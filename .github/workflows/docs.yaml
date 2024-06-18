@@ -1,0 +1,36 @@
+name: Build documentation
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+        with:
+          fetch-depth: 0
+
+      - name: Prepare static content
+        run: |
+          ./gradlew dokkatooGeneratePublicationHtml
+          mkdir -p build/static
+          cp -rf build/dokka build/static/kdoc
+          unzip artifacts/webHelpDOC2-all.zip -d build/static
+
+      - name: Deploy Kdoc to github pages
+        uses: JamesIves/github-pages-deploy-action@5c6e9e9f3672ce8fd37b9856193d2a537941e66c #v4.6.1
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: build/static # The folder the action should deploy.
+
+      - name: Save artifact with build results
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
+        with:
+          name: docs
+          path: |
+            artifacts/${{ env.ARTIFACT }}
+          retention-days: 7
