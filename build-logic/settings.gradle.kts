@@ -2,6 +2,7 @@ pluginManagement {
   listOf(repositories, dependencyResolutionManagement.repositories).forEach {
     it.mavenCentral()
     it.gradlePluginPortal()
+    it.google()
   }
 }
 
