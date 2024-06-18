@@ -11,6 +11,7 @@ kgp = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.r
 apollo-api = { group = "com.apollographql.apollo3", name = "apollo-api", version.ref = "apollo" }
 apollo-mpp-utils = { group = "com.apollographql.apollo3", name = "apollo-mpp-utils", version.ref = "apollo" }
 apollo-testing-support = { group = "com.apollographql.apollo3", name = "apollo-testing-support", version.ref = "apollo" }
+apollo-runtime = { group = "com.apollographql.apollo3", name = "apollo-runtime", version.ref = "apollo" }
 atomicfu-library = { group = "org.jetbrains.kotlinx", name = "atomicfu", version.ref = "atomicfu" }
 atomicfu-plugin = { group = "org.jetbrains.kotlinx", name = "atomicfu-gradle-plugin", version.ref = "atomicfu" }
 coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
