@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
   id("org.jetbrains.kotlin.multiplatform")
+  id("kotlinx-atomicfu")
 }
 
 librarianModule()
@@ -46,7 +47,17 @@ kotlin {
     getByName("commonMain") {
       dependencies {
         api(libs.apollo.runtime)
-        api(project(":normalized-cache-api-incubating"))
+        api(libs.apollo.mpp.utils)
+        implementation(libs.okio)
+        api(libs.uuid)
+        implementation(libs.atomicfu.library)
+      }
+    }
+
+    getByName("commonTest") {
+      dependencies {
+        implementation(libs.kotlin.test)
+        implementation(libs.apollo.testing.support)
       }
     }
 
