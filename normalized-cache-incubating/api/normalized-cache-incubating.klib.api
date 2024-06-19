@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <com.apollographql.cache.normalized:normalized-cache-incubating>
+// Library unique name: <com.apollographql.cache:normalized-cache-incubating>
 abstract class com.apollographql.cache.normalized.api/CacheKeyApolloResolver : com.apollographql.cache.normalized.api/ApolloResolver { // com.apollographql.cache.normalized.api/CacheKeyApolloResolver|null[0]
     abstract fun cacheKeyForField(com.apollographql.cache.normalized.api/ResolverContext): com.apollographql.cache.normalized.api/CacheKey? // com.apollographql.cache.normalized.api/CacheKeyApolloResolver.cacheKeyForField|cacheKeyForField(com.apollographql.cache.normalized.api.ResolverContext){}[0]
     constructor <init>() // com.apollographql.cache.normalized.api/CacheKeyApolloResolver.<init>|<init>(){}[0]

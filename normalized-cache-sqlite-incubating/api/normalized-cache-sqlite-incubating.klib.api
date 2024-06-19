@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <com.apollographql.cache.normalized:normalized-cache-sqlite-incubating>
+// Library unique name: <com.apollographql.cache:normalized-cache-sqlite-incubating>
 abstract interface com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase : app.cash.sqldelight/Transacter { // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase|null[0]
     abstract val blobQueries // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase.blobQueries|{}blobQueries[0]
         abstract fun <get-blobQueries>(): com.apollographql.cache.normalized.sql.internal.blob/BlobQueries // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase.blobQueries.<get-blobQueries>|<get-blobQueries>(){}[0]
