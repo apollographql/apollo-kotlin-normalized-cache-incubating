@@ -1,12 +1,12 @@
-name: pr
+name: check-pull-request
 
 on: pull_request
 
 jobs:
-  pr:
+  check-pull-request:
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
       - run: |
-          ./gradlew build -x assemble # remove '-x assemble' when https://github.com/GradleUp/librarian/pull/6 is released
+          ./gradlew build 
