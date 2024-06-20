@@ -9,7 +9,7 @@ sqldelight = "2.0.1"
 androidx-sqlite = "2.3.1"
 
 [libraries]
-librarian = "com.gradleup.librarian:core:0.0.2"
+librarian = "com.gradleup.librarian:core:0.0.3"
 kgp = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin-plugin" }
 android-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-plugin" }
 apollo-api = { group = "com.apollographql.apollo3", name = "apollo-api", version.ref = "apollo" }

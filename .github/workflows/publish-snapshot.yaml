@@ -1,10 +1,10 @@
-name: snapshot
+name: publish-snapshot
 
 on:
   push:
     branches: [ main ]
 jobs:
-  snapshot:
+  publish-snapshot:
     runs-on: macos-latest
 
     steps:
