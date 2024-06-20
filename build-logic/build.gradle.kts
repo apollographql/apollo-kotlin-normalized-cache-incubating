@@ -11,7 +11,3 @@ dependencies {
 }
 
 group = "build-logic"
-
-java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-}
