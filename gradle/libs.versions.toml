@@ -4,7 +4,7 @@ android-plugin = "8.2.2"
 apollo = "4.0.0-beta.7"
 kotlinx-coroutines = "1.8.0"
 okio = "3.9.0"
-atomicfu = "0.24.0"
+atomicfu = "0.23.1" # Must be the same version as the one used by apollo-testing-support or native compilation will fail
 sqldelight = "2.0.1"
 androidx-sqlite = "2.3.1"
 
@@ -13,9 +13,11 @@ librarian = "com.gradleup.librarian:core:0.0.3"
 kgp = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin-plugin" }
 android-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-plugin" }
 apollo-api = { group = "com.apollographql.apollo3", name = "apollo-api", version.ref = "apollo" }
+apollo-gradle-plugin = { group = "com.apollographql.apollo3", name = "apollo-gradle-plugin", version.ref = "apollo" }
 apollo-mpp-utils = { group = "com.apollographql.apollo3", name = "apollo-mpp-utils", version.ref = "apollo" }
 apollo-testing-support = { group = "com.apollographql.apollo3", name = "apollo-testing-support", version.ref = "apollo" }
 apollo-runtime = { group = "com.apollographql.apollo3", name = "apollo-runtime", version.ref = "apollo" }
+apollo-mockserver = "com.apollographql.mockserver:apollo-mockserver:0.0.1"
 atomicfu-library = { group = "org.jetbrains.kotlinx", name = "atomicfu", version.ref = "atomicfu" }
 atomicfu-plugin = { group = "org.jetbrains.kotlinx", name = "atomicfu-gradle-plugin", version.ref = "atomicfu" }
 coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
