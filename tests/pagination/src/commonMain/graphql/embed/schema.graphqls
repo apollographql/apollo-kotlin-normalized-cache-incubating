@@ -1,0 +1,16 @@
+type Query {
+  hero: Hero!
+}
+
+type Hero {
+  friends: [Friend!]!
+}
+
+type Friend {
+  name: String!
+  pet: Animal!
+}
+
+type Animal {
+  name: String
+}
