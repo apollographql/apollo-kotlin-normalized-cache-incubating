@@ -1,6 +1,6 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo3.annotations.ApolloInternal
+import com.apollographql.apollo.annotations.ApolloInternal
 
 /**
  * Data read from the cache that can be represented as a JSON map.

@@ -1,10 +1,10 @@
 package pagination
 
-import com.apollographql.apollo3.api.CompiledArgument
-import com.apollographql.apollo3.api.CompiledField
-import com.apollographql.apollo3.api.Executable
-import com.apollographql.apollo3.api.Optional
-import com.apollographql.apollo3.api.json.ApolloJsonElement
+import com.apollographql.apollo.api.CompiledArgument
+import com.apollographql.apollo.api.CompiledField
+import com.apollographql.apollo.api.Executable
+import com.apollographql.apollo.api.Optional
+import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
 import com.apollographql.cache.normalized.api.FieldKeyContext
@@ -17,7 +17,7 @@ import com.apollographql.cache.normalized.api.MetadataGeneratorContext
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.apollo3.testing.internal.runTest
+import com.apollographql.apollo.testing.internal.runTest
 import pagination.offsetBasedWithPageAndInput.UsersQuery
 import pagination.offsetBasedWithPageAndInput.type.buildUser
 import pagination.offsetBasedWithPageAndInput.type.buildUserPage

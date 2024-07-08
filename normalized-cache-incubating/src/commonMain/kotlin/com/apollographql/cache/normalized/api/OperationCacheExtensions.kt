@@ -1,13 +1,13 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo3.annotations.ApolloInternal
-import com.apollographql.apollo3.api.Adapter
-import com.apollographql.apollo3.api.CustomScalarAdapters
-import com.apollographql.apollo3.api.Executable
-import com.apollographql.apollo3.api.Operation
-import com.apollographql.apollo3.api.json.MapJsonReader
-import com.apollographql.apollo3.api.json.MapJsonWriter
-import com.apollographql.apollo3.api.variables
+import com.apollographql.apollo.annotations.ApolloInternal
+import com.apollographql.apollo.api.Adapter
+import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.Executable
+import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.api.json.MapJsonReader
+import com.apollographql.apollo.api.json.MapJsonWriter
+import com.apollographql.apollo.api.variables
 import com.apollographql.cache.normalized.api.internal.CacheBatchReader
 import com.apollographql.cache.normalized.api.internal.Normalizer
 import kotlin.jvm.JvmOverloads

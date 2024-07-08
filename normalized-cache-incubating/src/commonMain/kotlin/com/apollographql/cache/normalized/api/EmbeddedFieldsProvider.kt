@@ -1,9 +1,9 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo3.annotations.ApolloExperimental
-import com.apollographql.apollo3.api.CompiledNamedType
-import com.apollographql.apollo3.api.InterfaceType
-import com.apollographql.apollo3.api.ObjectType
+import com.apollographql.apollo.annotations.ApolloExperimental
+import com.apollographql.apollo.api.CompiledNamedType
+import com.apollographql.apollo.api.InterfaceType
+import com.apollographql.apollo.api.ObjectType
 
 /**
  * A provider for fields whose value should be embedded in their [Record], rather than being dereferenced during normalization.

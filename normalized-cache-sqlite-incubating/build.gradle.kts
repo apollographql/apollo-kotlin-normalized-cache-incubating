@@ -128,8 +128,8 @@ kotlin {
     }
 
     configureEach {
-      languageSettings.optIn("com.apollographql.apollo3.annotations.ApolloExperimental")
-      languageSettings.optIn("com.apollographql.apollo3.annotations.ApolloInternal")
+      languageSettings.optIn("com.apollographql.apollo.annotations.ApolloExperimental")
+      languageSettings.optIn("com.apollographql.apollo.annotations.ApolloInternal")
     }
   }
 }

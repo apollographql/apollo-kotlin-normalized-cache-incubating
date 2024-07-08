@@ -1,7 +1,7 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo3.annotations.ApolloExperimental
-import com.apollographql.apollo3.api.json.ApolloJsonElement
+import com.apollographql.apollo.annotations.ApolloExperimental
+import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.cache.normalized.api.FieldRecordMerger.FieldMerger
 
 /**

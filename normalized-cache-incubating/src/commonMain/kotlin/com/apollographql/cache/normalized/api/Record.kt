@@ -1,7 +1,7 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo3.annotations.ApolloExperimental
-import com.apollographql.apollo3.annotations.ApolloInternal
+import com.apollographql.apollo.annotations.ApolloExperimental
+import com.apollographql.apollo.annotations.ApolloInternal
 import com.apollographql.cache.normalized.api.internal.RecordWeigher.calculateBytes
 import com.benasher44.uuid.Uuid
 

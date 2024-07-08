@@ -1,14 +1,14 @@
 package com.apollographql.cache.normalized.api.internal
 
-import com.apollographql.apollo3.api.CompiledField
-import com.apollographql.apollo3.api.CompiledFragment
-import com.apollographql.apollo3.api.CompiledListType
-import com.apollographql.apollo3.api.CompiledNamedType
-import com.apollographql.apollo3.api.CompiledNotNullType
-import com.apollographql.apollo3.api.CompiledSelection
-import com.apollographql.apollo3.api.CompiledType
-import com.apollographql.apollo3.api.Executable
-import com.apollographql.apollo3.api.isComposite
+import com.apollographql.apollo.api.CompiledField
+import com.apollographql.apollo.api.CompiledFragment
+import com.apollographql.apollo.api.CompiledListType
+import com.apollographql.apollo.api.CompiledNamedType
+import com.apollographql.apollo.api.CompiledNotNullType
+import com.apollographql.apollo.api.CompiledSelection
+import com.apollographql.apollo.api.CompiledType
+import com.apollographql.apollo.api.Executable
+import com.apollographql.apollo.api.isComposite
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
 import com.apollographql.cache.normalized.api.CacheKeyGeneratorContext
@@ -151,7 +151,7 @@ internal class Normalizer(
    *
    * This function builds the list of records as a side effect
    *
-   * @param value a json value from the response. Can be any type supported by [com.apollographql.apollo3.api.json.JsonWriter]
+   * @param value a json value from the response. Can be any type supported by [com.apollographql.apollo.api.json.JsonWriter]
    * @param field the field currently being normalized
    * @param type_ the type currently being normalized. It can be different from [field.type] for lists.
    * @param embeddedFields the embedded fields of the parent

@@ -1,8 +1,8 @@
 package pagination
 
-import com.apollographql.apollo3.api.Optional
-import com.apollographql.apollo3.api.json.ApolloJsonElement
-import com.apollographql.apollo3.testing.internal.runTest
+import com.apollographql.apollo.api.Optional
+import com.apollographql.apollo.api.json.ApolloJsonElement
+import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.FieldPolicyApolloResolver
 import com.apollographql.cache.normalized.api.FieldRecordMerger

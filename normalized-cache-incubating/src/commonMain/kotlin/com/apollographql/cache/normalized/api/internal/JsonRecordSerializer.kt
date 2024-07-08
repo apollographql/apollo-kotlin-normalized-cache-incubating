@@ -1,10 +1,10 @@
 package com.apollographql.cache.normalized.api.internal
 
-import com.apollographql.apollo3.annotations.ApolloInternal
-import com.apollographql.apollo3.api.json.BufferedSinkJsonWriter
-import com.apollographql.apollo3.api.json.BufferedSourceJsonReader
-import com.apollographql.apollo3.api.json.JsonWriter
-import com.apollographql.apollo3.api.json.readAny
+import com.apollographql.apollo.annotations.ApolloInternal
+import com.apollographql.apollo.api.json.BufferedSinkJsonWriter
+import com.apollographql.apollo.api.json.BufferedSourceJsonReader
+import com.apollographql.apollo.api.json.JsonWriter
+import com.apollographql.apollo.api.json.readAny
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
 import okio.Buffer
