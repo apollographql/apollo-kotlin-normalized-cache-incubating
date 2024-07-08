@@ -1,10 +1,10 @@
 package com.apollographql.cache.normalized.api.internal
 
-import com.apollographql.apollo3.api.CompiledField
-import com.apollographql.apollo3.api.CompiledFragment
-import com.apollographql.apollo3.api.CompiledSelection
-import com.apollographql.apollo3.api.Executable
-import com.apollographql.apollo3.exception.CacheMissException
+import com.apollographql.apollo.api.CompiledField
+import com.apollographql.apollo.api.CompiledFragment
+import com.apollographql.apollo.api.CompiledSelection
+import com.apollographql.apollo.api.Executable
+import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.cache.normalized.api.ApolloResolver
 import com.apollographql.cache.normalized.api.CacheData
 import com.apollographql.cache.normalized.api.CacheHeaders

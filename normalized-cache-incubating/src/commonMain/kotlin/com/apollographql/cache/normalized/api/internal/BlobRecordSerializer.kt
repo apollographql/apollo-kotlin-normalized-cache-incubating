@@ -1,6 +1,6 @@
 package com.apollographql.cache.normalized.api.internal
 
-import com.apollographql.apollo3.annotations.ApolloInternal
+import com.apollographql.apollo.annotations.ApolloInternal
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
 import okio.Buffer

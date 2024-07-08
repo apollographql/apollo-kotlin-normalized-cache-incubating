@@ -1,6 +1,6 @@
 package com.apollographql.cache.normalized.api.internal
 
-import com.apollographql.apollo3.annotations.ApolloInternal
+import com.apollographql.apollo.annotations.ApolloInternal
 
 /**
  * A lock with read/write semantics where possible.

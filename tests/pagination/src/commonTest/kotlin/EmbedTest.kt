@@ -1,8 +1,8 @@
 package pagination
 
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.api.CustomScalarAdapters
-import com.apollographql.apollo3.testing.internal.runTest
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
 import com.apollographql.cache.normalized.api.CacheKeyGeneratorContext

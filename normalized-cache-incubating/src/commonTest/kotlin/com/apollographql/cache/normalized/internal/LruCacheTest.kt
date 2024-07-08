@@ -1,6 +1,6 @@
 package com.apollographql.cache.normalized.internal
 
-import com.apollographql.apollo3.testing.internal.runTest
+import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.internal.LruCache
 import kotlinx.coroutines.delay
 import kotlin.test.Test

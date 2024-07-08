@@ -1,7 +1,7 @@
 package com.apollographql.cache.normalized.sql
 
-import com.apollographql.apollo3.annotations.ApolloExperimental
-import com.apollographql.apollo3.exception.apolloExceptionHandler
+import com.apollographql.apollo.annotations.ApolloExperimental
+import com.apollographql.apollo.exception.apolloExceptionHandler
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders.EVICT_AFTER_READ
 import com.apollographql.cache.normalized.api.CacheHeaders

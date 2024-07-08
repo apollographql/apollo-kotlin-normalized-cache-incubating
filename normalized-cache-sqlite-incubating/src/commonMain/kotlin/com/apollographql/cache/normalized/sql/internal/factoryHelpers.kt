@@ -3,7 +3,7 @@ package com.apollographql.cache.normalized.sql.internal
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
-import com.apollographql.apollo3.exception.apolloExceptionHandler
+import com.apollographql.apollo.exception.apolloExceptionHandler
 import com.apollographql.cache.normalized.sql.internal.blob.BlobDatabase
 import com.apollographql.cache.normalized.sql.internal.json.JsonDatabase
 

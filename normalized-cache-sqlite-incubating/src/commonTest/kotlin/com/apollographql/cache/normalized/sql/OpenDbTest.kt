@@ -1,6 +1,6 @@
 package com.apollographql.cache.normalized.sql
 
-import com.apollographql.apollo3.testing.HostFileSystem
+import com.apollographql.apollo.testing.HostFileSystem
 import okio.Path.Companion.toPath
 import kotlin.test.Test
 import kotlin.test.assertTrue

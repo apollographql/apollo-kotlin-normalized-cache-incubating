@@ -1,6 +1,6 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo3.annotations.ApolloDeprecatedSince
+import com.apollographql.apollo.annotations.ApolloDeprecatedSince
 import kotlin.jvm.JvmStatic
 
 /**

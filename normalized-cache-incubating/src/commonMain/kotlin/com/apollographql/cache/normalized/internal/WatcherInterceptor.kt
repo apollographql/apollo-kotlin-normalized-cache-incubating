@@ -1,13 +1,13 @@
 package com.apollographql.cache.normalized.internal
 
-import com.apollographql.apollo3.api.ApolloRequest
-import com.apollographql.apollo3.api.ApolloResponse
-import com.apollographql.apollo3.api.CustomScalarAdapters
-import com.apollographql.apollo3.api.Operation
-import com.apollographql.apollo3.api.Query
-import com.apollographql.apollo3.exception.DefaultApolloException
-import com.apollographql.apollo3.interceptor.ApolloInterceptor
-import com.apollographql.apollo3.interceptor.ApolloInterceptorChain
+import com.apollographql.apollo.api.ApolloRequest
+import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.api.Query
+import com.apollographql.apollo.exception.DefaultApolloException
+import com.apollographql.apollo.interceptor.ApolloInterceptor
+import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.ApolloStoreInterceptor
 import com.apollographql.cache.normalized.api.dependentKeys

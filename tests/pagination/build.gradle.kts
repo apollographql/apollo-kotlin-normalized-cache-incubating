@@ -1,9 +1,9 @@
-import com.apollographql.apollo3.annotations.ApolloExperimental
+import com.apollographql.apollo.annotations.ApolloExperimental
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
   id("org.jetbrains.kotlin.multiplatform")
-  id("com.apollographql.apollo3")
+  id("com.apollographql.apollo")
 }
 
 kotlin {
@@ -57,8 +57,8 @@ kotlin {
     }
 
     configureEach {
-      languageSettings.optIn("com.apollographql.apollo3.annotations.ApolloExperimental")
-      languageSettings.optIn("com.apollographql.apollo3.annotations.ApolloInternal")
+      languageSettings.optIn("com.apollographql.apollo.annotations.ApolloExperimental")
+      languageSettings.optIn("com.apollographql.apollo.annotations.ApolloInternal")
     }
   }
 }

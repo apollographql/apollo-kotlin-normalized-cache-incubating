@@ -1,10 +1,10 @@
 package com.apollographql.cache.normalized
 
-import com.apollographql.apollo3.annotations.ApolloExperimental
-import com.apollographql.apollo3.api.CustomScalarAdapters
-import com.apollographql.apollo3.api.Fragment
-import com.apollographql.apollo3.api.Operation
-import com.apollographql.apollo3.interceptor.ApolloInterceptor
+import com.apollographql.apollo.annotations.ApolloExperimental
+import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.Fragment
+import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.cache.normalized.api.ApolloResolver
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
@@ -47,8 +47,8 @@ interface ApolloStore {
    *
    * @param operation to be read
    *
-   * @throws [com.apollographql.apollo3.exception.CacheMissException] on cache miss
-   * @throws [com.apollographql.apollo3.exception.ApolloException] on other cache read errors
+   * @throws [com.apollographql.apollo.exception.CacheMissException] on cache miss
+   * @throws [com.apollographql.apollo.exception.ApolloException] on other cache read errors
    *
    * @return the operation data
    */
@@ -65,8 +65,8 @@ interface ApolloStore {
    * @param fragment to be read
    * @param cacheKey    [CacheKey] to be used to find cache record for the fragment
    *
-   * @throws [com.apollographql.apollo3.exception.CacheMissException] on cache miss
-   * @throws [com.apollographql.apollo3.exception.ApolloException] on other cache read errors
+   * @throws [com.apollographql.apollo.exception.CacheMissException] on cache miss
+   * @throws [com.apollographql.apollo.exception.ApolloException] on other cache read errors
    *
    * @return the fragment data
    */
