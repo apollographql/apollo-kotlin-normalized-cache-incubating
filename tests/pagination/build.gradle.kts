@@ -111,8 +111,4 @@ apollo {
     @OptIn(ApolloExperimental::class)
     generateDataBuilders.set(true)
   }
-
-  // Shouldn't be needed after https://github.com/apollographql/apollo-kotlin/blob/e6dfb1a0ba963080b088660ed80691b91b66e54d/libraries/apollo-gradle-plugin-external/src/main/kotlin/com/apollographql/apollo3/gradle/internal/DefaultApolloExtension.kt#L279
-  // is released in the Apollo Gradle plugin.
-  linkSqlite.set(true)
 }
