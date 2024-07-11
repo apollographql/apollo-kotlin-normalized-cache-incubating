@@ -79,7 +79,7 @@ class ExpirationTest {
         .normalizedCache(
             normalizedCacheFactory = SqlNormalizedCacheFactory(name = null, withDates = true),
             cacheKeyGenerator = TypePolicyCacheKeyGenerator,
-            cacheResolver = ExpireDateCacheResolver()
+            apolloResolver = ExpireDateCacheResolver()
         )
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())

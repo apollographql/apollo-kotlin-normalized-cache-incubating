@@ -26,7 +26,6 @@ import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.ApolloResolver
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
-import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.DefaultEmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
@@ -34,7 +33,6 @@ import com.apollographql.cache.normalized.api.EmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.EmptyMetadataGenerator
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.FieldPolicyApolloResolver
-import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.MetadataGenerator
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.RecordMerger
@@ -107,18 +105,6 @@ enum class FetchPolicy {
  * @param writeToCacheAsynchronously set to true to write to the cache after the response has been emitted.
  * This allows to display results faster
  */
-@JvmOverloads
-@JvmName("configureApolloClientBuilder")
-fun ApolloClient.Builder.normalizedCache(
-    normalizedCacheFactory: NormalizedCacheFactory,
-    cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
-    cacheResolver: CacheResolver = FieldPolicyCacheResolver,
-    writeToCacheAsynchronously: Boolean = false,
-): ApolloClient.Builder {
-  return store(ApolloStore(normalizedCacheFactory, cacheKeyGenerator, cacheResolver), writeToCacheAsynchronously)
-}
-
-@ApolloExperimental
 @JvmOverloads
 @JvmName("configureApolloClientBuilder2")
 fun ApolloClient.Builder.normalizedCache(

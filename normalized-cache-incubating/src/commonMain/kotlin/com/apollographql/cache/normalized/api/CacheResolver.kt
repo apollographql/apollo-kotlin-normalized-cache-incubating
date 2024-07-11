@@ -1,6 +1,5 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.annotations.ApolloExperimental
 import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.exception.CacheMissException
@@ -8,16 +7,16 @@ import com.apollographql.apollo.mpp.currentTimeMillis
 import kotlin.jvm.JvmSuppressWildcards
 
 /**
- * An interface for [CacheResolver] used to read the cache
+ * Controls how fields are resolved from the cache.
  */
-interface CacheResolver {
+interface ApolloResolver {
   /**
    * Resolves a field from the cache. Called when reading from the cache, usually before a network request.
    * - takes a GraphQL field and operation variables as input and generates data for this field
    * - this data can be a CacheKey for objects but it can also be any other data if needed. In that respect,
-   * it's closer to a resolver as might be found in apollo-server
-   * - is used before a network request
-   * - is used when reading the cache
+   * it's closer to a resolver as might be found in a GraphQL server
+   * - used before a network request
+   * - used when reading the cache
    *
    * It can be used to map field arguments to [CacheKey]:
    *
@@ -32,13 +31,13 @@ interface CacheResolver {
    * ```
    *
    * ```
-   * override fun resolveField(field: CompiledField, variables: Executable.Variables, parent: Map<String, Any?>, parentId: String): Any? {
-   *   val id = field.resolveArgument("id", variables)?.toString()
+   * override fun resolveField(context: ResolverContext): Any? {
+   *   val id = context.field.resolveArgument("id", context.variables)?.toString()
    *   if (id != null) {
    *     return CacheKey(id)
    *   }
    *
-   *   return super.resolveField(field, variables, parent, parentId)
+   *   return super.resolveField(context)
    * }
    * ```
    *
@@ -48,81 +47,67 @@ interface CacheResolver {
    * [resolveField] can also be generalized to return any value:
    *
    * ```
-   * override fun resolveField(field: CompiledField, variables: Executable.Variables, parent: Map<String, Any?>, parentId: String): Any? {
-   *   if (field.name == "name") {
+   * override fun resolveField(context: ResolverContext): Any? {
+   *   if (context.field.name == "name") {
    *     // Every "name" field will return "JohnDoe" now!
    *     return "JohnDoe"
    *   }
    *
-   *   return super.resolveField(field, variables, parent, parentId)
+   *   return super.resolveField(context)
    * }
    * ```
    *
-   * See also @fieldPolicy
+   * See also `@fieldPolicy`
    * See also [CacheKeyGenerator]
    *
-   * @param field the field to resolve
-   * @param variables the variables of the current operation
-   * @param parent the parent object as a map. It can contain the same values as [Record]. Especially, nested objects will be represented
-   * by [CacheKey]
-   * @param parentId the key of the parent. Mainly used for debugging
+   * @param context the field to resolve and associated information to resolve it
    *
    * @return a value that can go in a [Record]. No type checking is done. It is the responsibility of implementations to return the correct
    * type
    */
-  fun resolveField(
-      field: CompiledField,
-      variables: Executable.Variables,
-      parent: Map<String, @JvmSuppressWildcards Any?>,
-      parentId: String,
-  ): Any?
+  fun resolveField(context: ResolverContext): Any?
 }
 
-@ApolloExperimental
 class ResolverContext(
+    /**
+     * The field to resolve
+     */
     val field: CompiledField,
+
+    /**
+     * The variables of the current operation
+     */
     val variables: Executable.Variables,
+
+    /**
+     * The parent object as a map. It can contain the same values as [Record]. Especially, nested objects will be represented
+     * by [CacheKey]
+     */
     val parent: Map<String, @JvmSuppressWildcards Any?>,
+
+    /**
+     * The key of the parent. Mainly used for debugging
+     */
     val parentKey: String,
+
+    /**
+     * The type of the parent
+     */
     val parentType: String,
+
+    /**
+     * The cache headers used to pass arbitrary information to the resolver
+     */
     val cacheHeaders: CacheHeaders,
+
+    /**
+     * The [FieldKeyGenerator] to use to generate field keys
+     */
     val fieldKeyGenerator: FieldKeyGenerator,
 )
 
 /**
- * Same as [CacheResolver] but takes a [ResolverContext] as a parameter that's easier to evolve
- */
-@ApolloExperimental
-interface ApolloResolver {
-  fun resolveField(
-      context: ResolverContext,
-  ): Any?
-}
-
-/**
  * A cache resolver that uses the parent to resolve fields.
- */
-object DefaultCacheResolver : CacheResolver {
-  /**
-   * @param parent a [Map] that represent the object containing this field. The map values can have the same types as the ones in  [Record]
-   */
-  override fun resolveField(
-      field: CompiledField,
-      variables: Executable.Variables,
-      parent: Map<String, @JvmSuppressWildcards Any?>,
-      parentId: String,
-  ): Any? {
-    val fieldKey = field.nameWithArguments(variables)
-    if (!parent.containsKey(fieldKey)) {
-      throw CacheMissException(parentId, fieldKey)
-    }
-
-    return parent[fieldKey]
-  }
-}
-
-/**
- * An [ApolloResolver] that uses the parent to resolve fields.
  */
 object DefaultApolloResolver : ApolloResolver {
   override fun resolveField(context: ResolverContext): Any? {
@@ -138,9 +123,7 @@ object DefaultApolloResolver : ApolloResolver {
 /**
  * A cache resolver that uses the cache date as a receive date and expires after a fixed max age
  */
-@ApolloExperimental
 class ReceiveDateApolloResolver(private val maxAge: Int) : ApolloResolver {
-
   override fun resolveField(context: ResolverContext): Any? {
     val parent = context.parent
     val parentKey = context.parentKey
@@ -159,7 +142,6 @@ class ReceiveDateApolloResolver(private val maxAge: Int) : ApolloResolver {
           if (maxAge + maxStale - age < 0) {
             throw CacheMissException(parentKey, fieldKey, true)
           }
-
         }
       }
     }
@@ -171,27 +153,21 @@ class ReceiveDateApolloResolver(private val maxAge: Int) : ApolloResolver {
 /**
  * A cache resolver that uses the cache date as an expiration date and expires past it
  */
-@ApolloExperimental
-class ExpireDateCacheResolver : CacheResolver {
-  /**
-   * @param parent a [Map] that represent the object containing this field. The map values can have the same types as the ones in  [Record]
-   */
-  override fun resolveField(
-      field: CompiledField,
-      variables: Executable.Variables,
-      parent: Map<String, @JvmSuppressWildcards Any?>,
-      parentId: String,
-  ): Any? {
-    val fieldKey = field.nameWithArguments(variables)
+class ExpireDateCacheResolver : ApolloResolver {
+  override fun resolveField(context: ResolverContext): Any? {
+    val parent = context.parent
+    val parentKey = context.parentKey
+
+    val fieldKey = context.fieldKeyGenerator.getFieldKey(FieldKeyContext(context.parentType, context.field, context.variables))
     if (!parent.containsKey(fieldKey)) {
-      throw CacheMissException(parentId, fieldKey)
+      throw CacheMissException(parentKey, fieldKey)
     }
 
     if (parent is Record) {
       val expires = parent.dates?.get(fieldKey)
       if (expires != null) {
         if (currentTimeMillis() / 1000 - expires >= 0) {
-          throw CacheMissException(parentId, fieldKey, true)
+          throw CacheMissException(parentKey, fieldKey, true)
         }
       }
     }
@@ -201,27 +177,7 @@ class ExpireDateCacheResolver : CacheResolver {
 }
 
 /**
- * A [CacheResolver] that uses @fieldPolicy annotations to resolve fields and delegates to [DefaultCacheResolver] else
- */
-object FieldPolicyCacheResolver : CacheResolver {
-  override fun resolveField(
-      field: CompiledField,
-      variables: Executable.Variables,
-      parent: Map<String, @JvmSuppressWildcards Any?>,
-      parentId: String,
-  ): Any? {
-    val keyArgsValues = field.argumentValues(variables) { it.definition.isKey }.values.map { it.toString() }
-
-    if (keyArgsValues.isNotEmpty()) {
-      return CacheKey(field.type.rawType().name, keyArgsValues)
-    }
-
-    return DefaultCacheResolver.resolveField(field, variables, parent, parentId)
-  }
-}
-
-/**
- * A [ApolloResolver] that uses @fieldPolicy annotations to resolve fields and delegates to [DefaultApolloResolver] else
+ * A cache resolver that uses `@fieldPolicy` annotations to resolve fields and delegates to [DefaultApolloResolver] otherwise
  */
 object FieldPolicyApolloResolver : ApolloResolver {
   override fun resolveField(context: ResolverContext): Any? {

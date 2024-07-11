@@ -9,7 +9,6 @@ import com.apollographql.cache.normalized.api.ApolloResolver
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
-import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.DefaultEmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
@@ -17,7 +16,6 @@ import com.apollographql.cache.normalized.api.EmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.EmptyMetadataGenerator
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.FieldPolicyApolloResolver
-import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.MetadataGenerator
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
@@ -203,20 +201,6 @@ interface ApolloStore {
    */
   fun dispose()
 }
-
-fun ApolloStore(
-    normalizedCacheFactory: NormalizedCacheFactory,
-    cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
-    cacheResolver: CacheResolver = FieldPolicyCacheResolver,
-): ApolloStore = DefaultApolloStore(
-    normalizedCacheFactory = normalizedCacheFactory,
-    cacheKeyGenerator = cacheKeyGenerator,
-    metadataGenerator = EmptyMetadataGenerator,
-    cacheResolver = cacheResolver,
-    recordMerger = DefaultRecordMerger,
-    fieldKeyGenerator = DefaultFieldKeyGenerator,
-    embeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
-)
 
 @ApolloExperimental
 fun ApolloStore(

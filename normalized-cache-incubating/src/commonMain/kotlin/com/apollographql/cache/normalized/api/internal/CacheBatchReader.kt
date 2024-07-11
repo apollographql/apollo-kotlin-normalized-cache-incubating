@@ -9,7 +9,6 @@ import com.apollographql.cache.normalized.api.ApolloResolver
 import com.apollographql.cache.normalized.api.CacheData
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
-import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.ReadOnlyNormalizedCache
 import com.apollographql.cache.normalized.api.Record
@@ -26,7 +25,7 @@ internal class CacheBatchReader(
     private val cache: ReadOnlyNormalizedCache,
     private val rootKey: String,
     private val variables: Executable.Variables,
-    private val cacheResolver: Any,
+    private val cacheResolver: ApolloResolver,
     private val cacheHeaders: CacheHeaders,
     private val rootSelections: List<CompiledSelection>,
     private val rootTypename: String,
@@ -121,24 +120,17 @@ internal class CacheBatchReader(
             return@mapNotNull null
           }
 
-          val value = when (cacheResolver) {
-            is CacheResolver -> cacheResolver.resolveField(it, variables, record, record.key)
-            is ApolloResolver -> {
-              cacheResolver.resolveField(
-                  ResolverContext(
-                      field = it,
-                      variables = variables,
-                      parent = record,
-                      parentKey = record.key,
-                      parentType = pendingReference.parentType,
-                      cacheHeaders = cacheHeaders,
-                      fieldKeyGenerator = fieldKeyGenerator,
-                  )
+          val value = cacheResolver.resolveField(
+              ResolverContext(
+                  field = it,
+                  variables = variables,
+                  parent = record,
+                  parentKey = record.key,
+                  parentType = pendingReference.parentType,
+                  cacheHeaders = cacheHeaders,
+                  fieldKeyGenerator = fieldKeyGenerator,
               )
-            }
-
-            else -> throw IllegalStateException()
-          }
+          )
           value.registerCacheKeys(pendingReference.path + it.responseName, it.selections, it.type.rawType().name)
 
           it.responseName to value
@@ -182,24 +174,17 @@ internal class CacheBatchReader(
             return@mapNotNull null
           }
 
-          val value = when (cacheResolver) {
-            is CacheResolver -> cacheResolver.resolveField(it, variables, this, "")
-            is ApolloResolver -> {
-              cacheResolver.resolveField(
-                  ResolverContext(
-                      field = it,
-                      variables = variables,
-                      parent = this,
-                      parentKey = "",
-                      parentType = parentType,
-                      cacheHeaders = cacheHeaders,
-                      fieldKeyGenerator = fieldKeyGenerator,
-                  )
+          val value = cacheResolver.resolveField(
+              ResolverContext(
+                  field = it,
+                  variables = variables,
+                  parent = this,
+                  parentKey = "",
+                  parentType = parentType,
+                  cacheHeaders = cacheHeaders,
+                  fieldKeyGenerator = fieldKeyGenerator,
               )
-            }
-
-            else -> throw IllegalStateException()
-          }
+          )
           value.registerCacheKeys(path + it.responseName, it.selections, it.type.rawType().name)
 
           it.responseName to value

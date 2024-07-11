@@ -1,23 +1,19 @@
 package com.apollographql.cache.normalized.internal
 
 import com.apollographql.apollo.api.CustomScalarAdapters
-import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.variables
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.ApolloResolver
-import com.apollographql.cache.normalized.api.CacheData
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
-import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.EmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.MetadataGenerator
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
-import com.apollographql.cache.normalized.api.ReadOnlyNormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.api.internal.OptimisticNormalizedCache
@@ -35,7 +31,7 @@ internal class DefaultApolloStore(
     private val cacheKeyGenerator: CacheKeyGenerator,
     private val fieldKeyGenerator: FieldKeyGenerator,
     private val metadataGenerator: MetadataGenerator,
-    private val cacheResolver: Any,
+    private val cacheResolver: ApolloResolver,
     private val recordMerger: RecordMerger,
     private val embeddedFieldsProvider: EmbeddedFieldsProvider,
 ) : ApolloStore {
@@ -122,7 +118,7 @@ internal class DefaultApolloStore(
       cacheHeaders: CacheHeaders,
   ): D {
     val variables = operation.variables(customScalarAdapters, true)
-    return operation.readDataFromCachePrivate(
+    return operation.readDataFromCacheInternal(
         cache = cache,
         cacheResolver = cacheResolver,
         cacheHeaders = cacheHeaders,
@@ -140,7 +136,7 @@ internal class DefaultApolloStore(
   ): D {
     val variables = fragment.variables(customScalarAdapters, true)
 
-    return fragment.readDataFromCachePrivate(
+    return fragment.readDataFromCacheInternal(
         cache = cache,
         cacheResolver = cacheResolver,
         cacheHeaders = cacheHeaders,
@@ -234,37 +230,4 @@ internal class DefaultApolloStore(
   }
 
   override fun dispose() {}
-
-  companion object {
-    private fun <D : Executable.Data> Executable<D>.readDataFromCachePrivate(
-        cacheKey: CacheKey,
-        cache: ReadOnlyNormalizedCache,
-        cacheResolver: Any,
-        cacheHeaders: CacheHeaders,
-        variables: Executable.Variables,
-        fieldKeyGenerator: FieldKeyGenerator,
-    ): CacheData {
-      return when (cacheResolver) {
-        is CacheResolver -> readDataFromCacheInternal(
-            cacheKey = cacheKey,
-            cache = cache,
-            cacheResolver = cacheResolver,
-            cacheHeaders = cacheHeaders,
-            variables = variables,
-            fieldKeyGenerator = fieldKeyGenerator,
-        )
-
-        is ApolloResolver -> readDataFromCacheInternal(
-            cacheKey = cacheKey,
-            cache = cache,
-            cacheResolver = cacheResolver,
-            cacheHeaders = cacheHeaders,
-            variables = variables,
-            fieldKeyGenerator = fieldKeyGenerator,
-        )
-
-        else -> throw IllegalStateException()
-      }
-    }
-  }
 }
