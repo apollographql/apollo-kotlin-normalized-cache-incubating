@@ -7,7 +7,7 @@ import com.apollographql.cache.normalized.api.ConnectionEmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.ConnectionFieldKeyGenerator
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
 import com.apollographql.cache.normalized.api.ConnectionRecordMerger
-import com.apollographql.cache.normalized.api.FieldPolicyApolloResolver
+import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
@@ -50,7 +50,7 @@ class ConnectionProgrammaticPaginationTest {
         normalizedCacheFactory = cacheFactory,
         cacheKeyGenerator = TypePolicyCacheKeyGenerator,
         metadataGenerator = ConnectionMetadataGenerator(connectionTypes),
-        apolloResolver = FieldPolicyApolloResolver,
+        cacheResolver = FieldPolicyCacheResolver,
         recordMerger = ConnectionRecordMerger,
         fieldKeyGenerator = ConnectionFieldKeyGenerator(connectionFields),
         embeddedFieldsProvider = ConnectionEmbeddedFieldsProvider(

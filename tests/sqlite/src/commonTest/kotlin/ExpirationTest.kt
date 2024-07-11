@@ -12,7 +12,7 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.EmptyMetadataGenerator
 import com.apollographql.cache.normalized.api.ExpireDateCacheResolver
-import com.apollographql.cache.normalized.api.ReceiveDateApolloResolver
+import com.apollographql.cache.normalized.api.ReceiveDateCacheResolver
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.apolloStore
@@ -37,7 +37,7 @@ class ExpirationTest {
         .normalizedCache(
             normalizedCacheFactory = SqlNormalizedCacheFactory(name = null, withDates = true),
             cacheKeyGenerator = TypePolicyCacheKeyGenerator,
-            apolloResolver = ReceiveDateApolloResolver(maxAge),
+            cacheResolver = ReceiveDateCacheResolver(maxAge),
             recordMerger = DefaultRecordMerger,
             metadataGenerator = EmptyMetadataGenerator,
         )
@@ -79,7 +79,7 @@ class ExpirationTest {
         .normalizedCache(
             normalizedCacheFactory = SqlNormalizedCacheFactory(name = null, withDates = true),
             cacheKeyGenerator = TypePolicyCacheKeyGenerator,
-            apolloResolver = ExpireDateCacheResolver()
+            cacheResolver = ExpireDateCacheResolver()
         )
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())

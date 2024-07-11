@@ -5,10 +5,10 @@ import com.apollographql.apollo.api.CompiledFragment
 import com.apollographql.apollo.api.CompiledSelection
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.exception.CacheMissException
-import com.apollographql.cache.normalized.api.ApolloResolver
 import com.apollographql.cache.normalized.api.CacheData
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.ReadOnlyNormalizedCache
 import com.apollographql.cache.normalized.api.Record
@@ -25,7 +25,7 @@ internal class CacheBatchReader(
     private val cache: ReadOnlyNormalizedCache,
     private val rootKey: String,
     private val variables: Executable.Variables,
-    private val cacheResolver: ApolloResolver,
+    private val cacheResolver: CacheResolver,
     private val cacheHeaders: CacheHeaders,
     private val rootSelections: List<CompiledSelection>,
     private val rootTypename: String,

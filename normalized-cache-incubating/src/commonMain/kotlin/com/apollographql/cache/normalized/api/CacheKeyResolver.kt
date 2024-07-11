@@ -6,15 +6,15 @@ import com.apollographql.apollo.api.CompiledNotNullType
 import com.apollographql.apollo.api.isComposite
 
 /**
- * An [ApolloResolver] that resolves objects and list of objects and falls back to the default resolver for scalar fields.
- * It is intended to simplify the usage of [ApolloResolver] when no special handling is needed for scalar fields.
+ * An [CacheResolver] that resolves objects and list of objects and falls back to the default resolver for scalar fields.
+ * It is intended to simplify the usage of [CacheResolver] when no special handling is needed for scalar fields.
  *
  * Override [cacheKeyForField] to compute a cache key for a field of composite type.
  * Override [listOfCacheKeysForField] to compute a list of cache keys for a field of 'list-of-composite' type.
  *
- * For simplicity, this only handles one level of lists. Implement [ApolloResolver] if you need arbitrary nested lists of objects.
+ * For simplicity, this only handles one level of lists. Implement [CacheResolver] if you need arbitrary nested lists of objects.
  */
-abstract class CacheKeyApolloResolver : ApolloResolver {
+abstract class CacheKeyResolver : CacheResolver {
   /**
    * Returns the computed cache key for a composite field.
    *
@@ -63,6 +63,6 @@ abstract class CacheKeyApolloResolver : ApolloResolver {
       }
     }
 
-    return DefaultApolloResolver.resolveField(context)
+    return DefaultCacheResolver.resolveField(context)
   }
 }

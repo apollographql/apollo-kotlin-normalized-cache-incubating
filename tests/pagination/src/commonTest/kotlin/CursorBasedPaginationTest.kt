@@ -9,7 +9,7 @@ import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
 import com.apollographql.cache.normalized.api.ConnectionRecordMerger
-import com.apollographql.cache.normalized.api.FieldPolicyApolloResolver
+import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
@@ -52,7 +52,7 @@ class CursorBasedPaginationTest {
         normalizedCacheFactory = cacheFactory,
         cacheKeyGenerator = TypePolicyCacheKeyGenerator,
         metadataGenerator = ConnectionMetadataGenerator(setOf("UserConnection")),
-        apolloResolver = FieldPolicyApolloResolver,
+        cacheResolver = FieldPolicyCacheResolver,
         recordMerger = ConnectionRecordMerger
     )
     apolloStore.clearAll()
@@ -365,7 +365,7 @@ class CursorBasedPaginationTest {
             normalizedCacheFactory = MemoryCacheFactory(),
             cacheKeyGenerator = TypePolicyCacheKeyGenerator,
             metadataGenerator = ConnectionMetadataGenerator(setOf("UserConnection")),
-            apolloResolver = FieldPolicyApolloResolver,
+            cacheResolver = FieldPolicyCacheResolver,
             recordMerger = ConnectionRecordMerger
         )
         .build()

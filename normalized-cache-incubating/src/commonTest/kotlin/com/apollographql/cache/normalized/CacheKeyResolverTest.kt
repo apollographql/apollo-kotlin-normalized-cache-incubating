@@ -5,11 +5,11 @@ import com.apollographql.apollo.api.CompiledListType
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.ObjectType
 import com.apollographql.apollo.exception.CacheMissException
-import com.apollographql.cache.normalized.CacheKeyApolloResolverTest.Fixtures.TEST_LIST_FIELD
-import com.apollographql.cache.normalized.CacheKeyApolloResolverTest.Fixtures.TEST_SIMPLE_FIELD
+import com.apollographql.cache.normalized.CacheKeyResolverTest.Fixtures.TEST_LIST_FIELD
+import com.apollographql.cache.normalized.CacheKeyResolverTest.Fixtures.TEST_SIMPLE_FIELD
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
-import com.apollographql.cache.normalized.api.CacheKeyApolloResolver
+import com.apollographql.cache.normalized.api.CacheKeyResolver
 import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
 import com.apollographql.cache.normalized.api.ResolverContext
 import kotlin.test.BeforeTest
@@ -19,15 +19,15 @@ import kotlin.test.assertFailsWith
 import kotlin.test.fail
 
 
-class CacheKeyApolloResolverTest {
+class CacheKeyResolverTest {
 
-  private lateinit var subject: CacheKeyApolloResolver
+  private lateinit var subject: CacheKeyResolver
   lateinit var onCacheKeyForField: (context: ResolverContext) -> CacheKey?
   lateinit var onListOfCacheKeysForField: (context: ResolverContext) -> List<CacheKey?>?
 
   @BeforeTest
   fun setup() {
-    subject = FakeCacheKeyApolloResolver()
+    subject = FakeCacheKeyResolver()
     onCacheKeyForField = { _ ->
       fail("Unexpected call to cacheKeyForField")
     }
@@ -85,7 +85,7 @@ class CacheKeyApolloResolverTest {
     }
   }
 
-  inner class FakeCacheKeyApolloResolver : CacheKeyApolloResolver() {
+  inner class FakeCacheKeyResolver : CacheKeyResolver() {
 
     override fun cacheKeyForField(context: ResolverContext): CacheKey? {
       return onCacheKeyForField(context)

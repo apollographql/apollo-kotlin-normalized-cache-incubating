@@ -4,7 +4,7 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
-import com.apollographql.cache.normalized.api.FieldPolicyApolloResolver
+import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.FieldRecordMerger
 import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.MetadataGenerator
@@ -45,7 +45,7 @@ class OffsetBasedWithArrayPaginationTest {
         normalizedCacheFactory = cacheFactory,
         cacheKeyGenerator = TypePolicyCacheKeyGenerator,
         metadataGenerator = OffsetPaginationMetadataGenerator("users"),
-        apolloResolver = FieldPolicyApolloResolver,
+        cacheResolver = FieldPolicyCacheResolver,
         recordMerger = FieldRecordMerger(OffsetPaginationFieldMerger())
     )
     apolloStore.clearAll()

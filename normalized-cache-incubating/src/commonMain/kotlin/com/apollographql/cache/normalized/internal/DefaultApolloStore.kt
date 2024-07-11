@@ -5,10 +5,10 @@ import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.variables
 import com.apollographql.cache.normalized.ApolloStore
-import com.apollographql.cache.normalized.api.ApolloResolver
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
+import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.EmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.MetadataGenerator
@@ -31,7 +31,7 @@ internal class DefaultApolloStore(
     private val cacheKeyGenerator: CacheKeyGenerator,
     private val fieldKeyGenerator: FieldKeyGenerator,
     private val metadataGenerator: MetadataGenerator,
-    private val cacheResolver: ApolloResolver,
+    private val cacheResolver: CacheResolver,
     private val recordMerger: RecordMerger,
     private val embeddedFieldsProvider: EmbeddedFieldsProvider,
 ) : ApolloStore {

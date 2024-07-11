@@ -5,7 +5,7 @@ import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
 import com.apollographql.cache.normalized.api.ConnectionRecordMerger
-import com.apollographql.cache.normalized.api.FieldPolicyApolloResolver
+import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
@@ -44,7 +44,7 @@ class ConnectionWithNodesPaginationTest {
         normalizedCacheFactory = cacheFactory,
         cacheKeyGenerator = TypePolicyCacheKeyGenerator,
         metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
-        apolloResolver = FieldPolicyApolloResolver,
+        cacheResolver = FieldPolicyCacheResolver,
         recordMerger = ConnectionRecordMerger
     )
     apolloStore.clearAll()

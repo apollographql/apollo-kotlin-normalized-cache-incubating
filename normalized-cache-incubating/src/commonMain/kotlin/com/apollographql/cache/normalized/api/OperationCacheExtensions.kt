@@ -43,7 +43,7 @@ fun <D : Executable.Data> Executable<D>.normalize(
 fun <D : Executable.Data> Executable<D>.readDataFromCache(
     customScalarAdapters: CustomScalarAdapters,
     cache: ReadOnlyNormalizedCache,
-    cacheResolver: ApolloResolver,
+    cacheResolver: CacheResolver,
     cacheHeaders: CacheHeaders,
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
 ): D {
@@ -63,7 +63,7 @@ fun <D : Executable.Data> Executable<D>.readDataFromCache(
     cacheKey: CacheKey,
     customScalarAdapters: CustomScalarAdapters,
     cache: ReadOnlyNormalizedCache,
-    cacheResolver: ApolloResolver,
+    cacheResolver: CacheResolver,
     cacheHeaders: CacheHeaders,
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
 ): D {
@@ -82,7 +82,7 @@ fun <D : Executable.Data> Executable<D>.readDataFromCache(
 fun <D : Executable.Data> Executable<D>.readDataFromCacheInternal(
     cacheKey: CacheKey,
     cache: ReadOnlyNormalizedCache,
-    cacheResolver: ApolloResolver,
+    cacheResolver: CacheResolver,
     cacheHeaders: CacheHeaders,
     variables: Executable.Variables,
     fieldKeyGenerator: FieldKeyGenerator,
@@ -99,7 +99,7 @@ fun <D : Executable.Data> Executable<D>.readDataFromCacheInternal(
 private fun <D : Executable.Data> Executable<D>.readInternal(
     cacheKey: CacheKey,
     cache: ReadOnlyNormalizedCache,
-    cacheResolver: ApolloResolver,
+    cacheResolver: CacheResolver,
     cacheHeaders: CacheHeaders,
     variables: Executable.Variables,
     fieldKeyGenerator: FieldKeyGenerator,
