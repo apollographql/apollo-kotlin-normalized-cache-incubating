@@ -1,6 +1,5 @@
 package com.apollographql.cache.normalized.sql
 
-import com.apollographql.apollo.annotations.ApolloExperimental
 import com.apollographql.apollo.exception.apolloExceptionHandler
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders.EVICT_AFTER_READ
@@ -92,7 +91,6 @@ class SqlNormalizedCache internal constructor(
     return headerValue(ApolloCacheHeaders.DATE)?.toLong()
   }
 
-  @ApolloExperimental
   override fun merge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     if (cacheHeaders.hasHeader(ApolloCacheHeaders.DO_NOT_STORE) || cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
       return emptySet()
@@ -106,7 +104,6 @@ class SqlNormalizedCache internal constructor(
     }
   }
 
-  @ApolloExperimental
   override fun merge(records: Collection<Record>, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     if (cacheHeaders.hasHeader(ApolloCacheHeaders.DO_NOT_STORE) || cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
       return emptySet()

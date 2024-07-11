@@ -1,6 +1,5 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.annotations.ApolloExperimental
 import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.Executable
 
@@ -13,7 +12,6 @@ import com.apollographql.apollo.api.Executable
  * A [FieldKeyGenerator] can be used to customize this format, for instance to exclude certain pagination arguments when storing a
  * connection field.
  */
-@ApolloExperimental
 interface FieldKeyGenerator {
   /**
    * Returns the field key to use within its parent [Record].
@@ -24,7 +22,6 @@ interface FieldKeyGenerator {
 /**
  * Context passed to the [FieldKeyGenerator.getFieldKey] method.
  */
-@ApolloExperimental
 class FieldKeyContext(
     val parentType: String,
     val field: CompiledField,
@@ -37,7 +34,6 @@ class FieldKeyContext(
  *
  * @see CompiledField.nameWithArguments
  */
-@ApolloExperimental
 object DefaultFieldKeyGenerator : FieldKeyGenerator {
   override fun getFieldKey(context: FieldKeyContext): String {
     return context.field.nameWithArguments(context.variables)
@@ -48,7 +44,6 @@ object DefaultFieldKeyGenerator : FieldKeyGenerator {
  * A [FieldKeyGenerator] that generates field keys by excluding
  * [Relay connection types](https://relay.dev/graphql/connections.htm#sec-Connection-Types) pagination arguments.
  */
-@ApolloExperimental
 class ConnectionFieldKeyGenerator(private val connectionFields: Map<String, List<String>>) : FieldKeyGenerator {
   companion object {
     private val paginationArguments = setOf("first", "last", "before", "after")

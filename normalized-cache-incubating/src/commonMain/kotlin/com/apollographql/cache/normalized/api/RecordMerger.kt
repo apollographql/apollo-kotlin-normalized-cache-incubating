@@ -1,13 +1,11 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.annotations.ApolloExperimental
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.cache.normalized.api.FieldRecordMerger.FieldMerger
 
 /**
  * A merger that merges incoming [Record]s from the network with existing ones in the cache.
  */
-@ApolloExperimental
 interface RecordMerger {
   /**
    * Merges the incoming Record with the existing Record.
@@ -21,7 +19,6 @@ interface RecordMerger {
 /**
  * A [RecordMerger] that merges fields by replacing them with the incoming fields.
  */
-@ApolloExperimental
 object DefaultRecordMerger : RecordMerger {
   override fun merge(existing: Record, incoming: Record, newDate: Long?): Pair<Record, Set<String>> {
     val changedKeys = mutableSetOf<String>()
@@ -54,12 +51,10 @@ object DefaultRecordMerger : RecordMerger {
 /**
  * A convenience implementation of [RecordMerger] that simplifies the merging of [Record]s by delegating to a [FieldMerger].
  */
-@ApolloExperimental
 class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
   /**
    * Used to merge Records field by field.
    */
-  @ApolloExperimental
   interface FieldMerger {
     /**
      * Merges the existing field with the incoming field.
@@ -69,7 +64,6 @@ class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
     fun mergeFields(existing: FieldInfo, incoming: FieldInfo): FieldInfo
   }
 
-  @ApolloExperimental
   data class FieldInfo(
       /**
        * Value of the field being merged.
@@ -137,7 +131,6 @@ class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
  * Note: although `nodes` is not a standard field in Relay, it is often used - see
  * [this issue on the Relay spec](https://github.com/facebook/relay/issues/3850) that discusses this pattern.
  */
-@ApolloExperimental
 val ConnectionRecordMerger = FieldRecordMerger(ConnectionFieldMerger)
 
 private object ConnectionFieldMerger : FieldMerger {

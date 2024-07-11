@@ -1,7 +1,5 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.annotations.ApolloExperimental
-
 /**
  * A collection of cache headers that Apollo's implementations of [NormalizedCache] respect.
  */
@@ -24,12 +22,10 @@ object ApolloCacheHeaders {
   /**
    * The value of this header will be stored in the [Record] fields date
    */
-  @ApolloExperimental
   const val DATE = "apollo-date"
 
   /**
    * How long to accept stale fields
    */
-  @ApolloExperimental
   const val MAX_STALE = "apollo-max-stale"
 }

@@ -6,7 +6,6 @@ import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.annotations.ApolloDeprecatedSince
 import com.apollographql.apollo.annotations.ApolloDeprecatedSince.Version.v4_0_0
-import com.apollographql.apollo.annotations.ApolloExperimental
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.ExecutionContext
@@ -334,7 +333,6 @@ fun <T> MutableExecutionOptions<T>.storePartialResponses(storePartialResponses: 
  *
  * Default: false
  */
-@ApolloExperimental
 fun <T> MutableExecutionOptions<T>.storeReceiveDate(storeReceiveDate: Boolean) = addExecutionContext(
     StoreReceiveDateContext(storeReceiveDate)
 )
@@ -346,7 +344,6 @@ fun <T> MutableExecutionOptions<T>.storeReceiveDate(storeReceiveDate: Boolean) =
  *
  * Default: false
  */
-@ApolloExperimental
 fun <T> MutableExecutionOptions<T>.storeExpirationDate(storeExpirationDate: Boolean): T {
   addExecutionContext(StoreExpirationDateContext(storeExpirationDate))
   if (this is ApolloClient.Builder) {

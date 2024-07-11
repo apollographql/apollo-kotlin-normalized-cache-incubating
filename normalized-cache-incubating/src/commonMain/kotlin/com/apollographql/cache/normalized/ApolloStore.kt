@@ -1,6 +1,5 @@
 package com.apollographql.cache.normalized
 
-import com.apollographql.apollo.annotations.ApolloExperimental
 import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
@@ -202,7 +201,6 @@ interface ApolloStore {
   fun dispose()
 }
 
-@ApolloExperimental
 fun ApolloStore(
     normalizedCacheFactory: NormalizedCacheFactory,
     cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,

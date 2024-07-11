@@ -6,7 +6,7 @@ import com.apollographql.apollo.api.CompiledNotNullType
 import com.apollographql.apollo.api.isComposite
 
 /**
- * An [CacheResolver] that resolves objects and list of objects and falls back to the default resolver for scalar fields.
+ * A [CacheResolver] that resolves objects and list of objects and falls back to the default resolver for scalar fields.
  * It is intended to simplify the usage of [CacheResolver] when no special handling is needed for scalar fields.
  *
  * Override [cacheKeyForField] to compute a cache key for a field of composite type.
