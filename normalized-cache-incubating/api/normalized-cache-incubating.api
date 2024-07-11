@@ -120,6 +120,7 @@ public final class com/apollographql/cache/normalized/NormalizedCache {
 	public static final fun getCacheHeaders (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/cache/normalized/api/CacheHeaders;
 	public static final fun getCacheInfo (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/cache/normalized/CacheInfo;
 	public static final fun isFromCache (Lcom/apollographql/apollo/api/ApolloResponse;)Z
+	public static final fun memoryCacheOnly (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
 	public static final fun optimisticUpdates (Lcom/apollographql/apollo/ApolloCall;Lcom/apollographql/apollo/api/Mutation$Data;)Lcom/apollographql/apollo/ApolloCall;
 	public static final fun optimisticUpdates (Lcom/apollographql/apollo/api/ApolloRequest$Builder;Lcom/apollographql/apollo/api/Mutation$Data;)Lcom/apollographql/apollo/api/ApolloRequest$Builder;
 	public static final fun refetchPolicy (Lcom/apollographql/apollo/api/MutableExecutionOptions;Lcom/apollographql/cache/normalized/FetchPolicy;)Ljava/lang/Object;
@@ -146,6 +147,7 @@ public final class com/apollographql/cache/normalized/api/ApolloCacheHeaders {
 	public static final field EVICT_AFTER_READ Ljava/lang/String;
 	public static final field INSTANCE Lcom/apollographql/cache/normalized/api/ApolloCacheHeaders;
 	public static final field MAX_STALE Ljava/lang/String;
+	public static final field MEMORY_CACHE_ONLY Ljava/lang/String;
 }
 
 public abstract interface class com/apollographql/cache/normalized/api/ApolloResolver {

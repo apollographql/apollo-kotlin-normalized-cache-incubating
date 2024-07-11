@@ -27,6 +27,9 @@ class SqlNormalizedCache internal constructor(
   }
 
   override fun loadRecord(key: String, cacheHeaders: CacheHeaders): Record? {
+    if (cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
+      return null
+    }
     val evictAfterRead = cacheHeaders.hasHeader(EVICT_AFTER_READ)
     return maybeTransaction(evictAfterRead) {
       try {
@@ -44,6 +47,9 @@ class SqlNormalizedCache internal constructor(
   }
 
   override fun loadRecords(keys: Collection<String>, cacheHeaders: CacheHeaders): Collection<Record> {
+    if (cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
+      return emptyList()
+    }
     val evictAfterRead = cacheHeaders.hasHeader(EVICT_AFTER_READ)
     return maybeTransaction(evictAfterRead) {
       try {
@@ -88,7 +94,7 @@ class SqlNormalizedCache internal constructor(
 
   @ApolloExperimental
   override fun merge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
-    if (cacheHeaders.hasHeader(ApolloCacheHeaders.DO_NOT_STORE)) {
+    if (cacheHeaders.hasHeader(ApolloCacheHeaders.DO_NOT_STORE) || cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
       return emptySet()
     }
     return try {
@@ -102,7 +108,7 @@ class SqlNormalizedCache internal constructor(
 
   @ApolloExperimental
   override fun merge(records: Collection<Record>, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
-    if (cacheHeaders.hasHeader(ApolloCacheHeaders.DO_NOT_STORE)) {
+    if (cacheHeaders.hasHeader(ApolloCacheHeaders.DO_NOT_STORE) || cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
       return emptySet()
     }
     return try {
