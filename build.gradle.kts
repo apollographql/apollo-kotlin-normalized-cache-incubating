@@ -1,13 +1,11 @@
-import com.gradleup.librarian.core.librarianRoot
+import com.gradleup.librarian.gradle.librarianRoot
 
-buildscript {
-  repositories {
-    mavenCentral()
-    google()
-  }
-  dependencies {
-    classpath("build-logic:build-logic")
-  }
+plugins {
+  alias(libs.plugins.kotlin).apply(false)
+  alias(libs.plugins.android).apply(false)
+  alias(libs.plugins.librarian).apply(false)
+  alias(libs.plugins.atomicfu).apply(false)
+  alias(libs.plugins.sqldelight).apply(false)
 }
 
 librarianRoot()

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<buildprofiles xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/build-profiles.xsd"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <variables></variables>
+  <build-profile instance="doc">
+    <variables>
+      <header-logo>apollo_logo.svg</header-logo>
+      <custom-favicons>favicon-96x96.png,favicon-192x192.png</custom-favicons>
+      <noindex-content>true</noindex-content>
+      <download-title>GitHub</download-title>
+      <download-page>https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/</download-page>
+      <showDownloadButton>true</showDownloadButton>
+      <enable-browser-edits>true</enable-browser-edits>
+      <browser-edits-url>https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/edit/main/Writerside/</browser-edits-url>
+    </variables>
+  </build-profile>
+</buildprofiles>

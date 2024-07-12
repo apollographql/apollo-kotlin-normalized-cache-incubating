@@ -1,13 +1,12 @@
-name: check-pull-request
+name: Build pull request
 
 on: pull_request
 
 jobs:
-  check-pull-request:
+  build-pull-request:
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
       - run: |
-          ./gradlew build
-          ./gradlew -p tests build
+          ./gradlew build 

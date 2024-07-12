@@ -5,6 +5,4 @@ pluginManagement {
   }
 }
 
-includeBuild("build-logic")
-
 include("normalized-cache-incubating", "normalized-cache-sqlite-incubating")

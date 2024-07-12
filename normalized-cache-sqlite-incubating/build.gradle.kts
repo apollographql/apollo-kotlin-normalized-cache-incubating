@@ -1,4 +1,4 @@
-import com.gradleup.librarian.core.librarianModule
+import com.gradleup.librarian.gradle.librarianModule
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
@@ -7,7 +7,7 @@ plugins {
   id("app.cash.sqldelight")
 }
 
-librarianModule()
+librarianModule(true)
 
 kotlin {
   jvm()
