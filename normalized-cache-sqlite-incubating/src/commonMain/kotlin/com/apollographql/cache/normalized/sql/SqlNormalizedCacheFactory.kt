@@ -13,13 +13,9 @@ import com.apollographql.cache.normalized.api.NormalizedCacheFactory
  * - on MacOS, it will use "Application Support/databases/name"
  * - on the JVM, it will use "System.getProperty("user.home")/.apollo"
  * Default: "apollo.db"
- *
- * @param withDates: whether to store dates (receive dates or expiration dates)
- * Once a database is created, this parameter cannot change
- * Default: false
  */
-expect class SqlNormalizedCacheFactory(name: String? = "apollo.db", withDates: Boolean = false) : NormalizedCacheFactory {
-  constructor(driver: SqlDriver, withDates: Boolean = false)
+expect class SqlNormalizedCacheFactory(name: String? = "apollo.db") : NormalizedCacheFactory {
+  constructor(driver: SqlDriver)
 
   override fun create(): NormalizedCache
 }

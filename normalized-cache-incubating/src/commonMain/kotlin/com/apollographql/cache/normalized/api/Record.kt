@@ -26,7 +26,7 @@ class Record(
     val mutationId: Uuid? = null,
 ) : Map<String, Any?> by fields {
 
-  var dates: Map<String, Long?>? = null
+  var dates: Map<String, Long?> = emptyMap()
     private set
 
   /**
@@ -40,10 +40,10 @@ class Record(
       key: String,
       fields: Map<String, Any?>,
       mutationId: Uuid?,
-      date: Map<String, Long?>,
+      dates: Map<String, Long?>,
       metadata: Map<String, Map<String, Any?>>,
   ) : this(key, fields, mutationId) {
-    this.dates = date
+    this.dates = dates
     this.metadata = metadata
   }
 

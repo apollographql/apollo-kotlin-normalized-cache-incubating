@@ -14,7 +14,6 @@ import com.apollographql.cache.normalized.api.NormalizedCache
 
 actual class SqlNormalizedCacheFactory actual constructor(
     private val driver: SqlDriver,
-    private val withDates: Boolean,
 ) : NormalizedCacheFactory() {
 
   /**
@@ -33,14 +32,13 @@ actual class SqlNormalizedCacheFactory actual constructor(
       configure: ((SupportSQLiteDatabase) -> Unit)? = null,
       useNoBackupDirectory: Boolean = false,
       windowSizeBytes: Long? = null,
-      withDates: Boolean = false,
   ) : this(
       AndroidSqliteDriver(
-          getSchema(withDates),
+          getSchema(),
           context.applicationContext,
           name,
           factory,
-          object : AndroidSqliteDriver.Callback(getSchema(withDates)) {
+          object : AndroidSqliteDriver.Callback(getSchema()) {
             override fun onConfigure(db: SupportSQLiteDatabase) {
               super.onConfigure(db)
               configure?.invoke(db)
@@ -49,13 +47,12 @@ actual class SqlNormalizedCacheFactory actual constructor(
           useNoBackupDirectory = useNoBackupDirectory,
           windowSizeBytes = windowSizeBytes,
       ),
-      withDates
   )
 
-  actual constructor(name: String?, withDates: Boolean) : this(createDriver(name, null, getSchema(withDates)), withDates)
+  actual constructor(name: String?) : this(createDriver(name, null, getSchema()))
 
   actual override fun create(): NormalizedCache {
-    return SqlNormalizedCache(createRecordDatabase(driver, withDates))
+    return SqlNormalizedCache(createRecordDatabase(driver))
   }
 }
 

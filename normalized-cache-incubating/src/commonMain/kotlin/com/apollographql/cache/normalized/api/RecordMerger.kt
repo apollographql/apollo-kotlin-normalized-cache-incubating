@@ -42,7 +42,7 @@ object DefaultRecordMerger : RecordMerger {
         key = existing.key,
         fields = mergedFields,
         mutationId = incoming.mutationId,
-        date = date,
+        dates = date,
         metadata = existing.metadata + incoming.metadata,
     ) to changedKeys
   }
@@ -115,7 +115,7 @@ class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
         key = existing.key,
         fields = mergedFields,
         mutationId = incoming.mutationId,
-        date = date,
+        dates = date,
         metadata = mergedMetadata,
     ) to changedKeys
   }

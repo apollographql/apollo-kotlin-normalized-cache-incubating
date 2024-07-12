@@ -29,18 +29,13 @@ class OffsetBasedWithPagePaginationTest {
   }
 
   @Test
-  fun blobSqlCache() {
-    test(SqlNormalizedCacheFactory(name = "blob", withDates = true))
-  }
-
-  @Test
-  fun jsonSqlCache() {
-    test(SqlNormalizedCacheFactory(name = "json", withDates = false))
+  fun sqlCache() {
+    test(SqlNormalizedCacheFactory())
   }
 
   @Test
   fun chainedCache() {
-    test(MemoryCacheFactory().chain(SqlNormalizedCacheFactory(name = "json", withDates = false)))
+    test(MemoryCacheFactory().chain(SqlNormalizedCacheFactory()))
   }
 
   private fun test(cacheFactory: NormalizedCacheFactory) = runTest {
@@ -246,7 +241,7 @@ internal fun assertChainedCachesAreEqual(apolloStore: ApolloStore) {
     val record2 = cache2[key]!!
     assertEquals(record1.key, record2.key)
     assertEquals(record1.fields, record2.fields)
-    assertEquals(record1.dates, record2.dates)
+    assertEquals(record1.dates.filterValues { it != null }, record2.dates.filterValues { it != null })
     assertEquals(record1.metadata, record2.metadata)
   }
 }

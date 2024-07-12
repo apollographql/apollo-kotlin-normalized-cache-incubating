@@ -5,10 +5,9 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import com.apollographql.apollo.exception.apolloExceptionHandler
 import com.apollographql.cache.normalized.sql.internal.blob.BlobDatabase
-import com.apollographql.cache.normalized.sql.internal.json.JsonDatabase
 
-internal fun createRecordDatabase(driver: SqlDriver, withDates: Boolean): RecordDatabase {
-  maybeCreateOrMigrateSchema(driver, getSchema(withDates))
+internal fun createRecordDatabase(driver: SqlDriver): RecordDatabase {
+  maybeCreateOrMigrateSchema(driver, getSchema())
 
   val tableNames = mutableListOf<String>()
 
@@ -31,23 +30,12 @@ internal fun createRecordDatabase(driver: SqlDriver, withDates: Boolean): Record
      */
   }
 
-  val expectedTableName = if (withDates) "blobs" else "records"
-
+  val expectedTableName = "blobs"
   check(tableNames.isEmpty() || tableNames.contains(expectedTableName)) {
-    "Apollo: Cannot find the '$expectedTableName' table, did you change the 'withDates' parameter? (found '$tableNames' instead)"
+    "Apollo: Cannot find the '$expectedTableName' table (found '$tableNames' instead)"
   }
 
-
-
-  return if (withDates) {
-    BlobRecordDatabase(BlobDatabase(driver).blobQueries)
-  } else {
-    JsonRecordDatabase(JsonDatabase(driver).jsonQueries)
-  }
+  return BlobRecordDatabase(BlobDatabase(driver).blobQueries)
 }
 
-internal fun getSchema(withDates: Boolean): SqlSchema<QueryResult.Value<Unit>> = if (withDates) {
-  BlobDatabase.Schema
-} else {
-  JsonDatabase.Schema
-}
+internal fun getSchema(): SqlSchema<QueryResult.Value<Unit>> = BlobDatabase.Schema

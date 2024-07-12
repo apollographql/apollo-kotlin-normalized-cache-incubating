@@ -76,7 +76,7 @@ object JsonRecordSerializer {
         key = key,
         fields = fields,
         mutationId = null,
-        date = emptyMap(),
+        dates = emptyMap(),
         metadata = allFields[KEY_METADATA] as Map<String, Map<String, Any?>>
     )
   }
