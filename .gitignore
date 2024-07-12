@@ -11,40 +11,16 @@
 
 # Generated files
 build
-/reports
 .kotlin
 
 # Place where the Android SDK path is set
 local.properties
 
-# Secret used by sample apps
-github_token
-
-# XCode 
+# XCode
 xcuserdata
 project.xcworkspace
 
-# Mac OS Finder 
+# Mac OS Finder
 .DS_Store
 Thumbs.db
-db.json
-*.log
 
-# Docs
-node_modules/
-/docs/public
-/docs/.cache
-!docs/public/_redirects
-.deploy*/
-docs.json
-package-lock.json
-**/.project
-.vscode/**
-**/bin
-.sqldelight
-
-# Local Netlify folder
-.netlify
-
-# IntelliJ plugin
-intellij-plugin/mockJDK
