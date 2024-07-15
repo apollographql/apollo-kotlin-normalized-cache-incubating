@@ -25,7 +25,7 @@ class TrimTest {
         key = "old",
         fields = mapOf("key" to "value"),
         mutationId = null,
-        date = mapOf("key" to 0L),
+        dates = mapOf("key" to 0L),
         metadata = emptyMap()
     )
     cache.merge(oldRecord, CacheHeaders.NONE, recordMerger = DefaultRecordMerger)
@@ -35,7 +35,7 @@ class TrimTest {
           key = "new$it",
           fields = mapOf("key" to largeString),
           mutationId = null,
-          date = mapOf("key" to 1 + it.toLong()),
+          dates = mapOf("key" to 1 + it.toLong()),
           metadata = emptyMap()
       )
     }

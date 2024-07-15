@@ -25,18 +25,13 @@ class ConnectionWithNodesPaginationTest {
   }
 
   @Test
-  fun blobSqlCache() {
-    test(SqlNormalizedCacheFactory(name = "blob", withDates = true))
-  }
-
-  @Test
-  fun jsonSqlCache() {
-    test(SqlNormalizedCacheFactory(name = "json", withDates = false))
+  fun sqlCache() {
+    test(SqlNormalizedCacheFactory())
   }
 
   @Test
   fun chainedCache() {
-    test(MemoryCacheFactory().chain(SqlNormalizedCacheFactory(name = "json", withDates = false)))
+    test(MemoryCacheFactory().chain(SqlNormalizedCacheFactory()))
   }
 
   private fun test(cacheFactory: NormalizedCacheFactory) = runTest {

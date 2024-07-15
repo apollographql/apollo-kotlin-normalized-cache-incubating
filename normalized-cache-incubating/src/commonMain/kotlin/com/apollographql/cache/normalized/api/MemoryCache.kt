@@ -124,11 +124,12 @@ class MemoryCache(
 
   private fun internalMerge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     val oldRecord = loadRecord(record.key, cacheHeaders)
+    val date = cacheHeaders.date()
     val changedKeys = if (oldRecord == null) {
-      lruCache[record.key] = record
+      lruCache[record.key] = record.withDate(date)
       record.fieldKeys()
     } else {
-      val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record, newDate = null)
+      val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record, newDate = date)
       lruCache[record.key] = mergedRecord
       changedKeys
     }
@@ -166,4 +167,21 @@ class MemoryCacheFactory @JvmOverloads constructor(
         expireAfterMillis = expireAfterMillis,
     )
   }
+}
+
+private fun CacheHeaders.date(): Long? {
+  return headerValue(ApolloCacheHeaders.DATE)?.toLong()
+}
+
+private fun Record.withDate(date: Long?): Record {
+  if (date == null) {
+    return this
+  }
+  return Record(
+      key = key,
+      fields = fields,
+      mutationId = mutationId,
+      dates = fields.mapValues { date },
+      metadata = metadata
+  )
 }

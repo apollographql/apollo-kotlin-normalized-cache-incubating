@@ -126,7 +126,7 @@ internal class Normalizer(
         key = key,
         fields = fieldValues,
         mutationId = null,
-        date = emptyMap(),
+        dates = emptyMap(),
         metadata = metadata,
     )
 

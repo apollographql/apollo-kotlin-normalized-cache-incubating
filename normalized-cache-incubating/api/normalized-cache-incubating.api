@@ -479,12 +479,6 @@ public final class com/apollographql/cache/normalized/api/internal/BlobRecordSer
 	public final fun serialize (Lcom/apollographql/cache/normalized/api/Record;)[B
 }
 
-public final class com/apollographql/cache/normalized/api/internal/JsonRecordSerializer {
-	public static final field INSTANCE Lcom/apollographql/cache/normalized/api/internal/JsonRecordSerializer;
-	public final fun deserialize (Ljava/lang/String;Ljava/lang/String;)Lcom/apollographql/cache/normalized/api/Record;
-	public final fun serialize (Lcom/apollographql/cache/normalized/api/Record;)Ljava/lang/String;
-}
-
 public final class com/apollographql/cache/normalized/api/internal/Lock {
 	public fun <init> ()V
 	public final fun read (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
