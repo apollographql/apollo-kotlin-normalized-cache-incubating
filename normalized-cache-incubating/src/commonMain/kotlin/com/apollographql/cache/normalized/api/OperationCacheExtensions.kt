@@ -78,45 +78,6 @@ fun <D : Executable.Data> Executable<D>.readDataFromCache(
   ).toData(adapter(), customScalarAdapters, variables)
 }
 
-@JvmOverloads
-fun <D : Executable.Data> Executable<D>.readDataFromCache(
-    customScalarAdapters: CustomScalarAdapters,
-    cache: ReadOnlyNormalizedCache,
-    cacheResolver: ApolloResolver,
-    cacheHeaders: CacheHeaders,
-    fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
-): D {
-  val variables = variables(customScalarAdapters, true)
-  return readInternal(
-      cacheKey = CacheKey.rootKey(),
-      cache = cache,
-      cacheResolver = cacheResolver,
-      cacheHeaders = cacheHeaders,
-      variables = variables,
-      fieldKeyGenerator = fieldKeyGenerator,
-  ).toData(adapter(), customScalarAdapters, variables)
-}
-
-@JvmOverloads
-fun <D : Executable.Data> Executable<D>.readDataFromCache(
-    cacheKey: CacheKey,
-    customScalarAdapters: CustomScalarAdapters,
-    cache: ReadOnlyNormalizedCache,
-    cacheResolver: ApolloResolver,
-    cacheHeaders: CacheHeaders,
-    fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
-): D {
-  val variables = variables(customScalarAdapters, true)
-  return readInternal(
-      cacheKey = cacheKey,
-      cache = cache,
-      cacheResolver = cacheResolver,
-      cacheHeaders = cacheHeaders,
-      variables = variables,
-      fieldKeyGenerator = fieldKeyGenerator,
-  ).toData(adapter(), customScalarAdapters, variables)
-}
-
 @ApolloInternal
 fun <D : Executable.Data> Executable<D>.readDataFromCacheInternal(
     cacheKey: CacheKey,
@@ -134,28 +95,11 @@ fun <D : Executable.Data> Executable<D>.readDataFromCacheInternal(
     fieldKeyGenerator = fieldKeyGenerator,
 )
 
-@ApolloInternal
-fun <D : Executable.Data> Executable<D>.readDataFromCacheInternal(
-    cacheKey: CacheKey,
-    cache: ReadOnlyNormalizedCache,
-    cacheResolver: ApolloResolver,
-    cacheHeaders: CacheHeaders,
-    variables: Executable.Variables,
-    fieldKeyGenerator: FieldKeyGenerator,
-): CacheData = readInternal(
-    cacheKey = cacheKey,
-    cache = cache,
-    cacheResolver = cacheResolver,
-    cacheHeaders = cacheHeaders,
-    variables = variables,
-    fieldKeyGenerator = fieldKeyGenerator,
-)
-
 
 private fun <D : Executable.Data> Executable<D>.readInternal(
     cacheKey: CacheKey,
     cache: ReadOnlyNormalizedCache,
-    cacheResolver: Any,
+    cacheResolver: CacheResolver,
     cacheHeaders: CacheHeaders,
     variables: Executable.Variables,
     fieldKeyGenerator: FieldKeyGenerator,

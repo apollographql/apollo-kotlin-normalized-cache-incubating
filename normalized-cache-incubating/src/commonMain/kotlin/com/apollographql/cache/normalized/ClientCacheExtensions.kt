@@ -6,7 +6,6 @@ import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.annotations.ApolloDeprecatedSince
 import com.apollographql.apollo.annotations.ApolloDeprecatedSince.Version.v4_0_0
-import com.apollographql.apollo.annotations.ApolloExperimental
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.ExecutionContext
@@ -23,7 +22,6 @@ import com.apollographql.apollo.interceptor.AutoPersistedQueryInterceptor
 import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.apollo.network.http.HttpInfo
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
-import com.apollographql.cache.normalized.api.ApolloResolver
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
 import com.apollographql.cache.normalized.api.CacheResolver
@@ -33,7 +31,6 @@ import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.EmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.EmptyMetadataGenerator
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
-import com.apollographql.cache.normalized.api.FieldPolicyApolloResolver
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.MetadataGenerator
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
@@ -108,24 +105,12 @@ enum class FetchPolicy {
  * This allows to display results faster
  */
 @JvmOverloads
-@JvmName("configureApolloClientBuilder")
-fun ApolloClient.Builder.normalizedCache(
-    normalizedCacheFactory: NormalizedCacheFactory,
-    cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
-    cacheResolver: CacheResolver = FieldPolicyCacheResolver,
-    writeToCacheAsynchronously: Boolean = false,
-): ApolloClient.Builder {
-  return store(ApolloStore(normalizedCacheFactory, cacheKeyGenerator, cacheResolver), writeToCacheAsynchronously)
-}
-
-@ApolloExperimental
-@JvmOverloads
 @JvmName("configureApolloClientBuilder2")
 fun ApolloClient.Builder.normalizedCache(
     normalizedCacheFactory: NormalizedCacheFactory,
     cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
-    apolloResolver: ApolloResolver = FieldPolicyApolloResolver,
+    cacheResolver: CacheResolver = FieldPolicyCacheResolver,
     recordMerger: RecordMerger = DefaultRecordMerger,
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
     embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
@@ -136,7 +121,7 @@ fun ApolloClient.Builder.normalizedCache(
           normalizedCacheFactory = normalizedCacheFactory,
           cacheKeyGenerator = cacheKeyGenerator,
           metadataGenerator = metadataGenerator,
-          apolloResolver = apolloResolver,
+          cacheResolver = cacheResolver,
           recordMerger = recordMerger,
           fieldKeyGenerator = fieldKeyGenerator,
           embeddedFieldsProvider = embeddedFieldsProvider
@@ -348,7 +333,6 @@ fun <T> MutableExecutionOptions<T>.storePartialResponses(storePartialResponses: 
  *
  * Default: false
  */
-@ApolloExperimental
 fun <T> MutableExecutionOptions<T>.storeReceiveDate(storeReceiveDate: Boolean) = addExecutionContext(
     StoreReceiveDateContext(storeReceiveDate)
 )
@@ -360,7 +344,6 @@ fun <T> MutableExecutionOptions<T>.storeReceiveDate(storeReceiveDate: Boolean) =
  *
  * Default: false
  */
-@ApolloExperimental
 fun <T> MutableExecutionOptions<T>.storeExpirationDate(storeExpirationDate: Boolean): T {
   addExecutionContext(StoreExpirationDateContext(storeExpirationDate))
   if (this is ApolloClient.Builder) {

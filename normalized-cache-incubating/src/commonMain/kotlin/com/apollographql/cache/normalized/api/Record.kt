@@ -1,6 +1,5 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.annotations.ApolloExperimental
 import com.apollographql.apollo.annotations.ApolloInternal
 import com.apollographql.cache.normalized.api.internal.RecordWeigher.calculateBytes
 import com.benasher44.uuid.Uuid
@@ -27,14 +26,12 @@ class Record(
     val mutationId: Uuid? = null,
 ) : Map<String, Any?> by fields {
 
-  @ApolloExperimental
   var dates: Map<String, Long?>? = null
     private set
 
   /**
    * Arbitrary metadata that can be attached to each field.
    */
-  @ApolloExperimental
   var metadata: Map<String, Map<String, Any?>> = emptyMap()
     private set
 

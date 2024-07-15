@@ -2,8 +2,9 @@ package pagination
 
 import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.api.json.ApolloJsonElement
+import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
-import com.apollographql.cache.normalized.api.FieldPolicyApolloResolver
+import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.FieldRecordMerger
 import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.MetadataGenerator
@@ -13,7 +14,6 @@ import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.api.internal.OptimisticNormalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.apollo.testing.internal.runTest
 import pagination.offsetBasedWithPage.UsersQuery
 import pagination.offsetBasedWithPage.type.buildUser
 import pagination.offsetBasedWithPage.type.buildUserPage
@@ -48,7 +48,7 @@ class OffsetBasedWithPagePaginationTest {
         normalizedCacheFactory = cacheFactory,
         cacheKeyGenerator = TypePolicyCacheKeyGenerator,
         metadataGenerator = OffsetPaginationMetadataGenerator("UserPage"),
-        apolloResolver = FieldPolicyApolloResolver,
+        cacheResolver = FieldPolicyCacheResolver,
         recordMerger = FieldRecordMerger(OffsetPaginationFieldMerger())
     )
     apolloStore.clearAll()

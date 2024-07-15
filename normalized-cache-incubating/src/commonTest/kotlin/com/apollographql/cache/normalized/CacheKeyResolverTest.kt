@@ -7,8 +7,11 @@ import com.apollographql.apollo.api.ObjectType
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.cache.normalized.CacheKeyResolverTest.Fixtures.TEST_LIST_FIELD
 import com.apollographql.cache.normalized.CacheKeyResolverTest.Fixtures.TEST_SIMPLE_FIELD
+import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyResolver
+import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
+import com.apollographql.cache.normalized.api.ResolverContext
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,31 +22,34 @@ import kotlin.test.fail
 class CacheKeyResolverTest {
 
   private lateinit var subject: CacheKeyResolver
-  lateinit var onCacheKeyForField: (field: CompiledField, variables: Executable.Variables) -> CacheKey?
-  lateinit var onListOfCacheKeysForField: (field: CompiledField, variables: Executable.Variables) -> List<CacheKey?>?
+  lateinit var onCacheKeyForField: (context: ResolverContext) -> CacheKey?
+  lateinit var onListOfCacheKeysForField: (context: ResolverContext) -> List<CacheKey?>?
 
   @BeforeTest
   fun setup() {
     subject = FakeCacheKeyResolver()
-    onCacheKeyForField = { _, _ ->
+    onCacheKeyForField = { _ ->
       fail("Unexpected call to cacheKeyForField")
     }
-    onListOfCacheKeysForField = { _, _ ->
+    onListOfCacheKeysForField = { _ ->
       fail("Unexpected call to listOfCacheKeysForField")
     }
   }
+
+  private fun resolverContext(field: CompiledField) =
+    ResolverContext(field, Executable.Variables(emptyMap()), emptyMap(), "", "", CacheHeaders(emptyMap()), DefaultFieldKeyGenerator)
 
   @Test
   fun verify_cacheKeyForField_called_for_named_composite_field() {
     val expectedKey = CacheKey("test")
     val fields = mutableListOf<CompiledField>()
 
-    onCacheKeyForField = { field: CompiledField, _: Executable.Variables ->
-      fields += field
+    onCacheKeyForField = { context: ResolverContext ->
+      fields += context.field
       expectedKey
     }
 
-    val returned = subject.resolveField(TEST_SIMPLE_FIELD, Executable.Variables(emptyMap()), emptyMap(), "")
+    val returned = subject.resolveField(resolverContext(TEST_SIMPLE_FIELD))
 
     assertEquals(returned, expectedKey)
     assertEquals(fields[0], TEST_SIMPLE_FIELD)
@@ -54,12 +60,12 @@ class CacheKeyResolverTest {
     val expectedKeys = listOf(CacheKey("test"))
     val fields = mutableListOf<CompiledField>()
 
-    onListOfCacheKeysForField = { field: CompiledField, _: Executable.Variables ->
-      fields += field
+    onListOfCacheKeysForField = { context: ResolverContext ->
+      fields += context.field
       expectedKeys
     }
 
-    val returned = subject.resolveField(TEST_LIST_FIELD, Executable.Variables(emptyMap()), emptyMap(), "")
+    val returned = subject.resolveField(resolverContext(TEST_LIST_FIELD))
 
     assertEquals(returned, expectedKeys)
     assertEquals(fields[0], TEST_LIST_FIELD)
@@ -67,26 +73,26 @@ class CacheKeyResolverTest {
 
   @Test
   fun super_called_for_null_return_values() {
-    onCacheKeyForField = { _, _ -> null }
-    onListOfCacheKeysForField = { _, _ -> null }
+    onCacheKeyForField = { _ -> null }
+    onListOfCacheKeysForField = { _ -> null }
 
     // The best way to ensure that super was called is to check for a cache miss exception from CacheResolver()
     assertFailsWith<CacheMissException> {
-      subject.resolveField(TEST_SIMPLE_FIELD, Executable.Variables(emptyMap()), emptyMap(), "")
+      subject.resolveField(resolverContext(TEST_SIMPLE_FIELD))
     }
     assertFailsWith<CacheMissException> {
-      subject.resolveField(TEST_LIST_FIELD, Executable.Variables(emptyMap()), emptyMap(), "")
+      subject.resolveField(resolverContext(TEST_LIST_FIELD))
     }
   }
 
   inner class FakeCacheKeyResolver : CacheKeyResolver() {
 
-    override fun cacheKeyForField(field: CompiledField, variables: Executable.Variables): CacheKey? {
-      return onCacheKeyForField(field, variables)
+    override fun cacheKeyForField(context: ResolverContext): CacheKey? {
+      return onCacheKeyForField(context)
     }
 
-    override fun listOfCacheKeysForField(field: CompiledField, variables: Executable.Variables): List<CacheKey?>? {
-      return onListOfCacheKeysForField(field, variables)
+    override fun listOfCacheKeysForField(context: ResolverContext): List<CacheKey?>? {
+      return onListOfCacheKeysForField(context)
     }
   }
 

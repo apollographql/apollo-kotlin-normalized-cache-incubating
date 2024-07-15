@@ -1,7 +1,6 @@
 package com.apollographql.cache.normalized.sql
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
-import com.apollographql.apollo.annotations.ApolloExperimental
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.sql.internal.Blob2RecordDatabase
@@ -18,7 +17,6 @@ import java.io.File
  * @param maxSize if the size of the database is bigger than [maxSize] (in bytes), it will be trimmed
  * @param trimFactor the amount of trimming to do
  */
-@ApolloExperimental
 class TrimmableNormalizedCacheFactory internal constructor(
     private val url: String,
     private val maxSize: Long? = null,

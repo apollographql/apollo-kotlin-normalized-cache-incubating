@@ -1,6 +1,5 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.annotations.ApolloExperimental
 import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.json.ApolloJsonElement
@@ -15,7 +14,6 @@ import com.apollographql.apollo.api.json.ApolloJsonElement
  *
  * @see [Record.metadata]
  */
-@ApolloExperimental
 interface MetadataGenerator {
   /**
    * Returns metadata for the given object.
@@ -32,7 +30,6 @@ interface MetadataGenerator {
 /**
  * Additional context passed to the [MetadataGenerator.metadataForObject] method.
  */
-@ApolloExperimental
 class MetadataGeneratorContext(
     val field: CompiledField,
     val variables: Executable.Variables,
@@ -49,7 +46,6 @@ class MetadataGeneratorContext(
 /**
  * Default [MetadataGenerator] that returns empty metadata.
  */
-@ApolloExperimental
 object EmptyMetadataGenerator : MetadataGenerator {
   override fun metadataForObject(obj: ApolloJsonElement, context: MetadataGeneratorContext): Map<String, ApolloJsonElement> = emptyMap()
 }
@@ -61,7 +57,6 @@ object EmptyMetadataGenerator : MetadataGenerator {
  *
  * Either `pageInfo.startCursor` and `pageInfo.endCursor`, or `edges.cursor` must be present in the selection.
  */
-@ApolloExperimental
 class ConnectionMetadataGenerator(private val connectionTypes: Set<String>) : MetadataGenerator {
   @Suppress("UNCHECKED_CAST")
   override fun metadataForObject(obj: ApolloJsonElement, context: MetadataGeneratorContext): Map<String, ApolloJsonElement> {
