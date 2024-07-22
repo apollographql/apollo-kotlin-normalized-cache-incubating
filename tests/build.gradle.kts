@@ -3,7 +3,9 @@ buildscript {
     mavenCentral()
     google()
   }
-  dependencies {
-    classpath("build-logic:build-logic")
-  }
+}
+
+plugins {
+  alias(libs.plugins.kotlin).apply(false)
+  alias(libs.plugins.apollo).apply(false)
 }

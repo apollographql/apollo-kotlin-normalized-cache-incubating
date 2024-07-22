@@ -4,3 +4,9 @@ query GetUser {
     email
   }
 }
+
+query RepositoryListQuery($first: Int = 15, $after: String) {
+  repositories(first: $first, after: $after) {
+    id
+  }
+}
