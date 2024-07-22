@@ -1,6 +1,6 @@
 type Query {
   user: User
-  repositories(first: Int, after: String): [Repository]
+  repositories(first: Int, after: String): [Repository!]!
 }
 
 type User {

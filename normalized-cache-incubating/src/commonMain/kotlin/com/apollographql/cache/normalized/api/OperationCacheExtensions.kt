@@ -1,13 +1,9 @@
 package com.apollographql.cache.normalized.api
 
 import com.apollographql.apollo.annotations.ApolloInternal
-import com.apollographql.apollo.api.Adapter
-import com.apollographql.apollo.api.CustomScalarAdapters
-import com.apollographql.apollo.api.Executable
-import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.api.*
 import com.apollographql.apollo.api.json.MapJsonReader
 import com.apollographql.apollo.api.json.MapJsonWriter
-import com.apollographql.apollo.api.variables
 import com.apollographql.cache.normalized.api.internal.CacheBatchReader
 import com.apollographql.cache.normalized.api.internal.Normalizer
 import kotlin.jvm.JvmOverloads
@@ -33,7 +29,7 @@ fun <D : Executable.Data> Executable<D>.normalize(
 ): Map<String, Record> {
   val writer = MapJsonWriter()
   adapter().toJson(writer, customScalarAdapters, data)
-  val variables = variables(customScalarAdapters)
+  val variables = variables(customScalarAdapters, withDefaultValues = true)
   @Suppress("UNCHECKED_CAST")
   return Normalizer(variables, rootKey, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider)
       .normalize(writer.root() as Map<String, Any?>, rootField().selections, rootField().type.rawType())
