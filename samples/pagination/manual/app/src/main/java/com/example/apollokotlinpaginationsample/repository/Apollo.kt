@@ -2,17 +2,15 @@ package com.example.apollokotlinpaginationsample.repository
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
-import com.apollographql.apollo.cache.normalized.FetchPolicy
-import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory
-import com.apollographql.apollo.cache.normalized.apolloStore
-import com.apollographql.apollo.cache.normalized.fetchPolicy
-import com.apollographql.apollo.cache.normalized.normalizedCache
-import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory
+import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.MemoryCacheFactory
+import com.apollographql.cache.normalized.apolloStore
+import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.normalizedCache
+import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.example.apollokotlinpaginationsample.Application
 import com.example.apollokotlinpaginationsample.BuildConfig
 import com.example.apollokotlinpaginationsample.graphql.RepositoryListQuery
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 private const val SERVER_URL = "https://api.github.com/graphql"
 
@@ -60,7 +58,7 @@ suspend fun fetchAndMergeNextPage() {
     )
 
     // 4. Update the cache with the merged list
-    withContext(Dispatchers.IO) {
-        apolloClient.apolloStore.writeOperation(operation = listQuery, operationData = dataWithMergedList)
+    apolloClient.apolloStore.writeOperation(operation = listQuery, operationData = dataWithMergedList).also { keys ->
+        apolloClient.apolloStore.publish(keys)
     }
 }

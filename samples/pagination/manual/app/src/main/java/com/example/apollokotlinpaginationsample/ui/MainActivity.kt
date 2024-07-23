@@ -27,9 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.apollographql.apollo.api.ApolloResponse
-import com.apollographql.apollo.cache.normalized.FetchPolicy
-import com.apollographql.apollo.cache.normalized.fetchPolicy
-import com.apollographql.apollo.cache.normalized.watch
+import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.watch
 import com.apollographql.apollo.exception.CacheMissException
 import com.example.apollokotlinpaginationsample.R
 import com.example.apollokotlinpaginationsample.graphql.RepositoryListQuery
