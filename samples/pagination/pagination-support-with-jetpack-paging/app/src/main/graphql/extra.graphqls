@@ -1,0 +1,13 @@
+extend schema
+@link(
+    url: "https://specs.apollo.dev/kotlin_labs/v0.3",
+    import: ["@nonnull", "@typePolicy"]
+)
+
+extend type Query @nonnull(fields: "organization")
+extend type RepositoryConnection @nonnull(fields: "edges")
+extend type RepositoryEdge @nonnull(fields: "node")
+
+extend type Repository @typePolicy(keyFields: "id")
+
+extend type Organization @typePolicy(connectionFields: "repositories")
