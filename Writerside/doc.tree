@@ -7,6 +7,7 @@
                  start-page="welcome.md">
 
     <toc-element topic="welcome.md"/>
+    <toc-element topic="pagination.md"/>
     <toc-element toc-title="GitHub" href="https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating"/>
     <toc-element toc-title="Kdoc" href="https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc"/>
 </instance-profile>
