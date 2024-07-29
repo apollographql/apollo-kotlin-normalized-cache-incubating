@@ -1,5 +1,6 @@
 package com.apollographql.cache.normalized.sql.internal
 
+import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.internal.BlobRecordSerializer
 import com.apollographql.cache.normalized.sql.internal.blob2.Blob2Queries
@@ -43,21 +44,21 @@ internal class Blob2RecordDatabase(private val blobQueries: Blob2Queries) : Reco
   }
 
   override fun insert(record: Record) {
-    blobQueries.insert(record.key, BlobRecordSerializer.serialize(record), record.date())
+    blobQueries.insert(record.key, BlobRecordSerializer.serialize(record), record.receivedDate())
   }
 
   override fun update(record: Record) {
-    blobQueries.update(BlobRecordSerializer.serialize(record), record.date(), record.key)
+    blobQueries.update(BlobRecordSerializer.serialize(record), record.receivedDate(), record.key)
   }
 
   override fun selectAll(): List<Record> {
     TODO("Not yet implemented")
   }
 
-  private fun Record.date(): Long? {
-    /**
-     * The
-     */
-    return dates?.values?.filterNotNull()?.maxOrNull()
+  /**
+   * The most recent of the fields' received dates.
+   */
+  private fun Record.receivedDate(): Long? {
+    return metadata.values.mapNotNull { it[ApolloCacheHeaders.RECEIVED_DATE] as? Long }.maxOrNull()
   }
 }

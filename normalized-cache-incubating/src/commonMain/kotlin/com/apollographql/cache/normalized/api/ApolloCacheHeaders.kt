@@ -20,9 +20,14 @@ object ApolloCacheHeaders {
   const val EVICT_AFTER_READ = "evict-after-read"
 
   /**
-   * The value of this header will be stored in the [Record] fields date
+   * The value of this header will be stored in the [Record]'s received date.
    */
-  const val DATE = "apollo-date"
+  const val RECEIVED_DATE = "apollo-received-date"
+
+  /**
+   * The value of this header will be stored in the [Record]'s expiration date.
+   */
+  const val EXPIRATION_DATE = "apollo-expiration-date"
 
   /**
    * How long to accept stale fields
