@@ -48,13 +48,13 @@ class GlobalMaxAgeProvider(private val maxAge: Duration) : MaxAgeProvider {
 }
 
 /**
- * A provider that returns a max age based on patterns.
+ * A provider that returns a max age based on [schema coordinates](https://github.com/graphql/graphql-spec/pull/794).
+ * The given coordinates must be object (e.g. `MyType`) or field (e.g. `MyType.myField`) coordinates.
+ * If a field matches both field and object coordinates, the field ones are used.
  */
-class PatternMaxAgeProvider(
-  /**
-   * The order is important - the first matching item will be used.
-   */
-  private val maxAgePerMatcher: List<Pair<String, Duration>>
+class SchemaCoordinatesMaxAgeProvider(
+  private val coordinatesToDurations: List<Pair<String, Duration>>,
+  private val defaultMaxAge: Duration? = null,
 ) : MaxAgeProvider {
   override fun getMaxAge(maxAgeContext: maxAgeContext): Duration? {
     // ...
@@ -62,13 +62,12 @@ class PatternMaxAgeProvider(
 }
 
 // Example usage:
-val maxAgeProvider = PatternMaxAgeProvider(
-  listOf(
-    ".*\\.status" to 1.minutes,
-    "MyType\\.myField" to 5.minutes,
-    "MyType\\..*" to 10.minutes,
-    ".*" to 1.days,
-  )
+val maxAgeProvider = SchemaCoordinatesMaxAgeProvider(
+  coordinatesToDurations = listOf(
+    "MyType.myField" to 5.minutes,
+    "MyType" to 10.minutes,
+  ),
+  defaultMaxAge = 1.days,
 )
 
 /**
