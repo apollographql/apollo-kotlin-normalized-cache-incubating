@@ -2,5 +2,30 @@ query GetUser {
   user {
     name
     email
+    admin
+  }
+}
+
+query GetUserAdmin {
+  user {
+    admin
+  }
+}
+
+query GetUserEmail {
+  user {
+    email
+  }
+}
+
+query GetUserName {
+  user {
+    name
+  }
+}
+
+query GetCompany {
+  company {
+    id
   }
 }

@@ -1,9 +1,14 @@
 type Query {
   user: User
+  company: Company
 }
 
 type User {
   name: String!
   email: String!
   admin: Boolean
+}
+
+type Company {
+  id: ID!
 }
