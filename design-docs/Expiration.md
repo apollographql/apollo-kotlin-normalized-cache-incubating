@@ -21,6 +21,20 @@ and instead use the `Record.metadata` map which can store arbitrary data per fie
 
 ```kotlin
 
+/**
+ * A cache resolver that raises a cache miss if the field's received date is older than its max age
+ * (configurable via [maxAgeProvider]) or its expiration date has passed.
+ *
+ * Received dates are stored by calling `storeReceiveDate(true)` on your `ApolloClient`.
+ *
+ * Expiration dates are stored by calling `storeExpirationDate(true)` on your `ApolloClient`.
+ *
+ * A maximum staleness can be configured via the [ApolloCacheHeaders.MAX_STALE] cache header.
+ *
+ * @see MutableExecutionOptions.storeReceiveDate
+ * @see MutableExecutionOptions.storeExpirationDate
+ * @see MutableExecutionOptions.maxStale
+ */
 class ExpirationCacheResolver(private val maxAgeProvider: MaxAgeProvider) : CacheResolver {
   // ...
 }
@@ -33,12 +47,11 @@ interface MaxAgeProvider {
   fun getMaxAge(maxAgeContext: maxAgeContext): Duration?
 }
 
-
 class maxAgeContext(
   val field: CompiledField,
+  val parentType: String,
 )
-// Note: it's a single field for now, but having a class allows for future evolutions. 
-
+// Note: using a class instead of arguments allows for future evolutions. 
 
 /**
  * A provider that returns a single max age for all types.
@@ -53,7 +66,7 @@ class GlobalMaxAgeProvider(private val maxAge: Duration) : MaxAgeProvider {
  * If a field matches both field and object coordinates, the field ones are used.
  */
 class SchemaCoordinatesMaxAgeProvider(
-  private val coordinatesToDurations: List<Pair<String, Duration>>,
+  private val coordinatesToDurations: Map<String, Duration>,
   private val defaultMaxAge: Duration? = null,
 ) : MaxAgeProvider {
   override fun getMaxAge(maxAgeContext: maxAgeContext): Duration? {
@@ -63,7 +76,7 @@ class SchemaCoordinatesMaxAgeProvider(
 
 // Example usage:
 val maxAgeProvider = SchemaCoordinatesMaxAgeProvider(
-  coordinatesToDurations = listOf(
+  coordinatesToDurations = mapOf(
     "MyType.myField" to 5.minutes,
     "MyType" to 10.minutes,
   ),
@@ -83,6 +96,7 @@ class SchemaMaxAgeProvider : MaxAgeProvider {
 Pseudo code:
 
 ```kotlin
+val resolvedField = // delegate to the default resolver
 val maxStale = // max stale duration from cache headers (if any, or 0)
 
 // First consider the field's max age (client side)
@@ -91,7 +105,8 @@ if (fieldMaxAge != null) {
   val fieldReceivedDate = // field's received date from the Record
   if (fieldReceivedDate != null) {
     val fieldAge = currentDate - fieldReceivedDate
-    if (fieldAge - fieldMaxAge > maxStale) {
+    val stale = fieldAge - fieldMaxAge
+    if (stale >= maxStale) {
       // throw cache miss
     }
   }
@@ -100,12 +115,13 @@ if (fieldMaxAge != null) {
 // Then consider the field's expiration date (server side)
 val fieldExpirationDate = // field's expiration date from the Record
 if (fieldExpirationDate != null) {
-  if (currentDate - fieldExpirationDate > maxStale) {
+  val stale = currentDate - fieldExpirationDate
+  if (stale >= maxStale) {
     // throw cache miss
   }
 }
 
-// Fall back to default resolver
+return resolvedField
 ```
 
 Note: the `maxStale` duration is to allow for a per-operation override of the max age / expiration date. 
