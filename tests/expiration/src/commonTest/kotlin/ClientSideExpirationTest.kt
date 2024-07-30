@@ -24,6 +24,7 @@ import com.apollographql.cache.normalized.storeReceiveDate
 import sqlite.GetUserQuery
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 class ClientSideExpirationTest {
   @Test
@@ -46,14 +47,12 @@ class ClientSideExpirationTest {
     val client = ApolloClient.Builder()
         .normalizedCache(
             normalizedCacheFactory = normalizedCacheFactory,
-            cacheKeyGenerator = TypePolicyCacheKeyGenerator,
-            cacheResolver = ReceiveDateCacheResolver(maxAge),
-            recordMerger = DefaultRecordMerger,
-            metadataGenerator = EmptyMetadataGenerator,
+            cacheResolver = ExpirationCacheResolver(GlobalMaxAgeProvider(maxAge.seconds)),
         )
-        .storeReceiveDate(true)
         .serverUrl("unused")
         .build()
+    client.apolloStore.clearAll()
+
     val query = GetUserQuery()
     val data = GetUserQuery.Data(GetUserQuery.User("John", "john@doe.com"))
 
@@ -69,7 +68,7 @@ class ClientSideExpirationTest {
 
     // with max stale, should succeed
     val response1 = client.query(GetUserQuery()).fetchPolicy(FetchPolicy.CacheOnly)
-        .cacheHeaders(CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MAX_STALE, "10").build())
+        .maxStale(10.seconds)
         .execute()
     assertTrue(response1.data?.user?.name == "John")
 

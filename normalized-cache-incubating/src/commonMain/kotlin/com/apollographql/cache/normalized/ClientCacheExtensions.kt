@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
+import kotlin.time.Duration
 
 enum class FetchPolicy {
   /**
@@ -402,6 +403,13 @@ fun <T> MutableExecutionOptions<T>.cacheHeaders(cacheHeaders: CacheHeaders) = ad
 )
 
 /**
+ * @param maxStale how long to accept stale fields
+ */
+fun <T> MutableExecutionOptions<T>.maxStale(maxStale: Duration) = cacheHeaders(
+    CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MAX_STALE, maxStale.inWholeSeconds.toString()).build()
+)
+
+/**
  * @param writeToCacheAsynchronously whether to return the response before writing it to the cache
  *
  * Setting this to true reduces the latency
@@ -698,6 +706,10 @@ val <D : Operation.Data> ApolloResponse<D>.cacheHeaders
  *
  * Any [FetchPolicy] previously set will be ignored
  */
-@Deprecated("Use fetchPolicy(FetchPolicy.CacheAndNetwork) instead", ReplaceWith("fetchPolicy(FetchPolicy.CacheAndNetwork).toFlow()"), level = DeprecationLevel.ERROR)
+@Deprecated(
+    "Use fetchPolicy(FetchPolicy.CacheAndNetwork) instead",
+    ReplaceWith("fetchPolicy(FetchPolicy.CacheAndNetwork).toFlow()"),
+    level = DeprecationLevel.ERROR
+)
 @ApolloDeprecatedSince(ApolloDeprecatedSince.Version.v3_7_5)
 fun <D : Query.Data> ApolloCall<D>.executeCacheAndNetwork(): Flow<ApolloResponse<D>> = TODO()
