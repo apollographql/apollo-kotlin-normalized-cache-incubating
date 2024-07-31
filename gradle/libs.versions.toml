@@ -1,34 +1,28 @@
 [versions]
 kotlin-plugin = "2.0.0"
 android-plugin = "8.2.2"
-apollo = "4.0.0-rc.2"
-kotlinx-coroutines = "1.8.0"
+apollo = "4.0.0"
 okio = "3.9.0"
 atomicfu = "0.23.1" # Must be the same version as the one used by apollo-testing-support or native compilation will fail
 sqldelight = "2.0.1"
 androidx-sqlite = "2.3.1"
+librarian = "0.0.6"
 
 [libraries]
-librarian = "com.gradleup.librarian:core:0.0.6"
-kgp = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin-plugin" }
 apollo-api = { group = "com.apollographql.apollo", name = "apollo-api", version.ref = "apollo" }
 apollo-mpp-utils = { group = "com.apollographql.apollo", name = "apollo-mpp-utils", version.ref = "apollo" }
 apollo-testing-support = { group = "com.apollographql.apollo", name = "apollo-testing-support", version.ref = "apollo" }
 apollo-runtime = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }
 apollo-mockserver = "com.apollographql.mockserver:apollo-mockserver:0.0.1"
 atomicfu-library = { group = "org.jetbrains.kotlinx", name = "atomicfu", version.ref = "atomicfu" }
-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test" } # the Kotlin plugin resolves the version
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit" } # the Kotlin plugin resolves the version
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 uuid = "com.benasher44:uuid:0.8.2"
 sqldelight-android = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 sqldelight-jvm = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 sqldelight-native = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }
 sqldelight-runtime = { group = "app.cash.sqldelight", name = "runtime", version.ref = "sqldelight" }
-sqldelight-sqlite = { group = "app.cash.sqldelight", name = "sqlite-dialect", version.ref = "sqldelight" }
-sqlite-jdbc = "org.xerial:sqlite-jdbc:3.43.2.0"
 truth = "com.google.truth:truth:1.1.3"
 slf4j-nop = "org.slf4j:slf4j-nop:2.0.13"
 androidx-sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "androidx-sqlite" }
@@ -38,7 +32,7 @@ androidx-startup-runtime = "androidx.startup:startup-runtime:1.1.1"
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-plugin" }
 android = { id = "com.android.library", version.ref = "android-plugin" }
-librarian = { id = "com.gradleup.librarian", version = "0.0.4" }
+librarian = { id = "com.gradleup.librarian", version.ref = "librarian" }
 atomicfu = { id = "org.jetbrains.kotlin.plugin.atomicfu", version.ref = "kotlin-plugin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }
