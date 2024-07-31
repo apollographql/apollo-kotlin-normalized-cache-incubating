@@ -5,10 +5,27 @@ import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.apollo.testing.internal.runTest
-import com.apollographql.cache.normalized.*
-import com.apollographql.cache.normalized.api.*
+import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.ApolloCacheHeaders
+import com.apollographql.cache.normalized.api.CacheHeaders
+import com.apollographql.cache.normalized.api.DefaultRecordMerger
+import com.apollographql.cache.normalized.api.ExpirationCacheResolver
+import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
+import com.apollographql.cache.normalized.api.MemoryCacheFactory
+import com.apollographql.cache.normalized.api.NormalizedCacheFactory
+import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
+import com.apollographql.cache.normalized.api.normalize
+import com.apollographql.cache.normalized.apolloStore
+import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.maxStale
+import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import sqlite.*
+import sqlite.GetCompanyQuery
+import sqlite.GetUserAdminQuery
+import sqlite.GetUserEmailQuery
+import sqlite.GetUserNameQuery
+import sqlite.GetUserQuery
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
@@ -164,7 +181,8 @@ class ClientSideExpirationTest {
     }
   }
 
-  private fun cacheHeaders(receivedDate: Long): CacheHeaders {
-    return CacheHeaders.Builder().addHeader(ApolloCacheHeaders.RECEIVED_DATE, receivedDate.toString()).build()
-  }
+}
+
+fun cacheHeaders(receivedDate: Long): CacheHeaders {
+  return CacheHeaders.Builder().addHeader(ApolloCacheHeaders.RECEIVED_DATE, receivedDate.toString()).build()
 }

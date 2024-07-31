@@ -1,30 +1,30 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.exception.CacheMissException
+import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ExpirationCacheResolver
-import com.apollographql.cache.normalized.api.MaxAgeContext
-import com.apollographql.cache.normalized.api.MaxAgeProvider
 import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
+import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
 import com.apollographql.cache.normalized.apolloStore
+import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.fetchPolicy
-import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.storeExpirationDate
 import com.apollographql.mockserver.MockResponse
 import com.apollographql.mockserver.MockServer
+import sqlite.GetUserEmailQuery
+import sqlite.GetUserNameQuery
 import sqlite.GetUserQuery
 import kotlin.test.Test
 import kotlin.test.assertTrue
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-class ServerSideExpirationTest {
+class ClientAndServerSideExpirationTest {
   @Test
   fun memoryCache() {
     test(MemoryCacheFactory())
@@ -40,22 +40,25 @@ class ServerSideExpirationTest {
     test(MemoryCacheFactory().chain(SqlNormalizedCacheFactory()))
   }
 
-  @Suppress("JoinDeclarationAndAssignment")
   private fun test(normalizedCacheFactory: NormalizedCacheFactory) = runTest {
     val mockServer = MockServer()
     val client = ApolloClient.Builder()
         .normalizedCache(
             normalizedCacheFactory = normalizedCacheFactory,
-            cacheResolver = ExpirationCacheResolver(object : MaxAgeProvider {
-              override fun getMaxAge(maxAgeContext: MaxAgeContext): Duration? = null
-            })
+            cacheResolver = ExpirationCacheResolver(
+                SchemaCoordinatesMaxAgeProvider(
+                    mapOf(
+                        "User.email" to 2.seconds,
+                    ),
+                    defaultMaxAge = 20.seconds,
+                )
+            )
         )
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())
         .build()
     client.apolloStore.clearAll()
 
-    val query = GetUserQuery()
     val data = """
       {
         "data": {
@@ -68,37 +71,35 @@ class ServerSideExpirationTest {
       }
     """.trimIndent()
 
-    var response: ApolloResponse<GetUserQuery.Data>
-
-    // store data with an expiration date in the future
+    // Store data with an expiration date 10s in the future, and a received date 10s in the past
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=10")
             .body(data)
             .build()
     )
-    client.query(query).fetchPolicy(FetchPolicy.NetworkOnly).execute()
-    // read from cache -> it should succeed
-    response = client.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertTrue(response.data?.user?.name == "John")
+    client.query(GetUserQuery()).fetchPolicy(FetchPolicy.NetworkOnly).cacheHeaders(cacheHeaders(currentTimeMillis() / 1000 - 10)).execute()
 
-    // store expired data
+    // Read User.name from cache -> it should succeed
+    val userNameResponse = client.query(GetUserNameQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    assertTrue(userNameResponse.data?.user?.name == "John")
+
+    // Read User.email from cache -> it should fail
+    var userEmailResponse = client.query(GetUserEmailQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    var e = userEmailResponse.exception as CacheMissException
+    assertTrue(e.stale)
+
+    // Store data with an expired date of now
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=0")
             .body(data)
             .build()
     )
-    client.query(query).fetchPolicy(FetchPolicy.NetworkOnly).execute()
-    // read from cache -> it should fail
-    val e = client.query(GetUserQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute().exception as CacheMissException
+    client.query(GetUserQuery()).fetchPolicy(FetchPolicy.NetworkOnly).execute()
+    // Read User.name from cache -> it should fail
+    userEmailResponse = client.query(GetUserEmailQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    e = userEmailResponse.exception as CacheMissException
     assertTrue(e.stale)
-
-    // read from cache with a max stale -> no cache miss
-    response = client.query(GetUserQuery())
-        .fetchPolicy(FetchPolicy.CacheOnly)
-        .maxStale(1.seconds)
-        .execute()
-    assertTrue(response.data?.user?.name == "John")
   }
 }
