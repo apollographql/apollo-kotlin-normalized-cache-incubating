@@ -43,6 +43,9 @@ abstract interface com.apollographql.cache.normalized.api/EmbeddedFieldsProvider
 abstract interface com.apollographql.cache.normalized.api/FieldKeyGenerator { // com.apollographql.cache.normalized.api/FieldKeyGenerator|null[0]
     abstract fun getFieldKey(com.apollographql.cache.normalized.api/FieldKeyContext): kotlin/String // com.apollographql.cache.normalized.api/FieldKeyGenerator.getFieldKey|getFieldKey(com.apollographql.cache.normalized.api.FieldKeyContext){}[0]
 }
+abstract interface com.apollographql.cache.normalized.api/MaxAgeProvider { // com.apollographql.cache.normalized.api/MaxAgeProvider|null[0]
+    abstract fun getMaxAge(com.apollographql.cache.normalized.api/MaxAgeContext): kotlin.time/Duration? // com.apollographql.cache.normalized.api/MaxAgeProvider.getMaxAge|getMaxAge(com.apollographql.cache.normalized.api.MaxAgeContext){}[0]
+}
 abstract interface com.apollographql.cache.normalized.api/MetadataGenerator { // com.apollographql.cache.normalized.api/MetadataGenerator|null[0]
     abstract fun metadataForObject(kotlin/Any?, com.apollographql.cache.normalized.api/MetadataGeneratorContext): kotlin.collections/Map<kotlin/String, kotlin/Any?> // com.apollographql.cache.normalized.api/MetadataGenerator.metadataForObject|metadataForObject(kotlin.Any?;com.apollographql.cache.normalized.api.MetadataGeneratorContext){}[0]
 }
@@ -173,9 +176,9 @@ final class com.apollographql.cache.normalized.api/EmbeddedFieldsContext { // co
     final val parentType // com.apollographql.cache.normalized.api/EmbeddedFieldsContext.parentType|{}parentType[0]
         final fun <get-parentType>(): com.apollographql.apollo.api/CompiledNamedType // com.apollographql.cache.normalized.api/EmbeddedFieldsContext.parentType.<get-parentType>|<get-parentType>(){}[0]
 }
-final class com.apollographql.cache.normalized.api/ExpireDateCacheResolver : com.apollographql.cache.normalized.api/CacheResolver { // com.apollographql.cache.normalized.api/ExpireDateCacheResolver|null[0]
-    constructor <init>() // com.apollographql.cache.normalized.api/ExpireDateCacheResolver.<init>|<init>(){}[0]
-    final fun resolveField(com.apollographql.cache.normalized.api/ResolverContext): kotlin/Any? // com.apollographql.cache.normalized.api/ExpireDateCacheResolver.resolveField|resolveField(com.apollographql.cache.normalized.api.ResolverContext){}[0]
+final class com.apollographql.cache.normalized.api/ExpirationCacheResolver : com.apollographql.cache.normalized.api/CacheResolver { // com.apollographql.cache.normalized.api/ExpirationCacheResolver|null[0]
+    constructor <init>(com.apollographql.cache.normalized.api/MaxAgeProvider) // com.apollographql.cache.normalized.api/ExpirationCacheResolver.<init>|<init>(com.apollographql.cache.normalized.api.MaxAgeProvider){}[0]
+    final fun resolveField(com.apollographql.cache.normalized.api/ResolverContext): kotlin/Any? // com.apollographql.cache.normalized.api/ExpirationCacheResolver.resolveField|resolveField(com.apollographql.cache.normalized.api.ResolverContext){}[0]
 }
 final class com.apollographql.cache.normalized.api/FieldKeyContext { // com.apollographql.cache.normalized.api/FieldKeyContext|null[0]
     constructor <init>(kotlin/String, com.apollographql.apollo.api/CompiledField, com.apollographql.apollo.api/Executable.Variables) // com.apollographql.cache.normalized.api/FieldKeyContext.<init>|<init>(kotlin.String;com.apollographql.apollo.api.CompiledField;com.apollographql.apollo.api.Executable.Variables){}[0]
@@ -206,6 +209,17 @@ final class com.apollographql.cache.normalized.api/FieldRecordMerger : com.apoll
     }
     final fun merge(com.apollographql.cache.normalized.api/Record, com.apollographql.cache.normalized.api/Record): kotlin/Pair<com.apollographql.cache.normalized.api/Record, kotlin.collections/Set<kotlin/String>> // com.apollographql.cache.normalized.api/FieldRecordMerger.merge|merge(com.apollographql.cache.normalized.api.Record;com.apollographql.cache.normalized.api.Record){}[0]
 }
+final class com.apollographql.cache.normalized.api/GlobalMaxAgeProvider : com.apollographql.cache.normalized.api/MaxAgeProvider { // com.apollographql.cache.normalized.api/GlobalMaxAgeProvider|null[0]
+    constructor <init>(kotlin.time/Duration) // com.apollographql.cache.normalized.api/GlobalMaxAgeProvider.<init>|<init>(kotlin.time.Duration){}[0]
+    final fun getMaxAge(com.apollographql.cache.normalized.api/MaxAgeContext): kotlin.time/Duration // com.apollographql.cache.normalized.api/GlobalMaxAgeProvider.getMaxAge|getMaxAge(com.apollographql.cache.normalized.api.MaxAgeContext){}[0]
+}
+final class com.apollographql.cache.normalized.api/MaxAgeContext { // com.apollographql.cache.normalized.api/MaxAgeContext|null[0]
+    constructor <init>(com.apollographql.apollo.api/CompiledField, kotlin/String) // com.apollographql.cache.normalized.api/MaxAgeContext.<init>|<init>(com.apollographql.apollo.api.CompiledField;kotlin.String){}[0]
+    final val field // com.apollographql.cache.normalized.api/MaxAgeContext.field|{}field[0]
+        final fun <get-field>(): com.apollographql.apollo.api/CompiledField // com.apollographql.cache.normalized.api/MaxAgeContext.field.<get-field>|<get-field>(){}[0]
+    final val parentType // com.apollographql.cache.normalized.api/MaxAgeContext.parentType|{}parentType[0]
+        final fun <get-parentType>(): kotlin/String // com.apollographql.cache.normalized.api/MaxAgeContext.parentType.<get-parentType>|<get-parentType>(){}[0]
+}
 final class com.apollographql.cache.normalized.api/MemoryCache : com.apollographql.cache.normalized.api/NormalizedCache { // com.apollographql.cache.normalized.api/MemoryCache|null[0]
     constructor <init>(com.apollographql.cache.normalized.api/NormalizedCache? = ..., kotlin/Int = ..., kotlin/Long = ...) // com.apollographql.cache.normalized.api/MemoryCache.<init>|<init>(com.apollographql.cache.normalized.api.NormalizedCache?;kotlin.Int;kotlin.Long){}[0]
     final fun clearAll() // com.apollographql.cache.normalized.api/MemoryCache.clearAll|clearAll(){}[0]
@@ -232,10 +246,6 @@ final class com.apollographql.cache.normalized.api/MetadataGeneratorContext { //
         final fun <get-field>(): com.apollographql.apollo.api/CompiledField // com.apollographql.cache.normalized.api/MetadataGeneratorContext.field.<get-field>|<get-field>(){}[0]
     final val variables // com.apollographql.cache.normalized.api/MetadataGeneratorContext.variables|{}variables[0]
         final fun <get-variables>(): com.apollographql.apollo.api/Executable.Variables // com.apollographql.cache.normalized.api/MetadataGeneratorContext.variables.<get-variables>|<get-variables>(){}[0]
-}
-final class com.apollographql.cache.normalized.api/ReceiveDateCacheResolver : com.apollographql.cache.normalized.api/CacheResolver { // com.apollographql.cache.normalized.api/ReceiveDateCacheResolver|null[0]
-    constructor <init>(kotlin/Int) // com.apollographql.cache.normalized.api/ReceiveDateCacheResolver.<init>|<init>(kotlin.Int){}[0]
-    final fun resolveField(com.apollographql.cache.normalized.api/ResolverContext): kotlin/Any? // com.apollographql.cache.normalized.api/ReceiveDateCacheResolver.resolveField|resolveField(com.apollographql.cache.normalized.api.ResolverContext){}[0]
 }
 final class com.apollographql.cache.normalized.api/Record : kotlin.collections/Map<kotlin/String, kotlin/Any?> { // com.apollographql.cache.normalized.api/Record|null[0]
     constructor <init>(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?>, com.benasher44.uuid/Uuid? = ...) // com.apollographql.cache.normalized.api/Record.<init>|<init>(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>;com.benasher44.uuid.Uuid?){}[0]
@@ -285,6 +295,10 @@ final class com.apollographql.cache.normalized.api/ResolverContext { // com.apol
         final fun <get-parentType>(): kotlin/String // com.apollographql.cache.normalized.api/ResolverContext.parentType.<get-parentType>|<get-parentType>(){}[0]
     final val variables // com.apollographql.cache.normalized.api/ResolverContext.variables|{}variables[0]
         final fun <get-variables>(): com.apollographql.apollo.api/Executable.Variables // com.apollographql.cache.normalized.api/ResolverContext.variables.<get-variables>|<get-variables>(){}[0]
+}
+final class com.apollographql.cache.normalized.api/SchemaCoordinatesMaxAgeProvider : com.apollographql.cache.normalized.api/MaxAgeProvider { // com.apollographql.cache.normalized.api/SchemaCoordinatesMaxAgeProvider|null[0]
+    constructor <init>(kotlin.collections/Map<kotlin/String, kotlin.time/Duration>, kotlin.time/Duration? = ...) // com.apollographql.cache.normalized.api/SchemaCoordinatesMaxAgeProvider.<init>|<init>(kotlin.collections.Map<kotlin.String,kotlin.time.Duration>;kotlin.time.Duration?){}[0]
+    final fun getMaxAge(com.apollographql.cache.normalized.api/MaxAgeContext): kotlin.time/Duration? // com.apollographql.cache.normalized.api/SchemaCoordinatesMaxAgeProvider.getMaxAge|getMaxAge(com.apollographql.cache.normalized.api.MaxAgeContext){}[0]
 }
 final class com.apollographql.cache.normalized/CacheInfo : com.apollographql.apollo.api/ExecutionContext.Element { // com.apollographql.cache.normalized/CacheInfo|null[0]
     constructor <init>(kotlin/Long, kotlin/Long, kotlin/Boolean, kotlin/String?, kotlin/String?) // com.apollographql.cache.normalized/CacheInfo.<init>|<init>(kotlin.Long;kotlin.Long;kotlin.Boolean;kotlin.String?;kotlin.String?){}[0]
@@ -371,6 +385,7 @@ final fun <#A: kotlin/Any?> (com.apollographql.apollo.api/MutableExecutionOption
 final fun <#A: kotlin/Any?> (com.apollographql.apollo.api/MutableExecutionOptions<#A>).com.apollographql.cache.normalized/emitCacheMisses(kotlin/Boolean): com.apollographql.apollo.api/MutableExecutionOptions<#A> // com.apollographql.cache.normalized/emitCacheMisses|emitCacheMisses@com.apollographql.apollo.api.MutableExecutionOptions<0:0>(kotlin.Boolean){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (com.apollographql.apollo.api/MutableExecutionOptions<#A>).com.apollographql.cache.normalized/fetchPolicy(com.apollographql.cache.normalized/FetchPolicy): #A // com.apollographql.cache.normalized/fetchPolicy|fetchPolicy@com.apollographql.apollo.api.MutableExecutionOptions<0:0>(com.apollographql.cache.normalized.FetchPolicy){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (com.apollographql.apollo.api/MutableExecutionOptions<#A>).com.apollographql.cache.normalized/fetchPolicyInterceptor(com.apollographql.apollo.interceptor/ApolloInterceptor): #A // com.apollographql.cache.normalized/fetchPolicyInterceptor|fetchPolicyInterceptor@com.apollographql.apollo.api.MutableExecutionOptions<0:0>(com.apollographql.apollo.interceptor.ApolloInterceptor){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (com.apollographql.apollo.api/MutableExecutionOptions<#A>).com.apollographql.cache.normalized/maxStale(kotlin.time/Duration): #A // com.apollographql.cache.normalized/maxStale|maxStale@com.apollographql.apollo.api.MutableExecutionOptions<0:0>(kotlin.time.Duration){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (com.apollographql.apollo.api/MutableExecutionOptions<#A>).com.apollographql.cache.normalized/memoryCacheOnly(kotlin/Boolean): #A // com.apollographql.cache.normalized/memoryCacheOnly|memoryCacheOnly@com.apollographql.apollo.api.MutableExecutionOptions<0:0>(kotlin.Boolean){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (com.apollographql.apollo.api/MutableExecutionOptions<#A>).com.apollographql.cache.normalized/refetchPolicy(com.apollographql.cache.normalized/FetchPolicy): #A // com.apollographql.cache.normalized/refetchPolicy|refetchPolicy@com.apollographql.apollo.api.MutableExecutionOptions<0:0>(com.apollographql.cache.normalized.FetchPolicy){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (com.apollographql.apollo.api/MutableExecutionOptions<#A>).com.apollographql.cache.normalized/refetchPolicyInterceptor(com.apollographql.apollo.interceptor/ApolloInterceptor): #A // com.apollographql.cache.normalized/refetchPolicyInterceptor|refetchPolicyInterceptor@com.apollographql.apollo.api.MutableExecutionOptions<0:0>(com.apollographql.apollo.interceptor.ApolloInterceptor){0§<kotlin.Any?>}[0]
