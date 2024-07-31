@@ -113,6 +113,7 @@ public final class com/apollographql/cache/normalized/NormalizedCache {
 	public static final fun getCacheHeaders (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/cache/normalized/api/CacheHeaders;
 	public static final fun getCacheInfo (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/cache/normalized/CacheInfo;
 	public static final fun isFromCache (Lcom/apollographql/apollo/api/ApolloResponse;)Z
+	public static final fun maxStale-HG0u8IE (Lcom/apollographql/apollo/api/MutableExecutionOptions;J)Ljava/lang/Object;
 	public static final fun memoryCacheOnly (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
 	public static final fun optimisticUpdates (Lcom/apollographql/apollo/ApolloCall;Lcom/apollographql/apollo/api/Mutation$Data;)Lcom/apollographql/apollo/ApolloCall;
 	public static final fun optimisticUpdates (Lcom/apollographql/apollo/api/ApolloRequest$Builder;Lcom/apollographql/apollo/api/Mutation$Data;)Lcom/apollographql/apollo/api/ApolloRequest$Builder;
@@ -270,8 +271,8 @@ public final class com/apollographql/cache/normalized/api/EmptyMetadataGenerator
 	public fun metadataForObject (Ljava/lang/Object;Lcom/apollographql/cache/normalized/api/MetadataGeneratorContext;)Ljava/util/Map;
 }
 
-public final class com/apollographql/cache/normalized/api/ExpireDateCacheResolver : com/apollographql/cache/normalized/api/CacheResolver {
-	public fun <init> ()V
+public final class com/apollographql/cache/normalized/api/ExpirationCacheResolver : com/apollographql/cache/normalized/api/CacheResolver {
+	public fun <init> (Lcom/apollographql/cache/normalized/api/MaxAgeProvider;)V
 	public fun resolveField (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/lang/Object;
 }
 
@@ -311,6 +312,22 @@ public final class com/apollographql/cache/normalized/api/FieldRecordMerger$Fiel
 
 public abstract interface class com/apollographql/cache/normalized/api/FieldRecordMerger$FieldMerger {
 	public abstract fun mergeFields (Lcom/apollographql/cache/normalized/api/FieldRecordMerger$FieldInfo;Lcom/apollographql/cache/normalized/api/FieldRecordMerger$FieldInfo;)Lcom/apollographql/cache/normalized/api/FieldRecordMerger$FieldInfo;
+}
+
+public final class com/apollographql/cache/normalized/api/GlobalMaxAgeProvider : com/apollographql/cache/normalized/api/MaxAgeProvider {
+	public synthetic fun <init> (JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getMaxAge-5sfh64U (Lcom/apollographql/cache/normalized/api/MaxAgeContext;)J
+	public synthetic fun getMaxAge-LV8wdWc (Lcom/apollographql/cache/normalized/api/MaxAgeContext;)Lkotlin/time/Duration;
+}
+
+public final class com/apollographql/cache/normalized/api/MaxAgeContext {
+	public fun <init> (Lcom/apollographql/apollo/api/CompiledField;Ljava/lang/String;)V
+	public final fun getField ()Lcom/apollographql/apollo/api/CompiledField;
+	public final fun getParentType ()Ljava/lang/String;
+}
+
+public abstract interface class com/apollographql/cache/normalized/api/MaxAgeProvider {
+	public abstract fun getMaxAge-LV8wdWc (Lcom/apollographql/cache/normalized/api/MaxAgeContext;)Lkotlin/time/Duration;
 }
 
 public final class com/apollographql/cache/normalized/api/MemoryCache : com/apollographql/cache/normalized/api/NormalizedCache {
@@ -391,11 +408,6 @@ public abstract interface class com/apollographql/cache/normalized/api/ReadOnlyN
 	public abstract fun loadRecords (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Collection;
 }
 
-public final class com/apollographql/cache/normalized/api/ReceiveDateCacheResolver : com/apollographql/cache/normalized/api/CacheResolver {
-	public fun <init> (I)V
-	public fun resolveField (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/lang/Object;
-}
-
 public final class com/apollographql/cache/normalized/api/Record : java/util/Map, kotlin/jvm/internal/markers/KMappedMarker {
 	public static final field Companion Lcom/apollographql/cache/normalized/api/Record$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;)V
@@ -472,6 +484,12 @@ public final class com/apollographql/cache/normalized/api/ResolverContext {
 	public final fun getParentKey ()Ljava/lang/String;
 	public final fun getParentType ()Ljava/lang/String;
 	public final fun getVariables ()Lcom/apollographql/apollo/api/Executable$Variables;
+}
+
+public final class com/apollographql/cache/normalized/api/SchemaCoordinatesMaxAgeProvider : com/apollographql/cache/normalized/api/MaxAgeProvider {
+	public synthetic fun <init> (Ljava/util/Map;Lkotlin/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/util/Map;Lkotlin/time/Duration;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getMaxAge-LV8wdWc (Lcom/apollographql/cache/normalized/api/MaxAgeContext;)Lkotlin/time/Duration;
 }
 
 public final class com/apollographql/cache/normalized/api/TypePolicyCacheKeyGenerator : com/apollographql/cache/normalized/api/CacheKeyGenerator {
