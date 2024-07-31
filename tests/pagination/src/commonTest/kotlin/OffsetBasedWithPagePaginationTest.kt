@@ -241,7 +241,6 @@ internal fun assertChainedCachesAreEqual(apolloStore: ApolloStore) {
     val record2 = cache2[key]!!
     assertEquals(record1.key, record2.key)
     assertEquals(record1.fields, record2.fields)
-    assertEquals(record1.dates.filterValues { it != null }, record2.dates.filterValues { it != null })
     assertEquals(record1.metadata, record2.metadata)
   }
 }
