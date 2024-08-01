@@ -17,7 +17,7 @@ by default, unless a max age is defined on the client.
 To do this, let's store both dates in the Record. Implementation: we can remove the current `Record.date` field,
 and instead use the `Record.metadata` map which can store arbitrary data per field.
 
-## API
+## Programmatic API
 
 ```kotlin
 
@@ -125,3 +125,90 @@ return resolvedField
 ```
 
 Note: the `maxStale` duration is to allow for a per-operation override of the max age / expiration date. 
+
+## Declarative API
+
+### Schema directives
+
+These directives will land in a `cache` v0.1 [Apollo Spec](https://specs.apollo.dev/).
+
+```graphql
+"""
+Indicates that a field (or a type's fields) should be considered stale after the given duration
+in seconds has passed since it has been received.
+
+When applied on a type, all fields of the type inherit the max age.
+
+When applied on a field whose parent type has a max age, the field's max age takes precedence.
+
+```graphql
+type User @maxAge(seconds: 10) {
+  id: ID!
+  email: String @maxAge(seconds: 20)
+}
+\```
+
+`User.id` is considered stale after 10 seconds, and `User.email` after 20 seconds.
+"""
+directive @maxAge(seconds: Int!) on FIELD_DEFINITION | OBJECT
+
+"""
+Indicates that a field should be considered stale after the given duration in seconds has passed
+since it has been received.
+
+When applied on a field whose parent type has a max age, the field's max age takes precedence.
+
+`@maxAgeField` is the same as `@maxAge` but can be used on type system extensions for services
+that do not own the schema like client services:
+
+```graphql
+# extend the schema to set a max age on User.email.
+extend type User @maxAgeField(name: "email", seconds: 20)
+\```
+
+`User.email` is considered stale after 20 seconds.
+"""
+directive @maxAgeField(name: String!, seconds: Int!) repeatable on OBJECT
+```
+
+### Codegen changes
+
+#### Option A: Add max age info to `ObjectType`
+
+```kotlin
+class ObjectType internal constructor(
+  name: String,
+  keyFields: List<String>,
+  implements: List<InterfaceType>,
+  embeddedFields: List<String>,
+  typeMaxAge: Int?, // NEW! Contains the value of the @maxAge directive on the type (or null if not set)
+  fieldsMaxAge: Map<String, Int>?, // NEW! Contains the value of the @maxAge directive on the type's fields (and of @maxAgeField on the type) (or null if not set)
+) : CompiledNamedType(name) {... }
+```
+
+With this option, a `CacheResolver` can access the max age information directly from the `ObjectType` that is passed to it.
+
+Note: currently we pass only the parent type name to `CacheResolver` but we can pass the `CompiledNamedType` instead.
+
+- Pro: the `CacheResolver` is autonomous, no need to do any 'plumbing' to pass it the generated information.
+- Con: generates more fields for everybody, even users not using the feature (albeit with null values for them).
+
+#### Option B: Generate a dedicated file for max age info
+
+We generate a file looking like this:
+
+```kotlin
+object Expiration {
+  val maxAges: Map<String, Int> = mapOf(
+    "MyType" to 20,
+    "MyType.id" to 10,
+    // ...
+  )
+}
+```
+
+This is the approach we took for the `Pagination` feature where we need a list of connection types.
+
+- Pro: no codegen impact for non-users of the feature, the file can be generated only when there are fields selected that have a max age in
+  the schema.
+- Con: more 'plumbing' - it requires to manually pass `Expiration.maxAges` to the constructor of the `CacheResolver`.
