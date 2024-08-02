@@ -132,8 +132,8 @@ Note: the `maxStale` duration is to allow for a per-operation override of the ma
 
 #### Existing backend directive
 
-Apollo Server [has a `@cacheControl` directive](https://www.apollographql.com/docs/apollo-server/performance/caching) that can be be applied
-on fields and types to set a max age. This is used by the server to set a `Cache-Control` HTTP header on the response.
+Apollo Server [has a `@cacheControl` directive](https://www.apollographql.com/docs/apollo-server/performance/caching) that can be applied
+to fields and types to set a max age. This is used by the server to set a `Cache-Control` HTTP header on the response.
 
 Here's its definition:
 ```graphql
