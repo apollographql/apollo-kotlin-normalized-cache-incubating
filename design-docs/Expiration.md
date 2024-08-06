@@ -149,34 +149,30 @@ directive @cacheControl(
 ) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
 ```
 
-It could be beneficial to re-use this directive on the client side, rather that inventing a new one. This raises a few questions.
+It would be beneficial to re-use this directive on the client side, rather that inventing a new one. This raises a few questions.
+
+##### Meaning of scope
+
+On the client side the meaning of the `scope` argument is unclear for the moment, but could be useful in the future if we want to share a
+cache between users. This is out of scope for now and the argument could be left unused.
 
 ##### Default max age
 
 Apollo Server [uses heuristics](https://www.apollographql.com/docs/apollo-server/performance/caching/#default-maxage) to decide on the
 default max age when no directive is applied:
-- root fields are not cacheable by default (maxAge=0)
+- root fields have the default maxAge (which is 0 by default)
 - same for fields that return a composite type
-- non root fields that return a leaf type have the maxAge of their parent field (which is 0 by default, not cacheable)
+- non root fields that return a leaf type inherit the maxAge of their parent field
 
-On the backend it is reasonable to avoid over-caching, which can lead to bugs.
-
-On the client side however, users opt-in to the cache globally and are expecting everything to be cached indefinitely by default
-(which is the current behavior). The max age is an additional configuration. Because of this, the backend heuristics which essentially 
-default to not cacheable would probably be confusing to a client user.
-
-If we don't have these heuristics, the `inheritMaxAge` argument becomes unneeded, and we can remove it. If it is removed, then the `maxAge`
-argument should be required.
-
-##### Meaning of scope
-
-On the client side the meaning of the `scope` argument is unclear for the moment, but could be useful if we want to share a cache between
-users. This is probably out of scope for now and can either be removed or ignored. 
+The default max age [is configurable](https://www.apollographql.com/docs/apollo-server/performance/caching/#setting-a-different-default-maxage)
+on the backend and has a default value of 0. We must also make it configurable on the client side, but should make it a required argument
+rather than having a default, making the behavior more predictable.
 
 ##### Ability to use backend and client directives at the same time
 
 The ability to use both server side cache control (expiration date computed from the `Cache-Control` or `Age` header in the response), and
-client side cache control (max ages configured on the client) is desirable. The client app can override the server side values.
+client side cache control (max ages configured on the client) is desirable. The client app should be able to override the server side
+values.
 
 If we use the same directive for both, there is a potential conflict: clients will have `@cacheControl` directives in their schema that are
 meant for the server, and mustn't be interpreted by the codegen.
@@ -184,70 +180,32 @@ meant for the server, and mustn't be interpreted by the codegen.
 However, this can be solved thanks to the `@link` mechanism which ensures that the codegen only considers the directives that are properly
 namespaced. An [alias](https://specs.apollo.dev/link/v1.0/#example-import-an-aliased-name) can be used to avoid a conflict.
 
-##### Meaning of applying the directive to a type
+#### Directive definitions
 
-On the server side, applying the `@cacheControl` directive to a type means that all fields that return this type have the configured max
-age.
+We can re-use the backend `@cacheControl` directive on the client, and add a variant `@cacheControlField`, to configure fields via 
+extensions.
 
-```graphql
-type Query {
-  me: User!
-  user(id: ID!): User
-}
-
-type User @cacheControl(maxAge: 10) {
-  id: ID!
-  name: String!
-  picture: String @cacheControl(maxAge: 20)
-}
-```
-is equivalent to:
-```graphql
-type Query {
-  me: User! @cacheControl(maxAge: 10)
-  user(id: ID!): User @cacheControl(maxAge: 10)
-}
-
-type User {
-  id: ID!
-  name: String!
-  picture: String @cacheControl(maxAge: 20)
-}
-```
-
-Another way to interpret it could be that it represents the default max age for the type's fields. In that case it would be equivalent to:
-```graphql
-type Query {
-  me: User!
-  user(id: ID!): User
-}
-
-type User {
-  id: ID! @cacheControl(maxAge: 10)
-  name: String! @cacheControl(maxAge: 10)
-  picture: String @cacheControl(maxAge: 20)
-}
-```
-
-I think the backend meaning is more intuitive and expressive and is the one we should go with. In that case the same meaning should
-be used when object coordinates are passed to `SchemaCoordinatesMaxAgeProvider`.
-
-#### New client directives
-
-I propose we use a simplified version of the backend directive.
-
-These directives will land in a `cache` v0.1 [Apollo Spec](https://specs.apollo.dev/).
+These definitions will land in a `cache` v0.1 [Apollo Spec](https://specs.apollo.dev/).
 
 ```graphql
 """
-Indicates that a field or a type should be considered stale after the given max
-age in seconds has passed since it has been received.
+Possible values for the `@cacheControl` `scope` argument (unused on the client).
+"""
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
 
-When applied to a type, the max age applies to all fields in the schema that
-are of that type.
+"""
+Configures cache settings for a field or type.
 
-When applied to a field whose parent type has a max age, the field's max age
-takes precedence.
+- `maxAge`: The maximum amount of time the field's cached value is valid, in seconds. The default value is configurable.
+- `inheritMaxAge`: If true, the field inherits the `maxAge` of its parent field. If set to `true`, `maxAge` must not be provided.
+- `scope`: Unused on the client.
+
+When applied to a type, the settings apply to all schema fields that return this type.
+
+Field-level settings override type-level settings.
 
 ```graphql
 type Query {
@@ -261,29 +219,34 @@ type User @cacheControl(maxAge: 10) {
 }
 \```
 
-`Query.me` is considered stale after 10 seconds, and `Query.user` after 5
-seconds.
+`Query.me` is valid for 10 seconds, and `Query.user` for 5 seconds.
 """
-directive @cacheControl(maxAge: Int!) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
+directive @cacheControl(
+  maxAge: Int
+  inheritMaxAge: Boolean
+  scope: CacheControlScope
+) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
 
 """
-Indicates that a field should be considered stale after the given duration in
-seconds has passed since it has been received.
+Configures cache settings for a field.
 
-When applied to a field whose parent type has a max age, the field's max age
-takes precedence.
-
-`@cacheControlField` is the same as `@cacheControl` but can be used on type
-system extensions for services that do not own the schema like client services:
+`@cacheControlField` is the same as `@cacheControl` but can be used on type system extensions for services that do not own the schema like
+client services:
 
 ```graphql
 # extend the schema to set a max age on User.email.
 extend type User @cacheControlField(name: "email", maxAge: 20)
 \```
 
-`User.email` is considered stale after 20 seconds.
+`User.email` is valid for 20 seconds.
 """
-directive @cacheControlField(name: String!, maxAge: Int!) repeatable on OBJECT | INTERFACE
+directive @cacheControlField(
+  name: String!
+  maxAge: Int
+  inheritMaxAge: Boolean
+  scope: CacheControlScope
+) repeatable on OBJECT | INTERFACE
+
 ```
 
 ### Codegen changes
@@ -296,14 +259,12 @@ class ObjectType internal constructor(
   keyFields: List<String>,
   implements: List<InterfaceType>,
   embeddedFields: List<String>,
-  typeMaxAge: Int?, // NEW! Contains the value of the @maxAge directive on the type (or null if not set)
-  fieldsMaxAge: Map<String, Int>?, // NEW! Contains the value of the @maxAge directive on the type's fields (and of @maxAgeField on the type) (or null if not set)
-) : CompiledNamedType(name) {... }
+  typeMaxAge: MaxAge?, // NEW! Contains the value of the @cacheControl directive on the type (or null if not set)
+  fieldsMaxAge: Map<String, MaxAge>?, // NEW! Contains the value of the @cacheControl directive on the type's fields (and of @cacheControlField on the type) (or null if not set)
+) : CompiledNamedType(name) { ... }
 ```
 
 With this option, a `CacheResolver` can access the max age information directly from the `ObjectType` that is passed to it.
-
-Note: currently we pass only the parent type name to `CacheResolver` but we can pass the `CompiledNamedType` instead.
 
 - Pro: the `CacheResolver` is autonomous, no need to do any 'plumbing' to pass it the generated information.
 - Con: generates more fields for everybody, even users not using the feature (albeit with null values for them).
@@ -314,9 +275,9 @@ We generate a file looking like this:
 
 ```kotlin
 object Expiration {
-  val maxAges: Map<String, Int> = mapOf(
-    "MyType" to 20,
-    "MyType.id" to 10,
+  val maxAges: Map<String, MaxAge> = mapOf(
+    "MyType" to MaxAge.Value(20),
+    "MyType.id" to MaxAge.Inherit,
     // ...
   )
 }
