@@ -11,6 +11,7 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.ExpirationCacheResolver
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
+import com.apollographql.cache.normalized.api.MaxAge
 import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
@@ -104,9 +105,9 @@ class ClientSideExpirationTest {
   private fun schemaCoordinatesMaxAge(normalizedCacheFactory: NormalizedCacheFactory) = runTest {
     val maxAgeProvider = SchemaCoordinatesMaxAgeProvider(
         mapOf(
-            "User" to 10.seconds,
-            "User.name" to 5.seconds,
-            "User.email" to 2.seconds,
+            "User" to MaxAge.Duration(10.seconds),
+            "User.name" to MaxAge.Duration(5.seconds),
+            "User.email" to MaxAge.Duration(2.seconds),
         ),
         defaultMaxAge = 20.seconds,
     )
@@ -180,7 +181,6 @@ class ClientSideExpirationTest {
       it.merge(records, cacheHeaders(currentTimeMillis() / 1000 - secondsAgo), DefaultRecordMerger)
     }
   }
-
 }
 
 fun cacheHeaders(receivedDate: Long): CacheHeaders {

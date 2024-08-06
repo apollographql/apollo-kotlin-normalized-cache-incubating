@@ -6,6 +6,7 @@ import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ExpirationCacheResolver
+import com.apollographql.cache.normalized.api.MaxAge
 import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
@@ -48,7 +49,7 @@ class ClientAndServerSideExpirationTest {
             cacheResolver = ExpirationCacheResolver(
                 SchemaCoordinatesMaxAgeProvider(
                     mapOf(
-                        "User.email" to 2.seconds,
+                        "User.email" to MaxAge.Duration(2.seconds),
                     ),
                     defaultMaxAge = 20.seconds,
                 )
