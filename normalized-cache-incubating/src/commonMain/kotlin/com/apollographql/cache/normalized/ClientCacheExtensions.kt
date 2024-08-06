@@ -386,7 +386,7 @@ private class StoreExpirationInterceptor : ApolloInterceptor {
       return@map it.newBuilder()
           .cacheHeaders(
               it.cacheHeaders.newBuilder()
-                  .addHeader(ApolloCacheHeaders.DATE, expires.toString())
+                  .addHeader(ApolloCacheHeaders.EXPIRATION_DATE, expires.toString())
                   .build()
           )
           .build()

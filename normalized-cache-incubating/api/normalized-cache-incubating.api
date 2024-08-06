@@ -135,12 +135,13 @@ public final class com/apollographql/cache/normalized/VersionKt {
 }
 
 public final class com/apollographql/cache/normalized/api/ApolloCacheHeaders {
-	public static final field DATE Ljava/lang/String;
 	public static final field DO_NOT_STORE Ljava/lang/String;
 	public static final field EVICT_AFTER_READ Ljava/lang/String;
+	public static final field EXPIRATION_DATE Ljava/lang/String;
 	public static final field INSTANCE Lcom/apollographql/cache/normalized/api/ApolloCacheHeaders;
 	public static final field MAX_STALE Ljava/lang/String;
 	public static final field MEMORY_CACHE_ONLY Ljava/lang/String;
+	public static final field RECEIVED_DATE Ljava/lang/String;
 }
 
 public abstract interface class com/apollographql/cache/normalized/api/CacheData {
@@ -252,7 +253,7 @@ public final class com/apollographql/cache/normalized/api/DefaultFieldKeyGenerat
 
 public final class com/apollographql/cache/normalized/api/DefaultRecordMerger : com/apollographql/cache/normalized/api/RecordMerger {
 	public static final field INSTANCE Lcom/apollographql/cache/normalized/api/DefaultRecordMerger;
-	public fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/Record;Ljava/lang/Long;)Lkotlin/Pair;
+	public fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/Record;)Lkotlin/Pair;
 }
 
 public final class com/apollographql/cache/normalized/api/EmbeddedFieldsContext {
@@ -292,7 +293,7 @@ public final class com/apollographql/cache/normalized/api/FieldPolicyCacheResolv
 
 public final class com/apollographql/cache/normalized/api/FieldRecordMerger : com/apollographql/cache/normalized/api/RecordMerger {
 	public fun <init> (Lcom/apollographql/cache/normalized/api/FieldRecordMerger$FieldMerger;)V
-	public fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/Record;Ljava/lang/Long;)Lkotlin/Pair;
+	public fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/Record;)Lkotlin/Pair;
 }
 
 public final class com/apollographql/cache/normalized/api/FieldRecordMerger$FieldInfo {
@@ -399,7 +400,7 @@ public final class com/apollographql/cache/normalized/api/Record : java/util/Map
 	public static final field Companion Lcom/apollographql/cache/normalized/api/Record$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;Ljava/util/Map;Ljava/util/Map;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;Ljava/util/Map;)V
 	public fun clear ()V
 	public synthetic fun compute (Ljava/lang/Object;Ljava/util/function/BiFunction;)Ljava/lang/Object;
 	public fun compute (Ljava/lang/String;Ljava/util/function/BiFunction;)Ljava/lang/Object;
@@ -414,7 +415,6 @@ public final class com/apollographql/cache/normalized/api/Record : java/util/Map
 	public final fun fieldKeys ()Ljava/util/Set;
 	public final fun get (Ljava/lang/Object;)Ljava/lang/Object;
 	public fun get (Ljava/lang/String;)Ljava/lang/Object;
-	public final fun getDates ()Ljava/util/Map;
 	public fun getEntries ()Ljava/util/Set;
 	public final fun getFields ()Ljava/util/Map;
 	public final fun getKey ()Ljava/lang/String;
@@ -449,8 +449,14 @@ public final class com/apollographql/cache/normalized/api/Record : java/util/Map
 public final class com/apollographql/cache/normalized/api/Record$Companion {
 }
 
+public final class com/apollographql/cache/normalized/api/RecordKt {
+	public static final fun expirationDate (Lcom/apollographql/cache/normalized/api/Record;Ljava/lang/String;)Ljava/lang/Long;
+	public static final fun receivedDate (Lcom/apollographql/cache/normalized/api/Record;Ljava/lang/String;)Ljava/lang/Long;
+	public static final fun withDates (Lcom/apollographql/cache/normalized/api/Record;Ljava/lang/String;Ljava/lang/String;)Lcom/apollographql/cache/normalized/api/Record;
+}
+
 public abstract interface class com/apollographql/cache/normalized/api/RecordMerger {
-	public abstract fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/Record;Ljava/lang/Long;)Lkotlin/Pair;
+	public abstract fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/Record;)Lkotlin/Pair;
 }
 
 public final class com/apollographql/cache/normalized/api/RecordMergerKt {

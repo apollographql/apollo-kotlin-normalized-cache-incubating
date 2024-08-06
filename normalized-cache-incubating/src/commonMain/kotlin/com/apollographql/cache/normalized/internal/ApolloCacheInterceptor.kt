@@ -77,7 +77,7 @@ internal class ApolloCacheInterceptor(
       val cacheKeys = if (response.data != null) {
         var cacheHeaders = request.cacheHeaders + response.cacheHeaders
         if (request.storeReceiveDate) {
-          cacheHeaders += nowDateCacheHeaders()
+          cacheHeaders += nowReceiveDateCacheHeaders()
         }
         if (request.memoryCacheOnly) {
           cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
@@ -276,8 +276,8 @@ internal class ApolloCacheInterceptor(
   }
 
   companion object {
-    private fun nowDateCacheHeaders(): CacheHeaders {
-      return CacheHeaders.Builder().addHeader(ApolloCacheHeaders.DATE, (currentTimeMillis() / 1000).toString()).build()
+    private fun nowReceiveDateCacheHeaders(): CacheHeaders {
+      return CacheHeaders.Builder().addHeader(ApolloCacheHeaders.RECEIVED_DATE, (currentTimeMillis() / 1000).toString()).build()
     }
   }
 }

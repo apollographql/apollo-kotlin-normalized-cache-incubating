@@ -134,11 +134,11 @@ class ReceiveDateCacheResolver(private val maxAge: Int) : CacheResolver {
     }
 
     if (parent is Record) {
-      val lastUpdated = parent.dates?.get(fieldKey)
-      if (lastUpdated != null) {
+      val receivedDate = parent.receivedDate(fieldKey)
+      if (receivedDate != null) {
         val maxStale = context.cacheHeaders.headerValue(ApolloCacheHeaders.MAX_STALE)?.toLongOrNull() ?: 0L
         if (maxStale < Long.MAX_VALUE) {
-          val age = currentTimeMillis() / 1000 - lastUpdated
+          val age = currentTimeMillis() / 1000 - receivedDate
           if (maxAge + maxStale - age < 0) {
             throw CacheMissException(parentKey, fieldKey, true)
           }
@@ -164,9 +164,9 @@ class ExpireDateCacheResolver : CacheResolver {
     }
 
     if (parent is Record) {
-      val expires = parent.dates?.get(fieldKey)
-      if (expires != null) {
-        if (currentTimeMillis() / 1000 - expires >= 0) {
+      val expirationDate = parent.expirationDate(fieldKey)
+      if (expirationDate != null) {
+        if (currentTimeMillis() / 1000 - expirationDate >= 0) {
           throw CacheMissException(parentKey, fieldKey, true)
         }
       }

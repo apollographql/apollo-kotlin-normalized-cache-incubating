@@ -10,20 +10,18 @@ interface RecordMerger {
   /**
    * Merges the incoming Record with the existing Record.
    *
-   * @param newDate optional date to associate with the fields of the resulting merged Record. If null, a date will not be set.
    * @return a pair of the resulting merged Record and a set of field keys which have changed or were added.
    */
-  fun merge(existing: Record, incoming: Record, newDate: Long?): Pair<Record, Set<String>>
+  fun merge(existing: Record, incoming: Record): Pair<Record, Set<String>>
 }
 
 /**
  * A [RecordMerger] that merges fields by replacing them with the incoming fields.
  */
 object DefaultRecordMerger : RecordMerger {
-  override fun merge(existing: Record, incoming: Record, newDate: Long?): Pair<Record, Set<String>> {
+  override fun merge(existing: Record, incoming: Record): Pair<Record, Set<String>> {
     val changedKeys = mutableSetOf<String>()
     val mergedFields = existing.fields.toMutableMap()
-    val date = existing.dates?.toMutableMap() ?: mutableMapOf()
 
     for ((fieldKey, incomingFieldValue) in incoming.fields) {
       val hasExistingFieldValue = existing.fields.containsKey(fieldKey)
@@ -32,19 +30,22 @@ object DefaultRecordMerger : RecordMerger {
         mergedFields[fieldKey] = incomingFieldValue
         changedKeys.add("${existing.key}.$fieldKey")
       }
-      // Update the date even if the value did not change
-      if (newDate != null) {
-        date[fieldKey] = newDate
-      }
     }
 
     return Record(
         key = existing.key,
         fields = mergedFields,
         mutationId = incoming.mutationId,
-        dates = date,
-        metadata = existing.metadata + incoming.metadata,
+        metadata = existing.metadata.mergedWith(incoming.metadata),
     ) to changedKeys
+  }
+}
+
+private fun Map<String, Map<String, ApolloJsonElement>>.mergedWith(incoming: Map<String, Map<String, ApolloJsonElement>>): Map<String, Map<String, ApolloJsonElement>> {
+  return toMutableMap().also { existing ->
+    for ((incomingField, incomingMetadataForField) in incoming) {
+      existing[incomingField] = existing[incomingField].orEmpty() + incomingMetadataForField
+    }
   }
 }
 
@@ -68,7 +69,7 @@ class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
       /**
        * Value of the field being merged.
        */
-      val value: ApolloJsonElement,
+      val value: Any?,
 
       /**
        * Metadata attached to the field being merged. See also [Record.metadata] and [MetadataGenerator].
@@ -76,11 +77,10 @@ class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
       val metadata: Map<String, ApolloJsonElement>,
   )
 
-  override fun merge(existing: Record, incoming: Record, newDate: Long?): Pair<Record, Set<String>> {
+  override fun merge(existing: Record, incoming: Record): Pair<Record, Set<String>> {
     val changedKeys = mutableSetOf<String>()
     val mergedFields = existing.fields.toMutableMap()
     val mergedMetadata = existing.metadata.toMutableMap()
-    val date = existing.dates?.toMutableMap() ?: mutableMapOf()
 
     for ((fieldKey, incomingFieldValue) in incoming.fields) {
       val hasExistingFieldValue = existing.fields.containsKey(fieldKey)
@@ -105,17 +105,12 @@ class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
 
         changedKeys.add("${existing.key}.$fieldKey")
       }
-      // Update the date even if the value did not change
-      if (newDate != null) {
-        date[fieldKey] = newDate
-      }
     }
 
     return Record(
         key = existing.key,
         fields = mergedFields,
         mutationId = incoming.mutationId,
-        dates = date,
         metadata = mergedMetadata,
     ) to changedKeys
   }
@@ -153,17 +148,17 @@ private object ConnectionFieldMerger : FieldMerger {
       // Incoming is empty
       existing
     } else {
-      val existingValue = existing.value as Map<String, ApolloJsonElement>
+      val existingValue = existing.value as Map<String, Any?>
       val existingEdges = existingValue["edges"] as? List<*>
       val existingNodes = existingValue["nodes"] as? List<*>
-      val existingPageInfo = existingValue["pageInfo"] as? Map<String, ApolloJsonElement>
+      val existingPageInfo = existingValue["pageInfo"] as? Map<String, Any?>
       val existingHasPreviousPage = existingPageInfo?.get("hasPreviousPage") as? Boolean
       val existingHasNextPage = existingPageInfo?.get("hasNextPage") as? Boolean
 
-      val incomingValue = incoming.value as Map<String, ApolloJsonElement>
+      val incomingValue = incoming.value as Map<String, Any?>
       val incomingEdges = incomingValue["edges"] as? List<*>
       val incomingNodes = incomingValue["nodes"] as? List<*>
-      val incomingPageInfo = incomingValue["pageInfo"] as? Map<String, ApolloJsonElement>
+      val incomingPageInfo = incomingValue["pageInfo"] as? Map<String, Any?>
       val incomingHasPreviousPage = incomingPageInfo?.get("hasPreviousPage") as? Boolean
       val incomingHasNextPage = incomingPageInfo?.get("hasNextPage") as? Boolean
 
@@ -234,7 +229,7 @@ private object ConnectionFieldMerger : FieldMerger {
 
       FieldRecordMerger.FieldInfo(
           value = mergedValue,
-          metadata = mapOf("startCursor" to mergedStartCursor, "endCursor" to mergedEndCursor)
+          metadata = existing.metadata + incoming.metadata + mapOf("startCursor" to mergedStartCursor, "endCursor" to mergedEndCursor)
       )
     }
   }

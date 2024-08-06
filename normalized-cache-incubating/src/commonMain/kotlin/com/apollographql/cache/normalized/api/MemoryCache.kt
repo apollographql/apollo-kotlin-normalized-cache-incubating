@@ -123,14 +123,15 @@ class MemoryCache(
   }
 
   private fun internalMerge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
+    val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
+    val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
     val oldRecord = loadRecord(record.key, cacheHeaders)
-    val date = cacheHeaders.date()
     val changedKeys = if (oldRecord == null) {
-      lruCache[record.key] = record.withDate(date)
+      lruCache[record.key] = record.withDates(receivedDate = receivedDate, expirationDate = expirationDate)
       record.fieldKeys()
     } else {
-      val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record, newDate = date)
-      lruCache[record.key] = mergedRecord
+      val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record)
+      lruCache[record.key] = mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate)
       changedKeys
     }
     return changedKeys
@@ -167,21 +168,4 @@ class MemoryCacheFactory @JvmOverloads constructor(
         expireAfterMillis = expireAfterMillis,
     )
   }
-}
-
-private fun CacheHeaders.date(): Long? {
-  return headerValue(ApolloCacheHeaders.DATE)?.toLong()
-}
-
-private fun Record.withDate(date: Long?): Record {
-  if (date == null) {
-    return this
-  }
-  return Record(
-      key = key,
-      fields = fields,
-      mutationId = mutationId,
-      dates = fields.mapValues { date },
-      metadata = metadata
-  )
 }

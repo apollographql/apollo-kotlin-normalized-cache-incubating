@@ -82,7 +82,7 @@ class ClientSideExpirationTest {
     assertTrue(response2.data?.user?.name == "John")
   }
 
-  private fun cacheHeaders(date: Long): CacheHeaders {
-    return CacheHeaders.Builder().addHeader(ApolloCacheHeaders.DATE, date.toString()).build()
+  private fun cacheHeaders(receivedDate: Long): CacheHeaders {
+    return CacheHeaders.Builder().addHeader(ApolloCacheHeaders.RECEIVED_DATE, receivedDate.toString()).build()
   }
 }

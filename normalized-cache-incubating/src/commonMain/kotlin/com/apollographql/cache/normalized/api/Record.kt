@@ -1,6 +1,7 @@
 package com.apollographql.cache.normalized.api
 
 import com.apollographql.apollo.annotations.ApolloInternal
+import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.cache.normalized.api.internal.RecordWeigher.calculateBytes
 import com.benasher44.uuid.Uuid
 
@@ -26,13 +27,10 @@ class Record(
     val mutationId: Uuid? = null,
 ) : Map<String, Any?> by fields {
 
-  var dates: Map<String, Long?> = emptyMap()
-    private set
-
   /**
    * Arbitrary metadata that can be attached to each field.
    */
-  var metadata: Map<String, Map<String, Any?>> = emptyMap()
+  var metadata: Map<String, Map<String, ApolloJsonElement>> = emptyMap()
     private set
 
   @ApolloInternal
@@ -40,10 +38,8 @@ class Record(
       key: String,
       fields: Map<String, Any?>,
       mutationId: Uuid?,
-      dates: Map<String, Long?>,
-      metadata: Map<String, Map<String, Any?>>,
+      metadata: Map<String, Map<String, ApolloJsonElement>>,
   ) : this(key, fields, mutationId) {
-    this.dates = dates
     this.metadata = metadata
   }
 
@@ -57,7 +53,7 @@ class Record(
    * A field key incorporates any GraphQL arguments in addition to the field name.
    */
   fun mergeWith(newRecord: Record): Pair<Record, Set<String>> {
-    return DefaultRecordMerger.merge(existing = this, incoming = newRecord, newDate = null)
+    return DefaultRecordMerger.merge(existing = this, incoming = newRecord)
   }
 
 
@@ -102,3 +98,31 @@ class Record(
     }
   }
 }
+
+@ApolloInternal
+fun Record.withDates(receivedDate: String?, expirationDate: String?): Record {
+  if (receivedDate == null && expirationDate == null) {
+    return this
+  }
+  return Record(
+      key = key,
+      fields = fields,
+      mutationId = mutationId,
+      metadata = metadata + fields.mapValues { (key, _) ->
+        metadata[key].orEmpty() + buildMap {
+          receivedDate?.let {
+            put(ApolloCacheHeaders.RECEIVED_DATE, it.toLong())
+          }
+          expirationDate?.let {
+            put(ApolloCacheHeaders.EXPIRATION_DATE, it.toLong())
+          }
+        }
+      }
+  )
+}
+
+@ApolloInternal
+fun Record.receivedDate(field: String) = metadata[field]?.get(ApolloCacheHeaders.RECEIVED_DATE) as? Long
+
+@ApolloInternal
+fun Record.expirationDate(field: String) = metadata[field]?.get(ApolloCacheHeaders.EXPIRATION_DATE) as? Long
