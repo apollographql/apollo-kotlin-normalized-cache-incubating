@@ -28,7 +28,7 @@ internal class CacheBatchReader(
     private val cacheResolver: CacheResolver,
     private val cacheHeaders: CacheHeaders,
     private val rootSelections: List<CompiledSelection>,
-    private val rootTypename: String,
+    private val rootField: CompiledField,
     private val fieldKeyGenerator: FieldKeyGenerator,
 ) {
   /**
@@ -38,6 +38,7 @@ internal class CacheBatchReader(
   class PendingReference(
       val key: String,
       val path: List<Any>,
+      val fieldPath: List<CompiledField>,
       val selections: List<CompiledSelection>,
       val parentType: String,
   )
@@ -91,8 +92,9 @@ internal class CacheBatchReader(
         PendingReference(
             key = rootKey,
             selections = rootSelections,
-            parentType = rootTypename,
-            path = emptyList()
+            parentType = rootField.type.rawType().name,
+            path = emptyList(),
+            fieldPath = listOf(rootField),
         )
     )
 
@@ -129,9 +131,10 @@ internal class CacheBatchReader(
                   parentType = pendingReference.parentType,
                   cacheHeaders = cacheHeaders,
                   fieldKeyGenerator = fieldKeyGenerator,
+                  path = pendingReference.fieldPath + it,
               )
           )
-          value.registerCacheKeys(pendingReference.path + it.responseName, it.selections, it.type.rawType().name)
+          value.registerCacheKeys(pendingReference.path + it.responseName, pendingReference.fieldPath + it, it.selections, it.type.rawType().name)
 
           it.responseName to value
         }.toMap()
@@ -146,7 +149,12 @@ internal class CacheBatchReader(
   /**
    * The path leading to this value
    */
-  private fun Any?.registerCacheKeys(path: List<Any>, selections: List<CompiledSelection>, parentType: String) {
+  private fun Any?.registerCacheKeys(
+      path: List<Any>,
+      fieldPath: List<CompiledField>,
+      selections: List<CompiledSelection>,
+      parentType: String,
+  ) {
     when (this) {
       is CacheKey -> {
         pendingReferences.add(
@@ -154,14 +162,15 @@ internal class CacheBatchReader(
                 key = key,
                 selections = selections,
                 parentType = parentType,
-                path = path
+                path = path,
+                fieldPath = fieldPath,
             )
         )
       }
 
       is List<*> -> {
         forEachIndexed { index, value ->
-          value.registerCacheKeys(path + index, selections, parentType)
+          value.registerCacheKeys(path + index, fieldPath, selections, parentType)
         }
       }
 
@@ -183,9 +192,10 @@ internal class CacheBatchReader(
                   parentType = parentType,
                   cacheHeaders = cacheHeaders,
                   fieldKeyGenerator = fieldKeyGenerator,
+                  path = fieldPath + it,
               )
           )
-          value.registerCacheKeys(path + it.responseName, it.selections, it.type.rawType().name)
+          value.registerCacheKeys(path + it.responseName, fieldPath + it, it.selections, it.type.rawType().name)
 
           it.responseName to value
         }.toMap()

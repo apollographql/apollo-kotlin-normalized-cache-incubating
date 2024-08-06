@@ -108,6 +108,12 @@ class ResolverContext(
      * The [FieldKeyGenerator] to use to generate field keys
      */
     val fieldKeyGenerator: FieldKeyGenerator,
+
+    /**
+     * The path of the field to resolve.
+     * The first element is the root object, the last element is [field].
+     */
+    val path: List<CompiledField>,
 )
 
 /**
@@ -149,19 +155,17 @@ class ExpirationCacheResolver(
       val currentDate = currentTimeMillis() / 1000
 
       // Consider the field's max age (client side)
-      val fieldMaxAge = maxAgeProvider.getMaxAge(MaxAgeContext(field = field, parentType = context.parentType))?.inWholeSeconds
-      if (fieldMaxAge != null) {
-        val fieldReceivedDate = context.parent.receivedDate(field.name)
-        if (fieldReceivedDate != null) {
-          val fieldAge = currentDate - fieldReceivedDate
-          val stale = fieldAge - fieldMaxAge
-          if (stale >= maxStale) {
-            throw CacheMissException(
-                context.parentKey,
-                context.fieldKeyGenerator.getFieldKey(FieldKeyContext(context.parentType, context.field, context.variables)),
-                true
-            )
-          }
+      val fieldMaxAge = maxAgeProvider.getMaxAge(MaxAgeContext(context.path)).inWholeSeconds
+      val fieldReceivedDate = context.parent.receivedDate(field.name)
+      if (fieldReceivedDate != null) {
+        val fieldAge = currentDate - fieldReceivedDate
+        val stale = fieldAge - fieldMaxAge
+        if (stale >= maxStale) {
+          throw CacheMissException(
+              context.parentKey,
+              context.fieldKeyGenerator.getFieldKey(FieldKeyContext(context.parentType, context.field, context.variables)),
+              true
+          )
         }
       }
 

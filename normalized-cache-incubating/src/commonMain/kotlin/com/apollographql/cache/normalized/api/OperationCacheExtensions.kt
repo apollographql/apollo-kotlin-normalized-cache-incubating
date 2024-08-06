@@ -107,7 +107,7 @@ private fun <D : Executable.Data> Executable<D>.readInternal(
       variables = variables,
       rootKey = cacheKey.key,
       rootSelections = rootField().selections,
-      rootTypename = rootField().type.rawType().name,
+      rootField = rootField(),
       fieldKeyGenerator = fieldKeyGenerator,
   ).collectData()
 }

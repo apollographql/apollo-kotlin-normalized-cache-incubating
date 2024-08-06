@@ -21,7 +21,6 @@ import com.apollographql.mockserver.MockServer
 import sqlite.GetUserQuery
 import kotlin.test.Test
 import kotlin.test.assertTrue
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 class ServerSideExpirationTest {
@@ -46,9 +45,12 @@ class ServerSideExpirationTest {
     val client = ApolloClient.Builder()
         .normalizedCache(
             normalizedCacheFactory = normalizedCacheFactory,
-            cacheResolver = ExpirationCacheResolver(object : MaxAgeProvider {
-              override fun getMaxAge(maxAgeContext: MaxAgeContext): Duration? = null
-            })
+            cacheResolver = ExpirationCacheResolver(
+                // Can be any value since we don't store the receive date
+                object : MaxAgeProvider {
+                  override fun getMaxAge(maxAgeContext: MaxAgeContext) = 0.seconds
+                }
+            )
         )
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())
