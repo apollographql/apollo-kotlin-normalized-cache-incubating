@@ -42,14 +42,16 @@ class ExpirationCacheResolver(private val maxAgeProvider: MaxAgeProvider) : Cach
 interface MaxAgeProvider {
   /**
    * Returns the max age for the given type and field.
-   * @return null if no max age is defined for the given type and field.
    */
-  fun getMaxAge(maxAgeContext: maxAgeContext): Duration?
+  fun getMaxAge(maxAgeContext: maxAgeContext): Duration
 }
 
-class maxAgeContext(
-  val field: CompiledField,
-  val parentType: String,
+class MaxAgeContext(
+  /**
+   * The path of the field to get the max age of.
+   * The first element is the root object, the last element is the field to get the max age of.
+   */
+  val fieldPath: List<CompiledField>,
 )
 // Note: using a class instead of arguments allows for future evolutions. 
 
@@ -60,25 +62,39 @@ class GlobalMaxAgeProvider(private val maxAge: Duration) : MaxAgeProvider {
   override fun getMaxAge(maxAgeContext: maxAgeContext): Duration = maxAge
 }
 
+sealed interface MaxAge {
+  class Duration(val duration: kotlin.time.Duration) : MaxAge
+  data object Inherit : MaxAge
+}
+
 /**
  * A provider that returns a max age based on [schema coordinates](https://github.com/graphql/graphql-spec/pull/794).
- * The given coordinates must be object (e.g. `MyType`) or field (e.g. `MyType.myField`) coordinates.
- * If a field matches both field and object coordinates, the field ones are used.
+ * The given coordinates must be object/interface/union (e.g. `MyType`) or field (e.g. `MyType.myField`) coordinates.
+ *
+ * The max age of a field is determined as follows:
+ * - If the field has a [MaxAge.Duration] max age, return it.
+ * - Else, if the field has a [MaxAge.Inherit] max age, return the max age of the parent field.
+ * - Else, if the field's type has a [MaxAge.Duration] max age, return it.
+ * - Else, if the field's type has a [MaxAge.Inherit] max age, return the max age of the parent field.
+ * - Else, if the field is a root field, or the field's type is composite, return the default max age.
+ * - Else, return the max age of the parent field.
+ *
+ * Then the lowest of the field's max age and its parent field's max age is returned.
  */
 class SchemaCoordinatesMaxAgeProvider(
-  private val coordinatesToDurations: Map<String, Duration>,
-  private val defaultMaxAge: Duration? = null,
+  private val coordinatesToMaxAges: Map<String, MaxAge>,
+  private val defaultMaxAge: Duration,
 ) : MaxAgeProvider {
-  override fun getMaxAge(maxAgeContext: maxAgeContext): Duration? {
+  override fun getMaxAge(maxAgeContext: MaxAgeContext): Duration {
     // ...
   }
 }
 
 // Example usage:
 val maxAgeProvider = SchemaCoordinatesMaxAgeProvider(
-  coordinatesToDurations = mapOf(
-    "MyType.myField" to 5.minutes,
-    "MyType" to 10.minutes,
+  coordinatesToMaxAges = mapOf(
+    "MyType" to MaxAge.Duration(10.minutes),
+    "MyType.myField" to MaxAge.Duration(5.minutes),
   ),
   defaultMaxAge = 1.days,
 )
@@ -101,14 +117,12 @@ val maxStale = // max stale duration from cache headers (if any, or 0)
 
 // First consider the field's max age (client side)
 val fieldMaxAge = // field's max age from the passed MaxAgeProvider
-if (fieldMaxAge != null) {
-  val fieldReceivedDate = // field's received date from the Record
+val fieldReceivedDate = // field's received date from the Record
   if (fieldReceivedDate != null) {
     val fieldAge = currentDate - fieldReceivedDate
     val stale = fieldAge - fieldMaxAge
     if (stale >= maxStale) {
       // throw cache miss
-    }
   }
 }
 
