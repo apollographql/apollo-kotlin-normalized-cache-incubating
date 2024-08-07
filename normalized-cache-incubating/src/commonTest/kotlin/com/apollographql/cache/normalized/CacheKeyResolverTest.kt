@@ -37,7 +37,16 @@ class CacheKeyResolverTest {
   }
 
   private fun resolverContext(field: CompiledField) =
-    ResolverContext(field, Executable.Variables(emptyMap()), emptyMap(), "", "", CacheHeaders(emptyMap()), DefaultFieldKeyGenerator)
+    ResolverContext(
+        field,
+        Executable.Variables(emptyMap()),
+        emptyMap(),
+        "",
+        "",
+        CacheHeaders(emptyMap()),
+        DefaultFieldKeyGenerator,
+        emptyList()
+    )
 
   @Test
   fun verify_cacheKeyForField_called_for_named_composite_field() {
