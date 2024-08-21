@@ -92,10 +92,6 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
             append("metadata: ")
             append(metadata.prettifyDump(level + 1))
             append("\n")
-            indent(level + 1)
-            append("dates: ")
-            append(dates.prettifyDump(level + 1))
-            append("\n")
             indent(level)
             append("}")
           }

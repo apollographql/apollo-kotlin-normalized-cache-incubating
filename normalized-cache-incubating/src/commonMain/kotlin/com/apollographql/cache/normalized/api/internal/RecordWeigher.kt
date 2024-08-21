@@ -27,7 +27,6 @@ internal object RecordWeigher {
       size += key.length + weighField(value)
     }
     size += weighField(record.metadata)
-    size += weighField(record.dates)
     return size
   }
 

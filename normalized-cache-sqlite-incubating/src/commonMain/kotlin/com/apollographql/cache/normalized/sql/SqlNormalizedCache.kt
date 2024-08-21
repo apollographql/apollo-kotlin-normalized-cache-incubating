@@ -8,6 +8,7 @@ import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
+import com.apollographql.cache.normalized.api.withDates
 import com.apollographql.cache.normalized.sql.internal.RecordDatabase
 import kotlin.reflect.KClass
 
@@ -87,16 +88,12 @@ class SqlNormalizedCache internal constructor(
     }
   }
 
-  private fun CacheHeaders.date(): Long? {
-    return headerValue(ApolloCacheHeaders.DATE)?.toLong()
-  }
-
   override fun merge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     if (cacheHeaders.hasHeader(ApolloCacheHeaders.DO_NOT_STORE) || cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
       return emptySet()
     }
     return try {
-      internalUpdateRecord(record = record, recordMerger = recordMerger, date = cacheHeaders.date())
+      internalUpdateRecord(record = record, cacheHeaders = cacheHeaders, recordMerger = recordMerger)
     } catch (e: Exception) {
       // Unable to merge the record in the database, it is possibly corrupted - treat this as a cache miss
       apolloExceptionHandler(Exception("Unable to merge a record from the database", e))
@@ -109,7 +106,7 @@ class SqlNormalizedCache internal constructor(
       return emptySet()
     }
     return try {
-      internalUpdateRecords(records = records, recordMerger = recordMerger, date = cacheHeaders.date())
+      internalUpdateRecords(records = records, cacheHeaders = cacheHeaders, recordMerger = recordMerger)
     } catch (e: Exception) {
       // Unable to merge the records in the database, it is possibly corrupted - treat this as a cache miss
       apolloExceptionHandler(Exception("Unable to merge records from the database", e))
@@ -144,8 +141,10 @@ class SqlNormalizedCache internal constructor(
    *
    * This is an optimization over [internalUpdateRecord]
    */
-  private fun internalUpdateRecords(records: Collection<Record>, recordMerger: RecordMerger, date: Long?): Set<String> {
+  private fun internalUpdateRecords(records: Collection<Record>, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     var updatedRecordKeys: Set<String> = emptySet()
+    val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
+    val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
     recordDatabase.transaction {
       val oldRecords = internalGetRecords(
           keys = records.map { it.key },
@@ -154,12 +153,12 @@ class SqlNormalizedCache internal constructor(
       updatedRecordKeys = records.flatMap { record ->
         val oldRecord = oldRecords[record.key]
         if (oldRecord == null) {
-          recordDatabase.insert(record.withDate(date))
+          recordDatabase.insert(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
           record.fieldKeys()
         } else {
-          val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record, newDate = date)
+          val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record)
           if (mergedRecord.isNotEmpty()) {
-            recordDatabase.update(mergedRecord)
+            recordDatabase.update(mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
           }
           changedKeys
         }
@@ -168,33 +167,21 @@ class SqlNormalizedCache internal constructor(
     return updatedRecordKeys
   }
 
-  private fun Record.withDate(date: Long?): Record {
-    if (date == null) {
-      return this
-    }
-    return Record(
-        key = key,
-        fields = fields,
-        mutationId = mutationId,
-        dates = fields.mapValues { date },
-        metadata = metadata
-    )
-  }
-
   /**
    * Update a single [Record], loading the previous one
    */
-  private fun internalUpdateRecord(record: Record, recordMerger: RecordMerger, date: Long?): Set<String> {
+  private fun internalUpdateRecord(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
+    val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
+    val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
     return recordDatabase.transaction {
       val oldRecord = recordDatabase.select(record.key)
-
       if (oldRecord == null) {
-        recordDatabase.insert(record.withDate(date))
+        recordDatabase.insert(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
         record.fieldKeys()
       } else {
-        val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record, newDate = date)
+        val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record)
         if (mergedRecord.isNotEmpty()) {
-          recordDatabase.update(mergedRecord)
+          recordDatabase.update(mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
         }
         changedKeys
       }

@@ -3,6 +3,7 @@ package com.apollographql.cache.normalized.sql
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.Record
+import com.apollographql.cache.normalized.api.withDates
 import org.junit.Test
 import java.io.File
 import kotlin.test.assertEquals
@@ -25,9 +26,8 @@ class TrimTest {
         key = "old",
         fields = mapOf("key" to "value"),
         mutationId = null,
-        dates = mapOf("key" to 0L),
         metadata = emptyMap()
-    )
+    ).withDates(receivedDate = "0", expirationDate = null)
     cache.merge(oldRecord, CacheHeaders.NONE, recordMerger = DefaultRecordMerger)
 
     val newRecords = 0.until(2 * 1024).map {
@@ -35,9 +35,8 @@ class TrimTest {
           key = "new$it",
           fields = mapOf("key" to largeString),
           mutationId = null,
-          dates = mapOf("key" to 1 + it.toLong()),
           metadata = emptyMap()
-      )
+      ).withDates(receivedDate = it.toString(), expirationDate = null)
     }
     cache.merge(newRecords, CacheHeaders.NONE, recordMerger = DefaultRecordMerger)
 
