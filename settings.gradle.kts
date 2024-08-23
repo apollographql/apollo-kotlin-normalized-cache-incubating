@@ -1,5 +1,6 @@
 pluginManagement {
   listOf(repositories, dependencyResolutionManagement.repositories).forEach {
+    it.mavenLocal()
     it.mavenCentral()
     it.google()
   }

@@ -22,11 +22,11 @@ import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import sqlite.GetCompanyQuery
-import sqlite.GetUserAdminQuery
-import sqlite.GetUserEmailQuery
-import sqlite.GetUserNameQuery
-import sqlite.GetUserQuery
+import programmatic.GetCompanyQuery
+import programmatic.GetUserAdminQuery
+import programmatic.GetUserEmailQuery
+import programmatic.GetUserNameQuery
+import programmatic.GetUserQuery
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
@@ -48,18 +48,33 @@ class ClientSideExpirationTest {
   }
 
   @Test
-  fun schemaCoordinatesMaxAgeMemoryCache() {
-    schemaCoordinatesMaxAge(MemoryCacheFactory())
+  fun programmaticMaxAgeMemoryCache() {
+    programmaticMaxAge(MemoryCacheFactory())
   }
 
   @Test
-  fun schemaCoordinatesMaxAgeSqlCache() {
-    schemaCoordinatesMaxAge(SqlNormalizedCacheFactory())
+  fun programmaticMaxAgeSqlCache() {
+    programmaticMaxAge(SqlNormalizedCacheFactory())
   }
 
   @Test
-  fun schemaCoordinatesMaxAgeChainedCache() {
-    schemaCoordinatesMaxAge(MemoryCacheFactory().chain(SqlNormalizedCacheFactory()))
+  fun programmaticMaxAgeChainedCache() {
+    programmaticMaxAge(MemoryCacheFactory().chain(SqlNormalizedCacheFactory()))
+  }
+
+  @Test
+  fun declarativeMaxAgeMemoryCache() {
+    declarativeMaxAge(MemoryCacheFactory())
+  }
+
+  @Test
+  fun declarativeMaxAgeSqlCache() {
+    declarativeMaxAge(SqlNormalizedCacheFactory())
+  }
+
+  @Test
+  fun declarativeMaxAgeChainedCache() {
+    declarativeMaxAge(MemoryCacheFactory().chain(SqlNormalizedCacheFactory()))
   }
 
 
@@ -102,7 +117,7 @@ class ClientSideExpirationTest {
     assertTrue(response2.data?.user?.name == "John")
   }
 
-  private fun schemaCoordinatesMaxAge(normalizedCacheFactory: NormalizedCacheFactory) = runTest {
+  private fun programmaticMaxAge(normalizedCacheFactory: NormalizedCacheFactory) = runTest {
     val maxAgeProvider = SchemaCoordinatesMaxAgeProvider(
         mapOf(
             "User" to MaxAge.Duration(10.seconds),
@@ -172,6 +187,66 @@ class ClientSideExpirationTest {
     client.apolloStore.accessCache {
       it.merge(records, cacheHeaders(currentTimeMillis() / 1000 - secondsAgo), DefaultRecordMerger)
     }
+  }
+
+  private fun declarativeMaxAge(normalizedCacheFactory: NormalizedCacheFactory) = runTest {
+    val maxAgeProvider = SchemaCoordinatesMaxAgeProvider(
+        declarative.cache.Cache.maxAges,
+        defaultMaxAge = 20.seconds,
+    )
+
+    val client = ApolloClient.Builder()
+        .normalizedCache(
+            normalizedCacheFactory = normalizedCacheFactory,
+            cacheResolver = ExpirationCacheResolver(maxAgeProvider),
+        )
+        .serverUrl("unused")
+        .build()
+    client.apolloStore.clearAll()
+
+    // Store records 25 seconds ago, more than default max age: should cache miss
+    mergeCompanyQueryResults(client, 25)
+    var e = client.query(declarative.GetCompanyQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute().exception as CacheMissException
+    assertTrue(e.stale)
+
+    // Store records 15 seconds ago, less than default max age: should not cache miss
+    mergeCompanyQueryResults(client, 15)
+    // Company fields are not configured so the default max age should be used
+    val companyResponse = client.query(declarative.GetCompanyQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    assertTrue(companyResponse.data?.company?.id == "42")
+
+
+    // Store records 15 seconds ago, more than max age for User: should cache miss
+    mergeUserQueryResults(client, 15)
+    e = client.query(declarative.GetUserAdminQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute().exception as CacheMissException
+    assertTrue(e.stale)
+
+    // Store records 5 seconds ago, less than max age for User: should not cache miss
+    mergeUserQueryResults(client, 5)
+    val userAdminResponse = client.query(declarative.GetUserAdminQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    assertTrue(userAdminResponse.data?.user?.admin == true)
+
+
+    // Store records 10 seconds ago, more than max age for User.name: should cache miss
+    mergeUserQueryResults(client, 10)
+    e = client.query(declarative.GetUserNameQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute().exception as CacheMissException
+    assertTrue(e.stale)
+
+    // Store records 2 seconds ago, less than max age for User.name: should not cache miss
+    mergeUserQueryResults(client, 2)
+    val userNameResponse = client.query(declarative.GetUserNameQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    assertTrue(userNameResponse.data?.user?.name == "John")
+
+
+    // Store records 5 seconds ago, more than max age for User.email: should cache miss
+    mergeUserQueryResults(client, 5)
+    e = client.query(GetUserEmailQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute().exception as CacheMissException
+    assertTrue(e.stale)
+
+    // Store records 1 second ago, less than max age for User.email: should not cache miss
+    mergeUserQueryResults(client, 1)
+    val userEmailResponse = client.query(GetUserEmailQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    assertTrue(userEmailResponse.data?.user?.email == "john@doe.com")
   }
 
   private fun mergeUserQueryResults(client: ApolloClient, secondsAgo: Int) {

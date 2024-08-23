@@ -3,6 +3,7 @@ package com.apollographql.cache.normalized.api
 import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.isComposite
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 interface MaxAgeProvider {
   /**
@@ -46,7 +47,7 @@ sealed interface MaxAge {
  * Then the lowest of the field's max age and its parent field's max age is returned.
  */
 class SchemaCoordinatesMaxAgeProvider(
-    private val coordinatesToMaxAges: Map<String, MaxAge>,
+    private val maxAges: Map<String, MaxAge>,
     private val defaultMaxAge: Duration,
 ) : MaxAgeProvider {
   override fun getMaxAge(maxAgeContext: MaxAgeContext): Duration {
@@ -58,7 +59,7 @@ class SchemaCoordinatesMaxAgeProvider(
     val fieldName = maxAgeContext.fieldPath.last().name
     val fieldParentTypeName = maxAgeContext.fieldPath[maxAgeContext.fieldPath.lastIndex - 1].type.rawType().name
     val fieldCoordinates = "$fieldParentTypeName.$fieldName"
-    val computedFieldMaxAge = when (val fieldMaxAge = coordinatesToMaxAges[fieldCoordinates]) {
+    val computedFieldMaxAge = when (val fieldMaxAge = maxAges[fieldCoordinates]) {
       is MaxAge.Duration -> {
         fieldMaxAge.duration
       }
@@ -84,7 +85,7 @@ class SchemaCoordinatesMaxAgeProvider(
   private fun getTypeMaxAge(maxAgeContext: MaxAgeContext): Duration {
     val field = maxAgeContext.fieldPath.last()
     val fieldTypeName = field.type.rawType().name
-    return when (val typeMaxAge = coordinatesToMaxAges[fieldTypeName]) {
+    return when (val typeMaxAge = maxAges[fieldTypeName]) {
       is MaxAge.Duration -> {
         typeMaxAge.duration
       }
@@ -112,4 +113,15 @@ class SchemaCoordinatesMaxAgeProvider(
       getParentMaxAge(maxAgeContext)
     }
   }
+}
+
+fun SchemaCoordinatesMaxAgeProvider(maxAges: Map<String, Int>, defaultMaxAge: Duration): MaxAgeProvider {
+  val mappedMaxAges = maxAges.mapValues {
+    if (it.value == -1) {
+      MaxAge.Inherit
+    } else {
+      MaxAge.Duration(it.value.seconds)
+    }
+  }
+  return SchemaCoordinatesMaxAgeProvider(mappedMaxAges, defaultMaxAge)
 }

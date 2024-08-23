@@ -63,7 +63,13 @@ kotlin {
 }
 
 apollo {
-  service("service") {
-    packageName.set("sqlite")
+  service("programmatic") {
+    packageName.set("programmatic")
+    srcDir("src/commonMain/graphql/programmatic")
+  }
+
+  service("declarative") {
+    packageName.set("declarative")
+    srcDir("src/commonMain/graphql/declarative")
   }
 }

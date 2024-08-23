@@ -1,0 +1,68 @@
+extend schema @link(
+  url: "https://specs.apollo.dev/cache/v0.1",
+  import: ["@cacheControl", "@cacheControlField"]
+)
+
+type Query {
+  user: User
+  company: Company
+  products: [Product]
+  product(id: ID!): Product
+  node(id: ID!): Node
+  book: Book
+  cachedBook: Book @cacheControl(maxAge: 60)
+  reader: Reader @cacheControl(maxAge: 40)
+  currentUserId: String
+}
+
+type User @cacheControl(maxAge: 10) {
+  name: String! @cacheControl(maxAge: 5)
+  email: String! @cacheControl(maxAge: 2)
+  admin: Boolean
+}
+
+type Company {
+  id: ID!
+}
+
+interface Node @cacheControl(maxAge: 30) {
+  id: ID!
+}
+
+type Product implements Node @cacheControl(maxAge: 60) {
+  id: ID!
+  name: String!
+  price: Float!
+  colors: [ProductColor]
+}
+
+union ProductColor = StandardColor | CustomColor
+
+type StandardColor {
+  color: Color
+}
+
+enum Color {
+  BLACK
+  WHITE
+  RED
+  GREEN
+  BLUE
+  ORANGE
+}
+
+type CustomColor {
+  red: Int!
+  green: Int!
+  blue: Int!
+}
+
+
+type Book {
+  title: String
+  cachedTitle: String @cacheControl(maxAge: 30)
+}
+
+type Reader {
+  book: Book @cacheControl(inheritMaxAge: true)
+}
