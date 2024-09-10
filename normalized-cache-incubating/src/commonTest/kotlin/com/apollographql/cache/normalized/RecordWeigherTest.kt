@@ -1,5 +1,6 @@
 package com.apollographql.cache.normalized
 
+import com.apollographql.apollo.api.json.JsonNumber
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
 import kotlin.test.Test
@@ -13,6 +14,7 @@ class RecordWeigherTest {
     val expectedLongValue = Long.MAX_VALUE
     val expectedStringValue = "StringValue"
     val expectedBooleanValue = true
+    val expectedNumberValue = JsonNumber("10")
     val expectedCacheKey = CacheKey("foo")
     val expectedCacheKeyList = listOf(CacheKey("bar"), CacheKey("baz"))
     val expectedScalarList = listOf("scalarOne", "scalarTwo")
@@ -23,13 +25,14 @@ class RecordWeigherTest {
             "string" to expectedStringValue,
             "boolean" to expectedBooleanValue,
             "long" to expectedLongValue,
+            "number" to expectedNumberValue,
             "cacheReference" to expectedCacheKey,
             "scalarList" to expectedScalarList,
             "referenceList" to expectedCacheKeyList,
         )
     )
 
-    assertTrue(record.sizeInBytes <= 248)
-    assertTrue(record.sizeInBytes >= 242) // JS takes less space, maybe for strings?
+    assertTrue(record.sizeInBytes <= 284)
+    assertTrue(record.sizeInBytes >= 258) // JS takes less space, maybe for strings?
   }
 }
