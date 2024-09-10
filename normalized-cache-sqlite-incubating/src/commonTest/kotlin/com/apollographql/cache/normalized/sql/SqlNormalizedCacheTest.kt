@@ -253,6 +253,62 @@ class SqlNormalizedCacheTest {
     assertEquals("bad cache", throwable!!.cause!!.message)
   }
 
+  @Test
+  fun testCascadeDeleteWithSelfReference() {
+    // Creating a self-referencing record
+    cache.merge(
+        record = Record(
+            key = "selfRefKey",
+            fields = mapOf(
+                "field1" to "value1",
+                "selfRef" to CacheKey("selfRefKey"),
+            ),
+        ),
+        cacheHeaders = CacheHeaders.NONE,
+        recordMerger = DefaultRecordMerger,
+    )
+
+    val result = cache.remove(cacheKey = CacheKey("selfRefKey"), cascade = true)
+
+    assertTrue(result)
+    val record = cache.loadRecord("selfRefKey", CacheHeaders.NONE)
+    assertNull(record)
+  }
+
+  @Test
+  fun testCascadeDeleteWithCyclicReferences() {
+    // Creating two records that reference each other
+    cache.merge(
+        record = Record(
+            key = "key1",
+            fields = mapOf(
+                "field1" to "value1",
+                "refToKey2" to CacheKey("key2"),
+            ),
+        ),
+        cacheHeaders = CacheHeaders.NONE,
+        recordMerger = DefaultRecordMerger,
+    )
+
+    cache.merge(
+        record = Record(
+            key = "key2",
+            fields = mapOf(
+                "field1" to "value2",
+                "refToKey1" to CacheKey("key1"),
+            ),
+        ),
+        cacheHeaders = CacheHeaders.NONE,
+        recordMerger = DefaultRecordMerger,
+    )
+
+    val result = cache.remove(cacheKey = CacheKey("key1"), cascade = true)
+
+    assertTrue(result)
+    assertNull(cache.loadRecord("key1", CacheHeaders.NONE))
+    assertNull(cache.loadRecord("key2", CacheHeaders.NONE))
+  }
+
   private val BadDriver = object : SqlDriver {
     override fun close() {
       throw IllegalStateException("bad cache")
