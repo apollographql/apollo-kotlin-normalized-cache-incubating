@@ -1,6 +1,7 @@
 package com.apollographql.cache.normalized.api.internal
 
 import com.apollographql.apollo.annotations.ApolloInternal
+import com.apollographql.apollo.api.json.JsonNumber
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
 import okio.Buffer
@@ -94,7 +95,12 @@ object BlobRecordSerializer {
 
       is Double -> {
         buffer.writeByte(DOUBLE)
-        buffer.writeString(value.toString())
+        buffer.writeLong(value.toBits())
+      }
+
+      is JsonNumber -> {
+        buffer.writeByte(JSON_NUMBER)
+        buffer.writeString(value.value)
       }
 
       is Boolean -> {
@@ -139,7 +145,8 @@ object BlobRecordSerializer {
       STRING -> readString()
       INT -> readInt()
       LONG -> readLong()
-      DOUBLE -> readString().toDouble()
+      DOUBLE -> Double.fromBits(readLong())
+      JSON_NUMBER -> JsonNumber(readString())
       BOOLEAN -> readByte() > 0
       CACHE_KEY -> {
         CacheKey(readString())
@@ -169,8 +176,9 @@ object BlobRecordSerializer {
   private const val LONG = 2
   private const val BOOLEAN = 3
   private const val DOUBLE = 4
-  private const val LIST = 5
-  private const val MAP = 6
-  private const val CACHE_KEY = 7
-  private const val NULL = 8
+  private const val JSON_NUMBER = 5
+  private const val LIST = 6
+  private const val MAP = 7
+  private const val CACHE_KEY = 8
+  private const val NULL = 9
 }
