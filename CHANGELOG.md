@@ -2,6 +2,11 @@
 
 PUT_CHANGELOG_HERE
 
+# Version 0.0.3
+_2024-09-20_
+
+PUT_CHANGELOG_HERE
+
 # Version 0.0.2
 _2024-07-08_
 
