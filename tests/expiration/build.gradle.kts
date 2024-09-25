@@ -1,8 +1,10 @@
+import com.apollographql.cache.gradle.GenerateApolloCacheSourcesTask
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.apollo)
+  alias(libs.plugins.apollo.cache)
 }
 
 kotlin {
@@ -73,3 +75,12 @@ apollo {
     srcDir("src/commonMain/graphql/declarative")
   }
 }
+
+
+val generateDeclarativeApolloCacheSourcesTask =
+  tasks.register("generateDeclarativeApolloCacheSources", GenerateApolloCacheSourcesTask::class.java) {
+    packageName.set("declarative")
+    schemaFiles.from(file("src/commonMain/graphql/declarative"))
+  }
+
+kotlin.sourceSets.getByName("commonMain").kotlin.srcDir(generateDeclarativeApolloCacheSourcesTask)

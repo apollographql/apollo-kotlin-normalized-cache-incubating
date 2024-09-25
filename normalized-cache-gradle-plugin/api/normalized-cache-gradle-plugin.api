@@ -1,0 +1,30 @@
+public abstract class com/apollographql/cache/gradle/ApolloCacheExtension {
+	public fun <init> (Lorg/gradle/api/Project;)V
+	public final fun getProject ()Lorg/gradle/api/Project;
+	public final fun service (Ljava/lang/String;Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/apollographql/cache/gradle/ApolloCachePlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public abstract class com/apollographql/cache/gradle/ApolloCacheService {
+	public fun <init> ()V
+	public abstract fun getPackageName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSchemaFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+}
+
+public abstract class com/apollographql/cache/gradle/GenerateApolloCacheSourcesTask : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getPackageName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSchemaFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public final fun taskAction ()V
+}
+
+public final class com/apollographql/cache/gradle/VersionKt {
+	public static final field VERSION Ljava/lang/String;
+}
+
