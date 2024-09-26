@@ -25,10 +25,6 @@ abstract class GenerateApolloCacheSourcesTask : DefaultTask() {
   @get:OutputDirectory
   abstract val outputDirectory: DirectoryProperty
 
-  init {
-    outputDirectory.convention(project.layout.buildDirectory.dir("generated/source/apollo/cache"))
-  }
-
   @TaskAction
   fun taskAction() {
     val outputDir = outputDirectory.asFile.get()

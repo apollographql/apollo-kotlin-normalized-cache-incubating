@@ -6,6 +6,7 @@ import org.gradle.api.artifacts.ExternalDependency
 
 abstract class ApolloCachePlugin : Plugin<Project> {
   override fun apply(target: Project) {
+    target.extensions.create("apolloCache", ApolloCacheExtension::class.java, target)
     target.configureDefaultVersionsResolutionStrategy()
   }
 
