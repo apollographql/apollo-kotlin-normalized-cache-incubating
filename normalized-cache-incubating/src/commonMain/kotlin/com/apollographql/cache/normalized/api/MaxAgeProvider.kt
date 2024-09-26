@@ -3,7 +3,6 @@ package com.apollographql.cache.normalized.api
 import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.isComposite
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 interface MaxAgeProvider {
   /**
@@ -113,15 +112,4 @@ class SchemaCoordinatesMaxAgeProvider(
       getParentMaxAge(maxAgeContext)
     }
   }
-}
-
-fun SchemaCoordinatesMaxAgeProvider(maxAges: Map<String, Int>, defaultMaxAge: Duration): MaxAgeProvider {
-  val mappedMaxAges = maxAges.mapValues {
-    if (it.value == -1) {
-      MaxAge.Inherit
-    } else {
-      MaxAge.Duration(it.value.seconds)
-    }
-  }
-  return SchemaCoordinatesMaxAgeProvider(mappedMaxAges, defaultMaxAge)
 }

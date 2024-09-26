@@ -38,6 +38,7 @@ kotlin {
     getByName("commonMain") {
       dependencies {
         implementation(libs.apollo.runtime)
+        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
       }
     }
 
@@ -46,7 +47,6 @@ kotlin {
         implementation(libs.apollo.testing.support)
         implementation(libs.apollo.mockserver)
         implementation(libs.kotlin.test)
-        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
       }
     }
 

@@ -1,13 +1,25 @@
 package com.apollographql.cache.gradle.internal.codegen
 
 import com.apollographql.cache.gradle.VERSION
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.MAP
+import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.STRING
 import com.squareup.kotlinpoet.TypeSpec
-import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.asTypeName
 import java.io.File
+import kotlin.time.Duration
+
+private object Symbols {
+  val MaxAge = ClassName("com.apollographql.cache.normalized.api", "MaxAge")
+  val MaxAgeInherit = MaxAge.nestedClass("Inherit")
+  val MaxAgeDuration = MaxAge.nestedClass("Duration")
+  val Seconds = MemberName(Duration.Companion::class.asTypeName(), "seconds", isExtension = true)
+}
 
 internal class Codegen(
     private val packageName: String,
@@ -22,11 +34,13 @@ internal class Codegen(
     val initializer = CodeBlock.builder().apply {
       add("mapOf(\n")
       indent()
-      add(
-          maxAges.map { (k, v) ->
-            CodeBlock.of("%S to %L", k, v)
-          }.joinToString(",\n", postfix = ",\n")
-      )
+      maxAges.forEach { (field, duration) ->
+        if (duration == -1) {
+          addStatement("%S to %T,", field, Symbols.MaxAgeInherit)
+        } else {
+          addStatement("%S to %T(%L.%M),", field, Symbols.MaxAgeDuration, duration, Symbols.Seconds)
+        }
+      }
       unindent()
       add(")")
     }
@@ -35,8 +49,8 @@ internal class Codegen(
         .addType(
             TypeSpec.objectBuilder("Cache")
                 .addProperty(
-                    PropertySpec.builder("maxAges", Map::class.asClassName()
-                        .parameterizedBy(String::class.asClassName(), Int::class.asClassName())
+                    PropertySpec.builder("maxAges", MAP
+                        .parameterizedBy(STRING, Symbols.MaxAge)
                     )
                         .initializer(initializer)
                         .build()
