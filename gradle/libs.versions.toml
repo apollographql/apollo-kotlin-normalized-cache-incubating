@@ -42,3 +42,5 @@ atomicfu = { id = "org.jetbrains.kotlin.plugin.atomicfu", version.ref = "kotlin-
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }
 apollo-cache = { id = "com.apollographql.cache" }
+ksp = { id = "com.google.devtools.ksp", version = "2.0.0-1.0.24" }
+gratatouille = { id = "com.gradleup.gratatouille", version = "0.0.4" }

@@ -15,7 +15,7 @@ import com.apollographql.apollo.ast.SourceLocation
 import com.apollographql.apollo.ast.pretty
 import com.apollographql.apollo.ast.toGQLDocument
 import com.apollographql.apollo.ast.validateAsSchema
-import org.gradle.api.file.FileCollection
+import gratatouille.FileWithPath
 import org.gradle.api.logging.Logging
 import java.io.File
 
@@ -23,7 +23,7 @@ private const val CACHE_CONTROL = "cacheControl"
 private const val CACHE_CONTROL_FIELD = "cacheControlField"
 
 internal class SchemaReader(
-    private val schemaFiles: Collection<InputFile>,
+    private val schemaFiles: Collection<FileWithPath>,
 ) {
   /*
    * Taken from ApolloCompiler.buildCodegenSchema(), with error handling removed as errors will already be handled by it.
@@ -136,24 +136,6 @@ private class Issue(
   fun log() {
     Logging.getLogger("apollo").lifecycle("w: ${sourceLocation.pretty()}: Apollo: ${message}")
   }
-}
-
-/**
- * An input file together with its normalizedPath
- * normalizedPath is used to compute the package name in some cases
- */
-internal class InputFile(val file: File, val normalizedPath: String)
-
-internal fun FileCollection.toInputFiles(): List<InputFile> {
-  val inputFiles = mutableListOf<InputFile>()
-
-  asFileTree.visit {
-    if (it.file.isFile) {
-      inputFiles.add(InputFile(it.file, it.path))
-    }
-  }
-
-  return inputFiles
 }
 
 private val GQLTypeDefinition.fields

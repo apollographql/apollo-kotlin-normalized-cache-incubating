@@ -3,6 +3,8 @@ import com.gradleup.librarian.gradle.librarianModule
 plugins {
   alias(libs.plugins.kotlin.jvm)
   id("java-gradle-plugin")
+  alias(libs.plugins.ksp)
+  alias(libs.plugins.gratatouille)
 }
 
 librarianModule(true)
