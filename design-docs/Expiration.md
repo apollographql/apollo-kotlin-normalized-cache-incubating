@@ -301,4 +301,5 @@ This is the approach we took for the `Pagination` feature where we need a list o
 
 - Pro: no codegen impact for non-users of the feature, the file can be generated only when there are fields selected that have a max age in
   the schema.
+- Pro: this can be done in a dedicated Gradle plugin
 - Con: more 'plumbing' - it requires to manually pass `Expiration.maxAges` to the constructor of the `CacheResolver`.
