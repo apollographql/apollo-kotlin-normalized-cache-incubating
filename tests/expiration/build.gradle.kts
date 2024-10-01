@@ -3,7 +3,6 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.apollo)
-  alias(libs.plugins.apollo.cache)
 }
 
 kotlin {
@@ -72,12 +71,9 @@ apollo {
   service("declarative") {
     packageName.set("declarative")
     srcDir("src/commonMain/graphql/declarative")
-  }
-}
 
-apolloCache {
-  service("declarative") {
-    packageName.set("declarative")
-    srcDir("src/commonMain/graphql/declarative")
+    plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin") {
+      argument("packageName", packageName.get())
+    }
   }
 }

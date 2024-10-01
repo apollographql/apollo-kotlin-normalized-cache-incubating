@@ -1,6 +1,6 @@
-package com.apollographql.cache.gradle.internal.codegen
+package com.apollographql.cache.apollocompilerplugin.internal
 
-import com.apollographql.cache.gradle.VERSION
+import com.apollographql.cache.apollocompilerplugin.VERSION
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec

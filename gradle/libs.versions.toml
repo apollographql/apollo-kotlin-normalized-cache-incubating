@@ -1,7 +1,7 @@
 [versions]
 kotlin-plugin = "2.0.0"
 android-plugin = "8.2.2"
-apollo = "4.0.0"
+apollo = "4.0.1-SNAPSHOT"
 okio = "3.9.0"
 atomicfu = "0.23.1" # Must be the same version as the one used by apollo-testing-support or native compilation will fail
 sqldelight = "2.0.1"
@@ -15,6 +15,7 @@ apollo-testing-support = { group = "com.apollographql.apollo", name = "apollo-te
 apollo-runtime = { group = "com.apollographql.apollo", name = "apollo-runtime", version.ref = "apollo" }
 apollo-mockserver = "com.apollographql.mockserver:apollo-mockserver:0.0.1"
 apollo-ast = { group = "com.apollographql.apollo", name = "apollo-ast", version.ref = "apollo" }
+apollo-compiler = { group = "com.apollographql.apollo", name = "apollo-compiler", version.ref = "apollo" }
 atomicfu-library = { group = "org.jetbrains.kotlinx", name = "atomicfu", version.ref = "atomicfu" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test" } # the Kotlin plugin resolves the version
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit" } # the Kotlin plugin resolves the version
@@ -29,8 +30,6 @@ slf4j-nop = "org.slf4j:slf4j-nop:2.0.13"
 androidx-sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "androidx-sqlite" }
 androidx-sqlite-framework = { group = "androidx.sqlite", name = "sqlite-framework", version.ref = "androidx-sqlite" }
 androidx-startup-runtime = "androidx.startup:startup-runtime:1.1.1"
-kgp-min = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version = "1.9.0" }
-gradle-api-min = { group = "dev.gradleplugins", name = "gradle-api", version = "8.0" }
 kotlin-poet = { group = "com.squareup", name = "kotlinpoet", version = "1.18.1" }
 
 [plugins]
@@ -41,6 +40,3 @@ librarian = { id = "com.gradleup.librarian", version.ref = "librarian" }
 atomicfu = { id = "org.jetbrains.kotlin.plugin.atomicfu", version.ref = "kotlin-plugin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }
-apollo-cache = { id = "com.apollographql.cache" }
-ksp = { id = "com.google.devtools.ksp", version = "2.0.0-1.0.24" }
-gratatouille = { id = "com.gradleup.gratatouille", version = "0.0.4" }

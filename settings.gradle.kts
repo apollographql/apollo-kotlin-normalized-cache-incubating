@@ -1,5 +1,6 @@
 pluginManagement {
   listOf(repositories, dependencyResolutionManagement.repositories).forEach {
+    it.mavenLocal()
     it.mavenCentral()
     it.google()
   }
@@ -8,5 +9,5 @@ pluginManagement {
 include(
     "normalized-cache-incubating",
     "normalized-cache-sqlite-incubating",
-    "normalized-cache-gradle-plugin",
+    "normalized-cache-apollo-compiler-plugin",
 )
