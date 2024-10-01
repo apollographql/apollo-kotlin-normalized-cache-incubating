@@ -303,3 +303,5 @@ This is the approach we took for the `Pagination` feature where we need a list o
   the schema.
 - Pro: this can be done in a dedicated Gradle plugin
 - Con: more 'plumbing' - it requires to manually pass `Expiration.maxAges` to the constructor of the `CacheResolver`.
+
+In the end this (B) is the approach we're taking, and using an Apollo Kotlin Compiler Plugin to do so.
