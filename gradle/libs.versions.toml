@@ -1,7 +1,7 @@
 [versions]
 kotlin-plugin = "2.0.0"
 android-plugin = "8.2.2"
-apollo = "4.0.1-SNAPSHOT"
+apollo = "4.0.1"
 okio = "3.9.0"
 atomicfu = "0.23.1" # Must be the same version as the one used by apollo-testing-support or native compilation will fail
 sqldelight = "2.0.1"
@@ -40,3 +40,4 @@ librarian = { id = "com.gradleup.librarian", version.ref = "librarian" }
 atomicfu = { id = "org.jetbrains.kotlin.plugin.atomicfu", version.ref = "kotlin-plugin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }
+apollo-external = { id = "com.apollographql.apollo.external", version.ref = "apollo" }

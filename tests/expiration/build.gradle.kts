@@ -2,7 +2,9 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
-  alias(libs.plugins.apollo)
+  // TODO: Use the external plugin for now - switch to the regular one when Schema is not relocated
+  // See https://github.com/apollographql/apollo-kotlin/pull/6176
+  alias(libs.plugins.apollo.external)
 }
 
 kotlin {
