@@ -10,7 +10,7 @@ type Query {
   product(id: ID!): Product
   node(id: ID!): Node
   book: Book
-  cachedBook: Book @cacheControl(maxAge: -60)
+  cachedBook: Book @cacheControl(maxAge: 60)
   reader: Reader @cacheControl(maxAge: 40)
   currentUserId: String
 }
