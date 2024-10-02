@@ -64,4 +64,4 @@ private val cacheControlDefinitions_0_1 = """
   ) repeatable on OBJECT | INTERFACE
 """.trimIndent()
 
-internal val cacheControlGQLDefinitions by lazy { cacheControlDefinitions_0_1.parseAsGQLDocument().getOrThrow().definitions }
+internal val cacheControlGQLDefinitions = cacheControlDefinitions_0_1.parseAsGQLDocument().getOrThrow().definitions
