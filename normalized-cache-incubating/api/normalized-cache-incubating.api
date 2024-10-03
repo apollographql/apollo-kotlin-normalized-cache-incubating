@@ -272,6 +272,7 @@ public final class com/apollographql/cache/normalized/api/EmptyMetadataGenerator
 }
 
 public final class com/apollographql/cache/normalized/api/ExpirationCacheResolver : com/apollographql/cache/normalized/api/CacheResolver {
+	public fun <init> ()V
 	public fun <init> (Lcom/apollographql/cache/normalized/api/MaxAgeProvider;)V
 	public fun resolveField (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/lang/Object;
 }
