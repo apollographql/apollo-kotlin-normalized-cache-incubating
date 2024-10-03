@@ -1,4 +1,4 @@
-# Pagination with the normalized cache
+# Pagination
 
 When using the normalized cache, objects are stored in records keyed by the object's id:
 
