@@ -1,8 +1,10 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
-  id("org.jetbrains.kotlin.multiplatform")
-  id("com.apollographql.apollo")
+  alias(libs.plugins.kotlin.multiplatform)
+  // TODO: Use the external plugin for now - switch to the regular one when Schema is not relocated
+  // See https://github.com/apollographql/apollo-kotlin/pull/6176
+  alias(libs.plugins.apollo.external)
 }
 
 kotlin {
@@ -37,6 +39,7 @@ kotlin {
     getByName("commonMain") {
       dependencies {
         implementation(libs.apollo.runtime)
+        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
       }
     }
 
@@ -45,7 +48,6 @@ kotlin {
         implementation(libs.apollo.testing.support)
         implementation(libs.apollo.mockserver)
         implementation(libs.kotlin.test)
-        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
       }
     }
 
@@ -63,7 +65,17 @@ kotlin {
 }
 
 apollo {
-  service("service") {
-    packageName.set("sqlite")
+  service("programmatic") {
+    packageName.set("programmatic")
+    srcDir("src/commonMain/graphql/programmatic")
+  }
+
+  service("declarative") {
+    packageName.set("declarative")
+    srcDir("src/commonMain/graphql/declarative")
+
+    plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin") {
+      argument("packageName", packageName.get())
+    }
   }
 }

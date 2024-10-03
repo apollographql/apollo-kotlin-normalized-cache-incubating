@@ -5,4 +5,8 @@ pluginManagement {
   }
 }
 
-include("normalized-cache-incubating", "normalized-cache-sqlite-incubating")
+include(
+    "normalized-cache-incubating",
+    "normalized-cache-sqlite-incubating",
+    "normalized-cache-apollo-compiler-plugin",
+)

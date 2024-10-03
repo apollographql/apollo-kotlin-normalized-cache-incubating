@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
-  id("org.jetbrains.kotlin.multiplatform")
-  id("kotlinx-atomicfu")
+  alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.atomicfu)
 }
 
 librarianModule(true)

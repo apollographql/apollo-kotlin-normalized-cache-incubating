@@ -18,7 +18,7 @@ import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.storeExpirationDate
 import com.apollographql.mockserver.MockResponse
 import com.apollographql.mockserver.MockServer
-import sqlite.GetUserQuery
+import programmatic.GetUserQuery
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds

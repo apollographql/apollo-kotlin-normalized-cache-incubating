@@ -1,3 +1,5 @@
+includeBuild("../")
+
 pluginManagement {
   listOf(repositories, dependencyResolutionManagement.repositories).forEach {
     it.apply {
@@ -15,5 +17,3 @@ rootProject.projectDir
   .forEach {
     include(it.name)
   }
-
-includeBuild("../")

@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
-  id("org.jetbrains.kotlin.multiplatform")
-  id("com.apollographql.apollo")
+  alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.apollo)
 }
 
 kotlin {

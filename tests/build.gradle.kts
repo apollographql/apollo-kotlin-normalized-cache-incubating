@@ -6,6 +6,7 @@ buildscript {
 }
 
 plugins {
-  alias(libs.plugins.kotlin).apply(false)
+  alias(libs.plugins.kotlin.multiplatform).apply(false)
   alias(libs.plugins.apollo).apply(false)
+  alias(libs.plugins.apollo.external).apply(false)
 }

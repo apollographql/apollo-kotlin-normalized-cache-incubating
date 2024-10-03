@@ -2,9 +2,9 @@ import com.gradleup.librarian.gradle.librarianModule
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
-  id("org.jetbrains.kotlin.multiplatform")
-  id("com.android.library")
-  id("app.cash.sqldelight")
+  alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.android)
+  alias(libs.plugins.sqldelight)
 }
 
 librarianModule(true)
