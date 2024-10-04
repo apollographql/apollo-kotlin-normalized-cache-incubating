@@ -103,7 +103,7 @@ class SchemaCoordinatesMaxAgeProviderTest {
   @Test
   fun fallbackValue() {
     val provider1 = SchemaCoordinatesMaxAgeProvider(
-        maxAges = mapOf<String, MaxAge>(),
+        maxAges = mapOf(),
         defaultMaxAge = 12.seconds,
     )
     var maxAge = provider1.getMaxAge(

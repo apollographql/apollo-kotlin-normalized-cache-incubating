@@ -9,6 +9,7 @@ import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.storeExpirationDate
 import com.apollographql.cache.normalized.storeReceiveDate
 import kotlin.jvm.JvmSuppressWildcards
+import kotlin.time.Duration
 
 /**
  * Controls how fields are resolved from the cache.
@@ -147,6 +148,11 @@ object DefaultCacheResolver : CacheResolver {
 class ExpirationCacheResolver(
     private val maxAgeProvider: MaxAgeProvider,
 ) : CacheResolver {
+  /**
+   * Creates a new [ExpirationCacheResolver] with no max ages. Use this constructor if you want to consider only the expiration dates.
+   */
+  constructor() : this(maxAgeProvider = GlobalMaxAgeProvider(Duration.INFINITE))
+
   override fun resolveField(context: ResolverContext): Any? {
     val resolvedField = FieldPolicyCacheResolver.resolveField(context)
     if (context.parent is Record) {

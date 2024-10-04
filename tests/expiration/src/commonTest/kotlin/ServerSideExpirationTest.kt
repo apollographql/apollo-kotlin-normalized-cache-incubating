@@ -6,8 +6,6 @@ import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ExpirationCacheResolver
-import com.apollographql.cache.normalized.api.MaxAgeContext
-import com.apollographql.cache.normalized.api.MaxAgeProvider
 import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.apolloStore
@@ -45,12 +43,7 @@ class ServerSideExpirationTest {
     val client = ApolloClient.Builder()
         .normalizedCache(
             normalizedCacheFactory = normalizedCacheFactory,
-            cacheResolver = ExpirationCacheResolver(
-                // Can be any value since we don't store the receive date
-                object : MaxAgeProvider {
-                  override fun getMaxAge(maxAgeContext: MaxAgeContext) = 0.seconds
-                }
-            )
+            cacheResolver = ExpirationCacheResolver(),
         )
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())
