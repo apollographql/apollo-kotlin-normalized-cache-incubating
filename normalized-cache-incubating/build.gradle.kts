@@ -33,12 +33,17 @@ kotlin {
   @OptIn(ExperimentalKotlinGradlePluginApi::class)
   applyDefaultHierarchyTemplate {
     group("common") {
-      group("noWasm") {
-        group("concurrent") {
-          group("apple")
-          withJvm()
-        }
+      group("concurrent") {
+        group("apple")
         withJvm()
+      }
+      group("jsCommon") {
+        group("js") {
+          withJs()
+        }
+        group("wasmJs") {
+          withWasmJs()
+        }
       }
     }
   }
