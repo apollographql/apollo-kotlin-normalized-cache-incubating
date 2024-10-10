@@ -8,7 +8,7 @@ import kotlin.jvm.JvmStatic
  *
  * @param key The key of the object in the cache. The key must be globally unique.
  */
-class CacheKey constructor(val key: String) {
+class CacheKey(val key: String) {
 
   /**
    * Builds a [CacheKey] from a typename and a list of Strings.
@@ -67,7 +67,6 @@ class CacheKey constructor(val key: String) {
     private val ROOT_CACHE_KEY = CacheKey("QUERY_ROOT")
 
     @JvmStatic
-    @Suppress("UNUSED_PARAMETER")
     fun rootKey(): CacheKey {
       return ROOT_CACHE_KEY
     }

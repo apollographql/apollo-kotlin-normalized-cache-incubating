@@ -1,6 +1,6 @@
 package com.apollographql.cache.normalized
 
-import com.apollographql.cache.normalized.api.internal.patternToRegex
+import com.apollographql.cache.normalized.internal.patternToRegex
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails

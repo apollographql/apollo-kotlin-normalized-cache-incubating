@@ -2,7 +2,6 @@ package com.apollographql.cache.normalized.sql.internal
 
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.Record
-import com.apollographql.cache.normalized.api.internal.BlobRecordSerializer
 import com.apollographql.cache.normalized.sql.internal.blob2.Blob2Queries
 
 internal class Blob2RecordDatabase(private val blobQueries: Blob2Queries) : RecordDatabase {

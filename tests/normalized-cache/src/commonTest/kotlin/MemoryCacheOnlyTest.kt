@@ -7,10 +7,10 @@ import com.apollographql.apollo.testing.enqueueTestResponse
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
-import com.apollographql.cache.normalized.api.MemoryCache
-import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.memory.MemoryCache
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.memoryCacheOnly
 import com.apollographql.cache.normalized.sql.SqlNormalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory

@@ -1,11 +1,15 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.annotations.ApolloInternal
-import com.apollographql.apollo.api.*
+import com.apollographql.apollo.api.Adapter
+import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.Executable
+import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.MapJsonReader
 import com.apollographql.apollo.api.json.MapJsonWriter
-import com.apollographql.cache.normalized.api.internal.CacheBatchReader
-import com.apollographql.cache.normalized.api.internal.Normalizer
+import com.apollographql.apollo.api.variables
+import com.apollographql.cache.normalized.internal.CacheBatchReader
+import com.apollographql.cache.normalized.internal.CacheBatchReader.CacheBatchReaderData
+import com.apollographql.cache.normalized.internal.Normalizer
 import kotlin.jvm.JvmOverloads
 
 fun <D : Operation.Data> Operation<D>.normalize(
@@ -74,15 +78,14 @@ fun <D : Executable.Data> Executable<D>.readDataFromCache(
   ).toData(adapter(), customScalarAdapters, variables)
 }
 
-@ApolloInternal
-fun <D : Executable.Data> Executable<D>.readDataFromCacheInternal(
+internal fun <D : Executable.Data> Executable<D>.readDataFromCacheInternal(
     cacheKey: CacheKey,
     cache: ReadOnlyNormalizedCache,
     cacheResolver: CacheResolver,
     cacheHeaders: CacheHeaders,
     variables: Executable.Variables,
     fieldKeyGenerator: FieldKeyGenerator,
-): CacheData = readInternal(
+): CacheBatchReaderData = readInternal(
     cacheKey = cacheKey,
     cache = cache,
     cacheResolver = cacheResolver,
@@ -99,7 +102,7 @@ private fun <D : Executable.Data> Executable<D>.readInternal(
     cacheHeaders: CacheHeaders,
     variables: Executable.Variables,
     fieldKeyGenerator: FieldKeyGenerator,
-): CacheData {
+): CacheBatchReaderData {
   return CacheBatchReader(
       cache = cache,
       cacheHeaders = cacheHeaders,
@@ -118,8 +121,7 @@ fun Collection<Record>?.dependentKeys(): Set<String> {
   }?.toSet() ?: emptySet()
 }
 
-@ApolloInternal
-fun <D : Executable.Data> CacheData.toData(
+internal fun <D : Executable.Data> CacheBatchReaderData.toData(
     adapter: Adapter<D>,
     customScalarAdapters: CustomScalarAdapters,
     variables: Executable.Variables,

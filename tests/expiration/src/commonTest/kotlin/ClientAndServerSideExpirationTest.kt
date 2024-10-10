@@ -7,12 +7,12 @@ import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ExpirationCacheResolver
 import com.apollographql.cache.normalized.api.MaxAge
-import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.storeExpirationDate

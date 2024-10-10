@@ -1,8 +1,7 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.annotations.ApolloInternal
 import com.apollographql.apollo.api.json.ApolloJsonElement
-import com.apollographql.cache.normalized.api.internal.RecordWeigher.calculateBytes
+import com.apollographql.cache.normalized.internal.RecordWeigher.calculateBytes
 import com.benasher44.uuid.Uuid
 
 /**
@@ -25,23 +24,12 @@ class Record(
      */
     val fields: Map<String, RecordValue>,
     val mutationId: Uuid? = null,
+
+    /**
+     * Arbitrary metadata that can be attached to each field.
+     */
+    val metadata: Map<String, Map<String, ApolloJsonElement>> = emptyMap(),
 ) : Map<String, Any?> by fields {
-
-  /**
-   * Arbitrary metadata that can be attached to each field.
-   */
-  var metadata: Map<String, Map<String, ApolloJsonElement>> = emptyMap()
-    private set
-
-  @ApolloInternal
-  constructor(
-      key: String,
-      fields: Map<String, Any?>,
-      mutationId: Uuid?,
-      metadata: Map<String, Map<String, ApolloJsonElement>>,
-  ) : this(key, fields, mutationId) {
-    this.metadata = metadata
-  }
 
   val sizeInBytes: Int
     get() {
@@ -99,7 +87,6 @@ class Record(
   }
 }
 
-@ApolloInternal
 fun Record.withDates(receivedDate: String?, expirationDate: String?): Record {
   if (receivedDate == null && expirationDate == null) {
     return this
@@ -121,10 +108,8 @@ fun Record.withDates(receivedDate: String?, expirationDate: String?): Record {
   )
 }
 
-@ApolloInternal
 fun Record.receivedDate(field: String) = metadata[field]?.get(ApolloCacheHeaders.RECEIVED_DATE) as? Long
 
-@ApolloInternal
 fun Record.expirationDate(field: String) = metadata[field]?.get(ApolloCacheHeaders.EXPIRATION_DATE) as? Long
 
 
