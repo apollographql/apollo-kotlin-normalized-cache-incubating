@@ -20,18 +20,17 @@ public final class com/apollographql/cache/normalized/sql/SqlNormalizedCache : c
 	public fun remove (Ljava/lang/String;)I
 }
 
-public final class com/apollographql/cache/normalized/sql/SqlNormalizedCacheFactory : com/apollographql/cache/normalized/api/NormalizedCacheFactory {
-	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Landroidx/sqlite/db/SupportSQLiteOpenHelper$Factory;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Landroidx/sqlite/db/SupportSQLiteOpenHelper$Factory;Lkotlin/jvm/functions/Function1;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Landroidx/sqlite/db/SupportSQLiteOpenHelper$Factory;Lkotlin/jvm/functions/Function1;Z)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Landroidx/sqlite/db/SupportSQLiteOpenHelper$Factory;Lkotlin/jvm/functions/Function1;ZLjava/lang/Long;)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Landroidx/sqlite/db/SupportSQLiteOpenHelper$Factory;Lkotlin/jvm/functions/Function1;ZLjava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Lapp/cash/sqldelight/db/SqlDriver;)V
-	public fun <init> (Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun create ()Lcom/apollographql/cache/normalized/api/NormalizedCache;
+public final class com/apollographql/cache/normalized/sql/SqlNormalizedCacheFactory_androidKt {
+	public static final fun SqlNormalizedCacheFactory (Landroid/content/Context;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
+	public static final fun SqlNormalizedCacheFactory (Landroid/content/Context;Ljava/lang/String;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
+	public static final fun SqlNormalizedCacheFactory (Landroid/content/Context;Ljava/lang/String;Landroidx/sqlite/db/SupportSQLiteOpenHelper$Factory;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
+	public static final fun SqlNormalizedCacheFactory (Landroid/content/Context;Ljava/lang/String;Landroidx/sqlite/db/SupportSQLiteOpenHelper$Factory;Lkotlin/jvm/functions/Function1;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
+	public static final fun SqlNormalizedCacheFactory (Landroid/content/Context;Ljava/lang/String;Landroidx/sqlite/db/SupportSQLiteOpenHelper$Factory;Lkotlin/jvm/functions/Function1;Z)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
+	public static final fun SqlNormalizedCacheFactory (Landroid/content/Context;Ljava/lang/String;Landroidx/sqlite/db/SupportSQLiteOpenHelper$Factory;Lkotlin/jvm/functions/Function1;ZLjava/lang/Long;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
+	public static final fun SqlNormalizedCacheFactory (Lapp/cash/sqldelight/db/SqlDriver;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
+	public static final fun SqlNormalizedCacheFactory (Ljava/lang/String;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
+	public static synthetic fun SqlNormalizedCacheFactory$default (Landroid/content/Context;Ljava/lang/String;Landroidx/sqlite/db/SupportSQLiteOpenHelper$Factory;Lkotlin/jvm/functions/Function1;ZLjava/lang/Long;ILjava/lang/Object;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
+	public static synthetic fun SqlNormalizedCacheFactory$default (Ljava/lang/String;ILjava/lang/Object;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
 }
 
 public final class com/apollographql/cache/normalized/sql/VersionKt {

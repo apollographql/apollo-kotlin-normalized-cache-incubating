@@ -6,7 +6,9 @@ package com.apollographql.cache.normalized.internal
  * - uses Java's `ReentrantReadWriteLock` on the JVM
  * - uses AtomicFu's [ReentrantLock] on Native (read and write are not distinguished)
  */
-internal expect class Lock() {
+internal expect fun Lock(): Lock
+
+internal interface Lock {
   fun <T> read(block: () -> T): T
   fun <T> write(block: () -> T): T
 }
