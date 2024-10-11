@@ -41,7 +41,7 @@ class CacheKeyGeneratorContext(
 )
 
 /**
- * A [CacheKeyGenerator] that uses annotations to compute the id
+ * A [CacheKeyGenerator] that uses the `@typePolicy` directive to compute the id
  */
 object TypePolicyCacheKeyGenerator : CacheKeyGenerator {
   override fun cacheKeyForObject(obj: Map<String, Any?>, context: CacheKeyGeneratorContext): CacheKey? {
@@ -52,5 +52,21 @@ object TypePolicyCacheKeyGenerator : CacheKeyGenerator {
     } else {
       null
     }
+  }
+}
+
+/**
+ * A [CacheKeyGenerator] that uses the given id fields to compute the cache key.
+ * If the id field(s) is/are missing, the object is considered to not have an id.
+ *
+ * @see IdCacheKeyResolver
+ */
+class IdCacheKeyGenerator(private vararg val idFields: String = arrayOf("id")) : CacheKeyGenerator {
+  override fun cacheKeyForObject(obj: Map<String, Any?>, context: CacheKeyGeneratorContext): CacheKey? {
+    val values = idFields.map {
+      (obj[it] ?: return null).toString()
+    }
+    val typeName = context.field.type.rawType().name
+    return CacheKey(typeName, values)
   }
 }
