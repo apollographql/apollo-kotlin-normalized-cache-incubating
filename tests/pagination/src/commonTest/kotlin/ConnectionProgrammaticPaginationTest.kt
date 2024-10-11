@@ -8,9 +8,9 @@ import com.apollographql.cache.normalized.api.ConnectionFieldKeyGenerator
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
 import com.apollographql.cache.normalized.api.ConnectionRecordMerger
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
-import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import pagination.connectionProgrammatic.UsersQuery
 import pagination.connectionProgrammatic.type.Query

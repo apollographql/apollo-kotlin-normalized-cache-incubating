@@ -6,13 +6,12 @@ import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.FieldRecordMerger
-import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.MetadataGenerator
 import com.apollographql.cache.normalized.api.MetadataGeneratorContext
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
-import com.apollographql.cache.normalized.api.internal.OptimisticNormalizedCache
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import pagination.offsetBasedWithPage.UsersQuery
 import pagination.offsetBasedWithPage.type.buildUser
@@ -230,7 +229,7 @@ class OffsetBasedWithPagePaginationTest {
 internal fun assertChainedCachesAreEqual(apolloStore: ApolloStore) {
   val dump = apolloStore.dump().filterKeys {
     // Ignore optimistic cache for comparison
-    it != OptimisticNormalizedCache::class
+    it.simpleName != "OptimisticNormalizedCache"
   }
   if (dump.size < 2) return
   val caches = dump.values.toList()

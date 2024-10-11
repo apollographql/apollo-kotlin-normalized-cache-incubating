@@ -5,8 +5,6 @@ package com.apollographql.cache.normalized
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.CacheDumpProviderContext
-import com.apollographql.apollo.annotations.ApolloDeprecatedSince
-import com.apollographql.apollo.annotations.ApolloDeprecatedSince.Version.v4_0_0
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.ExecutionContext
@@ -47,51 +45,6 @@ import kotlinx.coroutines.flow.map
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
 import kotlin.time.Duration
-
-enum class FetchPolicy {
-  /**
-   * Try the cache, if that failed, try the network.
-   *
-   * This [FetchPolicy] emits one or more [ApolloResponse]s.
-   * Cache misses and network errors have [ApolloResponse.exception] set to a non-null [ApolloException]
-   *
-   * This is the default behaviour.
-   */
-  CacheFirst,
-
-  /**
-   * Only try the cache.
-   *
-   * This [FetchPolicy] emits one [ApolloResponse].
-   * Cache misses have [ApolloResponse.exception] set to a non-null [ApolloException]
-   */
-  CacheOnly,
-
-  /**
-   * Try the network, if that failed, try the cache.
-   *
-   * This [FetchPolicy] emits one or more [ApolloResponse]s.
-   * Cache misses and network errors have [ApolloResponse.exception] set to a non-null [ApolloException]
-   */
-  NetworkFirst,
-
-  /**
-   * Only try the network.
-   *
-   * This [FetchPolicy] emits one or more [ApolloResponse]s. Several [ApolloResponse]s
-   * may be emitted if your [NetworkTransport] supports it, for example with `@defer`.
-   * Network errors have [ApolloResponse.exception] set to a non-null [ApolloException]
-   */
-  NetworkOnly,
-
-  /**
-   * Try the cache, then also try the network.
-   *
-   * This [FetchPolicy] emits two or more [ApolloResponse]s.
-   * Cache misses and network errors have [ApolloResponse.exception] set to a non-null [ApolloException]
-   */
-  CacheAndNetwork,
-}
 
 /**
  * Configures an [ApolloClient] with a normalized cache.
@@ -158,24 +111,6 @@ fun ApolloClient.Builder.store(store: ApolloStore, writeToCacheAsynchronously: B
       .writeToCacheAsynchronously(writeToCacheAsynchronously)
       .addExecutionContext(CacheDumpProviderContext(store.cacheDumpProvider()))
 }
-
-@Deprecated(level = DeprecationLevel.ERROR, message = "Exceptions no longer throw", replaceWith = ReplaceWith("watch()"))
-@ApolloDeprecatedSince(v4_0_0)
-@Suppress("UNUSED_PARAMETER")
-fun <D : Query.Data> ApolloCall<D>.watch(
-    fetchThrows: Boolean,
-    refetchThrows: Boolean,
-): Flow<ApolloResponse<D>> =
-  throw UnsupportedOperationException("watch(fetchThrows: Boolean, refetchThrows: Boolean) is no longer supported, use watch() instead")
-
-@Deprecated(level = DeprecationLevel.ERROR, message = "Exceptions no longer throw", replaceWith = ReplaceWith("watch()"))
-@ApolloDeprecatedSince(v4_0_0)
-@Suppress("UNUSED_PARAMETER")
-fun <D : Query.Data> ApolloCall<D>.watch(
-    fetchThrows: Boolean,
-): Flow<ApolloResponse<D>> =
-  throw UnsupportedOperationException("watch(fetchThrows: Boolean, refetchThrows: Boolean) is no longer supported, use watch() instead")
-
 /**
  * Gets initial response(s) then observes the cache for any changes.
  *
@@ -312,12 +247,6 @@ fun <T> MutableExecutionOptions<T>.doNotStore(doNotStore: Boolean) = addExecutio
 fun <T> MutableExecutionOptions<T>.memoryCacheOnly(memoryCacheOnly: Boolean) = addExecutionContext(
     MemoryCacheOnlyContext(memoryCacheOnly)
 )
-
-@Deprecated("Emitting cache misses is now the default behavior, this method is a no-op", replaceWith = ReplaceWith(""))
-@ApolloDeprecatedSince(v4_0_0)
-@Suppress("UNUSED_PARAMETER")
-fun <T> MutableExecutionOptions<T>.emitCacheMisses(emitCacheMisses: Boolean) = this
-
 /**
  * @param storePartialResponses Whether to store partial responses.
  *
@@ -480,47 +409,8 @@ class CacheInfo private constructor(
     val cacheMissException: CacheMissException?,
     val networkException: ApolloException?,
 ) : ExecutionContext.Element {
-
-  @Deprecated("Use CacheInfo.Builder")
-  constructor(
-      millisStart: Long,
-      millisEnd: Long,
-      hit: Boolean,
-      missedKey: String?,
-      missedField: String?,
-  ) : this(
-      cacheStartMillis = millisStart,
-      cacheEndMillis = millisEnd,
-      networkStartMillis = 0,
-      networkEndMillis = 0,
-      isCacheHit = hit,
-      cacheMissException = missedKey?.let { CacheMissException(it, missedField) },
-      networkException = null
-  )
-
   override val key: ExecutionContext.Key<*>
     get() = Key
-
-  @Deprecated("Use cacheStartMillis instead", ReplaceWith("cacheStartMillis"))
-  val millisStart: Long
-    get() = cacheStartMillis
-
-  @Deprecated("Use cacheEndMillis instead", ReplaceWith("cacheEndMillis"))
-  val millisEnd: Long
-    get() = cacheEndMillis
-
-  @Deprecated("Use cacheHit instead", ReplaceWith("cacheHit"))
-  val hit: Boolean
-    get() = isCacheHit
-
-  @Deprecated("Use cacheMissException?.key instead", ReplaceWith("cacheMissException?.key"))
-  val missedKey: String?
-    get() = cacheMissException?.key
-
-  @Deprecated("Use cacheMissException?.fieldName instead", ReplaceWith("cacheMissException?.fieldName"))
-  val missedField: String?
-    get() = cacheMissException?.fieldName
-
 
   companion object Key : ExecutionContext.Key<CacheInfo>
 
@@ -530,6 +420,7 @@ class CacheInfo private constructor(
         .networkStartMillis(networkStartMillis)
         .networkEndMillis(networkEndMillis)
         .cacheHit(isCacheHit)
+        .cacheMissException(cacheMissException)
         .networkException(networkException)
   }
 
@@ -701,17 +592,3 @@ fun <D : Operation.Data> ApolloResponse.Builder<D>.cacheHeaders(cacheHeaders: Ca
 
 val <D : Operation.Data> ApolloResponse<D>.cacheHeaders
   get() = executionContext[CacheHeadersContext]?.value ?: CacheHeaders.NONE
-
-/**
- * Gets the result from the cache first and always fetch from the network. Use this to get an early
- * cached result while also updating the network values.
- *
- * Any [FetchPolicy] previously set will be ignored
- */
-@Deprecated(
-    "Use fetchPolicy(FetchPolicy.CacheAndNetwork) instead",
-    ReplaceWith("fetchPolicy(FetchPolicy.CacheAndNetwork).toFlow()"),
-    level = DeprecationLevel.ERROR
-)
-@ApolloDeprecatedSince(ApolloDeprecatedSince.Version.v3_7_5)
-fun <D : Query.Data> ApolloCall<D>.executeCacheAndNetwork(): Flow<ApolloResponse<D>> = TODO()

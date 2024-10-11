@@ -5,8 +5,8 @@ import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
-import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import sqlite.RepositoryListQuery
 import kotlin.test.Test

@@ -12,7 +12,6 @@ import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.ExpirationCacheResolver
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.MaxAge
-import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
@@ -20,6 +19,7 @@ import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.maxStale
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import programmatic.GetCompanyQuery

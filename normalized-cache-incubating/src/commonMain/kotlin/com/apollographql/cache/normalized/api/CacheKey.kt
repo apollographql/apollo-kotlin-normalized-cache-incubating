@@ -1,6 +1,5 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.annotations.ApolloDeprecatedSince
 import kotlin.jvm.JvmStatic
 
 /**
@@ -8,7 +7,7 @@ import kotlin.jvm.JvmStatic
  *
  * @param key The key of the object in the cache. The key must be globally unique.
  */
-class CacheKey constructor(val key: String) {
+class CacheKey(val key: String) {
 
   /**
    * Builds a [CacheKey] from a typename and a list of Strings.
@@ -67,23 +66,8 @@ class CacheKey constructor(val key: String) {
     private val ROOT_CACHE_KEY = CacheKey("QUERY_ROOT")
 
     @JvmStatic
-    @Suppress("UNUSED_PARAMETER")
     fun rootKey(): CacheKey {
       return ROOT_CACHE_KEY
     }
-
-    /**
-     * Helper function to build a cache key from a list of strings
-     */
-    @Deprecated("Use the constructor instead", ReplaceWith("CacheKey(typename, values)"), level = DeprecationLevel.ERROR)
-    @ApolloDeprecatedSince(ApolloDeprecatedSince.Version.v3_0_0)
-    fun from(typename: String, values: List<String>) = CacheKey(typename, values)
-
-    /**
-     * Helper function to build a cache key from a list of strings
-     */
-    @Deprecated("Use the constructor instead", ReplaceWith("CacheKey(typename, values)"), level = DeprecationLevel.ERROR)
-    @ApolloDeprecatedSince(ApolloDeprecatedSince.Version.v3_0_0)
-    fun from(typename: String, vararg values: String) = CacheKey(typename, values.toList())
   }
 }

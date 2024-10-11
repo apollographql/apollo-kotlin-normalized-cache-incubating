@@ -4,7 +4,7 @@ import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
-import com.apollographql.cache.normalized.api.MemoryCache
+import com.apollographql.cache.normalized.memory.MemoryCache
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import kotlin.test.Test

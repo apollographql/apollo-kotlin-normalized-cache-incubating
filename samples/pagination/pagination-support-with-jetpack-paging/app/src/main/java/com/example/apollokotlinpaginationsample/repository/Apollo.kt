@@ -15,9 +15,9 @@ import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
 import com.apollographql.cache.normalized.api.ConnectionRecordMerger
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
-import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.watch

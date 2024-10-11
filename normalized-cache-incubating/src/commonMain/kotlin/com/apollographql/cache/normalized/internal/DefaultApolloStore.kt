@@ -16,7 +16,6 @@ import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
-import com.apollographql.cache.normalized.api.internal.OptimisticNormalizedCache
 import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.api.readDataFromCacheInternal
 import com.apollographql.cache.normalized.api.toData

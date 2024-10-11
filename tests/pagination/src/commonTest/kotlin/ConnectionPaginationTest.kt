@@ -6,9 +6,9 @@ import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
 import com.apollographql.cache.normalized.api.ConnectionRecordMerger
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
-import com.apollographql.cache.normalized.api.MemoryCacheFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import pagination.connection.UsersQuery
 import pagination.connection.pagination.Pagination
