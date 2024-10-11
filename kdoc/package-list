@@ -1,13 +1,12 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
-
+$dokka.location:com.apollographql.cache.normalized.sql//SqlNormalizedCacheFactory/#kotlin.String?#kotlin.String?/PointingToDeclaration/normalized-cache-sqlite-incubating/com.apollographql.cache.normalized.sql/[jvm]-sql-normalized-cache-factory.html
 module:normalized-cache-apollo-compiler-plugin
 com.apollographql.cache.apollocompilerplugin
 module:normalized-cache-incubating
 com.apollographql.cache.normalized
 com.apollographql.cache.normalized.api
-com.apollographql.cache.normalized.api.internal
-com.apollographql.cache.normalized.api.internal.store
+com.apollographql.cache.normalized.memory
 module:normalized-cache-sqlite-incubating
 com.apollographql.cache.normalized.sql
 com.apollographql.cache.normalized.sql.internal.blob
