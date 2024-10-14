@@ -1,9 +1,15 @@
 type Query {
   user: User
+  user2(id: ID!): User
+  userById(userId: ID!): User
+  users(ids: [ID!]!): [User!]!
+  usersByIDs(userIds: [ID!]!): [User!]!
   repositories(first: Int, after: String): [Repository!]!
 }
 
 type User {
+  id: ID!
+  userId: ID!
   name: String!
   email: String!
   admin: Boolean

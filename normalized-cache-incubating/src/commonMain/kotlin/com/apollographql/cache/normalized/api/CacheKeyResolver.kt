@@ -66,3 +66,32 @@ abstract class CacheKeyResolver : CacheResolver {
     return DefaultCacheResolver.resolveField(context)
   }
 }
+
+/**
+ * A simple [CacheKeyResolver] that uses the id/ids argument, if present, to compute the cache key.
+ * The name of the id arguments can be provided (by default "id" for objects and "ids" for lists).
+ * If several names are provided, the first present one is used.
+ * Only one level of list is supported - implement [CacheResolver] if you need arbitrary nested lists of objects.
+ *
+ * @param idFields possible names of the argument containing the id for objects
+ * @param idListFields possible names of the argument containing the ids for lists
+ *
+ * @see IdCacheKeyGenerator
+ */
+class IdCacheKeyResolver(
+    private val idFields: List<String> = listOf("id"),
+    private val idListFields: List<String> = listOf("ids"),
+) : CacheKeyResolver() {
+  override fun cacheKeyForField(context: ResolverContext): CacheKey? {
+    val typeName = context.field.type.rawType().name
+    val id = idFields.firstNotNullOfOrNull { context.field.argumentValue(it, context.variables).getOrNull()?.toString() } ?: return null
+    return CacheKey(typeName, id)
+  }
+
+  override fun listOfCacheKeysForField(context: ResolverContext): List<CacheKey?>? {
+    val typeName = context.field.type.rawType().name
+    val ids = idListFields.firstNotNullOfOrNull { context.field.argumentValue(it, context.variables).getOrNull() as? List<*> }
+        ?: return null
+    return ids.map { id -> id?.toString()?.let { CacheKey(typeName, it) } }
+  }
+}

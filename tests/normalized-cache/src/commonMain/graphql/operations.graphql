@@ -5,6 +5,38 @@ query GetUser {
   }
 }
 
+query GetUser2($id: ID!) {
+  user2(id: $id) {
+    id
+    name
+    email
+  }
+}
+
+query GetUserById($userId: ID!) {
+  userById(userId: $userId) {
+    userId
+    name
+    email
+  }
+}
+
+query GetUsers($ids: [ID!]!) {
+  users(ids: $ids) {
+    id
+    name
+    email
+  }
+}
+
+query GetUsersByIDs($userIds: [ID!]!) {
+  usersByIDs(userIds: $userIds) {
+    id
+    name
+    email
+  }
+}
+
 query RepositoryListQuery($first: Int = 15, $after: String) {
   repositories(first: $first, after: $after) {
     id

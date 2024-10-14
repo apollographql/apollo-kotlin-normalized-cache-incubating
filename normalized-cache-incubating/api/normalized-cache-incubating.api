@@ -304,6 +304,21 @@ public final class com/apollographql/cache/normalized/api/GlobalMaxAgeProvider :
 	public fun getMaxAge-5sfh64U (Lcom/apollographql/cache/normalized/api/MaxAgeContext;)J
 }
 
+public final class com/apollographql/cache/normalized/api/IdCacheKeyGenerator : com/apollographql/cache/normalized/api/CacheKeyGenerator {
+	public fun <init> ()V
+	public fun <init> ([Ljava/lang/String;)V
+	public synthetic fun <init> ([Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cacheKeyForObject (Ljava/util/Map;Lcom/apollographql/cache/normalized/api/CacheKeyGeneratorContext;)Lcom/apollographql/cache/normalized/api/CacheKey;
+}
+
+public final class com/apollographql/cache/normalized/api/IdCacheKeyResolver : com/apollographql/cache/normalized/api/CacheKeyResolver {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cacheKeyForField (Lcom/apollographql/cache/normalized/api/ResolverContext;)Lcom/apollographql/cache/normalized/api/CacheKey;
+	public fun listOfCacheKeysForField (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/util/List;
+}
+
 public abstract interface class com/apollographql/cache/normalized/api/MaxAge {
 }
 
