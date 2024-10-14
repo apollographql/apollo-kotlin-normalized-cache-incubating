@@ -56,11 +56,14 @@ class IdCacheKeyGeneratorTest {
     )
     val apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).store(store).build()
     val query1 = GetUsersQuery(listOf("42", "43"))
-    apolloClient.enqueueTestResponse(query1, GetUsersQuery.Data(listOf(
-        GetUsersQuery.User(id = "42", name = "John", email = "a@a.com"),
-        GetUsersQuery.User(id = "43", name = "Jane", email = "b@b.com"),
-    )
-    )
+    apolloClient.enqueueTestResponse(
+        query1,
+        GetUsersQuery.Data(
+            listOf(
+                GetUsersQuery.User(id = "42", name = "John", email = "a@a.com"),
+                GetUsersQuery.User(id = "43", name = "Jane", email = "b@b.com"),
+            )
+        )
     )
     apolloClient.query(query1).fetchPolicy(FetchPolicy.NetworkOnly).execute()
     val users1 = apolloClient.query(query1).fetchPolicy(FetchPolicy.CacheOnly).execute().dataOrThrow().users
