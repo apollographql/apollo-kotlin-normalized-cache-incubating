@@ -8,6 +8,7 @@ import com.apollographql.apollo.CacheDumpProviderContext
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.ExecutionContext
+import com.apollographql.apollo.api.ExecutionOptions
 import com.apollographql.apollo.api.MutableExecutionOptions
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
@@ -111,6 +112,7 @@ fun ApolloClient.Builder.store(store: ApolloStore, writeToCacheAsynchronously: B
       .writeToCacheAsynchronously(writeToCacheAsynchronously)
       .addExecutionContext(CacheDumpProviderContext(store.cacheDumpProvider()))
 }
+
 /**
  * Gets initial response(s) then observes the cache for any changes.
  *
@@ -247,6 +249,7 @@ fun <T> MutableExecutionOptions<T>.doNotStore(doNotStore: Boolean) = addExecutio
 fun <T> MutableExecutionOptions<T>.memoryCacheOnly(memoryCacheOnly: Boolean) = addExecutionContext(
     MemoryCacheOnlyContext(memoryCacheOnly)
 )
+
 /**
  * @param storePartialResponses Whether to store partial responses.
  *
@@ -334,10 +337,17 @@ fun <T> MutableExecutionOptions<T>.cacheHeaders(cacheHeaders: CacheHeaders) = ad
 )
 
 /**
+ * Add a cache header to be passed to your [com.apollographql.cache.normalized.api.NormalizedCache]
+ */
+fun <T> MutableExecutionOptions<T>.addCacheHeader(key: String, value: String) = cacheHeaders(
+    cacheHeaders.newBuilder().addHeader(key, value).build()
+)
+
+/**
  * @param maxStale how long to accept stale fields
  */
-fun <T> MutableExecutionOptions<T>.maxStale(maxStale: Duration) = cacheHeaders(
-    CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MAX_STALE, maxStale.inWholeSeconds.toString()).build()
+fun <T> MutableExecutionOptions<T>.maxStale(maxStale: Duration) = addCacheHeader(
+    ApolloCacheHeaders.MAX_STALE, maxStale.inWholeSeconds.toString()
 )
 
 /**
@@ -389,7 +399,7 @@ internal val <D : Operation.Data> ApolloRequest<D>.writeToCacheAsynchronously
 internal val <D : Mutation.Data> ApolloRequest<D>.optimisticData
   get() = executionContext[OptimisticUpdatesContext]?.value
 
-internal val <D : Operation.Data> ApolloRequest<D>.cacheHeaders
+internal val ExecutionOptions.cacheHeaders: CacheHeaders
   get() = executionContext[CacheHeadersContext]?.value ?: CacheHeaders.NONE
 
 internal val <D : Operation.Data> ApolloRequest<D>.watchContext: WatchContext?
