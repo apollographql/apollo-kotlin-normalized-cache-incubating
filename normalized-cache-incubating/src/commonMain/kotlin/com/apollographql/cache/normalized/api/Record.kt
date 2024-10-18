@@ -1,5 +1,6 @@
 package com.apollographql.cache.normalized.api
 
+import com.apollographql.apollo.annotations.ApolloInternal
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.cache.normalized.internal.RecordWeigher.calculateBytes
 import com.benasher44.uuid.Uuid
@@ -87,8 +88,9 @@ class Record(
   }
 }
 
-fun Record.withDates(receivedDate: String?, expirationDate: String?): Record {
-  if (receivedDate == null && expirationDate == null) {
+@ApolloInternal
+fun Record.withDates(receivedDate: String?, staleDate: String?): Record {
+  if (receivedDate == null && staleDate == null) {
     return this
   }
   return Record(
@@ -100,8 +102,8 @@ fun Record.withDates(receivedDate: String?, expirationDate: String?): Record {
           receivedDate?.let {
             put(ApolloCacheHeaders.RECEIVED_DATE, it.toLong())
           }
-          expirationDate?.let {
-            put(ApolloCacheHeaders.EXPIRATION_DATE, it.toLong())
+          staleDate?.let {
+            put(ApolloCacheHeaders.STALE_DATE, it.toLong())
           }
         }
       }
@@ -110,7 +112,7 @@ fun Record.withDates(receivedDate: String?, expirationDate: String?): Record {
 
 fun Record.receivedDate(field: String) = metadata[field]?.get(ApolloCacheHeaders.RECEIVED_DATE) as? Long
 
-fun Record.expirationDate(field: String) = metadata[field]?.get(ApolloCacheHeaders.EXPIRATION_DATE) as? Long
+fun Record.staleDate(field: String) = metadata[field]?.get(ApolloCacheHeaders.STALE_DATE) as? Long
 
 
 /**

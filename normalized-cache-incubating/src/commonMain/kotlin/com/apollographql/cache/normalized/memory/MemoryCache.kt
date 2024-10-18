@@ -7,10 +7,10 @@ import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
-import com.apollographql.cache.normalized.internal.Lock
-import com.apollographql.cache.normalized.memory.internal.LruCache
-import com.apollographql.cache.normalized.internal.patternToRegex
 import com.apollographql.cache.normalized.api.withDates
+import com.apollographql.cache.normalized.internal.Lock
+import com.apollographql.cache.normalized.internal.patternToRegex
+import com.apollographql.cache.normalized.memory.internal.LruCache
 import kotlin.jvm.JvmOverloads
 import kotlin.reflect.KClass
 
@@ -132,14 +132,14 @@ class MemoryCache(
 
   private fun internalMerge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
-    val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
+    val staleDate = cacheHeaders.headerValue(ApolloCacheHeaders.STALE_DATE)
     val oldRecord = loadRecord(record.key, cacheHeaders)
     val changedKeys = if (oldRecord == null) {
-      lruCache[record.key] = record.withDates(receivedDate = receivedDate, expirationDate = expirationDate)
+      lruCache[record.key] = record.withDates(receivedDate = receivedDate, staleDate = staleDate)
       record.fieldKeys()
     } else {
       val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record)
-      lruCache[record.key] = mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate)
+      lruCache[record.key] = mergedRecord.withDates(receivedDate = receivedDate, staleDate = staleDate)
       changedKeys
     }
     return changedKeys

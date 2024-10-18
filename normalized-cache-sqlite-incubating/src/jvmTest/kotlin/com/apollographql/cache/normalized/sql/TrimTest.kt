@@ -27,7 +27,7 @@ class TrimTest {
         fields = mapOf("key" to "value"),
         mutationId = null,
         metadata = emptyMap()
-    ).withDates(receivedDate = "0", expirationDate = null)
+    ).withDates(receivedDate = "0", staleDate = null)
     cache.merge(oldRecord, CacheHeaders.NONE, recordMerger = DefaultRecordMerger)
 
     val newRecords = 0.until(2 * 1024).map {
@@ -36,7 +36,7 @@ class TrimTest {
           fields = mapOf("key" to largeString),
           mutationId = null,
           metadata = emptyMap()
-      ).withDates(receivedDate = it.toString(), expirationDate = null)
+      ).withDates(receivedDate = it.toString(), staleDate = null)
     }
     cache.merge(newRecords, CacheHeaders.NONE, recordMerger = DefaultRecordMerger)
 

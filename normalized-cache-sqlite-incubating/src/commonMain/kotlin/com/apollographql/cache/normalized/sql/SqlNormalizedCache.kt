@@ -149,7 +149,7 @@ class SqlNormalizedCache internal constructor(
   private fun internalUpdateRecords(records: Collection<Record>, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     var updatedRecordKeys: Set<String> = emptySet()
     val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
-    val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
+    val staleDate = cacheHeaders.headerValue(ApolloCacheHeaders.STALE_DATE)
     recordDatabase.transaction {
       val oldRecords = internalGetRecords(
           keys = records.map { it.key },
@@ -158,12 +158,12 @@ class SqlNormalizedCache internal constructor(
       updatedRecordKeys = records.flatMap { record ->
         val oldRecord = oldRecords[record.key]
         if (oldRecord == null) {
-          recordDatabase.insert(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
+          recordDatabase.insert(record.withDates(receivedDate = receivedDate, staleDate = staleDate))
           record.fieldKeys()
         } else {
           val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record)
           if (mergedRecord.isNotEmpty()) {
-            recordDatabase.update(mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
+            recordDatabase.update(mergedRecord.withDates(receivedDate = receivedDate, staleDate = staleDate))
           }
           changedKeys
         }
@@ -177,16 +177,16 @@ class SqlNormalizedCache internal constructor(
    */
   private fun internalUpdateRecord(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
-    val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
+    val staleDate = cacheHeaders.headerValue(ApolloCacheHeaders.STALE_DATE)
     return recordDatabase.transaction {
       val oldRecord = recordDatabase.select(record.key)
       if (oldRecord == null) {
-        recordDatabase.insert(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
+        recordDatabase.insert(record.withDates(receivedDate = receivedDate, staleDate = staleDate))
         record.fieldKeys()
       } else {
         val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record)
         if (mergedRecord.isNotEmpty()) {
-          recordDatabase.update(mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
+          recordDatabase.update(mergedRecord.withDates(receivedDate = receivedDate, staleDate = staleDate))
         }
         changedKeys
       }

@@ -1,10 +1,8 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.api.Adapter
 import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Operation
-import com.apollographql.apollo.api.json.MapJsonReader
 import com.apollographql.apollo.api.json.MapJsonWriter
 import com.apollographql.apollo.api.variables
 import com.apollographql.cache.normalized.internal.CacheBatchReader
@@ -119,18 +117,4 @@ fun Collection<Record>?.dependentKeys(): Set<String> {
   return this?.flatMap {
     it.fieldKeys()
   }?.toSet() ?: emptySet()
-}
-
-internal fun <D : Executable.Data> CacheBatchReaderData.toData(
-    adapter: Adapter<D>,
-    customScalarAdapters: CustomScalarAdapters,
-    variables: Executable.Variables,
-): D {
-  val reader = MapJsonReader(
-      root = toMap(),
-  )
-
-  return adapter.fromJson(reader, customScalarAdapters.newBuilder().falseVariables(variables.valueMap.filter { it.value == false }.keys)
-      .build()
-  )
 }

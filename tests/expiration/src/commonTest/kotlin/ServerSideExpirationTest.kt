@@ -5,7 +5,7 @@ import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
-import com.apollographql.cache.normalized.api.ExpirationCacheResolver
+import com.apollographql.cache.normalized.api.CacheControlCacheResolver
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
@@ -13,7 +13,7 @@ import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.storeExpirationDate
+import com.apollographql.cache.normalized.storeStaleDate
 import com.apollographql.mockserver.MockResponse
 import com.apollographql.mockserver.MockServer
 import programmatic.GetUserQuery
@@ -43,9 +43,9 @@ class ServerSideExpirationTest {
     val client = ApolloClient.Builder()
         .normalizedCache(
             normalizedCacheFactory = normalizedCacheFactory,
-            cacheResolver = ExpirationCacheResolver(),
+            cacheResolver = CacheControlCacheResolver(),
         )
-        .storeExpirationDate(true)
+        .storeStaleDate(true)
         .serverUrl(mockServer.url())
         .build()
     client.apolloStore.clearAll()
@@ -65,7 +65,7 @@ class ServerSideExpirationTest {
 
     var response: ApolloResponse<GetUserQuery.Data>
 
-    // store data with an expiration date in the future
+    // store data with a stale date in the future
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=10")

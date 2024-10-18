@@ -5,9 +5,10 @@ import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.MutableExecutionOptions
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.mpp.currentTimeMillis
+import com.apollographql.cache.normalized.api.CacheResolver.ResolvedValue
 import com.apollographql.cache.normalized.maxStale
-import com.apollographql.cache.normalized.storeExpirationDate
 import com.apollographql.cache.normalized.storeReceiveDate
+import com.apollographql.cache.normalized.storeStaleDate
 import kotlin.jvm.JvmSuppressWildcards
 import kotlin.time.Duration
 
@@ -68,9 +69,14 @@ interface CacheResolver {
    * @param context the field to resolve and associated information to resolve it
    *
    * @return a value that can go in a [Record]. No type checking is done. It is the responsibility of implementations to return the correct
-   * type
+   * type. The value can be wrapped in a [ResolvedValue] to provide additional information.
    */
   fun resolveField(context: ResolverContext): Any?
+
+  class ResolvedValue(
+      val value: Any?,
+      val cacheHeaders: CacheHeaders,
+  )
 }
 
 class ResolverContext(
@@ -133,63 +139,74 @@ object DefaultCacheResolver : CacheResolver {
 
 /**
  * A cache resolver that raises a cache miss if the field's received date is older than its max age
- * (configurable via [maxAgeProvider]) or its expiration date has passed.
+ * (configurable via [maxAgeProvider]) or its stale date has passed.
  *
  * Received dates are stored by calling `storeReceiveDate(true)` on your `ApolloClient`.
  *
- * Expiration dates are stored by calling `storeExpirationDate(true)` on your `ApolloClient`.
+ * Stale dates are stored by calling `storeStaleDate(true)` on your `ApolloClient`.
  *
  * A maximum staleness can be configured via the [ApolloCacheHeaders.MAX_STALE] cache header.
  *
  * @see MutableExecutionOptions.storeReceiveDate
- * @see MutableExecutionOptions.storeExpirationDate
+ * @see MutableExecutionOptions.storeStaleDate
  * @see MutableExecutionOptions.maxStale
  */
-class ExpirationCacheResolver(
+class CacheControlCacheResolver(
     private val maxAgeProvider: MaxAgeProvider,
 ) : CacheResolver {
   /**
-   * Creates a new [ExpirationCacheResolver] with no max ages. Use this constructor if you want to consider only the expiration dates.
+   * Creates a new [CacheControlCacheResolver] with no max ages. Use this constructor if you want to consider only the stale dates.
    */
   constructor() : this(maxAgeProvider = GlobalMaxAgeProvider(Duration.INFINITE))
 
   override fun resolveField(context: ResolverContext): Any? {
-    val resolvedField = FieldPolicyCacheResolver.resolveField(context)
+    var isStale = false
     if (context.parent is Record) {
       val field = context.field
-      val maxStale = context.cacheHeaders.headerValue(ApolloCacheHeaders.MAX_STALE)?.toLongOrNull() ?: 0L
-      val currentDate = currentTimeMillis() / 1000
-
-      // Consider the field's max age (client side)
-      val fieldMaxAge = maxAgeProvider.getMaxAge(MaxAgeContext(context.path)).inWholeSeconds
-      val fieldReceivedDate = context.parent.receivedDate(field.name)
-      if (fieldReceivedDate != null) {
-        val fieldAge = currentDate - fieldReceivedDate
-        val stale = fieldAge - fieldMaxAge
-        if (stale >= maxStale) {
+      val receivedDate = context.parent.receivedDate(field.name)
+      // Consider the client controlled max age
+      if (receivedDate != null) {
+        val currentDate = currentTimeMillis() / 1000
+        val age = currentDate - receivedDate
+        val maxAge = maxAgeProvider.getMaxAge(MaxAgeContext(context.path)).inWholeSeconds
+        val staleDuration = age - maxAge
+        val maxStale = context.cacheHeaders.headerValue(ApolloCacheHeaders.MAX_STALE)?.toLongOrNull() ?: 0L
+        if (staleDuration >= maxStale) {
           throw CacheMissException(
-              context.parentKey,
-              context.fieldKeyGenerator.getFieldKey(FieldKeyContext(context.parentType, context.field, context.variables)),
-              true
+              key = context.parentKey,
+              fieldName = context.fieldKeyGenerator.getFieldKey(FieldKeyContext(context.parentType, context.field, context.variables)),
+              stale = true
           )
         }
+        if (staleDuration >= 0) isStale = true
       }
 
-      // Consider the field's expiration date (server side)
-      val fieldExpirationDate = context.parent.expirationDate(field.name)
-      if (fieldExpirationDate != null) {
-        val stale = currentDate - fieldExpirationDate
-        if (stale >= maxStale) {
+      // Consider the server controlled max age
+      val staleDate = context.parent.staleDate(field.name)
+      if (staleDate != null) {
+        val currentDate = currentTimeMillis() / 1000
+        val staleDuration = currentDate - staleDate
+        val maxStale = context.cacheHeaders.headerValue(ApolloCacheHeaders.MAX_STALE)?.toLongOrNull() ?: 0L
+        if (staleDuration >= maxStale) {
           throw CacheMissException(
-              context.parentKey,
-              context.fieldKeyGenerator.getFieldKey(FieldKeyContext(context.parentType, context.field, context.variables)),
-              true
+              key = context.parentKey,
+              fieldName = context.fieldKeyGenerator.getFieldKey(FieldKeyContext(context.parentType, context.field, context.variables)),
+              stale = true
           )
         }
+        if (staleDuration >= 0) isStale = true
       }
     }
 
-    return resolvedField
+    val value = FieldPolicyCacheResolver.resolveField(context)
+    return if (isStale) {
+      ResolvedValue(
+          value = value,
+          cacheHeaders = CacheHeaders.Builder().addHeader(ApolloCacheHeaders.STALE, "true").build(),
+      )
+    } else {
+      value
+    }
   }
 }
 
