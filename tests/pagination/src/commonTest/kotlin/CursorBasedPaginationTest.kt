@@ -77,7 +77,7 @@ class CursorBasedPaginationTest {
       }
     }
     apolloStore.writeOperation(query1, data1)
-    var dataFromStore = apolloStore.readOperation(query1)
+    var dataFromStore = apolloStore.readOperation(query1).data
     assertEquals(data1, dataFromStore)
     assertChainedCachesAreEqual(apolloStore)
 
@@ -106,7 +106,7 @@ class CursorBasedPaginationTest {
       }
     }
     apolloStore.writeOperation(query2, data2)
-    dataFromStore = apolloStore.readOperation(query1)
+    dataFromStore = apolloStore.readOperation(query1).data
     var expectedData = UsersQuery.Data {
       users = buildUserConnection {
         pageInfo = buildPageInfo {
@@ -169,7 +169,7 @@ class CursorBasedPaginationTest {
       }
     }
     apolloStore.writeOperation(query3, data3)
-    dataFromStore = apolloStore.readOperation(query1)
+    dataFromStore = apolloStore.readOperation(query1).data
     expectedData = UsersQuery.Data {
       users = buildUserConnection {
         pageInfo = buildPageInfo {
@@ -244,7 +244,7 @@ class CursorBasedPaginationTest {
       }
     }
     apolloStore.writeOperation(query4, data4)
-    dataFromStore = apolloStore.readOperation(query1)
+    dataFromStore = apolloStore.readOperation(query1).data
     expectedData = UsersQuery.Data {
       users = buildUserConnection {
         pageInfo = buildPageInfo {
@@ -331,7 +331,7 @@ class CursorBasedPaginationTest {
       }
     }
     apolloStore.writeOperation(query5, data5)
-    dataFromStore = apolloStore.readOperation(query1)
+    dataFromStore = apolloStore.readOperation(query1).data
     assertEquals(data5, dataFromStore)
     assertChainedCachesAreEqual(apolloStore)
 
@@ -347,7 +347,7 @@ class CursorBasedPaginationTest {
       }
     }
     apolloStore.writeOperation(query6, data6)
-    dataFromStore = apolloStore.readOperation(query1)
+    dataFromStore = apolloStore.readOperation(query1).data
     assertEquals(data5, dataFromStore)
     assertChainedCachesAreEqual(apolloStore)
   }

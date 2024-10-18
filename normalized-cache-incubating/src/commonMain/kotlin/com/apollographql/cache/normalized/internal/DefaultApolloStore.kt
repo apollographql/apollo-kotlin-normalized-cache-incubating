@@ -5,6 +5,7 @@ import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.variables
 import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.ApolloStore.ReadResult
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
@@ -18,7 +19,6 @@ import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.api.readDataFromCacheInternal
-import com.apollographql.cache.normalized.api.toData
 import com.benasher44.uuid.Uuid
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -115,16 +115,20 @@ internal class DefaultApolloStore(
       operation: Operation<D>,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
-  ): D {
+  ): ReadResult<D> {
     val variables = operation.variables(customScalarAdapters, true)
-    return operation.readDataFromCacheInternal(
+    val batchReaderData = operation.readDataFromCacheInternal(
         cache = cache,
         cacheResolver = cacheResolver,
         cacheHeaders = cacheHeaders,
         cacheKey = CacheKey.rootKey(),
         variables = variables,
         fieldKeyGenerator = fieldKeyGenerator,
-    ).toData(operation.adapter(), customScalarAdapters, variables)
+    )
+    return ReadResult(
+        data = batchReaderData.toData(operation.adapter(), customScalarAdapters, variables),
+        cacheHeaders = batchReaderData.cacheHeaders,
+    )
   }
 
   override fun <D : Fragment.Data> readFragment(
@@ -132,17 +136,21 @@ internal class DefaultApolloStore(
       cacheKey: CacheKey,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
-  ): D {
+  ): ReadResult<D> {
     val variables = fragment.variables(customScalarAdapters, true)
 
-    return fragment.readDataFromCacheInternal(
+    val batchReaderData = fragment.readDataFromCacheInternal(
         cache = cache,
         cacheResolver = cacheResolver,
         cacheHeaders = cacheHeaders,
         cacheKey = cacheKey,
         variables = variables,
         fieldKeyGenerator = fieldKeyGenerator,
-    ).toData(fragment.adapter(), customScalarAdapters, variables)
+    )
+    return ReadResult(
+        data = batchReaderData.toData(fragment.adapter(), customScalarAdapters, variables),
+        cacheHeaders = batchReaderData.cacheHeaders,
+    )
   }
 
   override fun <R> accessCache(block: (NormalizedCache) -> R): R {

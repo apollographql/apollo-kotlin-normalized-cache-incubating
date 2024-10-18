@@ -33,4 +33,9 @@ object ApolloCacheHeaders {
    * How long to accept stale fields
    */
   const val MAX_STALE = "apollo-max-stale"
+
+  /**
+   * True if the returned data is considered stale
+   */
+  const val STALE = "apollo-stale"
 }

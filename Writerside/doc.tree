@@ -10,5 +10,5 @@
     <toc-element toc-title="Kdoc" href="https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc"/>
     <toc-element topic="welcome.md"/>
     <toc-element topic="pagination.md"/>
-    <toc-element topic="expiration.md"/>
+    <toc-element topic="cache-control.md"/>
 </instance-profile>

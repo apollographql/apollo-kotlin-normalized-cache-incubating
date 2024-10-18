@@ -1,5 +1,6 @@
 package com.apollographql.cache.normalized.api
 
+import com.apollographql.apollo.annotations.ApolloInternal
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.cache.normalized.internal.RecordWeigher.calculateBytes
 import com.benasher44.uuid.Uuid
@@ -87,6 +88,7 @@ class Record(
   }
 }
 
+@ApolloInternal
 fun Record.withDates(receivedDate: String?, expirationDate: String?): Record {
   if (receivedDate == null && expirationDate == null) {
     return this

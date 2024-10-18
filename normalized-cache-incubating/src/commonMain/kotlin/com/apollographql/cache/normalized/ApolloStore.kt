@@ -1,6 +1,7 @@
 package com.apollographql.cache.normalized
 
 import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.JsonNumber
@@ -48,13 +49,13 @@ interface ApolloStore {
    * @throws [com.apollographql.apollo.exception.CacheMissException] on cache miss
    * @throws [com.apollographql.apollo.exception.ApolloException] on other cache read errors
    *
-   * @return the operation data
+   * @return the operation data with optional headers from the [NormalizedCache]
    */
   fun <D : Operation.Data> readOperation(
       operation: Operation<D>,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
-  ): D
+  ): ReadResult<D>
 
   /**
    * Read a GraphQL fragment from the store.
@@ -66,14 +67,14 @@ interface ApolloStore {
    * @throws [com.apollographql.apollo.exception.CacheMissException] on cache miss
    * @throws [com.apollographql.apollo.exception.ApolloException] on other cache read errors
    *
-   * @return the fragment data
+   * @return the fragment data with optional headers from the [NormalizedCache]
    */
   fun <D : Fragment.Data> readFragment(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
-  ): D
+  ): ReadResult<D>
 
   /**
    * Write an operation data to the store.
@@ -200,6 +201,11 @@ interface ApolloStore {
    * Release resources associated with this store.
    */
   fun dispose()
+
+  class ReadResult<D : Executable.Data>(
+      val data: D,
+      val cacheHeaders: CacheHeaders,
+  )
 }
 
 fun ApolloStore(

@@ -7,10 +7,10 @@ import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
-import com.apollographql.cache.normalized.internal.Lock
-import com.apollographql.cache.normalized.memory.internal.LruCache
-import com.apollographql.cache.normalized.internal.patternToRegex
 import com.apollographql.cache.normalized.api.withDates
+import com.apollographql.cache.normalized.internal.Lock
+import com.apollographql.cache.normalized.internal.patternToRegex
+import com.apollographql.cache.normalized.memory.internal.LruCache
 import kotlin.jvm.JvmOverloads
 import kotlin.reflect.KClass
 

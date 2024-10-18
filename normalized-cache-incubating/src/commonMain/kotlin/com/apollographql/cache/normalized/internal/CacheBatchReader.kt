@@ -1,10 +1,14 @@
 package com.apollographql.cache.normalized.internal
 
+import com.apollographql.apollo.api.Adapter
 import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.CompiledFragment
 import com.apollographql.apollo.api.CompiledSelection
+import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.Executable
+import com.apollographql.apollo.api.json.MapJsonReader
 import com.apollographql.apollo.exception.CacheMissException
+import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheResolver
@@ -15,10 +19,8 @@ import com.apollographql.cache.normalized.api.ResolverContext
 import kotlin.jvm.JvmSuppressWildcards
 
 /**
- * A resolver that solves the "N+1" problem by batching all SQL queries at a given depth
- * It respects skip/include directives
- *
- * Returns the data in [toMap]
+ * A resolver that solves the "N+1" problem by batching all SQL queries at a given depth.
+ * It respects skip/include directives.
  */
 internal class CacheBatchReader(
     private val cache: ReadOnlyNormalizedCache,
@@ -47,6 +49,11 @@ internal class CacheBatchReader(
    * The key is the path to the object
    */
   private val data = mutableMapOf<List<Any>, Map<String, Any?>>()
+
+  /**
+   * True if at least one of the resolved fields is stale
+   */
+  private var isStale = false
 
   private val pendingReferences = mutableListOf<PendingReference>()
 
@@ -132,7 +139,7 @@ internal class CacheBatchReader(
                   fieldKeyGenerator = fieldKeyGenerator,
                   path = pendingReference.fieldPath + it,
               )
-          )
+          ).unwrap()
           value.registerCacheKeys(pendingReference.path + it.responseName, pendingReference.fieldPath + it, it.selections, it.type.rawType().name)
 
           it.responseName to value
@@ -142,7 +149,22 @@ internal class CacheBatchReader(
       }
     }
 
-    return CacheBatchReaderData(data)
+    return CacheBatchReaderData(data, CacheHeaders.Builder().apply { if (isStale) addHeader(ApolloCacheHeaders.STALE, "true") }.build())
+  }
+
+  private fun Any?.unwrap(): Any? {
+    return when (this) {
+      is CacheResolver.ResolvedValue -> {
+        if (cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true") {
+          isStale = true
+        }
+        this.value
+      }
+
+      else -> {
+        this
+      }
+    }
   }
 
   /**
@@ -193,20 +215,31 @@ internal class CacheBatchReader(
                   fieldKeyGenerator = fieldKeyGenerator,
                   path = fieldPath + it,
               )
-          )
+          ).unwrap()
           value.registerCacheKeys(path + it.responseName, fieldPath + it, it.selections, it.type.rawType().name)
-
-          it.responseName to value
-        }.toMap()
+        }
       }
     }
   }
 
-  internal data class CacheBatchReaderData(
+  internal class CacheBatchReaderData(
       private val data: Map<List<Any>, Map<String, Any?>>,
+      val cacheHeaders: CacheHeaders,
   ) {
+    fun <D : Executable.Data> toData(
+        adapter: Adapter<D>,
+        customScalarAdapters: CustomScalarAdapters,
+        variables: Executable.Variables,
+    ): D {
+      val reader = MapJsonReader(toMap())
+      return adapter.fromJson(
+          reader,
+          customScalarAdapters.newBuilder().falseVariables(variables.valueMap.filter { it.value == false }.keys).build()
+      )
+    }
+
     @Suppress("UNCHECKED_CAST")
-    fun toMap(): Map<String, Any?> {
+    private fun toMap(): Map<String, Any?> {
       return data[emptyList()].replaceCacheKeys(emptyList()) as Map<String, Any?>
     }
 

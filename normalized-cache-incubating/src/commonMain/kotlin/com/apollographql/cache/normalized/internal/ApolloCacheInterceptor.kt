@@ -208,7 +208,7 @@ internal class ApolloCacheInterceptor(
     val operation = request.operation
     val startMillis = currentTimeMillis()
 
-    val data = try {
+    val readResult = try {
       var cacheHeaders = request.cacheHeaders
       if (request.memoryCacheOnly) {
         cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
@@ -231,6 +231,7 @@ internal class ApolloCacheInterceptor(
                   .cacheEndMillis(currentTimeMillis())
                   .cacheHit(false)
                   .cacheMissException(e)
+                  .stale(e.stale)
                   .build()
           )
           .isLast(true)
@@ -241,13 +242,15 @@ internal class ApolloCacheInterceptor(
         requestUuid = request.requestUuid,
         operation = operation,
     )
-        .data(data)
+        .data(readResult.data)
         .addExecutionContext(request.executionContext)
+        .cacheHeaders(readResult.cacheHeaders)
         .cacheInfo(
             CacheInfo.Builder()
                 .cacheStartMillis(startMillis)
                 .cacheEndMillis(currentTimeMillis())
                 .cacheHit(true)
+                .stale(readResult.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
                 .build()
         )
         .isLast(true)
