@@ -21,7 +21,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
-class ServerSideExpirationTest {
+class ServerSideCacheControlTest {
   @Test
   fun memoryCache() {
     test(MemoryCacheFactory())
@@ -77,7 +77,7 @@ class ServerSideExpirationTest {
     response = client.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute()
     assertTrue(response.data?.user?.name == "John")
 
-    // store expired data
+    // store stale data
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=0")

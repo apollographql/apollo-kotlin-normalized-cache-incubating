@@ -26,7 +26,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
-class ClientAndServerSideExpirationTest {
+class ClientAndServerSideCacheControlTest {
   @Test
   fun cacheMissesMemory() {
     cacheMisses(MemoryCacheFactory())
@@ -91,7 +91,7 @@ class ClientAndServerSideExpirationTest {
     var e = userEmailResponse.exception as CacheMissException
     assertTrue(e.stale)
 
-    // Store data with an expired date of now, and a received date of now
+    // Store data with a stale date of now, and a received date of now
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=0")
@@ -171,7 +171,7 @@ class ClientAndServerSideExpirationTest {
     assertTrue(userEmailResponse.data?.user?.email == "john@doe.com")
     assertTrue(userEmailResponse.cacheInfo?.isStale == true)
 
-    // Store data with an expired date of now, and a received date of now
+    // Store data with a slate date of now, and a received date of now
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=0")
