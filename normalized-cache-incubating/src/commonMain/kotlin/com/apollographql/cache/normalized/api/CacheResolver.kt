@@ -7,8 +7,8 @@ import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.cache.normalized.api.CacheResolver.ResolvedValue
 import com.apollographql.cache.normalized.maxStale
+import com.apollographql.cache.normalized.storeExpirationDate
 import com.apollographql.cache.normalized.storeReceiveDate
-import com.apollographql.cache.normalized.storeStaleDate
 import kotlin.jvm.JvmSuppressWildcards
 import kotlin.time.Duration
 
@@ -139,23 +139,23 @@ object DefaultCacheResolver : CacheResolver {
 
 /**
  * A cache resolver that raises a cache miss if the field's received date is older than its max age
- * (configurable via [maxAgeProvider]) or its stale date has passed.
+ * (configurable via [maxAgeProvider]) or if its expiration date has passed.
  *
  * Received dates are stored by calling `storeReceiveDate(true)` on your `ApolloClient`.
  *
- * Stale dates are stored by calling `storeStaleDate(true)` on your `ApolloClient`.
+ * Expiration dates are stored by calling `storeExpirationDate(true)` on your `ApolloClient`.
  *
  * A maximum staleness can be configured via the [ApolloCacheHeaders.MAX_STALE] cache header.
  *
  * @see MutableExecutionOptions.storeReceiveDate
- * @see MutableExecutionOptions.storeStaleDate
+ * @see MutableExecutionOptions.storeExpirationDate
  * @see MutableExecutionOptions.maxStale
  */
 class CacheControlCacheResolver(
     private val maxAgeProvider: MaxAgeProvider,
 ) : CacheResolver {
   /**
-   * Creates a new [CacheControlCacheResolver] with no max ages. Use this constructor if you want to consider only the stale dates.
+   * Creates a new [CacheControlCacheResolver] with no max ages. Use this constructor if you want to consider only the expiration dates.
    */
   constructor() : this(maxAgeProvider = GlobalMaxAgeProvider(Duration.INFINITE))
 
@@ -182,10 +182,10 @@ class CacheControlCacheResolver(
       }
 
       // Consider the server controlled max age
-      val staleDate = context.parent.staleDate(field.name)
-      if (staleDate != null) {
+      val expirationDate = context.parent.expirationDate(field.name)
+      if (expirationDate != null) {
         val currentDate = currentTimeMillis() / 1000
-        val staleDuration = currentDate - staleDate
+        val staleDuration = currentDate - expirationDate
         val maxStale = context.cacheHeaders.headerValue(ApolloCacheHeaders.MAX_STALE)?.toLongOrNull() ?: 0L
         if (staleDuration >= maxStale) {
           throw CacheMissException(

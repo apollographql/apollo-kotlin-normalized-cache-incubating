@@ -89,8 +89,8 @@ class Record(
 }
 
 @ApolloInternal
-fun Record.withDates(receivedDate: String?, staleDate: String?): Record {
-  if (receivedDate == null && staleDate == null) {
+fun Record.withDates(receivedDate: String?, expirationDate: String?): Record {
+  if (receivedDate == null && expirationDate == null) {
     return this
   }
   return Record(
@@ -102,8 +102,8 @@ fun Record.withDates(receivedDate: String?, staleDate: String?): Record {
           receivedDate?.let {
             put(ApolloCacheHeaders.RECEIVED_DATE, it.toLong())
           }
-          staleDate?.let {
-            put(ApolloCacheHeaders.STALE_DATE, it.toLong())
+          expirationDate?.let {
+            put(ApolloCacheHeaders.EXPIRATION_DATE, it.toLong())
           }
         }
       }
@@ -112,7 +112,7 @@ fun Record.withDates(receivedDate: String?, staleDate: String?): Record {
 
 fun Record.receivedDate(field: String) = metadata[field]?.get(ApolloCacheHeaders.RECEIVED_DATE) as? Long
 
-fun Record.staleDate(field: String) = metadata[field]?.get(ApolloCacheHeaders.STALE_DATE) as? Long
+fun Record.expirationDate(field: String) = metadata[field]?.get(ApolloCacheHeaders.EXPIRATION_DATE) as? Long
 
 
 /**

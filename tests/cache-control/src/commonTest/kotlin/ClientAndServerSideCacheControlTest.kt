@@ -16,7 +16,7 @@ import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.storeStaleDate
+import com.apollographql.cache.normalized.storeExpirationDate
 import com.apollographql.mockserver.MockResponse
 import com.apollographql.mockserver.MockServer
 import programmatic.GetUserEmailQuery
@@ -56,7 +56,7 @@ class ClientAndServerSideCacheControlTest {
                 )
             )
         )
-        .storeStaleDate(true)
+        .storeExpirationDate(true)
         .serverUrl(mockServer.url())
         .build()
     client.apolloStore.clearAll()
@@ -73,7 +73,7 @@ class ClientAndServerSideCacheControlTest {
       }
     """.trimIndent()
 
-    // Store data with a stale date 10s in the future, and a received date 10s in the past
+    // Store data with an expiration date 10s in the future, and a received date 10s in the past
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=10")
@@ -91,7 +91,7 @@ class ClientAndServerSideCacheControlTest {
     var e = userEmailResponse.exception as CacheMissException
     assertTrue(e.stale)
 
-    // Store data with a stale date of now, and a received date of now
+    // Store data with an expiration date of now, and a received date of now
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=0")
@@ -135,7 +135,7 @@ class ClientAndServerSideCacheControlTest {
                 )
             )
         )
-        .storeStaleDate(true)
+        .storeExpirationDate(true)
         .serverUrl(mockServer.url())
         .build()
     client.apolloStore.clearAll()
@@ -152,7 +152,7 @@ class ClientAndServerSideCacheControlTest {
       }
     """.trimIndent()
 
-    // Store data with a stale date 10s in the future, and a received date 10s in the past
+    // Store data with an expiration date 10s in the future, and a received date 10s in the past
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=10")

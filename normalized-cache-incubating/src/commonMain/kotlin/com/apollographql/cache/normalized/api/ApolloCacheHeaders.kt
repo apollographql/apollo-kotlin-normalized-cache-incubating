@@ -25,9 +25,9 @@ object ApolloCacheHeaders {
   const val RECEIVED_DATE = "apollo-received-date"
 
   /**
-   * The value of this header will be stored in the [Record]'s stale date.
+   * The value of this header will be stored in the [Record]'s expiration date.
    */
-  const val STALE_DATE = "apollo-stale-date"
+  const val EXPIRATION_DATE = "apollo-expiration-date"
 
   /**
    * How long to accept stale fields

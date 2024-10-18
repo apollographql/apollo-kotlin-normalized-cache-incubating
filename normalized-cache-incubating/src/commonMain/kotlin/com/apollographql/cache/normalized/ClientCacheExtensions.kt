@@ -273,28 +273,28 @@ fun <T> MutableExecutionOptions<T>.storeReceiveDate(storeReceiveDate: Boolean) =
 )
 
 /**
- * @param storeStaleDate Whether to store the stale date in the cache.
+ * @param storeExpirationDate Whether to store the expiration date in the cache.
  *
- * The stale date is computed from the response HTTP headers
+ * The expiration date is computed from the response HTTP headers
  *
  * Default: false
  */
-fun <T> MutableExecutionOptions<T>.storeStaleDate(storeStaleDate: Boolean): T {
-  addExecutionContext(StoreStaleDateContext(storeStaleDate))
+fun <T> MutableExecutionOptions<T>.storeExpirationDate(storeExpirationDate: Boolean): T {
+  addExecutionContext(StoreExpirationDateContext(storeExpirationDate))
   if (this is ApolloClient.Builder) {
-    check(interceptors.none { it is StoreStaleDateInterceptor }) {
-      "Apollo: storeStaleDate() can only be called once on ApolloClient.Builder()"
+    check(interceptors.none { it is StoreExpirationDateInterceptor }) {
+      "Apollo: storeExpirationDate() can only be called once on ApolloClient.Builder()"
     }
-    addInterceptor(StoreStaleDateInterceptor())
+    addInterceptor(StoreExpirationDateInterceptor())
   }
   @Suppress("UNCHECKED_CAST")
   return this as T
 }
 
-private class StoreStaleDateInterceptor : ApolloInterceptor {
+private class StoreExpirationDateInterceptor : ApolloInterceptor {
   override fun <D : Operation.Data> intercept(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
     return chain.proceed(request).map {
-      val store = request.executionContext[StoreStaleDateContext]?.value
+      val store = request.executionContext[StoreExpirationDateContext]?.value
       if (store != true) {
         return@map it
       }
@@ -312,7 +312,7 @@ private class StoreStaleDateInterceptor : ApolloInterceptor {
       }.firstOrNull() ?: return@map it
 
       val age = headers.get("age")?.toIntOrNull()
-      val staleDate = if (age != null) {
+      val expires = if (age != null) {
         currentTimeMillis() / 1000 + maxAge - age
       } else {
         currentTimeMillis() / 1000 + maxAge
@@ -321,7 +321,7 @@ private class StoreStaleDateInterceptor : ApolloInterceptor {
       return@map it.newBuilder()
           .cacheHeaders(
               it.cacheHeaders.newBuilder()
-                  .addHeader(ApolloCacheHeaders.STALE_DATE, staleDate.toString())
+                  .addHeader(ApolloCacheHeaders.EXPIRATION_DATE, expires.toString())
                   .build()
           )
           .build()
@@ -552,11 +552,11 @@ internal class StoreReceiveDateContext(val value: Boolean) : ExecutionContext.El
   companion object Key : ExecutionContext.Key<StoreReceiveDateContext>
 }
 
-internal class StoreStaleDateContext(val value: Boolean) : ExecutionContext.Element {
+internal class StoreExpirationDateContext(val value: Boolean) : ExecutionContext.Element {
   override val key: ExecutionContext.Key<*>
     get() = Key
 
-  companion object Key : ExecutionContext.Key<StoreStaleDateContext>
+  companion object Key : ExecutionContext.Key<StoreExpirationDateContext>
 }
 
 

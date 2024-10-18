@@ -13,7 +13,7 @@ import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.storeStaleDate
+import com.apollographql.cache.normalized.storeExpirationDate
 import com.apollographql.mockserver.MockResponse
 import com.apollographql.mockserver.MockServer
 import programmatic.GetUserQuery
@@ -45,7 +45,7 @@ class ServerSideCacheControlTest {
             normalizedCacheFactory = normalizedCacheFactory,
             cacheResolver = CacheControlCacheResolver(),
         )
-        .storeStaleDate(true)
+        .storeExpirationDate(true)
         .serverUrl(mockServer.url())
         .build()
     client.apolloStore.clearAll()
@@ -65,7 +65,7 @@ class ServerSideCacheControlTest {
 
     var response: ApolloResponse<GetUserQuery.Data>
 
-    // store data with a stale date in the future
+    // store data with an expiration date in the future
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=10")

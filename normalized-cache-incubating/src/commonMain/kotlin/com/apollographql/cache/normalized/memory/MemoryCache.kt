@@ -132,14 +132,14 @@ class MemoryCache(
 
   private fun internalMerge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
-    val staleDate = cacheHeaders.headerValue(ApolloCacheHeaders.STALE_DATE)
+    val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
     val oldRecord = loadRecord(record.key, cacheHeaders)
     val changedKeys = if (oldRecord == null) {
-      lruCache[record.key] = record.withDates(receivedDate = receivedDate, staleDate = staleDate)
+      lruCache[record.key] = record.withDates(receivedDate = receivedDate, expirationDate = expirationDate)
       record.fieldKeys()
     } else {
       val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record)
-      lruCache[record.key] = mergedRecord.withDates(receivedDate = receivedDate, staleDate = staleDate)
+      lruCache[record.key] = mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate)
       changedKeys
     }
     return changedKeys

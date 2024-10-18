@@ -122,9 +122,9 @@ public final class com/apollographql/cache/normalized/NormalizedCache {
 	public static final fun refetchPolicyInterceptor (Lcom/apollographql/apollo/api/MutableExecutionOptions;Lcom/apollographql/apollo/interceptor/ApolloInterceptor;)Ljava/lang/Object;
 	public static final fun store (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/ApolloStore;Z)Lcom/apollographql/apollo/ApolloClient$Builder;
 	public static synthetic fun store$default (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/ApolloStore;ZILjava/lang/Object;)Lcom/apollographql/apollo/ApolloClient$Builder;
+	public static final fun storeExpirationDate (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
 	public static final fun storePartialResponses (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
 	public static final fun storeReceiveDate (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
-	public static final fun storeStaleDate (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
 	public static final fun watch (Lcom/apollographql/apollo/ApolloCall;)Lkotlinx/coroutines/flow/Flow;
 	public static final fun watch (Lcom/apollographql/apollo/ApolloCall;Lcom/apollographql/apollo/api/Query$Data;)Lkotlinx/coroutines/flow/Flow;
 	public static final fun writeToCacheAsynchronously (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
@@ -137,12 +137,12 @@ public final class com/apollographql/cache/normalized/VersionKt {
 public final class com/apollographql/cache/normalized/api/ApolloCacheHeaders {
 	public static final field DO_NOT_STORE Ljava/lang/String;
 	public static final field EVICT_AFTER_READ Ljava/lang/String;
+	public static final field EXPIRATION_DATE Ljava/lang/String;
 	public static final field INSTANCE Lcom/apollographql/cache/normalized/api/ApolloCacheHeaders;
 	public static final field MAX_STALE Ljava/lang/String;
 	public static final field MEMORY_CACHE_ONLY Ljava/lang/String;
 	public static final field RECEIVED_DATE Ljava/lang/String;
 	public static final field STALE Ljava/lang/String;
-	public static final field STALE_DATE Ljava/lang/String;
 }
 
 public final class com/apollographql/cache/normalized/api/CacheControlCacheResolver : com/apollographql/cache/normalized/api/CacheResolver {
@@ -463,8 +463,8 @@ public final class com/apollographql/cache/normalized/api/Record$Companion {
 }
 
 public final class com/apollographql/cache/normalized/api/RecordKt {
+	public static final fun expirationDate (Lcom/apollographql/cache/normalized/api/Record;Ljava/lang/String;)Ljava/lang/Long;
 	public static final fun receivedDate (Lcom/apollographql/cache/normalized/api/Record;Ljava/lang/String;)Ljava/lang/Long;
-	public static final fun staleDate (Lcom/apollographql/cache/normalized/api/Record;Ljava/lang/String;)Ljava/lang/Long;
 	public static final fun withDates (Lcom/apollographql/cache/normalized/api/Record;Ljava/lang/String;Ljava/lang/String;)Lcom/apollographql/cache/normalized/api/Record;
 }
 
