@@ -50,7 +50,7 @@ class EmbedTest {
         )
     )
     client.apolloStore.writeOperation(query, data)
-    val dataFromStore = client.apolloStore.readOperation(query)
+    val dataFromStore = client.apolloStore.readOperation(query).data
     assertEquals(data, dataFromStore)
   }
 }
