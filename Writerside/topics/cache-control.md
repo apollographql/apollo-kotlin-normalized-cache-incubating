@@ -10,18 +10,17 @@ When receiving a response from the server, the [`Cache-Control` HTTP header](htt
 
 > Apollo Server can be configured to include the `Cache-Control` header in responses. See the [caching documentation](https://www.apollographql.com/docs/apollo-server/performance/caching/) for more information.
 
-The cache can be configured to store the **expiration date** of the received fields in the corresponding records. To do so, call [`.storeExpirationDate(true)`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/store-expiration-date.html?query=fun%20%3CT%3E%20MutableExecutionOptions%3CT%3E.storeExpirationDate(storeExpirationDate:%20Boolean):%20T), and set your client's cache resolver to [
-`CacheControlCacheResolver`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-cache-control-cache-resolver/index.html):
+The cache can be configured to store the **expiration date** of the received fields in the corresponding records. To do so, call [`.storeExpirationDate(true)`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/store-expiration-date.html?query=fun%20%3CT%3E%20MutableExecutionOptions%3CT%3E.storeExpirationDate(storeExpirationDate:%20Boolean):%20T), and set your client's cache resolver to [`CacheControlCacheResolver`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-cache-control-cache-resolver/index.html):
 
 ```kotlin
 val apolloClient = ApolloClient.builder()
-    .serverUrl("https://example.com/graphql")
-    .storeExpirationDate(true)
-    .normalizedCache(
-        normalizedCacheFactory = /*...*/,
-        cacheResolver = CacheControlCacheResolver(),
-    )
-    .build()
+  .serverUrl("https://example.com/graphql")
+  .storeExpirationDate(true)
+  .normalizedCache(
+    normalizedCacheFactory = /*...*/,
+    cacheResolver = CacheControlCacheResolver(),
+  )
+  .build()
 ```
 
 **Expiration dates** will be stored and when a field is resolved, the cache resolver will check if the field is stale. If so, it will throw a `CacheMissException`.
@@ -30,18 +29,17 @@ val apolloClient = ApolloClient.builder()
 
 When storing fields, the cache can also store their **received date**. This date can then be compared to the current date when resolving a field to determine if its age is above its **maximum age**.
 
-To store the **received date** of fields, call [`.storeReceivedDate(true)`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/store-receive-date.html?query=fun%20%3CT%3E%20MutableExecutionOptions%3CT%3E.storeReceiveDate(storeReceiveDate:%20Boolean):%20T), and set your client's cache resolver to [
-`CacheControlCacheResolver`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-cache-control-cache-resolver/index.html):
+To store the **received date** of fields, call [`.storeReceivedDate(true)`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/store-receive-date.html?query=fun%20%3CT%3E%20MutableExecutionOptions%3CT%3E.storeReceiveDate(storeReceiveDate:%20Boolean):%20T), and set your client's cache resolver to [`CacheControlCacheResolver`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-cache-control-cache-resolver/index.html):
 
 ```kotlin
 val apolloClient = ApolloClient.builder()
-    .serverUrl("https://example.com/graphql")
-    .storeReceivedDate(true)
-    .normalizedCache(
-        normalizedCacheFactory = /*...*/,
-        cacheResolver = CacheControlCacheResolver(maxAgeProvider),
-    )
-    .build()
+  .serverUrl("https://example.com/graphql")
+  .storeReceivedDate(true)
+  .normalizedCache(
+    normalizedCacheFactory = /*...*/,
+    cacheResolver = CacheControlCacheResolver(maxAgeProvider),
+  )
+  .build()
 ```
 
 > Expiration dates and received dates can be both stored to combine server-controlled and client-controlled expiration strategies.
@@ -146,5 +144,4 @@ With `maxStale`, it is possible to get data from the cache even if it is stale. 
 if (response.cacheInfo?.isStale == true) {
   // The response contains at least one stale field
 }
-
 ```
