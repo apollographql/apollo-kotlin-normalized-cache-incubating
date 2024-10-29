@@ -5,7 +5,7 @@ import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
-import com.apollographql.cache.normalized.api.ExpirationCacheResolver
+import com.apollographql.cache.normalized.api.CacheControlCacheResolver
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
@@ -21,7 +21,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
-class ServerSideExpirationTest {
+class ServerSideCacheControlTest {
   @Test
   fun memoryCache() {
     test(MemoryCacheFactory())
@@ -43,7 +43,7 @@ class ServerSideExpirationTest {
     val client = ApolloClient.Builder()
         .normalizedCache(
             normalizedCacheFactory = normalizedCacheFactory,
-            cacheResolver = ExpirationCacheResolver(),
+            cacheResolver = CacheControlCacheResolver(),
         )
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())
@@ -77,7 +77,7 @@ class ServerSideExpirationTest {
     response = client.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute()
     assertTrue(response.data?.user?.name == "John")
 
-    // store expired data
+    // store stale data
     mockServer.enqueue(
         MockResponse.Builder()
             .addHeader("Cache-Control", "max-age=0")

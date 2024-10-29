@@ -48,6 +48,7 @@ kotlin {
         implementation(libs.apollo.testing.support)
         implementation(libs.apollo.mockserver)
         implementation(libs.kotlin.test)
+        implementation(libs.turbine)
       }
     }
 

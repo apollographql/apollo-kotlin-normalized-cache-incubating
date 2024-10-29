@@ -282,16 +282,16 @@ fun <T> MutableExecutionOptions<T>.storeReceiveDate(storeReceiveDate: Boolean) =
 fun <T> MutableExecutionOptions<T>.storeExpirationDate(storeExpirationDate: Boolean): T {
   addExecutionContext(StoreExpirationDateContext(storeExpirationDate))
   if (this is ApolloClient.Builder) {
-    check(interceptors.none { it is StoreExpirationInterceptor }) {
+    check(interceptors.none { it is StoreExpirationDateInterceptor }) {
       "Apollo: storeExpirationDate() can only be called once on ApolloClient.Builder()"
     }
-    addInterceptor(StoreExpirationInterceptor())
+    addInterceptor(StoreExpirationDateInterceptor())
   }
   @Suppress("UNCHECKED_CAST")
   return this as T
 }
 
-private class StoreExpirationInterceptor : ApolloInterceptor {
+private class StoreExpirationDateInterceptor : ApolloInterceptor {
   override fun <D : Operation.Data> intercept(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
     return chain.proceed(request).map {
       val store = request.executionContext[StoreExpirationDateContext]?.value
@@ -418,6 +418,7 @@ class CacheInfo private constructor(
     val isCacheHit: Boolean,
     val cacheMissException: CacheMissException?,
     val networkException: ApolloException?,
+    val isStale: Boolean,
 ) : ExecutionContext.Element {
   override val key: ExecutionContext.Key<*>
     get() = Key
@@ -432,6 +433,7 @@ class CacheInfo private constructor(
         .cacheHit(isCacheHit)
         .cacheMissException(cacheMissException)
         .networkException(networkException)
+        .stale(isStale)
   }
 
   class Builder {
@@ -442,6 +444,7 @@ class CacheInfo private constructor(
     private var cacheHit: Boolean = false
     private var cacheMissException: CacheMissException? = null
     private var networkException: ApolloException? = null
+    private var stale: Boolean = false
 
     fun cacheStartMillis(cacheStartMillis: Long) = apply {
       this.cacheStartMillis = cacheStartMillis
@@ -471,6 +474,9 @@ class CacheInfo private constructor(
       this.networkException = networkException
     }
 
+    fun stale(stale: Boolean) = apply {
+      this.stale = stale
+    }
 
     fun build(): CacheInfo = CacheInfo(
         cacheStartMillis = cacheStartMillis,
@@ -479,7 +485,8 @@ class CacheInfo private constructor(
         networkEndMillis = networkEndMillis,
         isCacheHit = cacheHit,
         cacheMissException = cacheMissException,
-        networkException = networkException
+        networkException = networkException,
+        isStale = stale,
     )
   }
 }

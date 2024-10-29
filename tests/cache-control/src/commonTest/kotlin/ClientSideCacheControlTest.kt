@@ -7,9 +7,9 @@ import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
+import com.apollographql.cache.normalized.api.CacheControlCacheResolver
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
-import com.apollographql.cache.normalized.api.ExpirationCacheResolver
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.MaxAge
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
@@ -31,7 +31,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
-class ClientSideExpirationTest {
+class ClientSideCacheControlTest {
   @Test
   fun globalMaxAgeMemoryCache() {
     globalMaxAge(MemoryCacheFactory())
@@ -83,7 +83,7 @@ class ClientSideExpirationTest {
     val client = ApolloClient.Builder()
         .normalizedCache(
             normalizedCacheFactory = normalizedCacheFactory,
-            cacheResolver = ExpirationCacheResolver(GlobalMaxAgeProvider(maxAge.seconds)),
+            cacheResolver = CacheControlCacheResolver(GlobalMaxAgeProvider(maxAge.seconds)),
         )
         .serverUrl("unused")
         .build()
@@ -96,7 +96,7 @@ class ClientSideExpirationTest {
 
     client.apolloStore.accessCache {
       // store records in the past
-      it.merge(records, cacheHeaders(currentTimeMillis() / 1000 - 15), DefaultRecordMerger)
+      it.merge(records, receivedDate(currentTimeSeconds() - 15), DefaultRecordMerger)
     }
 
     val e = client.query(GetUserQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute().exception as CacheMissException
@@ -110,7 +110,7 @@ class ClientSideExpirationTest {
 
     client.apolloStore.accessCache {
       // update records to be in the present
-      it.merge(records, cacheHeaders(currentTimeMillis() / 1000), DefaultRecordMerger)
+      it.merge(records, receivedDate(currentTimeSeconds()), DefaultRecordMerger)
     }
 
     val response2 = client.query(GetUserQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute()
@@ -130,7 +130,7 @@ class ClientSideExpirationTest {
     val client = ApolloClient.Builder()
         .normalizedCache(
             normalizedCacheFactory = normalizedCacheFactory,
-            cacheResolver = ExpirationCacheResolver(maxAgeProvider),
+            cacheResolver = CacheControlCacheResolver(maxAgeProvider),
         )
         .serverUrl("unused")
         .build()
@@ -185,7 +185,7 @@ class ClientSideExpirationTest {
     val data = GetCompanyQuery.Data(GetCompanyQuery.Company("42"))
     val records = GetCompanyQuery().normalize(data, CustomScalarAdapters.Empty, TypePolicyCacheKeyGenerator).values
     client.apolloStore.accessCache {
-      it.merge(records, cacheHeaders(currentTimeMillis() / 1000 - secondsAgo), DefaultRecordMerger)
+      it.merge(records, receivedDate(currentTimeSeconds() - secondsAgo), DefaultRecordMerger)
     }
   }
 
@@ -198,7 +198,7 @@ class ClientSideExpirationTest {
     val client = ApolloClient.Builder()
         .normalizedCache(
             normalizedCacheFactory = normalizedCacheFactory,
-            cacheResolver = ExpirationCacheResolver(maxAgeProvider),
+            cacheResolver = CacheControlCacheResolver(maxAgeProvider),
         )
         .serverUrl("unused")
         .build()
@@ -253,11 +253,13 @@ class ClientSideExpirationTest {
     val data = GetUserQuery.Data(GetUserQuery.User("John", "john@doe.com", true))
     val records = GetUserQuery().normalize(data, CustomScalarAdapters.Empty, TypePolicyCacheKeyGenerator).values
     client.apolloStore.accessCache {
-      it.merge(records, cacheHeaders(currentTimeMillis() / 1000 - secondsAgo), DefaultRecordMerger)
+      it.merge(records, receivedDate(currentTimeSeconds() - secondsAgo), DefaultRecordMerger)
     }
   }
 }
 
-fun cacheHeaders(receivedDate: Long): CacheHeaders {
-  return CacheHeaders.Builder().addHeader(ApolloCacheHeaders.RECEIVED_DATE, receivedDate.toString()).build()
+fun currentTimeSeconds() = currentTimeMillis() / 1000
+
+fun receivedDate(receivedDateSeconds: Long): CacheHeaders {
+  return CacheHeaders.Builder().addHeader(ApolloCacheHeaders.RECEIVED_DATE, receivedDateSeconds.toString()).build()
 }
