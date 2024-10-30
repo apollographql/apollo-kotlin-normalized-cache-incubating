@@ -54,7 +54,7 @@ class ConnectionFieldKeyGenerator(private val connectionFields: Map<String, List
       context.field.newBuilder()
           .arguments(
               context.field.arguments.filter { argument ->
-                argument.name !in paginationArguments
+                argument.definition.name !in paginationArguments
               }
           )
           .build()
