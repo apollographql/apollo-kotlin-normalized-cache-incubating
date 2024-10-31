@@ -1,17 +1,12 @@
 includeBuild("../")
 
 pluginManagement {
-  listOf(repositories, dependencyResolutionManagement.repositories).forEach {
-    it.apply {
-      maven {
-        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-      }
-      mavenCentral()
-    }
-  }
+  includeBuild("../build-logic")
 }
 
 rootProject.name = "apollo-kotlin-normalized-cache-incubating-tests"
+
+apply(from = "../gradle/repositories.gradle.kts")
 
 // Include all tests
 rootProject.projectDir

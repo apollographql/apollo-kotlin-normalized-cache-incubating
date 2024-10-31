@@ -1,14 +1,8 @@
 pluginManagement {
-  listOf(repositories, dependencyResolutionManagement.repositories).forEach {
-    it.apply {
-      maven {
-        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-      }
-      mavenCentral()
-      google()
-    }
-  }
+  includeBuild("build-logic")
 }
+
+apply(from = "gradle/repositories.gradle.kts")
 
 include(
     "normalized-cache-incubating",
