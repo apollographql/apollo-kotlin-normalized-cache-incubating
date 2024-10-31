@@ -1,0 +1,152 @@
+query WithFragmentSpreadsQuery {
+  computers {
+    id
+    ...ComputerFields @defer
+  }
+}
+
+fragment ComputerFields on Computer {
+  cpu
+  year
+  screen {
+    resolution
+    ...ScreenFields @defer(label: "a")
+  }
+}
+
+fragment ScreenFields on Screen {
+  isColor
+}
+
+
+query WithInlineFragmentsQuery {
+  computers {
+    id
+    ... on Computer @defer {
+      cpu
+      year
+      screen {
+        resolution
+        ... on Screen @defer(label: "b") {
+          isColor
+        }
+      }
+    }
+  }
+}
+
+
+mutation WithFragmentSpreadsMutation {
+  computers {
+    id
+    ...ComputerFields @defer(label: "c")
+  }
+}
+
+subscription WithInlineFragmentsSubscription {
+  count(to: 3) {
+    value
+    ... on Counter @defer {
+      valueTimesTwo
+    }
+  }
+}
+
+subscription WithFragmentSpreadsSubscription {
+  count(to: 3) {
+    value
+    ...CounterFields @defer(label: "d")
+  }
+}
+
+fragment CounterFields on Counter{
+  valueTimesTwo
+}
+
+query SimpleDeferQuery {
+  computers {
+    id
+    ... on Computer @defer {
+      cpu
+    }
+  }
+}
+
+query CanDisableDeferUsingIfArgumentQuery {
+  computers {
+    id
+    ... on Computer @defer(if: false) {
+      cpu
+    }
+  }
+}
+
+query DoesNotDisableDeferWithNullIfArgumentQuery($shouldDefer: Boolean) {
+  computers {
+    id
+    ... on Computer @defer(if: $shouldDefer) {
+      cpu
+    }
+  }
+}
+
+query CanDeferFragmentsOnTheTopLevelQueryFieldQuery {
+  ...FragmentOnQuery @defer
+}
+
+fragment FragmentOnQuery on Query {
+  computers {
+    id
+  }
+}
+
+query CanDeferAFragmentThatIsAlsoNotDeferredDeferredFragmentIsFirstQuery {
+  computer(id: "Computer1") {
+    screen {
+      ...ScreenFields @defer
+      ...ScreenFields
+    }
+  }
+}
+
+query CanDeferAFragmentThatIsAlsoNotDeferredNotDeferredFragmentIsFirstQuery {
+  computer(id: "Computer1") {
+    screen {
+      ...ScreenFields
+      ...ScreenFields @defer
+    }
+  }
+}
+
+query HandlesErrorsThrownInDeferredFragmentsQuery {
+  computer(id: "Computer1") {
+    id
+    ...ComputerErrorField @defer
+  }
+}
+
+fragment ComputerErrorField on Computer {
+  errorField
+}
+
+query HandlesNonNullableErrorsThrownInDeferredFragmentsQuery {
+  computer(id: "Computer1") {
+    id
+    ...ComputerNonNullableErrorField @defer
+  }
+}
+
+fragment ComputerNonNullableErrorField on Computer {
+  nonNullErrorField
+}
+
+query HandlesNonNullableErrorsThrownOutsideDeferredFragmentsQuery {
+  computer(id: "Computer1") {
+    nonNullErrorField
+    ...ComputerIdField @defer
+  }
+}
+
+fragment ComputerIdField on Computer {
+  id
+}
