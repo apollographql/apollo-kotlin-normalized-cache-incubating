@@ -146,8 +146,10 @@ public final class com/apollographql/cache/normalized/api/ApolloCacheHeaders {
 }
 
 public final class com/apollographql/cache/normalized/api/CacheControlCacheResolver : com/apollographql/cache/normalized/api/CacheResolver {
-	public fun <init> ()V
-	public fun <init> (Lcom/apollographql/cache/normalized/api/MaxAgeProvider;)V
+	public fun <init> (Lcom/apollographql/cache/normalized/api/CacheResolver;)V
+	public synthetic fun <init> (Lcom/apollographql/cache/normalized/api/CacheResolver;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/apollographql/cache/normalized/api/MaxAgeProvider;Lcom/apollographql/cache/normalized/api/CacheResolver;)V
+	public synthetic fun <init> (Lcom/apollographql/cache/normalized/api/MaxAgeProvider;Lcom/apollographql/cache/normalized/api/CacheResolver;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun resolveField (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/lang/Object;
 }
 

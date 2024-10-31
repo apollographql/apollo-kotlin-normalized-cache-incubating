@@ -147,17 +147,26 @@ object DefaultCacheResolver : CacheResolver {
  *
  * A maximum staleness can be configured via the [ApolloCacheHeaders.MAX_STALE] cache header.
  *
+ * @param maxAgeProvider the provider for the max age of fields
+ * @param delegateResolver the resolver to delegate to for non-stale fields, by default [FieldPolicyCacheResolver]
+ *
  * @see MutableExecutionOptions.storeReceiveDate
  * @see MutableExecutionOptions.storeExpirationDate
  * @see MutableExecutionOptions.maxStale
  */
 class CacheControlCacheResolver(
     private val maxAgeProvider: MaxAgeProvider,
+    private val delegateResolver: CacheResolver = FieldPolicyCacheResolver,
 ) : CacheResolver {
   /**
    * Creates a new [CacheControlCacheResolver] with no max ages. Use this constructor if you want to consider only the expiration dates.
    */
-  constructor() : this(maxAgeProvider = GlobalMaxAgeProvider(Duration.INFINITE))
+  constructor(
+      delegateResolver: CacheResolver = FieldPolicyCacheResolver,
+  ) : this(
+      maxAgeProvider = GlobalMaxAgeProvider(Duration.INFINITE),
+      delegateResolver = delegateResolver,
+  )
 
   override fun resolveField(context: ResolverContext): Any? {
     var isStale = false
@@ -198,7 +207,7 @@ class CacheControlCacheResolver(
       }
     }
 
-    val value = FieldPolicyCacheResolver.resolveField(context)
+    val value = delegateResolver.resolveField(context)
     return if (isStale) {
       ResolvedValue(
           value = value,

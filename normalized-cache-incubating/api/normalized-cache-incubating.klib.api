@@ -85,8 +85,8 @@ abstract interface com.apollographql.cache.normalized/ApolloStore { // com.apoll
     }
 }
 final class com.apollographql.cache.normalized.api/CacheControlCacheResolver : com.apollographql.cache.normalized.api/CacheResolver { // com.apollographql.cache.normalized.api/CacheControlCacheResolver|null[0]
-    constructor <init>() // com.apollographql.cache.normalized.api/CacheControlCacheResolver.<init>|<init>(){}[0]
-    constructor <init>(com.apollographql.cache.normalized.api/MaxAgeProvider) // com.apollographql.cache.normalized.api/CacheControlCacheResolver.<init>|<init>(com.apollographql.cache.normalized.api.MaxAgeProvider){}[0]
+    constructor <init>(com.apollographql.cache.normalized.api/CacheResolver = ...) // com.apollographql.cache.normalized.api/CacheControlCacheResolver.<init>|<init>(com.apollographql.cache.normalized.api.CacheResolver){}[0]
+    constructor <init>(com.apollographql.cache.normalized.api/MaxAgeProvider, com.apollographql.cache.normalized.api/CacheResolver = ...) // com.apollographql.cache.normalized.api/CacheControlCacheResolver.<init>|<init>(com.apollographql.cache.normalized.api.MaxAgeProvider;com.apollographql.cache.normalized.api.CacheResolver){}[0]
     final fun resolveField(com.apollographql.cache.normalized.api/ResolverContext): kotlin/Any? // com.apollographql.cache.normalized.api/CacheControlCacheResolver.resolveField|resolveField(com.apollographql.cache.normalized.api.ResolverContext){}[0]
 }
 final class com.apollographql.cache.normalized.api/CacheHeaders { // com.apollographql.cache.normalized.api/CacheHeaders|null[0]
