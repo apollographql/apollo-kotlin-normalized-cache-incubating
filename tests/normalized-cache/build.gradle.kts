@@ -55,4 +55,24 @@ apollo {
     sealedClassesForEnumsMatching.set(listOf("Episode"))
     generateOptionalOperationVariables.set(false)
   }
+
+  service("circular") {
+    packageName.set("circular")
+    srcDir(file("src/commonMain/graphql/circular"))
+    generateOptionalOperationVariables.set(false)
+  }
+
+  service("declarativecache") {
+    packageName.set("declarativecache")
+    srcDir(file("src/commonMain/graphql/declarativecache"))
+    generateOptionalOperationVariables.set(false)
+  }
+
+  service("fragmentnormalizer") {
+    packageName.set("fragmentnormalizer")
+    srcDir(file("src/commonMain/graphql/fragmentnormalizer"))
+    generateOptionalOperationVariables.set(false)
+    generateFragmentImplementations.set(true)
+  }
+
 }
