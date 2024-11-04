@@ -10,6 +10,7 @@ kotlin {
       withJs = false,
       withWasm = false,
       withAndroid = false,
+      withApple = AppleTargets.Host,
   )
 
   sourceSets {

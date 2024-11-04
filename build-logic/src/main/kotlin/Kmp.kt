@@ -2,23 +2,41 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
+enum class AppleTargets {
+  All,
+  Host,
+}
+
 fun KotlinMultiplatformExtension.configureKmp(
     withJs: Boolean,
     withWasm: Boolean,
     withAndroid: Boolean,
+    withApple: AppleTargets = AppleTargets.All,
 ) {
   jvm()
-  macosX64()
-  macosArm64()
-  iosArm64()
-  iosX64()
-  iosSimulatorArm64()
-  watchosArm32()
-  watchosArm64()
-  watchosSimulatorArm64()
-  tvosArm64()
-  tvosX64()
-  tvosSimulatorArm64()
+  when (withApple) {
+    AppleTargets.All -> {
+      macosX64()
+      macosArm64()
+      iosArm64()
+      iosX64()
+      iosSimulatorArm64()
+      watchosArm32()
+      watchosArm64()
+      watchosSimulatorArm64()
+      tvosArm64()
+      tvosX64()
+      tvosSimulatorArm64()
+    }
+
+    AppleTargets.Host -> {
+      if (System.getProperty("os.arch") == "aarch64") {
+        macosArm64()
+      } else {
+        macosX64()
+      }
+    }
+  }
   if (withJs) {
     js(IR) {
       nodejs()

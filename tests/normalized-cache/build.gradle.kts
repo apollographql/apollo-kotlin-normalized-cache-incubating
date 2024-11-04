@@ -5,15 +5,22 @@ plugins {
 
 kotlin {
   configureKmp(
-      withJs = false,
+      withJs = true,
       withWasm = false,
       withAndroid = false,
+      withApple = AppleTargets.Host,
   )
 
   sourceSets {
     getByName("commonMain") {
       dependencies {
         implementation(libs.apollo.runtime)
+        implementation("com.apollographql.cache:normalized-cache-incubating")
+      }
+    }
+
+    getByName("concurrentMain") {
+      dependencies {
         implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
       }
     }

@@ -1,5 +1,3 @@
-package test
-
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
