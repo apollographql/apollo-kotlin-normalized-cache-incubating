@@ -15,6 +15,7 @@ import com.apollographql.cache.normalized.memoryCacheOnly
 import com.apollographql.cache.normalized.sql.SqlNormalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.store
+import main.GetUserQuery
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals

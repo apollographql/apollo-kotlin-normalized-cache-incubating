@@ -1,0 +1,9 @@
+{
+  "data": {
+    "hero": {
+      "__typename": "Droid",
+      "id": "2001",
+      "name": "R2-D2"
+    }
+  }
+}

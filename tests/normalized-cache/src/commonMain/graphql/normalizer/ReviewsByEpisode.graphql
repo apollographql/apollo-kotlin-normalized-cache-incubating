@@ -1,0 +1,7 @@
+query ReviewsByEpisode($episode: Episode!) {
+  reviews(episode: $episode) {
+    id
+    stars
+    commentary
+  }
+}

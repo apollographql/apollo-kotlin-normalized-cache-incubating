@@ -11,6 +11,10 @@ import com.apollographql.cache.normalized.api.IdCacheKeyResolver
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.store
+import main.GetUser2Query
+import main.GetUserByIdQuery
+import main.GetUsersByIDsQuery
+import main.GetUsersQuery
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -14,6 +14,7 @@ kotlin {
     getByName("commonMain") {
       dependencies {
         implementation(libs.apollo.runtime)
+        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
       }
     }
 
@@ -22,7 +23,7 @@ kotlin {
         implementation(libs.apollo.testing.support)
         implementation(libs.apollo.mockserver)
         implementation(libs.kotlin.test)
-        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
+        implementation(libs.turbine)
       }
     }
 
@@ -35,7 +36,23 @@ kotlin {
 }
 
 apollo {
-  service("service") {
-    packageName.set("test")
+  service("main") {
+    packageName.set("main")
+    srcDir(file("src/commonMain/graphql/main"))
+  }
+
+  service("httpcache") {
+    packageName.set("httpcache")
+    srcDir(file("src/commonMain/graphql/httpcache"))
+  }
+
+  service("normalizer") {
+    packageName.set("normalizer")
+    srcDir(file("src/commonMain/graphql/normalizer"))
+    generateFragmentImplementations.set(true)
+    mapScalarToKotlinString("Date")
+    mapScalarToKotlinString("Instant")
+    sealedClassesForEnumsMatching.set(listOf("Episode"))
+    generateOptionalOperationVariables.set(false)
   }
 }
