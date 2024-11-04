@@ -39,7 +39,14 @@ fun KotlinMultiplatformExtension.configureKmp(
   }
   if (withJs) {
     js(IR) {
-      nodejs()
+      nodejs {
+        testTask {
+          useMocha {
+            // Override default 2s timeout
+            timeout = "120s"
+          }
+        }
+      }
     }
   }
   if (withWasm) {
