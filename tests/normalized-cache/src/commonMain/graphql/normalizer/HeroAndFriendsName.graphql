@@ -6,3 +6,10 @@ query HeroAndFriendsNames($episode: Episode) {
     }
   }
 }
+
+fragment HeroAndFriendsNamesFragment on Character {
+  name
+  friends {
+    name
+  }
+}

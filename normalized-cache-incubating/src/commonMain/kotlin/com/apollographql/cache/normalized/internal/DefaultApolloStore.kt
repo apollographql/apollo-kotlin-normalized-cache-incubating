@@ -222,6 +222,31 @@ internal class DefaultApolloStore(
     return cache.addOptimisticUpdates(records)
   }
 
+  override fun <D : Fragment.Data> writeOptimisticUpdates(
+      fragment: Fragment<D>,
+      cacheKey: CacheKey,
+      fragmentData: D,
+      mutationId: Uuid,
+      customScalarAdapters: CustomScalarAdapters,
+  ): Set<String> {
+    val records = fragment.normalize(
+        data = fragmentData,
+        customScalarAdapters = customScalarAdapters,
+        cacheKeyGenerator = cacheKeyGenerator,
+        metadataGenerator = metadataGenerator,
+        fieldKeyGenerator = fieldKeyGenerator,
+        embeddedFieldsProvider = embeddedFieldsProvider,
+        rootKey = cacheKey.key
+    ).values.map { record ->
+      Record(
+          key = record.key,
+          fields = record.fields,
+          mutationId = mutationId
+      )
+    }
+    return cache.addOptimisticUpdates(records)
+  }
+
   override fun rollbackOptimisticUpdates(
       mutationId: Uuid,
   ): Set<String> {

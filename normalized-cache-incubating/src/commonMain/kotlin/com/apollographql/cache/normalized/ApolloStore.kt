@@ -131,6 +131,27 @@ interface ApolloStore {
   ): Set<String>
 
   /**
+   * Writes a fragment to the optimistic store.
+   *
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * @param fragment the fragment to write
+   * @param cacheKey the root where to write the fragment data to
+   * @param fragmentData the fragment data to write
+   * @param mutationId a unique identifier for this optimistic update
+   * @return the changed keys
+   *
+   * @see publish
+   */
+  fun <D : Fragment.Data> writeOptimisticUpdates(
+      fragment: Fragment<D>,
+      cacheKey: CacheKey,
+      fragmentData: D,
+      mutationId: Uuid,
+      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
+  ): Set<String>
+
+  /**
    * Rollback operation data optimistic updates.
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
