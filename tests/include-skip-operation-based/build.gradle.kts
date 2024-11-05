@@ -2,9 +2,7 @@ import com.apollographql.apollo.annotations.ApolloExperimental
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
-  // TODO: Use the external plugin for now - switch to the regular one when Schema is not relocated
-  // See https://github.com/apollographql/apollo-kotlin/pull/6176
-  alias(libs.plugins.apollo.external)
+  alias(libs.plugins.apollo)
 }
 
 kotlin {
