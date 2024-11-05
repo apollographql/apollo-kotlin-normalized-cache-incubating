@@ -1,42 +1,27 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.apollo)
 }
 
 kotlin {
-  jvm()
-  macosX64()
-  macosArm64()
-  iosArm64()
-  iosX64()
-  iosSimulatorArm64()
-  watchosArm32()
-  watchosArm64()
-  watchosSimulatorArm64()
-  tvosArm64()
-  tvosX64()
-  tvosSimulatorArm64()
-
-  @OptIn(ExperimentalKotlinGradlePluginApi::class)
-  applyDefaultHierarchyTemplate {
-    group("common") {
-      group("concurrent") {
-        group("native") {
-          group("apple")
-        }
-        group("jvmCommon") {
-          withJvm()
-        }
-      }
-    }
-  }
+  configureKmp(
+      withJs = true,
+      withWasm = false,
+      withAndroid = false,
+      withApple = AppleTargets.Host,
+  )
 
   sourceSets {
     getByName("commonMain") {
       dependencies {
         implementation(libs.apollo.runtime)
+        implementation("com.apollographql.cache:normalized-cache-incubating")
+      }
+    }
+
+    getByName("concurrentMain") {
+      dependencies {
+        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
       }
     }
 
@@ -45,7 +30,7 @@ kotlin {
         implementation(libs.apollo.testing.support)
         implementation(libs.apollo.mockserver)
         implementation(libs.kotlin.test)
-        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
+        implementation(libs.turbine)
       }
     }
 
@@ -54,16 +39,47 @@ kotlin {
         implementation(libs.slf4j.nop)
       }
     }
-
-    configureEach {
-      languageSettings.optIn("com.apollographql.apollo.annotations.ApolloExperimental")
-      languageSettings.optIn("com.apollographql.apollo.annotations.ApolloInternal")
-    }
   }
 }
 
 apollo {
-  service("service") {
-    packageName.set("test")
+  service("main") {
+    packageName.set("main")
+    srcDir(file("src/commonMain/graphql/main"))
   }
+
+  service("httpcache") {
+    packageName.set("httpcache")
+    srcDir(file("src/commonMain/graphql/httpcache"))
+  }
+
+  service("normalizer") {
+    packageName.set("normalizer")
+    srcDir(file("src/commonMain/graphql/normalizer"))
+    generateFragmentImplementations.set(true)
+    mapScalarToKotlinString("Date")
+    mapScalarToKotlinString("Instant")
+    sealedClassesForEnumsMatching.set(listOf("Episode"))
+    generateOptionalOperationVariables.set(false)
+  }
+
+  service("circular") {
+    packageName.set("circular")
+    srcDir(file("src/commonMain/graphql/circular"))
+    generateOptionalOperationVariables.set(false)
+  }
+
+  service("declarativecache") {
+    packageName.set("declarativecache")
+    srcDir(file("src/commonMain/graphql/declarativecache"))
+    generateOptionalOperationVariables.set(false)
+  }
+
+  service("fragmentnormalizer") {
+    packageName.set("fragmentnormalizer")
+    srcDir(file("src/commonMain/graphql/fragmentnormalizer"))
+    generateOptionalOperationVariables.set(false)
+    generateFragmentImplementations.set(true)
+  }
+
 }

@@ -8,6 +8,7 @@ import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
+import main.RepositoryListQuery
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

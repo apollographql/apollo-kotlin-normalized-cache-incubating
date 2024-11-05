@@ -1,5 +1,4 @@
 import com.gradleup.librarian.gradle.librarianModule
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
@@ -10,36 +9,11 @@ plugins {
 librarianModule(true)
 
 kotlin {
-  jvm()
-  macosX64()
-  macosArm64()
-  iosArm64()
-  iosX64()
-  iosSimulatorArm64()
-  watchosArm32()
-  watchosArm64()
-  watchosSimulatorArm64()
-  tvosArm64()
-  tvosX64()
-  tvosSimulatorArm64()
-  androidTarget {
-    publishAllLibraryVariants()
-  }
-
-  @OptIn(ExperimentalKotlinGradlePluginApi::class)
-  applyDefaultHierarchyTemplate {
-    group("common") {
-      group("concurrent") {
-        group("native") {
-          group("apple")
-        }
-        group("jvmCommon") {
-          withJvm()
-          withAndroidTarget()
-        }
-      }
-    }
-  }
+  configureKmp(
+      withJs = false,
+      withWasm = false,
+      withAndroid = true,
+  )
 }
 
 android {
@@ -125,11 +99,6 @@ kotlin {
         implementation(libs.kotlin.test)
         implementation(libs.apollo.testing.support)
       }
-    }
-
-    configureEach {
-      languageSettings.optIn("com.apollographql.apollo.annotations.ApolloExperimental")
-      languageSettings.optIn("com.apollographql.apollo.annotations.ApolloInternal")
     }
   }
 }

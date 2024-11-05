@@ -1,5 +1,4 @@
 import com.apollographql.apollo.annotations.ApolloExperimental
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
@@ -7,37 +6,18 @@ plugins {
 }
 
 kotlin {
-  jvm()
-  macosX64()
-  macosArm64()
-  iosArm64()
-  iosX64()
-  iosSimulatorArm64()
-  watchosArm32()
-  watchosArm64()
-  watchosSimulatorArm64()
-  tvosArm64()
-  tvosX64()
-  tvosSimulatorArm64()
-
-  @OptIn(ExperimentalKotlinGradlePluginApi::class)
-  applyDefaultHierarchyTemplate {
-    group("common") {
-      group("concurrent") {
-        group("native") {
-          group("apple")
-        }
-        group("jvmCommon") {
-          withJvm()
-        }
-      }
-    }
-  }
+  configureKmp(
+      withJs = false,
+      withWasm = false,
+      withAndroid = false,
+      withApple = AppleTargets.Host,
+  )
 
   sourceSets {
     getByName("commonMain") {
       dependencies {
         implementation(libs.apollo.runtime)
+        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
       }
     }
 
@@ -46,7 +26,6 @@ kotlin {
         implementation(libs.apollo.testing.support)
         implementation(libs.apollo.mockserver)
         implementation(libs.kotlin.test)
-        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
       }
     }
 
@@ -54,11 +33,6 @@ kotlin {
       dependencies {
         implementation(libs.slf4j.nop)
       }
-    }
-
-    configureEach {
-      languageSettings.optIn("com.apollographql.apollo.annotations.ApolloExperimental")
-      languageSettings.optIn("com.apollographql.apollo.annotations.ApolloInternal")
     }
   }
 }
