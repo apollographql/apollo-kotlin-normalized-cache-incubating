@@ -6,6 +6,11 @@ This repository serves as a place to experiment with [Apollo Kotlin](https://git
 
 > The incubating version of the normalized cache is not stable and is subject to change. It is recommended to experiment with it in
 > non-critical projects/modules, or behind a feature flag.
+>
+> In particular,
+> - there are no guarantees about the format of the cached data, so you should assume that it may be lost when upgrading
+> - performance and size may not be optimal
+
 {style="warning"}
 
 Add the dependencies to your project.
