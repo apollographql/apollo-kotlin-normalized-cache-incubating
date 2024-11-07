@@ -1,0 +1,29 @@
+query MainQuery($userIds: [ID!]!) {
+  me {
+    id
+    name
+    email
+    admin
+    repositories {
+      ...RepositoryFragment
+    }
+  }
+
+  users(ids: $userIds) {
+    id
+    name
+    email
+    admin
+    repositories {
+      ...RepositoryFragment
+    }
+  }
+
+  repositories(first: 15) {
+    ...RepositoryFragment
+  }
+}
+
+fragment RepositoryFragment on Repository {
+  id
+}

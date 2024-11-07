@@ -94,6 +94,12 @@ public final class com/apollographql/cache/normalized/FetchPolicyInterceptors {
 	public static final fun getNetworkOnlyInterceptor ()Lcom/apollographql/apollo/interceptor/ApolloInterceptor;
 }
 
+public final class com/apollographql/cache/normalized/GarbageCollectionKt {
+	public static final fun allRecords (Lcom/apollographql/cache/normalized/ApolloStore;)Ljava/util/Map;
+	public static final fun getReachableCacheKeys (Lcom/apollographql/cache/normalized/ApolloStore;)Ljava/util/Set;
+	public static final fun removeUnreachableRecords (Lcom/apollographql/cache/normalized/ApolloStore;)Ljava/util/Set;
+}
+
 public final class com/apollographql/cache/normalized/NormalizedCache {
 	public static final fun -logCacheMisses (Lcom/apollographql/apollo/ApolloClient$Builder;Lkotlin/jvm/functions/Function1;)Lcom/apollographql/apollo/ApolloClient$Builder;
 	public static synthetic fun -logCacheMisses$default (Lcom/apollographql/apollo/ApolloClient$Builder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcom/apollographql/apollo/ApolloClient$Builder;
