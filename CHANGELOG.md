@@ -5,6 +5,7 @@
 - For consistency, `MemoryCacheFactory` and `MemoryCache` are now in the `com.apollographql.cache.normalized.memory` package 
 - Remove deprecated symbols
 - Add `IdCacheKeyGenerator` and `IdCacheKeyResolver` (#41)
+- Add `ApolloStore.writeOptimisticUpdates` API for fragments (#55)
 
 # Version 0.0.3
 _2024-09-20_

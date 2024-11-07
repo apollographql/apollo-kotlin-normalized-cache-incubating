@@ -41,10 +41,11 @@ interface ApolloStore {
   val changedKeys: SharedFlow<Set<String>>
 
   /**
-   * Read GraphQL operation from store.
-   * This is a synchronous operation that might block if the underlying cache is doing IO
+   * Reads an operation from the store.
    *
-   * @param operation to be read
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * @param operation the operation to read
    *
    * @throws [com.apollographql.apollo.exception.CacheMissException] on cache miss
    * @throws [com.apollographql.apollo.exception.ApolloException] on other cache read errors
@@ -58,11 +59,12 @@ interface ApolloStore {
   ): ReadResult<D>
 
   /**
-   * Read a GraphQL fragment from the store.
-   * This is a synchronous operation that might block if the underlying cache is doing IO
+   * Reads a fragment from the store.
    *
-   * @param fragment to be read
-   * @param cacheKey    [CacheKey] to be used to find cache record for the fragment
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * @param fragment the fragment to read
+   * @param cacheKey the root where to read the fragment data from
    *
    * @throws [com.apollographql.apollo.exception.CacheMissException] on cache miss
    * @throws [com.apollographql.apollo.exception.ApolloException] on other cache read errors
@@ -77,11 +79,12 @@ interface ApolloStore {
   ): ReadResult<D>
 
   /**
-   * Write an operation data to the store.
-   * This is a synchronous operation that might block if the underlying cache is doing IO
+   * Write an operation to the store.
    *
-   * @param operation     [Operation] response data of which should be written to the store
-   * @param operationData [Operation.Data] operation response data to be written to the store
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * @param operation the operation to write
+   * @param operationData the operation data to write
    * @return the changed keys
    *
    * @see publish
@@ -94,12 +97,13 @@ interface ApolloStore {
   ): Set<String>
 
   /**
-   * Write a fragment data to the store.
-   * This is a synchronous operation that might block if the underlying cache is doing IO
+   * Write a fragment to the store.
    *
-   * @param fragment data to be written to the store
-   * @param cacheKey [CacheKey] to be used as root record key
-   * @param fragmentData [Fragment.Data] to be written to the store
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * @param fragment the fragment to write
+   * @param cacheKey the root where to write the fragment data to
+   * @param fragmentData the fragment data to write
    * @return the changed keys
    *
    * @see publish
@@ -113,12 +117,13 @@ interface ApolloStore {
   ): Set<String>
 
   /**
-   * Write operation data to the optimistic store.
+   * Writes an operation to the optimistic store.
+   *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
-   * @param operation     [Operation] response data of which should be written to the store
-   * @param operationData [Operation.Data] operation response data to be written to the store
-   * @param mutationId    mutation unique identifier
+   * @param operation the operation to write
+   * @param operationData the operation data to write
+   * @param mutationId a unique identifier for this optimistic update
    * @return the changed keys
    *
    * @see publish
@@ -131,46 +136,74 @@ interface ApolloStore {
   ): Set<String>
 
   /**
-   * Rollback operation data optimistic updates.
+   * Writes a fragment to the optimistic store.
+   *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
-   * @param mutationId mutation unique identifier
+   * @param fragment the fragment to write
+   * @param cacheKey the root where to write the fragment data to
+   * @param fragmentData the fragment data to write
+   * @param mutationId a unique identifier for this optimistic update
    * @return the changed keys
+   *
+   * @see publish
+   */
+  fun <D : Fragment.Data> writeOptimisticUpdates(
+      fragment: Fragment<D>,
+      cacheKey: CacheKey,
+      fragmentData: D,
+      mutationId: Uuid,
+      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
+  ): Set<String>
+
+  /**
+   * Rollbacks optimistic updates.
+   *
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * @param mutationId the unique identifier of the optimistic update to rollback
+   * @return the changed keys
+   *
+   * @see publish
    */
   fun rollbackOptimisticUpdates(
       mutationId: Uuid,
   ): Set<String>
 
   /**
-   * Clear all records from this [ApolloStore].
-   * This is a synchronous operation that might block if the underlying cache is doing IO
+   * Clears all records.
+   *
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
    * @return `true` if all records were successfully removed, `false` otherwise
    */
   fun clearAll(): Boolean
 
   /**
-   * Remove cache record by the key
-   * This is a synchronous operation that might block if the underlying cache is doing IO
+   * Removes a record by its key.
    *
-   * @param cacheKey of record to be removed
-   * @param cascade defines if remove operation is propagated to the referenced entities
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * @param cacheKey the key of the record to remove
+   * @param cascade whether referenced records should also be removed
    * @return `true` if the record was successfully removed, `false` otherwise
    */
   fun remove(cacheKey: CacheKey, cascade: Boolean = true): Boolean
 
   /**
-   * Remove a list of cache records
-   * This is an optimized version of [remove] for caches that can batch operations
-   * This is a synchronous operation that might block if the underlying cache is doing IO
+   * Removes a list of records by their keys.
+   * This is an optimized version of [remove] for caches that can batch operations.
    *
-   * @param cacheKeys keys of records to be removed
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * @param cacheKeys the keys of the records to remove
+   * @param cascade whether referenced records should also be removed
    * @return the number of records that have been removed
    */
   fun remove(cacheKeys: List<CacheKey>, cascade: Boolean = true): Int
 
   /**
-   * Normalize [data] to a map of [Record] keyed by [Record.key].
+   * Normalizes operation data to a map of [Record] keyed by [Record.key].
    */
   fun <D : Operation.Data> normalize(
       operation: Operation<D>,
@@ -179,12 +212,17 @@ interface ApolloStore {
   ): Map<String, Record>
 
   /**
+   * Publishes a set of keys that have changed. This will notify subscribers of [changedKeys].
+   *
+   * @see changedKeys
+   *
    * @param keys A set of keys of [Record] which have changed.
    */
   suspend fun publish(keys: Set<String>)
 
   /**
    * Direct access to the cache.
+   *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
    * @param block a function that can access the cache.
@@ -192,13 +230,14 @@ interface ApolloStore {
   fun <R> accessCache(block: (NormalizedCache) -> R): R
 
   /**
-   * Dump the content of the store for debugging purposes.
+   * Dumps the content of the store for debugging purposes.
+   *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    */
   fun dump(): Map<KClass<*>, Map<String, Record>>
 
   /**
-   * Release resources associated with this store.
+   * Releases resources associated with this store.
    */
   fun dispose()
 

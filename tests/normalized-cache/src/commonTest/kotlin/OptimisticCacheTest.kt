@@ -6,6 +6,7 @@ import com.apollographql.apollo.testing.awaitElement
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
@@ -23,6 +24,8 @@ import normalizer.HeroAndFriendsNamesWithIDsQuery
 import normalizer.HeroNameWithIdQuery
 import normalizer.ReviewsByEpisodeQuery
 import normalizer.UpdateReviewMutation
+import normalizer.fragment.HeroAndFriendsNamesFragment
+import normalizer.fragment.HeroAndFriendsNamesFragmentImpl
 import normalizer.type.ColorInput
 import normalizer.type.Episode
 import normalizer.type.ReviewInput
@@ -49,7 +52,7 @@ class OptimisticCacheTest {
    * roll them back, make sure we're back to the initial state
    */
   @Test
-  fun programmaticOptimiticUpdates() = runTest(before = { setUp() }, after = { tearDown() }) {
+  fun programmaticOptimisticUpdates() = runTest(before = { setUp() }, after = { tearDown() }) {
     val query = HeroAndFriendsNamesQuery(Episode.JEDI)
 
     mockServer.enqueueString(testFixtureToUtf8("HeroAndFriendsNameResponse.json"))
@@ -78,19 +81,68 @@ class OptimisticCacheTest {
 
     var response = apolloClient.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute()
 
-    assertEquals(response.data?.hero?.name, "R222-D222")
-    assertEquals(response.data?.hero?.friends?.size, 2)
-    assertEquals(response.data?.hero?.friends?.get(0)?.name, "SuperMan")
-    assertEquals(response.data?.hero?.friends?.get(1)?.name, "Batman")
+    assertEquals<Any?>("R222-D222", response.data?.hero?.name)
+    assertEquals<Any?>(2, response.data?.hero?.friends?.size)
+    assertEquals<Any?>("SuperMan", response.data?.hero?.friends?.get(0)?.name)
+    assertEquals<Any?>("Batman", response.data?.hero?.friends?.get(1)?.name)
 
     store.rollbackOptimisticUpdates(mutationId)
     response = apolloClient.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute()
 
-    assertEquals(response.data?.hero?.name, "R2-D2")
-    assertEquals(response.data?.hero?.friends?.size, 3)
-    assertEquals(response.data?.hero?.friends?.get(0)?.name, "Luke Skywalker")
-    assertEquals(response.data?.hero?.friends?.get(1)?.name, "Han Solo")
-    assertEquals(response.data?.hero?.friends?.get(2)?.name, "Leia Organa")
+    assertEquals<Any?>("R2-D2", response.data?.hero?.name)
+    assertEquals<Any?>(3, response.data?.hero?.friends?.size)
+    assertEquals<Any?>("Luke Skywalker", response.data?.hero?.friends?.get(0)?.name)
+    assertEquals<Any?>("Han Solo", response.data?.hero?.friends?.get(1)?.name)
+    assertEquals<Any?>("Leia Organa", response.data?.hero?.friends?.get(2)?.name)
+  }
+
+  /**
+   * Write the updates programmatically, make sure they are seen,
+   * roll them back, make sure we're back to the initial state
+   */
+  @Test
+  fun programmaticOptimisticFragmentUpdates() = runTest(before = { setUp() }, after = { tearDown() }) {
+    val query = HeroAndFriendsNamesQuery(Episode.JEDI)
+
+    mockServer.enqueueString(testFixtureToUtf8("HeroAndFriendsNameResponse.json"))
+    apolloClient.query(query).fetchPolicy(FetchPolicy.NetworkOnly).execute()
+
+    val mutationId = uuid4()
+    val data = HeroAndFriendsNamesFragment(
+        "R222-D222",
+        listOf(
+            HeroAndFriendsNamesFragment.Friend(
+                "SuperMan"
+            ),
+            HeroAndFriendsNamesFragment.Friend(
+                "Batman"
+            )
+        )
+    )
+    store.writeOptimisticUpdates(
+        HeroAndFriendsNamesFragmentImpl(),
+        mutationId = mutationId,
+        cacheKey = CacheKey("""hero({"episode":"JEDI"})"""),
+        fragmentData = data,
+    ).also {
+      store.publish(it)
+    }
+
+    var response = apolloClient.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute()
+
+    assertEquals<Any?>("R222-D222", response.data?.hero?.name)
+    assertEquals<Any?>(2, response.data?.hero?.friends?.size)
+    assertEquals<Any?>("SuperMan", response.data?.hero?.friends?.get(0)?.name)
+    assertEquals<Any?>("Batman", response.data?.hero?.friends?.get(1)?.name)
+
+    store.rollbackOptimisticUpdates(mutationId)
+    response = apolloClient.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute()
+
+    assertEquals<Any?>("R2-D2", response.data?.hero?.name)
+    assertEquals<Any?>(3, response.data?.hero?.friends?.size)
+    assertEquals<Any?>("Luke Skywalker", response.data?.hero?.friends?.get(0)?.name)
+    assertEquals<Any?>("Han Solo", response.data?.hero?.friends?.get(1)?.name)
+    assertEquals<Any?>("Leia Organa", response.data?.hero?.friends?.get(2)?.name)
   }
 
   /**
@@ -132,13 +184,13 @@ class OptimisticCacheTest {
 
     // check if query1 see optimistic updates
     var response1 = apolloClient.query(query1).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response1.data?.hero?.id, "2001")
-    assertEquals(response1.data?.hero?.name, "R222-D222")
-    assertEquals(response1.data?.hero?.friends?.size, 2)
-    assertEquals(response1.data?.hero?.friends?.get(0)?.id, "1000")
-    assertEquals(response1.data?.hero?.friends?.get(0)?.name, "SuperMan")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.id, "1003")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.name, "Batman")
+    assertEquals<Any?>("2001", response1.data?.hero?.id)
+    assertEquals<Any?>("R222-D222", response1.data?.hero?.name)
+    assertEquals<Any?>(2, response1.data?.hero?.friends?.size)
+    assertEquals<Any?>("1000", response1.data?.hero?.friends?.get(0)?.id)
+    assertEquals<Any?>("SuperMan", response1.data?.hero?.friends?.get(0)?.name)
+    assertEquals<Any?>("1003", response1.data?.hero?.friends?.get(1)?.id)
+    assertEquals<Any?>("Batman", response1.data?.hero?.friends?.get(1)?.name)
 
     // execute query2
     val query2 = HeroNameWithIdQuery()
@@ -163,46 +215,46 @@ class OptimisticCacheTest {
 
     // check if query1 sees data2
     response1 = apolloClient.query(query1).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response1.data?.hero?.id, "2001")
-    assertEquals(response1.data?.hero?.name, "R222-D222")
-    assertEquals(response1.data?.hero?.friends?.size, 2)
-    assertEquals(response1.data?.hero?.friends?.get(0)?.id, "1000")
-    assertEquals(response1.data?.hero?.friends?.get(0)?.name, "Beast")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.id, "1003")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.name, "Batman")
+    assertEquals<Any?>("2001", response1.data?.hero?.id)
+    assertEquals<Any?>("R222-D222", response1.data?.hero?.name)
+    assertEquals<Any?>(2, response1.data?.hero?.friends?.size)
+    assertEquals<Any?>("1000", response1.data?.hero?.friends?.get(0)?.id)
+    assertEquals<Any?>("Beast", response1.data?.hero?.friends?.get(0)?.name)
+    assertEquals<Any?>("1003", response1.data?.hero?.friends?.get(1)?.id)
+    assertEquals<Any?>("Batman", response1.data?.hero?.friends?.get(1)?.name)
 
     // check if query2 sees data2
     var response2 = apolloClient.query(query2).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response2.data?.hero?.id, "1000")
-    assertEquals(response2.data?.hero?.name, "Beast")
+    assertEquals<Any?>("1000", response2.data?.hero?.id)
+    assertEquals<Any?>("Beast", response2.data?.hero?.name)
 
     // rollback data1
     store.rollbackOptimisticUpdates(mutationId1)
 
     // check if query2 sees the rollback
     response1 = apolloClient.query(query1).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response1.data?.hero?.id, "2001")
-    assertEquals(response1.data?.hero?.name, "R2-D2")
-    assertEquals(response1.data?.hero?.friends?.size, 3)
-    assertEquals(response1.data?.hero?.friends?.get(0)?.id, "1000")
-    assertEquals(response1.data?.hero?.friends?.get(0)?.name, "Beast")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.id, "1002")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.name, "Han Solo")
-    assertEquals(response1.data?.hero?.friends?.get(2)?.id, "1003")
-    assertEquals(response1.data?.hero?.friends?.get(2)?.name, "Leia Organa")
+    assertEquals<Any?>("2001", response1.data?.hero?.id)
+    assertEquals<Any?>("R2-D2", response1.data?.hero?.name)
+    assertEquals<Any?>(3, response1.data?.hero?.friends?.size)
+    assertEquals<Any?>("1000", response1.data?.hero?.friends?.get(0)?.id)
+    assertEquals<Any?>("Beast", response1.data?.hero?.friends?.get(0)?.name)
+    assertEquals<Any?>("1002", response1.data?.hero?.friends?.get(1)?.id)
+    assertEquals<Any?>("Han Solo", response1.data?.hero?.friends?.get(1)?.name)
+    assertEquals<Any?>("1003", response1.data?.hero?.friends?.get(2)?.id)
+    assertEquals<Any?>("Leia Organa", response1.data?.hero?.friends?.get(2)?.name)
 
     // check if query2 see the latest optimistic updates
     response2 = apolloClient.query(query2).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response2.data?.hero?.id, "1000")
-    assertEquals(response2.data?.hero?.name, "Beast")
+    assertEquals<Any?>("1000", response2.data?.hero?.id)
+    assertEquals<Any?>("Beast", response2.data?.hero?.name)
 
     // rollback query2 optimistic updates
     store.rollbackOptimisticUpdates(mutationId2)
 
     // check if query2 see the latest optimistic updates
     response2 = apolloClient.query(query2).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response2.data?.hero?.id, "1000")
-    assertEquals(response2.data?.hero?.name, "SuperMan")
+    assertEquals<Any?>("1000", response2.data?.hero?.id)
+    assertEquals<Any?>("SuperMan", response2.data?.hero?.name)
   }
 
   @Test
@@ -222,16 +274,16 @@ class OptimisticCacheTest {
     var watcherData = channel.receive()
 
     // before mutation and optimistic updates
-    assertEquals(watcherData?.reviews?.size, 3)
-    assertEquals(watcherData?.reviews?.get(0)?.id, "empireReview1")
-    assertEquals(watcherData?.reviews?.get(0)?.stars, 1)
-    assertEquals(watcherData?.reviews?.get(0)?.commentary, "Boring")
-    assertEquals(watcherData?.reviews?.get(1)?.id, "empireReview2")
-    assertEquals(watcherData?.reviews?.get(1)?.stars, 2)
-    assertEquals(watcherData?.reviews?.get(1)?.commentary, "So-so")
-    assertEquals(watcherData?.reviews?.get(2)?.id, "empireReview3")
-    assertEquals(watcherData?.reviews?.get(2)?.stars, 5)
-    assertEquals(watcherData?.reviews?.get(2)?.commentary, "Amazing")
+    assertEquals<Any?>(3, watcherData?.reviews?.size)
+    assertEquals<Any?>("empireReview1", watcherData?.reviews?.get(0)?.id)
+    assertEquals<Any?>(1, watcherData?.reviews?.get(0)?.stars)
+    assertEquals<Any?>("Boring", watcherData?.reviews?.get(0)?.commentary)
+    assertEquals<Any?>("empireReview2", watcherData?.reviews?.get(1)?.id)
+    assertEquals<Any?>(2, watcherData?.reviews?.get(1)?.stars)
+    assertEquals<Any?>("So-so", watcherData?.reviews?.get(1)?.commentary)
+    assertEquals<Any?>("empireReview3", watcherData?.reviews?.get(2)?.id)
+    assertEquals<Any?>(5, watcherData?.reviews?.get(2)?.stars)
+    assertEquals<Any?>("Amazing", watcherData?.reviews?.get(2)?.commentary)
 
     /**
      * There is a small potential for a race condition here. The changedKeys event from the optimistic updates might
@@ -266,30 +318,30 @@ class OptimisticCacheTest {
      * optimistic updates
      */
     watcherData = channel.receive()
-    assertEquals(watcherData?.reviews?.size, 3)
-    assertEquals(watcherData?.reviews?.get(0)?.id, "empireReview1")
-    assertEquals(watcherData?.reviews?.get(0)?.stars, 1)
-    assertEquals(watcherData?.reviews?.get(0)?.commentary, "Boring")
-    assertEquals(watcherData?.reviews?.get(1)?.id, "empireReview2")
-    assertEquals(watcherData?.reviews?.get(1)?.stars, 5)
-    assertEquals(watcherData?.reviews?.get(1)?.commentary, "Great")
-    assertEquals(watcherData?.reviews?.get(2)?.id, "empireReview3")
-    assertEquals(watcherData?.reviews?.get(2)?.stars, 5)
-    assertEquals(watcherData?.reviews?.get(2)?.commentary, "Amazing")
+    assertEquals<Any?>(3, watcherData?.reviews?.size)
+    assertEquals<Any?>("empireReview1", watcherData?.reviews?.get(0)?.id)
+    assertEquals<Any?>(1, watcherData?.reviews?.get(0)?.stars)
+    assertEquals<Any?>("Boring", watcherData?.reviews?.get(0)?.commentary)
+    assertEquals<Any?>("empireReview2", watcherData?.reviews?.get(1)?.id)
+    assertEquals<Any?>(5, watcherData?.reviews?.get(1)?.stars)
+    assertEquals<Any?>("Great", watcherData?.reviews?.get(1)?.commentary)
+    assertEquals<Any?>("empireReview3", watcherData?.reviews?.get(2)?.id)
+    assertEquals<Any?>(5, watcherData?.reviews?.get(2)?.stars)
+    assertEquals<Any?>("Amazing", watcherData?.reviews?.get(2)?.commentary)
 
     // after mutation with rolled back optimistic updates
     @Suppress("DEPRECATION")
     watcherData = channel.awaitElement()
-    assertEquals(watcherData?.reviews?.size, 3)
-    assertEquals(watcherData?.reviews?.get(0)?.id, "empireReview1")
-    assertEquals(watcherData?.reviews?.get(0)?.stars, 1)
-    assertEquals(watcherData?.reviews?.get(0)?.commentary, "Boring")
-    assertEquals(watcherData?.reviews?.get(1)?.id, "empireReview2")
-    assertEquals(watcherData?.reviews?.get(1)?.stars, 4)
-    assertEquals(watcherData?.reviews?.get(1)?.commentary, "Not Bad")
-    assertEquals(watcherData?.reviews?.get(2)?.id, "empireReview3")
-    assertEquals(watcherData?.reviews?.get(2)?.stars, 5)
-    assertEquals(watcherData?.reviews?.get(2)?.commentary, "Amazing")
+    assertEquals<Any?>(3, watcherData?.reviews?.size)
+    assertEquals<Any?>("empireReview1", watcherData?.reviews?.get(0)?.id)
+    assertEquals<Any?>(1, watcherData?.reviews?.get(0)?.stars)
+    assertEquals<Any?>("Boring", watcherData?.reviews?.get(0)?.commentary)
+    assertEquals<Any?>("empireReview2", watcherData?.reviews?.get(1)?.id)
+    assertEquals<Any?>(4, watcherData?.reviews?.get(1)?.stars)
+    assertEquals<Any?>("Not Bad", watcherData?.reviews?.get(1)?.commentary)
+    assertEquals<Any?>("empireReview3", watcherData?.reviews?.get(2)?.id)
+    assertEquals<Any?>(5, watcherData?.reviews?.get(2)?.stars)
+    assertEquals<Any?>("Amazing", watcherData?.reviews?.get(2)?.commentary)
 
     job.cancel()
   }
@@ -346,58 +398,58 @@ class OptimisticCacheTest {
 
     // check if query1 see optimistic updates
     var response1 = apolloClient.query(query1).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response1.data?.hero?.id, "2001")
-    assertEquals(response1.data?.hero?.name, "R222-D222")
-    assertEquals(response1.data?.hero?.friends?.size, 2)
-    assertEquals(response1.data?.hero?.friends?.get(0)?.id, "1000")
-    assertEquals(response1.data?.hero?.friends?.get(0)?.name, "Spiderman")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.id, "1003")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.name, "Batman")
+    assertEquals<Any?>("2001", response1.data?.hero?.id)
+    assertEquals<Any?>("R222-D222", response1.data?.hero?.name)
+    assertEquals<Any?>(2, response1.data?.hero?.friends?.size)
+    assertEquals<Any?>("1000", response1.data?.hero?.friends?.get(0)?.id)
+    assertEquals<Any?>("Spiderman", response1.data?.hero?.friends?.get(0)?.name)
+    assertEquals<Any?>("1003", response1.data?.hero?.friends?.get(1)?.id)
+    assertEquals<Any?>("Batman", response1.data?.hero?.friends?.get(1)?.name)
 
 
     // check if query2 see the latest optimistic updates
     var response2 = apolloClient.query(query2).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response2.data?.hero?.id, "1000")
-    assertEquals(response2.data?.hero?.name, "Spiderman")
+    assertEquals<Any?>("1000", response2.data?.hero?.id)
+    assertEquals<Any?>("Spiderman", response2.data?.hero?.name)
 
     // rollback query2 optimistic updates
     store.rollbackOptimisticUpdates(mutationId2)
 
     // check if query1 see the latest optimistic updates
     response1 = apolloClient.query(query1).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response1.data?.hero?.id, "2001")
-    assertEquals(response1.data?.hero?.name, "R222-D222")
-    assertEquals(response1.data?.hero?.friends?.size, 2)
-    assertEquals(response1.data?.hero?.friends?.get(0)?.id, "1000")
-    assertEquals(response1.data?.hero?.friends?.get(0)?.name, "Robocop")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.id, "1003")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.name, "Batman")
+    assertEquals<Any?>("2001", response1.data?.hero?.id)
+    assertEquals<Any?>("R222-D222", response1.data?.hero?.name)
+    assertEquals<Any?>(2, response1.data?.hero?.friends?.size)
+    assertEquals<Any?>("1000", response1.data?.hero?.friends?.get(0)?.id)
+    assertEquals<Any?>("Robocop", response1.data?.hero?.friends?.get(0)?.name)
+    assertEquals<Any?>("1003", response1.data?.hero?.friends?.get(1)?.id)
+    assertEquals<Any?>("Batman", response1.data?.hero?.friends?.get(1)?.name)
 
 
     // check if query2 see the latest optimistic updates
     response2 = apolloClient.query(query2).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response2.data?.hero?.id, "1000")
-    assertEquals(response2.data?.hero?.name, "Robocop")
+    assertEquals<Any?>("1000", response2.data?.hero?.id)
+    assertEquals<Any?>("Robocop", response2.data?.hero?.name)
 
     // rollback query1 optimistic updates
     store.rollbackOptimisticUpdates(mutationId1)
 
     // check if query1 see the latest non-optimistic updates
     response1 = apolloClient.query(query1).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response1.data?.hero?.id, "2001")
-    assertEquals(response1.data?.hero?.name, "R2-D2")
-    assertEquals(response1.data?.hero?.friends?.size, 3)
-    assertEquals(response1.data?.hero?.friends?.get(0)?.id, "1000")
-    assertEquals(response1.data?.hero?.friends?.get(0)?.name, "SuperMan")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.id, "1002")
-    assertEquals(response1.data?.hero?.friends?.get(1)?.name, "Han Solo")
-    assertEquals(response1.data?.hero?.friends?.get(2)?.id, "1003")
-    assertEquals(response1.data?.hero?.friends?.get(2)?.name, "Leia Organa")
+    assertEquals<Any?>("2001", response1.data?.hero?.id)
+    assertEquals<Any?>("R2-D2", response1.data?.hero?.name)
+    assertEquals<Any?>(3, response1.data?.hero?.friends?.size)
+    assertEquals<Any?>("1000", response1.data?.hero?.friends?.get(0)?.id)
+    assertEquals<Any?>("SuperMan", response1.data?.hero?.friends?.get(0)?.name)
+    assertEquals<Any?>("1002", response1.data?.hero?.friends?.get(1)?.id)
+    assertEquals<Any?>("Han Solo", response1.data?.hero?.friends?.get(1)?.name)
+    assertEquals<Any?>("1003", response1.data?.hero?.friends?.get(2)?.id)
+    assertEquals<Any?>("Leia Organa", response1.data?.hero?.friends?.get(2)?.name)
 
 
     // check if query2 see the latest non-optimistic updates
     response2 = apolloClient.query(query2).fetchPolicy(FetchPolicy.CacheOnly).execute()
-    assertEquals(response2.data?.hero?.id, "1000")
-    assertEquals(response2.data?.hero?.name, "SuperMan")
+    assertEquals<Any?>("1000", response2.data?.hero?.id)
+    assertEquals<Any?>("SuperMan", response2.data?.hero?.name)
   }
 }
