@@ -36,6 +36,8 @@ internal interface RecordDatabase {
 
   fun delete(key: String)
 
+  fun delete(keys: Collection<String>)
+
   fun deleteMatching(pattern: String)
 
   fun deleteAll()

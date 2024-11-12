@@ -74,10 +74,13 @@ class SqlNormalizedCache internal constructor(
 
   override fun remove(cacheKey: CacheKey, cascade: Boolean): Boolean {
     return recordDatabase.transaction {
-      internalDeleteRecord(
-          key = cacheKey.key,
-          cascade = cascade,
-      )
+      internalDeleteRecords(setOf(cacheKey.key), cascade) > 0
+    }
+  }
+
+  override fun remove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
+    return recordDatabase.transaction {
+      internalDeleteRecords(cacheKeys.map { it.key }, cascade)
     }
   }
 
@@ -118,27 +121,24 @@ class SqlNormalizedCache internal constructor(
     return mapOf(this::class to recordDatabase.selectAll().associateBy { it.key })
   }
 
+  private fun getReferencedKeysRecursively(keys: Collection<String>, visited: MutableSet<String> = mutableSetOf()): Set<String> {
+    if (keys.isEmpty()) return emptySet()
+    val referencedKeys = recordDatabase.select(keys - visited).flatMap { it.referencedFields() }.map { it.key }.toSet()
+    visited += keys
+    return referencedKeys + getReferencedKeysRecursively(referencedKeys, visited)
+  }
+
   /**
    * Assume an enclosing transaction
    */
-  private fun internalDeleteRecord(key: String, cascade: Boolean, visited: MutableSet<String> = mutableSetOf()): Boolean {
-    if (cascade) {
-      // If we've already visited this key, return to prevent infinite loop
-      if (key in visited) return false
-      visited.add(key)
-
-      recordDatabase.select(key)
-          ?.referencedFields()
-          ?.forEach {
-            internalDeleteRecord(
-                key = it.key,
-                cascade = true,
-                visited = visited
-            )
-          }
+  private fun internalDeleteRecords(keys: Collection<String>, cascade: Boolean): Int {
+    val referencedKeys = if (cascade) {
+      getReferencedKeysRecursively(keys)
+    } else {
+      emptySet()
     }
-    recordDatabase.delete(key)
-    return recordDatabase.changes() > 0
+    recordDatabase.delete(keys + referencedKeys)
+    return recordDatabase.changes().toInt()
   }
 
   /**

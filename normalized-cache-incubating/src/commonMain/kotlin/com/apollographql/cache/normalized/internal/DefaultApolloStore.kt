@@ -87,13 +87,7 @@ internal class DefaultApolloStore(
       cacheKeys: List<CacheKey>,
       cascade: Boolean,
   ): Int {
-    var count = 0
-    for (cacheKey in cacheKeys) {
-      if (cache.remove(cacheKey, cascade = cascade)) {
-        count++
-      }
-    }
-    return count
+    return cache.remove(cacheKeys, cascade)
   }
 
   override fun <D : Operation.Data> normalize(
