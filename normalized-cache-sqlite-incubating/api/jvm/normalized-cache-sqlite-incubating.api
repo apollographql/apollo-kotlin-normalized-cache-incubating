@@ -9,8 +9,11 @@ public final class com/apollographql/cache/normalized/sql/SqlNormalizedCache : c
 	public fun remove (Ljava/lang/String;)I
 }
 
-public final class com/apollographql/cache/normalized/sql/SqlNormalizedCacheFactory_jvmKt {
+public final class com/apollographql/cache/normalized/sql/SqlNormalizedCacheFactoryKt {
 	public static final fun SqlNormalizedCacheFactory (Lapp/cash/sqldelight/db/SqlDriver;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
+}
+
+public final class com/apollographql/cache/normalized/sql/SqlNormalizedCacheFactory_jvmKt {
 	public static final fun SqlNormalizedCacheFactory (Ljava/lang/String;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
 	public static final fun SqlNormalizedCacheFactory (Ljava/lang/String;Ljava/lang/String;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
 	public static final fun SqlNormalizedCacheFactory (Ljava/lang/String;Ljava/util/Properties;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
@@ -19,6 +22,7 @@ public final class com/apollographql/cache/normalized/sql/SqlNormalizedCacheFact
 }
 
 public final class com/apollographql/cache/normalized/sql/TrimmableNormalizedCacheFactory : com/apollographql/cache/normalized/api/NormalizedCacheFactory {
+	public fun close ()V
 	public fun create ()Lcom/apollographql/cache/normalized/api/NormalizedCache;
 }
 

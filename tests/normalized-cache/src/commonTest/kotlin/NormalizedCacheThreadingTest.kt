@@ -30,6 +30,8 @@ class NormalizedCacheThreadingTest {
             cacheCreateThreadName = currentThreadId()
             return MemoryCacheFactory().create()
           }
+
+          override fun close() {}
         }).build()
     assertNull(cacheCreateThreadName)
 

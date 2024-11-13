@@ -389,7 +389,7 @@ public final class com/apollographql/cache/normalized/api/NormalizedCache$Compan
 	public final fun prettifyDump (Ljava/util/Map;)Ljava/lang/String;
 }
 
-public abstract class com/apollographql/cache/normalized/api/NormalizedCacheFactory {
+public abstract class com/apollographql/cache/normalized/api/NormalizedCacheFactory : java/io/Closeable {
 	public fun <init> ()V
 	public abstract fun create ()Lcom/apollographql/cache/normalized/api/NormalizedCache;
 }
@@ -523,6 +523,7 @@ public final class com/apollographql/cache/normalized/memory/MemoryCacheFactory 
 	public fun <init> (IJ)V
 	public synthetic fun <init> (IJILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun chain (Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;)Lcom/apollographql/cache/normalized/memory/MemoryCacheFactory;
+	public fun close ()V
 	public synthetic fun create ()Lcom/apollographql/cache/normalized/api/NormalizedCache;
 	public fun create ()Lcom/apollographql/cache/normalized/memory/MemoryCache;
 }

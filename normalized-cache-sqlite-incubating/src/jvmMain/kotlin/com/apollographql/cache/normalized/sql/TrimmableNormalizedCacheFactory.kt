@@ -43,6 +43,10 @@ class TrimmableNormalizedCacheFactory internal constructor(
 
     return SqlNormalizedCache(Blob2RecordDatabase(queries))
   }
+
+  override fun close() {
+    driver.close()
+  }
 }
 
 

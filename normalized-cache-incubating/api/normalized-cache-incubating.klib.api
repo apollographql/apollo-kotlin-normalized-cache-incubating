@@ -12,7 +12,7 @@ abstract class com.apollographql.cache.normalized.api/CacheKeyResolver : com.apo
     final fun resolveField(com.apollographql.cache.normalized.api/ResolverContext): kotlin/Any? // com.apollographql.cache.normalized.api/CacheKeyResolver.resolveField|resolveField(com.apollographql.cache.normalized.api.ResolverContext){}[0]
     open fun listOfCacheKeysForField(com.apollographql.cache.normalized.api/ResolverContext): kotlin.collections/List<com.apollographql.cache.normalized.api/CacheKey?>? // com.apollographql.cache.normalized.api/CacheKeyResolver.listOfCacheKeysForField|listOfCacheKeysForField(com.apollographql.cache.normalized.api.ResolverContext){}[0]
 }
-abstract class com.apollographql.cache.normalized.api/NormalizedCacheFactory { // com.apollographql.cache.normalized.api/NormalizedCacheFactory|null[0]
+abstract class com.apollographql.cache.normalized.api/NormalizedCacheFactory : okio/Closeable { // com.apollographql.cache.normalized.api/NormalizedCacheFactory|null[0]
     abstract fun create(): com.apollographql.cache.normalized.api/NormalizedCache // com.apollographql.cache.normalized.api/NormalizedCacheFactory.create|create(){}[0]
     constructor <init>() // com.apollographql.cache.normalized.api/NormalizedCacheFactory.<init>|<init>(){}[0]
 }
@@ -275,6 +275,7 @@ final class com.apollographql.cache.normalized.memory/MemoryCache : com.apollogr
 final class com.apollographql.cache.normalized.memory/MemoryCacheFactory : com.apollographql.cache.normalized.api/NormalizedCacheFactory { // com.apollographql.cache.normalized.memory/MemoryCacheFactory|null[0]
     constructor <init>(kotlin/Int = ..., kotlin/Long = ...) // com.apollographql.cache.normalized.memory/MemoryCacheFactory.<init>|<init>(kotlin.Int;kotlin.Long){}[0]
     final fun chain(com.apollographql.cache.normalized.api/NormalizedCacheFactory): com.apollographql.cache.normalized.memory/MemoryCacheFactory // com.apollographql.cache.normalized.memory/MemoryCacheFactory.chain|chain(com.apollographql.cache.normalized.api.NormalizedCacheFactory){}[0]
+    final fun close() // com.apollographql.cache.normalized.memory/MemoryCacheFactory.close|close(){}[0]
     final fun create(): com.apollographql.cache.normalized.memory/MemoryCache // com.apollographql.cache.normalized.memory/MemoryCacheFactory.create|create(){}[0]
 }
 final class com.apollographql.cache.normalized/CacheInfo : com.apollographql.apollo.api/ExecutionContext.Element { // com.apollographql.cache.normalized/CacheInfo|null[0]

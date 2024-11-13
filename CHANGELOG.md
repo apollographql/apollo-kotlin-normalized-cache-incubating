@@ -1,6 +1,6 @@
 # Next version (unreleased)
 
-PUT_CHANGELOG_HERE
+- Add `NormalizedCacheFactory.close()` (#66)
 
 # Version 0.0.4
 _2024-11-07_
