@@ -176,4 +176,8 @@ class MemoryCacheFactory @JvmOverloads constructor(
         expireAfterMillis = expireAfterMillis,
     )
   }
+
+  override fun close() {
+    nextCacheFactory?.close()
+  }
 }

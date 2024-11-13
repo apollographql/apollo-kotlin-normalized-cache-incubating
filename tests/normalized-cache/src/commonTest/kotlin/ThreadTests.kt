@@ -87,6 +87,7 @@ class ThreadTests {
       return MyNormalizedCache(mainThreadId)
     }
 
+    override fun close() {}
   }
 
   @Test

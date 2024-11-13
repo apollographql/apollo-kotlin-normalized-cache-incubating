@@ -1,17 +1,8 @@
 package com.apollographql.cache.normalized.sql
 
-import app.cash.sqldelight.db.SqlDriver
-import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.sql.internal.createDriver
-import com.apollographql.cache.normalized.sql.internal.createRecordDatabase
 import com.apollographql.cache.normalized.sql.internal.getSchema
-
-actual fun SqlNormalizedCacheFactory(driver: SqlDriver): NormalizedCacheFactory = object : NormalizedCacheFactory() {
-  override fun create(): NormalizedCache {
-    return SqlNormalizedCache(createRecordDatabase(driver))
-  }
-}
 
 /**
  * @param name the name of the database or null for an in-memory database
@@ -22,6 +13,6 @@ actual fun SqlNormalizedCacheFactory(driver: SqlDriver): NormalizedCacheFactory 
 fun SqlNormalizedCacheFactory(
     name: String?,
     baseDir: String?,
-): NormalizedCacheFactory = SqlNormalizedCacheFactory(createDriver(name, baseDir, getSchema()))
+): NormalizedCacheFactory = SqlNormalizedCacheFactory(createDriver(name, baseDir, getSchema()), manageDriver = true)
 
 actual fun SqlNormalizedCacheFactory(name: String?): NormalizedCacheFactory = SqlNormalizedCacheFactory(name, null)

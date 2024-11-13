@@ -6,20 +6,11 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.sql.internal.createDriver
-import com.apollographql.cache.normalized.sql.internal.createRecordDatabase
 import com.apollographql.cache.normalized.sql.internal.getSchema
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import app.cash.sqldelight.db.SqlDriver
-import com.apollographql.cache.normalized.api.NormalizedCache
-
-actual fun SqlNormalizedCacheFactory(driver: SqlDriver): NormalizedCacheFactory = object : NormalizedCacheFactory() {
-  override fun create(): NormalizedCache {
-    return SqlNormalizedCache(createRecordDatabase(driver))
-  }
-}
 
 actual fun SqlNormalizedCacheFactory(name: String?): NormalizedCacheFactory =
-  SqlNormalizedCacheFactory(createDriver(name, null, getSchema()))
+  SqlNormalizedCacheFactory(createDriver(name, null, getSchema()), manageDriver = true)
 
 /**
  * @param [name] Name of the database file, or null for an in-memory database (as per Android framework implementation).
@@ -52,4 +43,5 @@ fun SqlNormalizedCacheFactory(
         useNoBackupDirectory = useNoBackupDirectory,
         windowSizeBytes = windowSizeBytes,
     ),
+    manageDriver = true,
 )
