@@ -290,7 +290,7 @@ private fun Any?.toExternal(): Any? {
     is Int -> this
     is Long -> this
     is Double -> this
-    is JsonNumber -> this
+    is JsonNumber -> this.value
     is CacheKey -> this.serialize()
     is List<*> -> {
       map { it.toExternal() }
