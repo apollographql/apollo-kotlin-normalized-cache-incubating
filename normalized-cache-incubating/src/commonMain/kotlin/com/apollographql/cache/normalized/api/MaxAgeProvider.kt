@@ -1,7 +1,5 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.api.CompiledField
-import com.apollographql.apollo.api.isComposite
 import kotlin.time.Duration
 
 interface MaxAgeProvider {
@@ -16,8 +14,14 @@ class MaxAgeContext(
      * The path of the field to get the max age of.
      * The first element is the root object, the last element is the field to get the max age of.
      */
-    val fieldPath: List<CompiledField>,
-)
+    val fieldPath: List<Field>,
+) {
+  class Field(
+      val name: String,
+      val type: String,
+      val isTypeComposite: Boolean,
+  )
+}
 
 /**
  * A provider that returns a single max age for all types.
@@ -56,7 +60,7 @@ class SchemaCoordinatesMaxAgeProvider(
     }
 
     val fieldName = maxAgeContext.fieldPath.last().name
-    val fieldParentTypeName = maxAgeContext.fieldPath[maxAgeContext.fieldPath.lastIndex - 1].type.rawType().name
+    val fieldParentTypeName = maxAgeContext.fieldPath[maxAgeContext.fieldPath.lastIndex - 1].type
     val fieldCoordinates = "$fieldParentTypeName.$fieldName"
     val computedFieldMaxAge = when (val fieldMaxAge = maxAges[fieldCoordinates]) {
       is MaxAge.Duration -> {
@@ -83,7 +87,7 @@ class SchemaCoordinatesMaxAgeProvider(
 
   private fun getTypeMaxAge(maxAgeContext: MaxAgeContext): Duration {
     val field = maxAgeContext.fieldPath.last()
-    val fieldTypeName = field.type.rawType().name
+    val fieldTypeName = field.type
     return when (val typeMaxAge = maxAges[fieldTypeName]) {
       is MaxAge.Duration -> {
         typeMaxAge.duration
@@ -106,7 +110,7 @@ class SchemaCoordinatesMaxAgeProvider(
   private fun getFallbackMaxAge(maxAgeContext: MaxAgeContext): Duration {
     val field = maxAgeContext.fieldPath.last()
     val isRootField = maxAgeContext.fieldPath.size == 2
-    return if (isRootField || field.type.rawType().isComposite()) {
+    return if (isRootField || field.isTypeComposite) {
       defaultMaxAge
     } else {
       getParentMaxAge(maxAgeContext)

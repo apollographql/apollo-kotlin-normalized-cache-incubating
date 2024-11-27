@@ -3,6 +3,7 @@ type Query {
   user(id: ID!): User
   users(ids: [ID!]!): [User!]!
   repositories(first: Int, after: String): [Repository!]!
+  projects: [Project!]!
 }
 
 type User {
@@ -15,4 +16,16 @@ type User {
 
 type Repository {
   id: ID!
+  stars: Int!
+  starGazers: [User!]!
+}
+
+type Project {
+  id: ID!
+  name: String!
+  description: String
+  owner: User!
+  collaborators: [User!]!
+  velocity: Int!
+  isUrgent: Boolean!
 }

@@ -33,5 +33,10 @@ apollo {
   service("service") {
     packageName.set("test")
     generateFragmentImplementations.set(true)
+    addTypename.set("always")
+
+    plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin") {
+      argument("packageName", packageName.get())
+    }
   }
 }

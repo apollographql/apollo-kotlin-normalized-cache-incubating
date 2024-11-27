@@ -3,6 +3,7 @@ package com.apollographql.cache.normalized.api
 import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.MutableExecutionOptions
+import com.apollographql.apollo.api.isComposite
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.cache.normalized.api.CacheResolver.ResolvedValue
@@ -172,12 +173,15 @@ class CacheControlCacheResolver(
     var isStale = false
     if (context.parent is Record) {
       val field = context.field
-      val receivedDate = context.parent.receivedDate(field.name)
       // Consider the client controlled max age
+      val receivedDate = context.parent.receivedDate(field.name)
       if (receivedDate != null) {
         val currentDate = currentTimeMillis() / 1000
         val age = currentDate - receivedDate
-        val maxAge = maxAgeProvider.getMaxAge(MaxAgeContext(context.path)).inWholeSeconds
+        val fieldPath = context.path.map {
+          MaxAgeContext.Field(name = it.name, type = it.type.rawType().name, isTypeComposite = it.type.rawType().isComposite())
+        }
+        val maxAge = maxAgeProvider.getMaxAge(MaxAgeContext(fieldPath)).inWholeSeconds
         val staleDuration = age - maxAge
         val maxStale = context.cacheHeaders.headerValue(ApolloCacheHeaders.MAX_STALE)?.toLongOrNull() ?: 0L
         if (staleDuration >= maxStale) {

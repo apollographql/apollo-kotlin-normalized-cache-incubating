@@ -24,6 +24,24 @@ query MainQuery($userIds: [ID!]!) {
   }
 }
 
+query RepositoryListQuery {
+  repositories(first: 15) {
+    id
+    stars
+    starGazers {
+      id
+      name
+    }
+  }
+}
+
 fragment RepositoryFragment on Repository {
   id
+}
+
+query ProjectListQuery {
+  projects {
+    velocity
+    isUrgent
+  }
 }
