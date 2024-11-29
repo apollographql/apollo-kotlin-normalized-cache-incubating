@@ -7,17 +7,17 @@ import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.MaxAgeContext
 import com.apollographql.cache.normalized.api.MaxAgeProvider
+import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordValue
 import com.apollographql.cache.normalized.api.expirationDate
 import com.apollographql.cache.normalized.api.receivedDate
-import com.apollographql.cache.normalized.internal.OptimisticNormalizedCache
 import kotlin.time.Duration
 
 @ApolloInternal
-fun ApolloStore.getReachableCacheKeys(): Set<CacheKey> {
-  fun ApolloStore.getReachableCacheKeys(roots: List<CacheKey>, reachableCacheKeys: MutableSet<CacheKey>) {
-    val records = accessCache { cache -> cache.loadRecords(roots.map { it.key }, CacheHeaders.NONE) }.associateBy { it.key }
+fun NormalizedCache.getReachableCacheKeys(): Set<CacheKey> {
+  fun NormalizedCache.getReachableCacheKeys(roots: List<CacheKey>, reachableCacheKeys: MutableSet<CacheKey>) {
+    val records = loadRecords(roots.map { it.key }, CacheHeaders.NONE).associateBy { it.key }
     val cacheKeysToCheck = mutableListOf<CacheKey>()
     for ((key, record) in records) {
       reachableCacheKeys.add(CacheKey(key))
@@ -34,18 +34,30 @@ fun ApolloStore.getReachableCacheKeys(): Set<CacheKey> {
 }
 
 @ApolloInternal
-fun ApolloStore.allRecords(): Map<String, Record> {
-  return accessCache { cache ->
-    val dump = cache.dump()
-    val classKey = dump.keys.first { it != OptimisticNormalizedCache::class }
-    dump[classKey]!!
-  }
+fun NormalizedCache.allRecords(): Map<String, Record> {
+  return dump().values.fold(emptyMap()) { acc, map -> acc + map }
 }
 
-fun ApolloStore.removeUnreachableRecords(): Set<CacheKey> {
+/**
+ * Remove all unreachable records in the cache.
+ * A record is unreachable if there exist no chain of references from the root record to it.
+ *
+ * @return the cache keys that were removed.
+ */
+fun NormalizedCache.removeUnreachableRecords(): Set<CacheKey> {
   val unreachableCacheKeys = allRecords().keys.map { CacheKey(it) } - getReachableCacheKeys()
   remove(unreachableCacheKeys, cascade = false)
   return unreachableCacheKeys.toSet()
+}
+
+/**
+ * Remove all unreachable records in the store.
+ * @see removeUnreachableRecords
+ */
+fun ApolloStore.removeUnreachableRecords(): Set<CacheKey> {
+  return accessCache { cache ->
+    cache.removeUnreachableRecords()
+  }
 }
 
 /**
@@ -63,7 +75,7 @@ fun ApolloStore.removeUnreachableRecords(): Set<CacheKey> {
  *
  * @return the field keys that were removed.
  */
-fun ApolloStore.removeStaleFields(
+fun NormalizedCache.removeStaleFields(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
 ): Set<String> {
@@ -109,15 +121,26 @@ fun ApolloStore.removeStaleFields(
     }
   }
   if (recordsToUpdate.isNotEmpty()) {
-    accessCache { cache ->
-      cache.remove(recordsToUpdate.keys.map { CacheKey(it) }, cascade = false)
-      val nonEmptyRecords = recordsToUpdate.values.filterNot { it.isEmptyRecord() }
-      if (nonEmptyRecords.isNotEmpty()) {
-        cache.merge(nonEmptyRecords, CacheHeaders.NONE, DefaultRecordMerger)
-      }
+    remove(recordsToUpdate.keys.map { CacheKey(it) }, cascade = false)
+    val nonEmptyRecords = recordsToUpdate.values.filterNot { it.isEmptyRecord() }
+    if (nonEmptyRecords.isNotEmpty()) {
+      merge(nonEmptyRecords, CacheHeaders.NONE, DefaultRecordMerger)
     }
   }
   return removedKeys
+}
+
+/**
+ * Remove all stale fields in the store.
+ * @see removeStaleFields
+ */
+fun ApolloStore.removeStaleFields(
+    maxAgeProvider: MaxAgeProvider,
+    maxStale: Duration = Duration.ZERO,
+): Set<String> {
+  return accessCache { cache ->
+    cache.removeStaleFields(maxAgeProvider, maxStale)
+  }
 }
 
 /**
@@ -130,7 +153,7 @@ fun ApolloStore.removeStaleFields(
  *
  * @return the field keys that were removed.
  */
-fun ApolloStore.removeDanglingReferences(): Set<String> {
+fun NormalizedCache.removeDanglingReferences(): Set<String> {
   val allRecords: MutableMap<String, Record> = allRecords().toMutableMap()
   val recordsToUpdate = mutableMapOf<String, Record>()
   val allRemovedKeys = mutableSetOf<String>()
@@ -154,15 +177,23 @@ fun ApolloStore.removeDanglingReferences(): Set<String> {
     allRemovedKeys.addAll(removedKeys)
   } while (removedKeys.isNotEmpty())
   if (recordsToUpdate.isNotEmpty()) {
-    accessCache { cache ->
-      cache.remove(recordsToUpdate.keys.map { CacheKey(it) }, cascade = false)
-      val nonEmptyRecords = recordsToUpdate.values.filterNot { it.isEmptyRecord() }
-      if (nonEmptyRecords.isNotEmpty()) {
-        cache.merge(nonEmptyRecords, CacheHeaders.NONE, DefaultRecordMerger)
-      }
+    remove(recordsToUpdate.keys.map { CacheKey(it) }, cascade = false)
+    val nonEmptyRecords = recordsToUpdate.values.filterNot { it.isEmptyRecord() }
+    if (nonEmptyRecords.isNotEmpty()) {
+      merge(nonEmptyRecords, CacheHeaders.NONE, DefaultRecordMerger)
     }
   }
   return allRemovedKeys
+}
+
+/**
+ * Remove all dangling references in the store.
+ * @see removeDanglingReferences
+ */
+fun ApolloStore.removeDanglingReferences(): Set<String> {
+  return accessCache { cache ->
+    cache.removeDanglingReferences()
+  }
 }
 
 private fun RecordValue.isDanglingReference(allRecords: Map<String, Record>): Boolean {

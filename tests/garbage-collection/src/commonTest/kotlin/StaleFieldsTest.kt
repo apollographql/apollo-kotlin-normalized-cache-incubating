@@ -41,7 +41,7 @@ class StaleFieldsTest {
         .cacheHeaders(receivedDate(currentTimeSeconds() - 60))
         .execute()
 
-    var allRecords = store.allRecords()
+    var allRecords = store.accessCache { it.allRecords() }
     assertTrue(allRecords["Repository:0"]!!.fields.containsKey("stars"))
     assertTrue(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
     assertTrue(allRecords["Repository:1"]!!.fields.containsKey("stars"))
@@ -59,7 +59,7 @@ class StaleFieldsTest {
             "Repository:1.stars",
         ), removedKeys
     )
-    allRecords = store.allRecords()
+    allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords["Repository:0"]!!.fields.containsKey("stars"))
     assertTrue(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
     assertFalse(allRecords["Repository:1"]!!.fields.containsKey("stars"))
@@ -80,7 +80,7 @@ class StaleFieldsTest {
             "Repository:1.starGazers",
         ), removedKeys
     )
-    allRecords = store.allRecords()
+    allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords["Repository:0"]!!.fields.containsKey("stars"))
     assertFalse(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
     assertFalse(allRecords["Repository:1"]!!.fields.containsKey("stars"))
@@ -101,7 +101,7 @@ class StaleFieldsTest {
         .cacheHeaders(receivedDate(currentTimeSeconds() - 60))
         .execute()
 
-    var allRecords = store.allRecords()
+    var allRecords = store.accessCache { it.allRecords() }
     assertTrue(allRecords["projects.0"]!!.fields.containsKey("velocity"))
     assertTrue(allRecords["projects.0"]!!.fields.containsKey("isUrgent"))
     assertTrue(allRecords["projects.1"]!!.fields.containsKey("velocity"))
@@ -119,7 +119,7 @@ class StaleFieldsTest {
             "projects.1.velocity",
         ), removedKeys
     )
-    allRecords = store.allRecords()
+    allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords["projects.0"]!!.fields.containsKey("velocity"))
     assertTrue(allRecords["projects.0"]!!.fields.containsKey("isUrgent"))
     assertFalse(allRecords["projects.1"]!!.fields.containsKey("velocity"))
@@ -140,7 +140,7 @@ class StaleFieldsTest {
             "projects.1.isUrgent",
         ), removedKeys
     )
-    allRecords = store.allRecords()
+    allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords.containsKey("projects.0"))
     assertFalse(allRecords.containsKey("projects.1"))
   }
@@ -159,7 +159,7 @@ class StaleFieldsTest {
         .cacheHeaders(expirationDate(currentTimeSeconds() - 60))
         .execute()
 
-    var allRecords = store.allRecords()
+    var allRecords = store.accessCache { it.allRecords() }
     assertTrue(allRecords["Repository:0"]!!.fields.containsKey("stars"))
     assertTrue(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
     assertTrue(allRecords["Repository:1"]!!.fields.containsKey("stars"))
@@ -189,7 +189,7 @@ class StaleFieldsTest {
             "User:1.name"
         ), removedKeys
     )
-    allRecords = store.allRecords()
+    allRecords = store.accessCache { it.allRecords() }
     assertTrue(allRecords.isEmpty())
 
     mockServer.enqueueString(REPOSITORY_LIST_RESPONSE)
@@ -204,7 +204,7 @@ class StaleFieldsTest {
         emptySet(),
         removedKeys
     )
-    allRecords = store.allRecords()
+    allRecords = store.accessCache { it.allRecords() }
     assertTrue(allRecords["Repository:0"]!!.fields.containsKey("stars"))
     assertTrue(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
     assertTrue(allRecords["Repository:1"]!!.fields.containsKey("stars"))

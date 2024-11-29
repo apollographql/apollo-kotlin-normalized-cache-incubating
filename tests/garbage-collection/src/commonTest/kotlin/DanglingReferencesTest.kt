@@ -32,7 +32,7 @@ class DanglingReferencesTest {
         .fetchPolicy(FetchPolicy.NetworkOnly)
         .execute()
 
-    var allRecords = store.allRecords()
+    var allRecords = store.accessCache { it.allRecords() }
     assertTrue(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
 
     // Remove User 1, now Repository 0.starGazers is a dangling reference
@@ -42,7 +42,7 @@ class DanglingReferencesTest {
         setOf("Repository:0.starGazers"),
         removedKeys
     )
-    allRecords = store.allRecords()
+    allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
   }
 
@@ -76,7 +76,7 @@ class DanglingReferencesTest {
         ),
         removedKeys
     )
-    val allRecords = store.allRecords()
+    val allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords.containsKey("QUERY_ROOT"))
     assertFalse(allRecords.containsKey("metaProjects.0.0"))
     assertFalse(allRecords.containsKey("metaProjects.0.0.type"))
