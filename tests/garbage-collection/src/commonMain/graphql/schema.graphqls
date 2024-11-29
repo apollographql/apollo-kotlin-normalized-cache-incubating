@@ -4,6 +4,7 @@ type Query {
   users(ids: [ID!]!): [User!]!
   repositories(first: Int, after: String): [Repository!]!
   projects: [Project!]!
+  metaProjects: [[Project!]!]!
 }
 
 type User {
@@ -28,4 +29,11 @@ type Project {
   collaborators: [User!]!
   velocity: Int!
   isUrgent: Boolean!
+  type: ProjectType!
+}
+
+type ProjectType {
+  id: ID!
+  name: String!
+  owners: [User!]!
 }

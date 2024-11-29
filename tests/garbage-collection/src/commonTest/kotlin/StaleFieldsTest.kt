@@ -9,7 +9,6 @@ import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
-import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.fetchPolicy

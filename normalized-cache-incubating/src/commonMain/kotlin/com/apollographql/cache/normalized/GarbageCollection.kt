@@ -120,6 +120,60 @@ fun ApolloStore.removeStaleFields(
   return removedKeys
 }
 
+/**
+ * Remove all dangling references in the cache.
+ * A field is a dangling reference if its value (or, for lists, any of its values) is a reference to a record that does not exist.
+ *
+ * When all fields of a record are removed, the record itself is removed too.
+ *
+ * This can result in unreachable records.
+ *
+ * @return the field keys that were removed.
+ */
+fun ApolloStore.removeDanglingReferences(): Set<String> {
+  val allRecords: MutableMap<String, Record> = allRecords().toMutableMap()
+  val recordsToUpdate = mutableMapOf<String, Record>()
+  val allRemovedKeys = mutableSetOf<String>()
+  do {
+    val removedKeys = mutableSetOf<String>()
+    for (record in allRecords.values.toList()) {
+      var recordCopy = record
+      for (field in record.fields) {
+        if (field.value.isDanglingReference(allRecords)) {
+          recordCopy -= field.key
+          recordsToUpdate[record.key] = recordCopy
+          removedKeys.add(record.key + "." + field.key)
+          if (recordCopy.isEmptyRecord()) {
+            allRecords.remove(record.key)
+          } else {
+            allRecords[record.key] = recordCopy
+          }
+        }
+      }
+    }
+    allRemovedKeys.addAll(removedKeys)
+  } while (removedKeys.isNotEmpty())
+  if (recordsToUpdate.isNotEmpty()) {
+    accessCache { cache ->
+      cache.remove(recordsToUpdate.keys.map { CacheKey(it) }, cascade = false)
+      val nonEmptyRecords = recordsToUpdate.values.filterNot { it.isEmptyRecord() }
+      if (nonEmptyRecords.isNotEmpty()) {
+        cache.merge(nonEmptyRecords, CacheHeaders.NONE, DefaultRecordMerger)
+      }
+    }
+  }
+  return allRemovedKeys
+}
+
+private fun RecordValue.isDanglingReference(allRecords: Map<String, Record>): Boolean {
+  return when (this) {
+    is CacheKey -> allRecords[this.key] == null
+    is List<*> -> any { it.isDanglingReference(allRecords) }
+    is Map<*, *> -> values.any { it.isDanglingReference(allRecords) }
+    else -> false
+  }
+}
+
 private fun Record.isEmptyRecord() = fields.isEmpty() || fields.size == 1 && fields.keys.first() == "__typename"
 
 private fun RecordValue.guessType(allRecords: Map<String, Record>): String {

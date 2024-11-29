@@ -45,3 +45,13 @@ query ProjectListQuery {
     isUrgent
   }
 }
+
+query MetaProjectListQuery {
+  metaProjects {
+    type {
+      owners {
+        name
+      }
+    }
+  }
+}
