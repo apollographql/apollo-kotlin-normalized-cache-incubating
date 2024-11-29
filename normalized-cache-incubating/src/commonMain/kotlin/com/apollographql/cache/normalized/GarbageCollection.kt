@@ -231,3 +231,33 @@ private operator fun Record.minus(key: String): Record {
       metadata = this.metadata - key,
   )
 }
+
+/**
+ * Perform garbage collection on the cache.
+ *
+ * This is a convenience method that calls [removeStaleFields], [removeDanglingReferences], and [removeUnreachableRecords].
+ *
+ * @param maxAgeProvider the max age provider to use for [removeStaleFields]
+ * @param maxStale the maximum staleness to use for [removeStaleFields]
+ */
+fun NormalizedCache.garbageCollect(
+    maxAgeProvider: MaxAgeProvider,
+    maxStale: Duration = Duration.ZERO,
+) {
+  removeStaleFields(maxAgeProvider, maxStale)
+  removeDanglingReferences()
+  removeUnreachableRecords()
+}
+
+/**
+ * Perform garbage collection on the store.
+ * @see garbageCollect
+ */
+fun ApolloStore.garbageCollect(
+    maxAgeProvider: MaxAgeProvider,
+    maxStale: Duration = Duration.ZERO,
+) {
+  accessCache { cache ->
+    cache.garbageCollect(maxAgeProvider, maxStale)
+  }
+}

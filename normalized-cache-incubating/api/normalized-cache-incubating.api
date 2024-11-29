@@ -96,6 +96,10 @@ public final class com/apollographql/cache/normalized/FetchPolicyInterceptors {
 
 public final class com/apollographql/cache/normalized/GarbageCollectionKt {
 	public static final fun allRecords (Lcom/apollographql/cache/normalized/api/NormalizedCache;)Ljava/util/Map;
+	public static final fun garbageCollect-SxA4cEA (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;J)V
+	public static final fun garbageCollect-SxA4cEA (Lcom/apollographql/cache/normalized/api/NormalizedCache;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;J)V
+	public static synthetic fun garbageCollect-SxA4cEA$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;JILjava/lang/Object;)V
+	public static synthetic fun garbageCollect-SxA4cEA$default (Lcom/apollographql/cache/normalized/api/NormalizedCache;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;JILjava/lang/Object;)V
 	public static final fun getReachableCacheKeys (Lcom/apollographql/cache/normalized/api/NormalizedCache;)Ljava/util/Set;
 	public static final fun removeDanglingReferences (Lcom/apollographql/cache/normalized/ApolloStore;)Ljava/util/Set;
 	public static final fun removeDanglingReferences (Lcom/apollographql/cache/normalized/api/NormalizedCache;)Ljava/util/Set;
