@@ -69,9 +69,9 @@ fun ApolloStore.removeUnreachableRecords(): Set<CacheKey> {
  *
  * Expiration dates are stored by calling `storeExpirationDate(true)` on your `ApolloClient`.
  *
- * When all fields of a record are removed, the record itself is removed too.
+ * When all fields of a record are stale, the record itself is removed.
  *
- * This operation result in unreachable records, and dangling references.
+ * This operation can result in unreachable records, and dangling references.
  *
  * @return the fields and records that were removed.
  */
@@ -152,7 +152,7 @@ fun ApolloStore.removeStaleFields(
  * Remove all dangling references in the cache.
  * A field is a dangling reference if its value (or, for lists, any of its values) is a reference to a record that does not exist.
  *
- * When all fields of a record are removed, the record itself is removed too.
+ * When all fields of a record are dangling references, the record itself is removed.
  *
  * This operation can result in unreachable records.
  *
