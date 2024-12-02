@@ -40,7 +40,7 @@ fun NormalizedCache.allRecords(): Map<String, Record> {
 
 /**
  * Remove all unreachable records in the cache.
- * A record is unreachable if there exist no chain of references from the root record to it.
+ * A record is unreachable if there exists no chain of references from the root record to it.
  *
  * @return the cache keys that were removed.
  */
