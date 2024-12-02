@@ -71,7 +71,7 @@ fun ApolloStore.removeUnreachableRecords(): Set<CacheKey> {
  *
  * When all fields of a record are removed, the record itself is removed too.
  *
- * This can result in unreachable records, and dangling references.
+ * This operation result in unreachable records, and dangling references.
  *
  * @return the field keys that were removed.
  */
@@ -149,7 +149,7 @@ fun ApolloStore.removeStaleFields(
  *
  * When all fields of a record are removed, the record itself is removed too.
  *
- * This can result in unreachable records.
+ * This operation can result in unreachable records.
  *
  * @return the field keys that were removed.
  */
