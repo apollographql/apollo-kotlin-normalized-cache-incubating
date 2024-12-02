@@ -5,6 +5,7 @@ import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.fetchPolicy
@@ -34,10 +35,10 @@ class GarbageCollectTest {
         .cacheHeaders(receivedDate(currentTimeSeconds() - 90))
         .execute()
 
-    // (metaProjects.0.0.type).owners is stale
-    // thus (metaProjects.0.0.type) is empty and removed
-    // thus (metaProjects.0.0).type is a dangling reference
-    // thus (metaProjects.0.0) is empty and removed
+    // (metaProjects.0.0.type).owners, (metaProjects.0.1.type).owners, (metaProjects.1.0.type).owners are stale
+    // thus (metaProjects.0.0.type), (metaProjects.0.1.type), (metaProjects.1.0.type) are empty and removed
+    // thus (metaProjects.0.0).type, (metaProjects.0.1).type, (metaProjects.1.0).type are dangling references
+    // thus (metaProjects.0.0), (metaProjects.0.1), (metaProjects.1.0) are empty and removed
     // thus (QUERY_ROOT).metaProjects is a dangling reference
     // thus QUERY_ROOT is empty and removed
     // every other record is unreachable and removed
@@ -45,7 +46,35 @@ class GarbageCollectTest {
         Cache.maxAges,
         defaultMaxAge = 120.seconds,
     )
-    store.garbageCollect(maxAgeProvider)
+    val garbageCollectResult = store.garbageCollect(maxAgeProvider)
+    assertEquals(
+        setOf(
+            "metaProjects.0.0.type.owners",
+            "metaProjects.0.1.type.owners",
+            "metaProjects.1.0.type.owners",
+        ),
+        garbageCollectResult.removedStaleFields
+    )
+
+    assertEquals(
+        setOf(
+            "metaProjects.0.0.type",
+            "metaProjects.0.1.type",
+            "metaProjects.1.0.type",
+            "QUERY_ROOT.metaProjects",
+        ),
+        garbageCollectResult.removedDanglingReferences
+    )
+
+    assertEquals(
+        setOf(
+            CacheKey("User:0"),
+            CacheKey("User:1"),
+            CacheKey("User:2"),
+        ),
+        garbageCollectResult.removedUnreachableRecords
+    )
+
     val allRecords = store.accessCache { it.allRecords() }
     assertEquals(emptyMap(), allRecords)
   }

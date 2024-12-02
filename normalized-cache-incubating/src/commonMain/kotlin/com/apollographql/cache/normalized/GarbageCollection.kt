@@ -243,10 +243,12 @@ private operator fun Record.minus(key: String): Record {
 fun NormalizedCache.garbageCollect(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
-) {
-  removeStaleFields(maxAgeProvider, maxStale)
-  removeDanglingReferences()
-  removeUnreachableRecords()
+): GarbageCollectResult {
+  return GarbageCollectResult(
+      removedStaleFields = removeStaleFields(maxAgeProvider, maxStale),
+      removedDanglingReferences = removeDanglingReferences(),
+      removedUnreachableRecords = removeUnreachableRecords()
+  )
 }
 
 /**
@@ -256,8 +258,14 @@ fun NormalizedCache.garbageCollect(
 fun ApolloStore.garbageCollect(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
-) {
-  accessCache { cache ->
+): GarbageCollectResult {
+  return accessCache { cache ->
     cache.garbageCollect(maxAgeProvider, maxStale)
   }
 }
+
+class GarbageCollectResult(
+    val removedStaleFields: Set<String>,
+    val removedDanglingReferences: Set<String>,
+    val removedUnreachableRecords: Set<CacheKey>,
+)

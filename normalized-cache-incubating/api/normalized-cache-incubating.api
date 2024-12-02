@@ -94,12 +94,19 @@ public final class com/apollographql/cache/normalized/FetchPolicyInterceptors {
 	public static final fun getNetworkOnlyInterceptor ()Lcom/apollographql/apollo/interceptor/ApolloInterceptor;
 }
 
+public final class com/apollographql/cache/normalized/GarbageCollectResult {
+	public fun <init> (Ljava/util/Set;Ljava/util/Set;Ljava/util/Set;)V
+	public final fun getRemovedDanglingReferences ()Ljava/util/Set;
+	public final fun getRemovedStaleFields ()Ljava/util/Set;
+	public final fun getRemovedUnreachableRecords ()Ljava/util/Set;
+}
+
 public final class com/apollographql/cache/normalized/GarbageCollectionKt {
 	public static final fun allRecords (Lcom/apollographql/cache/normalized/api/NormalizedCache;)Ljava/util/Map;
-	public static final fun garbageCollect-SxA4cEA (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;J)V
-	public static final fun garbageCollect-SxA4cEA (Lcom/apollographql/cache/normalized/api/NormalizedCache;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;J)V
-	public static synthetic fun garbageCollect-SxA4cEA$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;JILjava/lang/Object;)V
-	public static synthetic fun garbageCollect-SxA4cEA$default (Lcom/apollographql/cache/normalized/api/NormalizedCache;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;JILjava/lang/Object;)V
+	public static final fun garbageCollect-SxA4cEA (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;J)Lcom/apollographql/cache/normalized/GarbageCollectResult;
+	public static final fun garbageCollect-SxA4cEA (Lcom/apollographql/cache/normalized/api/NormalizedCache;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;J)Lcom/apollographql/cache/normalized/GarbageCollectResult;
+	public static synthetic fun garbageCollect-SxA4cEA$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;JILjava/lang/Object;)Lcom/apollographql/cache/normalized/GarbageCollectResult;
+	public static synthetic fun garbageCollect-SxA4cEA$default (Lcom/apollographql/cache/normalized/api/NormalizedCache;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;JILjava/lang/Object;)Lcom/apollographql/cache/normalized/GarbageCollectResult;
 	public static final fun getReachableCacheKeys (Lcom/apollographql/cache/normalized/api/NormalizedCache;)Ljava/util/Set;
 	public static final fun removeDanglingReferences (Lcom/apollographql/cache/normalized/ApolloStore;)Ljava/util/Set;
 	public static final fun removeDanglingReferences (Lcom/apollographql/cache/normalized/api/NormalizedCache;)Ljava/util/Set;
