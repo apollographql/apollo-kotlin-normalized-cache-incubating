@@ -73,15 +73,15 @@ fun ApolloStore.removeUnreachableRecords(): Set<CacheKey> {
  *
  * This operation result in unreachable records, and dangling references.
  *
- * @return the field keys that were removed.
+ * @return the fields and records that were removed.
  */
 fun NormalizedCache.removeStaleFields(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
-): Set<String> {
+): RemovedFieldsAndRecords {
   val allRecords: Map<String, Record> = allRecords()
   val recordsToUpdate = mutableMapOf<String, Record>()
-  val removedKeys = mutableSetOf<String>()
+  val removedFields = mutableSetOf<String>()
   for (record in allRecords.values) {
     var recordCopy = record
     for (field in record.fields) {
@@ -102,7 +102,7 @@ fun NormalizedCache.removeStaleFields(
         if (staleDuration >= maxStale.inWholeSeconds) {
           recordCopy -= field.key
           recordsToUpdate[record.key] = recordCopy
-          removedKeys.add(record.key + "." + field.key)
+          removedFields.add(record.key + "." + field.key)
           continue
         }
       }
@@ -115,19 +115,24 @@ fun NormalizedCache.removeStaleFields(
         if (staleDuration >= maxStale.inWholeSeconds) {
           recordCopy -= field.key
           recordsToUpdate[record.key] = recordCopy
-          removedKeys.add(record.key + "." + field.key)
+          removedFields.add(record.key + "." + field.key)
         }
       }
     }
   }
   if (recordsToUpdate.isNotEmpty()) {
     remove(recordsToUpdate.keys.map { CacheKey(it) }, cascade = false)
-    val nonEmptyRecords = recordsToUpdate.values.filterNot { it.isEmptyRecord() }
+    val emptyRecords = recordsToUpdate.values.filter { it.isEmptyRecord() }.toSet()
+    val nonEmptyRecords = recordsToUpdate.values - emptyRecords
     if (nonEmptyRecords.isNotEmpty()) {
       merge(nonEmptyRecords, CacheHeaders.NONE, DefaultRecordMerger)
     }
+    return RemovedFieldsAndRecords(
+        removedFields = removedFields,
+        removedRecords = emptyRecords.map { CacheKey(it.key) }.toSet()
+    )
   }
-  return removedKeys
+  return RemovedFieldsAndRecords(removedFields = emptySet(), removedRecords = emptySet())
 }
 
 /**
@@ -137,7 +142,7 @@ fun NormalizedCache.removeStaleFields(
 fun ApolloStore.removeStaleFields(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
-): Set<String> {
+): RemovedFieldsAndRecords {
   return accessCache { cache ->
     cache.removeStaleFields(maxAgeProvider, maxStale)
   }
@@ -151,21 +156,21 @@ fun ApolloStore.removeStaleFields(
  *
  * This operation can result in unreachable records.
  *
- * @return the field keys that were removed.
+ * @return the fields and records that were removed.
  */
-fun NormalizedCache.removeDanglingReferences(): Set<String> {
+fun NormalizedCache.removeDanglingReferences(): RemovedFieldsAndRecords {
   val allRecords: MutableMap<String, Record> = allRecords().toMutableMap()
   val recordsToUpdate = mutableMapOf<String, Record>()
-  val allRemovedKeys = mutableSetOf<String>()
+  val allRemovedFields = mutableSetOf<String>()
   do {
-    val removedKeys = mutableSetOf<String>()
+    val removedFields = mutableSetOf<String>()
     for (record in allRecords.values.toList()) {
       var recordCopy = record
       for (field in record.fields) {
         if (field.value.isDanglingReference(allRecords)) {
           recordCopy -= field.key
           recordsToUpdate[record.key] = recordCopy
-          removedKeys.add(record.key + "." + field.key)
+          removedFields.add(record.key + "." + field.key)
           if (recordCopy.isEmptyRecord()) {
             allRecords.remove(record.key)
           } else {
@@ -174,23 +179,28 @@ fun NormalizedCache.removeDanglingReferences(): Set<String> {
         }
       }
     }
-    allRemovedKeys.addAll(removedKeys)
-  } while (removedKeys.isNotEmpty())
+    allRemovedFields.addAll(removedFields)
+  } while (removedFields.isNotEmpty())
   if (recordsToUpdate.isNotEmpty()) {
     remove(recordsToUpdate.keys.map { CacheKey(it) }, cascade = false)
-    val nonEmptyRecords = recordsToUpdate.values.filterNot { it.isEmptyRecord() }
+    val emptyRecords = recordsToUpdate.values.filter { it.isEmptyRecord() }.toSet()
+    val nonEmptyRecords = recordsToUpdate.values - emptyRecords
     if (nonEmptyRecords.isNotEmpty()) {
       merge(nonEmptyRecords, CacheHeaders.NONE, DefaultRecordMerger)
     }
+    return RemovedFieldsAndRecords(
+        removedFields = allRemovedFields,
+        removedRecords = emptyRecords.map { CacheKey(it.key) }.toSet()
+    )
   }
-  return allRemovedKeys
+  return RemovedFieldsAndRecords(removedFields = emptySet(), removedRecords = emptySet())
 }
 
 /**
  * Remove all dangling references in the store.
  * @see removeDanglingReferences
  */
-fun ApolloStore.removeDanglingReferences(): Set<String> {
+fun ApolloStore.removeDanglingReferences(): RemovedFieldsAndRecords {
   return accessCache { cache ->
     cache.removeDanglingReferences()
   }
@@ -264,8 +274,13 @@ fun ApolloStore.garbageCollect(
   }
 }
 
+class RemovedFieldsAndRecords(
+    val removedFields: Set<String>,
+    val removedRecords: Set<CacheKey>,
+)
+
 class GarbageCollectResult(
-    val removedStaleFields: Set<String>,
-    val removedDanglingReferences: Set<String>,
+    val removedStaleFields: RemovedFieldsAndRecords,
+    val removedDanglingReferences: RemovedFieldsAndRecords,
     val removedUnreachableRecords: Set<CacheKey>,
 )

@@ -8,6 +8,7 @@ import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
 import com.apollographql.cache.normalized.cacheHeaders
@@ -51,13 +52,16 @@ class StaleFieldsTest {
         Cache.maxAges,
         defaultMaxAge = 120.seconds,
     )
-    var removedKeys = store.removeStaleFields(maxAgeProvider)
+    var removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
     // Repository.stars has a max age of 60 seconds, so they should be removed / User has a max age of 90 seconds, so Repository.starGazers should be kept
     assertEquals(
         setOf(
             "Repository:0.stars",
             "Repository:1.stars",
-        ), removedKeys
+        ), removedFieldsAndRecords.removedFields
+    )
+    assertEquals(
+        emptySet(), removedFieldsAndRecords.removedRecords
     )
     allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords["Repository:0"]!!.fields.containsKey("stars"))
@@ -70,7 +74,7 @@ class StaleFieldsTest {
         .fetchPolicy(FetchPolicy.NetworkOnly)
         .cacheHeaders(receivedDate(currentTimeSeconds() - 90))
         .execute()
-    removedKeys = store.removeStaleFields(maxAgeProvider)
+    removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
     // Repository.stars and Repository.starGazers should be removed
     assertEquals(
         setOf(
@@ -78,7 +82,10 @@ class StaleFieldsTest {
             "Repository:0.starGazers",
             "Repository:1.stars",
             "Repository:1.starGazers",
-        ), removedKeys
+        ), removedFieldsAndRecords.removedFields
+    )
+    assertEquals(
+        emptySet(), removedFieldsAndRecords.removedRecords
     )
     allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords["Repository:0"]!!.fields.containsKey("stars"))
@@ -111,13 +118,16 @@ class StaleFieldsTest {
         Cache.maxAges,
         defaultMaxAge = 120.seconds,
     )
-    var removedKeys = store.removeStaleFields(maxAgeProvider)
+    var removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
     // Project.velocity has a max age of 60 seconds, so they should be removed / Project.isUrgent has a max age of 90 seconds, so they should be kept
     assertEquals(
         setOf(
             "projects.0.velocity",
             "projects.1.velocity",
-        ), removedKeys
+        ), removedFieldsAndRecords.removedFields
+    )
+    assertEquals(
+        emptySet(), removedFieldsAndRecords.removedRecords
     )
     allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords["projects.0"]!!.fields.containsKey("velocity"))
@@ -130,7 +140,7 @@ class StaleFieldsTest {
         .fetchPolicy(FetchPolicy.NetworkOnly)
         .cacheHeaders(receivedDate(currentTimeSeconds() - 90))
         .execute()
-    removedKeys = store.removeStaleFields(maxAgeProvider)
+    removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
     // Project.velocity and Project.isUrgent should be removed, their records being empty they should be removed
     assertEquals(
         setOf(
@@ -138,7 +148,13 @@ class StaleFieldsTest {
             "projects.0.isUrgent",
             "projects.1.velocity",
             "projects.1.isUrgent",
-        ), removedKeys
+        ), removedFieldsAndRecords.removedFields
+    )
+    assertEquals(
+        setOf(
+            CacheKey("projects.0"),
+            CacheKey("projects.1"),
+        ), removedFieldsAndRecords.removedRecords
     )
     allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords.containsKey("projects.0"))
@@ -165,7 +181,7 @@ class StaleFieldsTest {
     assertTrue(allRecords["Repository:1"]!!.fields.containsKey("stars"))
     assertTrue(allRecords["Repository:1"]!!.fields.containsKey("starGazers"))
 
-    var removedKeys = store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE))
+    var removedFieldsAndRecords = store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE))
     // Everything is stale
     assertEquals(
         setOf(
@@ -187,7 +203,17 @@ class StaleFieldsTest {
             "User:1.__typename",
             "User:1.id",
             "User:1.name"
-        ), removedKeys
+        ), removedFieldsAndRecords.removedFields
+    )
+    assertEquals(
+        setOf(
+            CacheKey("Repository:0"),
+            CacheKey("Repository:1"),
+            CacheKey("User:0"),
+            CacheKey("User:1"),
+            CacheKey("User:2"),
+            CacheKey("QUERY_ROOT"),
+        ), removedFieldsAndRecords.removedRecords
     )
     allRecords = store.accessCache { it.allRecords() }
     assertTrue(allRecords.isEmpty())
@@ -198,11 +224,15 @@ class StaleFieldsTest {
         .cacheHeaders(expirationDate(currentTimeSeconds() - 60))
         .execute()
 
-    removedKeys = store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE), maxStale = 70.seconds)
+    removedFieldsAndRecords = store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE), maxStale = 70.seconds)
     // Nothing is stale
     assertEquals(
         emptySet(),
-        removedKeys
+        removedFieldsAndRecords.removedFields
+    )
+    assertEquals(
+        emptySet(),
+        removedFieldsAndRecords.removedRecords
     )
     allRecords = store.accessCache { it.allRecords() }
     assertTrue(allRecords["Repository:0"]!!.fields.containsKey("stars"))

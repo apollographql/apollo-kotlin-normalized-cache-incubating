@@ -53,7 +53,15 @@ class GarbageCollectTest {
             "metaProjects.0.1.type.owners",
             "metaProjects.1.0.type.owners",
         ),
-        garbageCollectResult.removedStaleFields
+        garbageCollectResult.removedStaleFields.removedFields
+    )
+    assertEquals(
+        setOf(
+            CacheKey("metaProjects.0.0.type"),
+            CacheKey("metaProjects.0.1.type"),
+            CacheKey("metaProjects.1.0.type"),
+        ),
+        garbageCollectResult.removedStaleFields.removedRecords
     )
 
     assertEquals(
@@ -63,7 +71,16 @@ class GarbageCollectTest {
             "metaProjects.1.0.type",
             "QUERY_ROOT.metaProjects",
         ),
-        garbageCollectResult.removedDanglingReferences
+        garbageCollectResult.removedDanglingReferences.removedFields
+    )
+    assertEquals(
+        setOf(
+            CacheKey("metaProjects.0.0"),
+            CacheKey("metaProjects.0.1"),
+            CacheKey("metaProjects.1.0"),
+            CacheKey("QUERY_ROOT"),
+        ),
+        garbageCollectResult.removedDanglingReferences.removedRecords
     )
 
     assertEquals(

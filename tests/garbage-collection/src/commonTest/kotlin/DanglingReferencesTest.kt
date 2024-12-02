@@ -37,10 +37,14 @@ class DanglingReferencesTest {
 
     // Remove User 1, now Repository 0.starGazers is a dangling reference
     store.remove(CacheKey("User:1"), cascade = false)
-    val removedKeys = store.removeDanglingReferences()
+    val removedFieldsAndRecords = store.removeDanglingReferences()
     assertEquals(
         setOf("Repository:0.starGazers"),
-        removedKeys
+        removedFieldsAndRecords.removedFields
+    )
+    assertEquals(
+        emptySet(),
+        removedFieldsAndRecords.removedRecords
     )
     allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
@@ -67,14 +71,22 @@ class DanglingReferencesTest {
     // thus (QUERY_ROOT).metaProjects is a dangling reference
     // thus QUERY_ROOT is empty and removed
     store.remove(CacheKey("User:0"), cascade = false)
-    val removedKeys = store.removeDanglingReferences()
+    val removedFieldsAndRecords = store.removeDanglingReferences()
     assertEquals(
         setOf(
             "metaProjects.0.0.type.owners",
             "metaProjects.0.0.type",
             "QUERY_ROOT.metaProjects",
         ),
-        removedKeys
+        removedFieldsAndRecords.removedFields
+    )
+    assertEquals(
+        setOf(
+            CacheKey("metaProjects.0.0.type"),
+            CacheKey("metaProjects.0.0"),
+            CacheKey("QUERY_ROOT"),
+        ),
+        removedFieldsAndRecords.removedRecords
     )
     val allRecords = store.accessCache { it.allRecords() }
     assertFalse(allRecords.containsKey("QUERY_ROOT"))
