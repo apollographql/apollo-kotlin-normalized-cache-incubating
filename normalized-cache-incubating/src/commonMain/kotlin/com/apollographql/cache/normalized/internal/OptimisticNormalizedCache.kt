@@ -39,19 +39,31 @@ internal class OptimisticNormalizedCache(private val wrapped: NormalizedCache) :
   }
 
   override fun remove(cacheKey: CacheKey, cascade: Boolean): Boolean {
-    var removed = wrapped.remove(cacheKey, cascade)
+    return remove(setOf(cacheKey), cascade) > 0
+  }
 
-    val recordJournal = recordJournals[cacheKey.key]
-    if (recordJournal != null) {
-      recordJournals.remove(cacheKey.key)
-      removed = true
-      if (cascade) {
-        for (cacheReference in recordJournal.current.referencedFields()) {
-          remove(CacheKey(cacheReference.key), true)
+  override fun remove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
+    return wrapped.remove(cacheKeys, cascade) + internalRemove(cacheKeys, cascade)
+  }
+
+  private fun internalRemove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
+    var total = 0
+    val referencedCacheKeys = mutableSetOf<CacheKey>()
+    for (cacheKey in cacheKeys) {
+      val removedRecordJournal = recordJournals.remove(cacheKey.key)
+      if (removedRecordJournal != null) {
+        total++
+        if (cascade) {
+          for (cacheReference in removedRecordJournal.current.referencedFields()) {
+            referencedCacheKeys += CacheKey(cacheReference.key)
+          }
         }
       }
     }
-    return removed
+    if (referencedCacheKeys.isNotEmpty()) {
+      total += internalRemove(referencedCacheKeys, cascade)
+    }
+    return total
   }
 
   override fun remove(pattern: String): Int {

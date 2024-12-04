@@ -61,6 +61,16 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
   fun remove(cacheKey: CacheKey, cascade: Boolean): Boolean
 
   /**
+   * Calls through to [NormalizedCache.remove]. Implementations should override this method
+   * if the underlying storage technology can offer an optimized manner to remove multiple records.
+   *
+   * @param cacheKeys of records to be removed
+   * @param cascade remove referenced records if true
+   * @return the number of records removed
+   */
+  fun remove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int
+
+  /**
    * Remove records whose key matches a given pattern from this cache and all chained caches
    *
    * @param pattern a pattern to filter the cache keys. 'pattern' is interpreted as in the LIKE operator of Sqlite.

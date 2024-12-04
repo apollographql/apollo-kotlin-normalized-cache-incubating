@@ -29,6 +29,10 @@ internal class BlobRecordDatabase(private val blobQueries: BlobQueries) : Record
     blobQueries.delete(key)
   }
 
+  override fun delete(keys: Collection<String>) {
+    blobQueries.deleteRecords(keys)
+  }
+
   override fun deleteMatching(pattern: String) {
     blobQueries.deleteRecordsWithKeyMatching(pattern, "\\")
   }

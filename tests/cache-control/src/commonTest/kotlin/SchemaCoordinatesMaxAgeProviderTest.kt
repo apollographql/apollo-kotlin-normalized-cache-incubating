@@ -1,6 +1,7 @@
 package test
 
 import com.apollographql.apollo.api.CompiledField
+import com.apollographql.apollo.api.isComposite
 import com.apollographql.cache.normalized.api.MaxAge
 import com.apollographql.cache.normalized.api.MaxAgeContext
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
@@ -147,5 +148,8 @@ class SchemaCoordinatesMaxAgeProviderTest {
 private fun CompiledField.field(name: String): CompiledField =
   selections.firstOrNull { (it as CompiledField).name == name } as CompiledField
 
-fun CompiledField.path(vararg path: String): List<CompiledField> =
+fun CompiledField.path(vararg path: String): List<MaxAgeContext.Field> =
   path.fold(listOf(this)) { acc, name -> acc + acc.last().field(name) }
+      .map {
+        MaxAgeContext.Field(name = it.name, type = it.type.rawType().name, isTypeComposite = it.type.rawType().isComposite())
+      }

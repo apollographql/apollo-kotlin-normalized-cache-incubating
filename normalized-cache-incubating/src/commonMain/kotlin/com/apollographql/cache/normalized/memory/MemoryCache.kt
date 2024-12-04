@@ -79,18 +79,33 @@ class MemoryCache(
   }
 
   override fun remove(cacheKey: CacheKey, cascade: Boolean): Boolean {
+    return remove(setOf(cacheKey), cascade) > 0
+  }
+
+  override fun remove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
     return lockWrite {
-      val record = lruCache.remove(cacheKey.key)
-
-      if (cascade && record != null) {
-        for (cacheReference in record.referencedFields()) {
-          remove(CacheKey(cacheReference.key), true)
-        }
-      }
-
-      val chainRemoved = nextCache?.remove(cacheKey, cascade) ?: false
-      record != null || chainRemoved
+      val total = internalRemove(cacheKeys, cascade)
+      nextCache?.remove(cacheKeys, cascade)
+      total
     }
+  }
+
+  private fun internalRemove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
+    var total = 0
+    val referencedCacheKeys = mutableSetOf<CacheKey>()
+    for (cacheKey in cacheKeys) {
+      val removedRecord = lruCache.remove(cacheKey.key)
+      if (cascade && removedRecord != null) {
+        referencedCacheKeys += removedRecord.referencedFields().map { CacheKey(it.key) }
+      }
+      if (removedRecord != null) {
+        total++
+      }
+    }
+    if (referencedCacheKeys.isNotEmpty()) {
+      total += internalRemove(referencedCacheKeys, cascade)
+    }
+    return total
   }
 
   override fun remove(pattern: String): Int {

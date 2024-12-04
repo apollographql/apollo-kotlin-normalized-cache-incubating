@@ -1,0 +1,35 @@
+extend schema
+@link(
+  url: "https://specs.apollo.dev/kotlin_labs/v0.3",
+  import: ["@fieldPolicy", "@typePolicy"]
+)
+
+@link(
+  url: "https://specs.apollo.dev/cache/v0.1",
+  import: ["@cacheControl", "@cacheControlField"]
+)
+
+# Workaround for https://github.com/apollographql/apollo-kotlin/pull/6284
+# Remove when the fix is released
+directive @link(
+  url: String!,
+  as: String,
+  import: [Import],
+  for: Purpose)
+repeatable on SCHEMA
+
+extend type Query
+@fieldPolicy(forField: "user" keyArgs: "id")
+@fieldPolicy(forField: "users" keyArgs: "ids")
+
+extend type User @typePolicy(keyFields: "id")
+
+extend type Repository @typePolicy(keyFields: "id")
+
+extend type Repository @cacheControlField(name: "stars", maxAge: 60)
+
+extend type User @cacheControl(maxAge: 90)
+
+extend type Project
+@cacheControlField(name: "velocity", maxAge: 60)
+@cacheControlField(name: "isUrgent", maxAge: 90)

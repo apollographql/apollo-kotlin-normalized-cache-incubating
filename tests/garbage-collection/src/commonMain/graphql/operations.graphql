@@ -1,0 +1,57 @@
+query MainQuery($userIds: [ID!]!) {
+  me {
+    id
+    name
+    email
+    admin
+    repositories {
+      ...RepositoryFragment
+    }
+  }
+
+  users(ids: $userIds) {
+    id
+    name
+    email
+    admin
+    repositories {
+      ...RepositoryFragment
+    }
+  }
+
+  repositories(first: 15) {
+    ...RepositoryFragment
+  }
+}
+
+query RepositoryListQuery {
+  repositories(first: 15) {
+    id
+    stars
+    starGazers {
+      id
+      name
+    }
+  }
+}
+
+fragment RepositoryFragment on Repository {
+  id
+}
+
+query ProjectListQuery {
+  projects {
+    velocity
+    isUrgent
+  }
+}
+
+query MetaProjectListQuery {
+  metaProjects {
+    type {
+      owners {
+        name
+      }
+    }
+  }
+}
