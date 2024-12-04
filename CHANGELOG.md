@@ -1,6 +1,6 @@
 # Next version (unreleased)
 
-PUT_CHANGELOG_HERE
+- Add Garbage Collection support (see [the documentation](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/garbage-collection.html) for details)
 
 # Version 0.0.4
 _2024-11-07_
