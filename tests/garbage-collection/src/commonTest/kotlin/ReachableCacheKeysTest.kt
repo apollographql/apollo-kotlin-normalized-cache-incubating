@@ -48,11 +48,18 @@ class ReachableCacheKeysTest {
                     "repositories": [
                       {
                         "__typename": "Repository",
-                        "id": "1"
+                        "id": "1",
+                        "starGazers": [
+                          {
+                            "__typename": "User",
+                            "id": "0"
+                          }
+                        ]
                       },
                       {
                         "__typename": "Repository",
-                        "id": "2"
+                        "id": "2",
+                        "starGazers": []
                       }
                     ]
                   },
@@ -66,11 +73,13 @@ class ReachableCacheKeysTest {
                       "repositories": [
                         {
                           "__typename": "Repository",
-                          "id": "3"
+                          "id": "3",
+                          "starGazers": []
                         },
                         {
                           "__typename": "Repository",
-                          "id": "4"
+                          "id": "4",
+                          "starGazers": []
                         }
                       ]
                     },
@@ -83,15 +92,18 @@ class ReachableCacheKeysTest {
                       "repositories": [
                         {
                           "__typename": "Repository",
-                          "id": "5"
+                          "id": "5",
+                          "starGazers": []
                         },
                         {
                           "__typename": "Repository",
-                          "id": "6"
+                          "id": "6",
+                          "starGazers": []
                         },
                         {
                           "__typename": "Repository",
-                          "id": "7"
+                          "id": "7",
+                          "starGazers": []
                         }
                       ]
                     }
@@ -99,11 +111,13 @@ class ReachableCacheKeysTest {
                   "repositories": [
                     {
                       "__typename": "Repository",
-                      "id": "7"
+                      "id": "7",
+                      "starGazers": []
                     },
                     {
                       "__typename": "Repository",
-                      "id": "8"
+                      "id": "8",
+                      "starGazers": []
                     }
                   ]
                 }
@@ -153,7 +167,7 @@ class ReachableCacheKeysTest {
           store.writeFragment(
               RepositoryFragmentImpl(),
               CacheKey("Repository:500"),
-              RepositoryFragment(id = "500", __typename = "Repository"),
+              RepositoryFragment(id = "500", __typename = "Repository", starGazers = emptyList()),
           )
           reachableCacheKeys = store.accessCache { it.getReachableCacheKeys() }
           assertContentEquals(

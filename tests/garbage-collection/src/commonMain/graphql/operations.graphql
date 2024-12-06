@@ -37,6 +37,9 @@ query RepositoryListQuery {
 
 fragment RepositoryFragment on Repository {
   id
+  starGazers {
+    id
+  }
 }
 
 query ProjectListQuery {
