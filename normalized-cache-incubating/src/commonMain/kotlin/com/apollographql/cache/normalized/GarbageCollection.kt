@@ -21,7 +21,7 @@ fun NormalizedCache.getReachableCacheKeys(): Set<CacheKey> {
     val cacheKeysToCheck = mutableListOf<CacheKey>()
     for ((key, record) in records) {
       reachableCacheKeys.add(CacheKey(key))
-      cacheKeysToCheck.addAll(record.referencedFields())
+      cacheKeysToCheck.addAll(record.referencedFields() - reachableCacheKeys)
     }
     if (cacheKeysToCheck.isNotEmpty()) {
       getReachableCacheKeys(cacheKeysToCheck, reachableCacheKeys)
