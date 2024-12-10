@@ -137,8 +137,10 @@ class SqlNormalizedCache internal constructor(
     } else {
       emptySet()
     }
-    recordDatabase.delete(keys + referencedKeys)
-    return recordDatabase.changes().toInt()
+    return (keys + referencedKeys).chunked(999).sumOf { chunkedKeys ->
+      recordDatabase.delete(chunkedKeys)
+      recordDatabase.changes().toInt()
+    }
   }
 
   /**
