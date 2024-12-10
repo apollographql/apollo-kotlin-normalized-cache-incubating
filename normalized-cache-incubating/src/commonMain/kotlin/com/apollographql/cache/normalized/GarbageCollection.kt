@@ -15,12 +15,12 @@ import com.apollographql.cache.normalized.api.receivedDate
 import kotlin.time.Duration
 
 @ApolloInternal
-fun NormalizedCache.getReachableCacheKeys(): Set<CacheKey> {
-  fun NormalizedCache.getReachableCacheKeys(roots: List<CacheKey>, reachableCacheKeys: MutableSet<CacheKey>) {
-    val records = loadRecords(roots.map { it.key }, CacheHeaders.NONE).associateBy { it.key }
+fun Map<String, Record>.getReachableCacheKeys(): Set<CacheKey> {
+  fun Map<String, Record>.getReachableCacheKeys(roots: List<CacheKey>, reachableCacheKeys: MutableSet<CacheKey>) {
+    val records = roots.mapNotNull { this[it.key] }
     val cacheKeysToCheck = mutableListOf<CacheKey>()
-    for ((key, record) in records) {
-      reachableCacheKeys.add(CacheKey(key))
+    for (record in records) {
+      reachableCacheKeys.add(CacheKey(record.key))
       cacheKeysToCheck.addAll(record.referencedFields() - reachableCacheKeys)
     }
     if (cacheKeysToCheck.isNotEmpty()) {
@@ -45,7 +45,12 @@ fun NormalizedCache.allRecords(): Map<String, Record> {
  * @return the cache keys that were removed.
  */
 fun NormalizedCache.removeUnreachableRecords(): Set<CacheKey> {
-  val unreachableCacheKeys = allRecords().keys.map { CacheKey(it) } - getReachableCacheKeys()
+  val allRecords = allRecords()
+  return removeUnreachableRecords(allRecords)
+}
+
+private fun NormalizedCache.removeUnreachableRecords(allRecords: Map<String, Record>): Set<CacheKey> {
+  val unreachableCacheKeys = allRecords.keys.map { CacheKey(it) } - allRecords.getReachableCacheKeys()
   remove(unreachableCacheKeys, cascade = false)
   return unreachableCacheKeys.toSet()
 }
@@ -79,10 +84,18 @@ fun NormalizedCache.removeStaleFields(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
 ): RemovedFieldsAndRecords {
-  val allRecords: Map<String, Record> = allRecords()
+  val allRecords = allRecords().toMutableMap()
+  return removeStaleFields(allRecords, maxAgeProvider, maxStale)
+}
+
+private fun NormalizedCache.removeStaleFields(
+    allRecords: MutableMap<String, Record>,
+    maxAgeProvider: MaxAgeProvider,
+    maxStale: Duration,
+): RemovedFieldsAndRecords {
   val recordsToUpdate = mutableMapOf<String, Record>()
   val removedFields = mutableSetOf<String>()
-  for (record in allRecords.values) {
+  for (record in allRecords.values.toList()) {
     var recordCopy = record
     for (field in record.fields) {
       // Consider the client controlled max age
@@ -103,6 +116,11 @@ fun NormalizedCache.removeStaleFields(
           recordCopy -= field.key
           recordsToUpdate[record.key] = recordCopy
           removedFields.add(record.key + "." + field.key)
+          if (recordCopy.isEmptyRecord()) {
+            allRecords.remove(record.key)
+          } else {
+            allRecords[record.key] = recordCopy
+          }
           continue
         }
       }
@@ -116,6 +134,11 @@ fun NormalizedCache.removeStaleFields(
           recordCopy -= field.key
           recordsToUpdate[record.key] = recordCopy
           removedFields.add(record.key + "." + field.key)
+          if (recordCopy.isEmptyRecord()) {
+            allRecords.remove(record.key)
+          } else {
+            allRecords[record.key] = recordCopy
+          }
         }
       }
     }
@@ -160,6 +183,10 @@ fun ApolloStore.removeStaleFields(
  */
 fun NormalizedCache.removeDanglingReferences(): RemovedFieldsAndRecords {
   val allRecords: MutableMap<String, Record> = allRecords().toMutableMap()
+  return removeDanglingReferences(allRecords)
+}
+
+private fun NormalizedCache.removeDanglingReferences(allRecords: MutableMap<String, Record>): RemovedFieldsAndRecords {
   val recordsToUpdate = mutableMapOf<String, Record>()
   val allRemovedFields = mutableSetOf<String>()
   do {
@@ -254,10 +281,11 @@ fun NormalizedCache.garbageCollect(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
 ): GarbageCollectResult {
+  val allRecords = allRecords().toMutableMap()
   return GarbageCollectResult(
-      removedStaleFields = removeStaleFields(maxAgeProvider, maxStale),
-      removedDanglingReferences = removeDanglingReferences(),
-      removedUnreachableRecords = removeUnreachableRecords()
+      removedStaleFields = removeStaleFields(allRecords, maxAgeProvider, maxStale),
+      removedDanglingReferences = removeDanglingReferences(allRecords),
+      removedUnreachableRecords = removeUnreachableRecords(allRecords)
   )
 }
 

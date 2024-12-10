@@ -107,7 +107,7 @@ public final class com/apollographql/cache/normalized/GarbageCollectionKt {
 	public static final fun garbageCollect-SxA4cEA (Lcom/apollographql/cache/normalized/api/NormalizedCache;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;J)Lcom/apollographql/cache/normalized/GarbageCollectResult;
 	public static synthetic fun garbageCollect-SxA4cEA$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;JILjava/lang/Object;)Lcom/apollographql/cache/normalized/GarbageCollectResult;
 	public static synthetic fun garbageCollect-SxA4cEA$default (Lcom/apollographql/cache/normalized/api/NormalizedCache;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;JILjava/lang/Object;)Lcom/apollographql/cache/normalized/GarbageCollectResult;
-	public static final fun getReachableCacheKeys (Lcom/apollographql/cache/normalized/api/NormalizedCache;)Ljava/util/Set;
+	public static final fun getReachableCacheKeys (Ljava/util/Map;)Ljava/util/Set;
 	public static final fun removeDanglingReferences (Lcom/apollographql/cache/normalized/ApolloStore;)Lcom/apollographql/cache/normalized/RemovedFieldsAndRecords;
 	public static final fun removeDanglingReferences (Lcom/apollographql/cache/normalized/api/NormalizedCache;)Lcom/apollographql/cache/normalized/RemovedFieldsAndRecords;
 	public static final fun removeStaleFields-SxA4cEA (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;J)Lcom/apollographql/cache/normalized/RemovedFieldsAndRecords;
