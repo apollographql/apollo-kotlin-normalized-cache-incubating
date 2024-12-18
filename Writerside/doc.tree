@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE instance-profile
-        SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
+<!DOCTYPE instance-profile SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
 
-<instance-profile id="doc"
-                 name="apollo-kotlin-normalized-cache-incubating"
-                 start-page="welcome.md">
+<instance-profile
+    id="doc"
+    name="apollo-kotlin-normalized-cache-incubating"
+    start-page="welcome.md"
+>
 
-    <toc-element toc-title="GitHub" href="https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating"/>
-    <toc-element toc-title="Kdoc" href="https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc"/>
-    <toc-element topic="welcome.md"/>
-    <toc-element topic="pagination.md"/>
-    <toc-element topic="cache-control.md"/>
-    <toc-element topic="garbage-collection.md"/>
+  <toc-element toc-title="GitHub" href="https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating" />
+  <toc-element toc-title="Kdoc" href="https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc" />
+  <toc-element topic="welcome.md" />
+  <toc-element topic="pagination-home.md">
+    <toc-element topic="pagination-relay-style.md" />
+    <toc-element topic="pagination-other.md" />
+    <toc-element topic="pagination-manual.md" />
+  </toc-element>
+  <toc-element topic="cache-control.md" />
+  <toc-element topic="garbage-collection.md" />
+
 </instance-profile>
