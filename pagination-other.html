@@ -1,0 +1,101 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="en-US" data-preset="contrast" data-primary-color="#307FFF"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="UTF-8"><meta name="robots" content="noindex"><meta name="built-on" content="2024-12-19T10:01:12.053228967"><title>Other types of pagination | apollo-kotlin-normalized-cache-incubating</title><script type="application/json" id="virtual-toc-data">[{"id":"pagination-arguments","level":0,"title":"Pagination arguments","anchor":"#pagination-arguments"},{"id":"record-merging","level":0,"title":"Record merging","anchor":"#record-merging"},{"id":"metadata","level":0,"title":"Metadata","anchor":"#metadata"},{"id":"embedded-fields","level":0,"title":"Embedded fields","anchor":"#embedded-fields"}]</script><script type="application/json" id="topic-shortcuts"></script><link href="https://resources.jetbrains.com/writerside/apidoc/6.10.0-b267/app.css" rel="stylesheet"><link rel="icon" type="image/png" sizes="16x16" href="images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="32x32" href="images/favicon-192x192.png"><meta name="image" content=""><!-- Open Graph --><meta property="og:title" content="Other types of pagination | apollo-kotlin-normalized-cache-incubating"><meta property="og:description" content=""><meta property="og:image" content=""><meta property="og:site_name" content="apollo-kotlin-normalized-cache-incubating Help"><meta property="og:type" content="website"><meta property="og:locale" content="en_US"><meta property="og:url" content="writerside-documentation/pagination-other.html"><!-- End Open Graph --><!-- Twitter Card --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content=""><meta name="twitter:title" content="Other types of pagination | apollo-kotlin-normalized-cache-incubating"><meta name="twitter:description" content=""><meta name="twitter:creator" content=""><meta name="twitter:image:src" content=""><!-- End Twitter Card --><!-- Schema.org WebPage --><script type="application/ld+json">{
+    "@context": "http://schema.org",
+    "@type": "WebPage",
+    "@id": "writerside-documentation/pagination-other.html#webpage",
+    "url": "writerside-documentation/pagination-other.html",
+    "name": "Other types of pagination | apollo-kotlin-normalized-cache-incubating",
+    "description": "",
+    "image": "",
+    "inLanguage":"en-US"
+}</script><!-- End Schema.org --><!-- Schema.org WebSite --><script type="application/ld+json">{
+    "@type": "WebSite",
+    "@id": "writerside-documentation/#website",
+    "url": "writerside-documentation/",
+    "name": "apollo-kotlin-normalized-cache-incubating Help"
+}</script><!-- End Schema.org --></head><body data-id="pagination-other" data-main-title="Other types of pagination" data-article-props="{&quot;seeAlsoStyle&quot;:&quot;links&quot;}" data-template="article" data-breadcrumbs="pagination-home.md|Pagination" data-edit-url="https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/edit/main/Writerside/topics/pagination/pagination-other.md"><div class="wrapper"><main class="panel _main"><header class="panel__header"><div class="container"><h3>apollo-kotlin-normalized-cache-incubating  Help</h3><div class="panel-trigger"></div></div></header><section class="panel__content"><div class="container"><article class="article" data-shortcut-switcher="inactive"><h1 data-toc="pagination-other" id="pagination-other.md">Other types of pagination</h1><p id="om1ld9_2">If your schema doesn't use <a href="https://relay.dev/graphql/connections.htm" id="om1ld9_3" data-external="true" rel="noopener noreferrer">Relay-style</a> pagination, you can still use the pagination support, with more configuration needed.</p><section class="chapter"><h2 id="pagination-arguments" data-toc="pagination-arguments">Pagination arguments</h2><p id="om1ld9_4">The <code class="code" id="om1ld9_5">@fieldPolicy</code> directive has a <code class="code" id="om1ld9_6">paginationArgs</code> argument that can be used to specify the arguments that should be omitted from the field key.</p><p id="om1ld9_7">Going back to <a href="pagination-home.html" id="om1ld9_8" data-tooltip="The normalized cache includes support for pagination, allowing you to merge pages of data into the same record field. This allows your application to watch a query for a list of items, receive updates when new pages are fetched, and update the UI with the full list.">the example</a> with <code class="code" id="om1ld9_9">usersPage</code>:</p><div class="code-block" data-lang="none">
+extend type Query
+@fieldPolicy(forField: &quot;usersPage&quot; paginationArgs: &quot;page&quot;)
+</div><aside class="prompt" data-type="tip" data-title="" id="om1ld9_11"><p id="om1ld9_12">This can also be done programmatically by configuring the <code class="code" id="om1ld9_13">ApolloStore</code> with a <a href="https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-field-key-generator/index.html?query=interface%20FieldKeyGenerator" id="om1ld9_14" data-external="true" rel="noopener noreferrer"><code class="code" id="om1ld9_15">FieldKeyGenerator</code></a> implementation.</p></aside><p id="om1ld9_16">With that in place, after fetching the first page, the cache will look like this:</p><div class="table-wrapper"><table class="wide" id="om1ld9_17"><thead><tr class="ijRowHead" id="om1ld9_18"><th id="om1ld9_19"><p>Cache Key</p></th><th id="om1ld9_20"><p>Record</p></th></tr></thead><tbody><tr id="om1ld9_21"><td id="om1ld9_22"><p>QUERY_ROOT</p></td><td id="om1ld9_23"><p><span class="control" id="om1ld9_24">usersPage(groupId: 2)</span>: [ref(user:1), ref(user:2)]</p></td></tr><tr id="om1ld9_25"><td id="om1ld9_26"><p>user:1</p></td><td id="om1ld9_27"><p>id: 1, name: John Smith</p></td></tr><tr id="om1ld9_28"><td id="om1ld9_29"><p>user:2</p></td><td id="om1ld9_30"><p>id: 2, name: Jane Doe</p></td></tr></tbody></table></div><p id="om1ld9_31">The field key no longer includes the <code class="code" id="om1ld9_32">page</code> argument, which means watching <code class="code" id="om1ld9_33">UsersPage(page = 1)</code> or any page will observe the same list.</p><p id="om1ld9_34">Here's what happens when fetching the second page:</p><div class="table-wrapper"><table class="wide" id="om1ld9_35"><thead><tr class="ijRowHead" id="om1ld9_36"><th id="om1ld9_37"><p>Cache Key</p></th><th id="om1ld9_38"><p>Record</p></th></tr></thead><tbody><tr id="om1ld9_39"><td id="om1ld9_40"><p>QUERY_ROOT</p></td><td id="om1ld9_41"><p>usersPage(groupId: 2): [ref(user:3), ref(user:4)]</p></td></tr><tr id="om1ld9_42"><td id="om1ld9_43"><p>user:1</p></td><td id="om1ld9_44"><p>id: 1, name: John Smith</p></td></tr><tr id="om1ld9_45"><td id="om1ld9_46"><p>user:2</p></td><td id="om1ld9_47"><p>id: 2, name: Jane Doe</p></td></tr><tr id="om1ld9_48"><td id="om1ld9_49"><p>user:3</p></td><td id="om1ld9_50"><p>id: 3, name: Peter Parker</p></td></tr><tr id="om1ld9_51"><td id="om1ld9_52"><p>user:4</p></td><td id="om1ld9_53"><p>id: 4, name: Bruce Wayne</p></td></tr></tbody></table></div><p id="om1ld9_54">The field containing the first page was overwritten by the second page.</p><p id="om1ld9_55">This is because the field key is now the same for all pages and the default merging strategy is to overwrite existing fields with the new value.</p></section><section class="chapter"><h2 id="record-merging" data-toc="record-merging">Record merging</h2><p id="om1ld9_56">To fix this, we need to supply the store with a piece of code that can merge the lists in a sensible way. This is done by passing a <a href="https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-record-merger/index.html?query=interface%20RecordMerger" id="om1ld9_57" data-external="true" rel="noopener noreferrer"><code class="code" id="om1ld9_58">RecordMerger</code></a> to the <code class="code" id="om1ld9_59">ApolloStore</code> constructor:</p><div class="code-block" data-lang="kotlin">
+object MyFieldMerger : FieldRecordMerger.FieldMerger {
+  override fun mergeFields(existing: FieldRecordMerger.FieldInfo, incoming: FieldRecordMerger.FieldInfo): FieldRecordMerger.FieldInfo {
+    val existingList = existing.value as List&lt;*&gt;
+    val incomingList = incoming.value as List&lt;*&gt;
+    val mergedList = existingList + incomingList
+    return FieldRecordMerger.FieldInfo(
+        value = mergedList,
+        metadata = emptyMap()
+    )
+  }
+}
+
+val apolloStore = ApolloStore(
+  normalizedCacheFactory = cacheFactory,
+  recordMerger = FieldRecordMerger(MyFieldMerger), // Configure the store with the custom merger
+)
+</div><p id="om1ld9_61">With this, the cache will be as expected after fetching the second page:</p><div class="table-wrapper"><table class="wide" id="om1ld9_62"><thead><tr class="ijRowHead" id="om1ld9_63"><th id="om1ld9_64"><p>Cache Key</p></th><th id="om1ld9_65"><p>Record</p></th></tr></thead><tbody><tr id="om1ld9_66"><td id="om1ld9_67"><p>QUERY_ROOT</p></td><td id="om1ld9_68"><p>usersPage(groupId: 2): [ref(user:1), ref(user:2), ref(user:3), ref(user:4)]</p></td></tr><tr id="om1ld9_69"><td id="om1ld9_70"><p>user:1</p></td><td id="om1ld9_71"><p>id: 1, name: John Smith</p></td></tr><tr id="om1ld9_72"><td id="om1ld9_73"><p>user:2</p></td><td id="om1ld9_74"><p>id: 2, name: Jane Doe</p></td></tr><tr id="om1ld9_75"><td id="om1ld9_76"><p>user:3</p></td><td id="om1ld9_77"><p>id: 3, name: Peter Parker</p></td></tr><tr id="om1ld9_78"><td id="om1ld9_79"><p>user:4</p></td><td id="om1ld9_80"><p>id: 4, name: Bruce Wayne</p></td></tr></tbody></table></div><p id="om1ld9_81">The <code class="code" id="om1ld9_82">RecordMerger</code> shown above is simplistic: it will always append new items to the end of the existing list. In a real app, we need to look at the contents of the incoming page and decide if and where to append / insert the items.</p><p id="om1ld9_83">To do that it is usually necessary to have access to the arguments that were used to fetch the existing/incoming lists (e.g. the page number), to decide what to do with the new items. For instance if the existing list is for page 1 and the incoming one is for page 2, we should append.</p><p id="om1ld9_84">Fields in records can have arbitrary metadata attached to them, in addition to their value. We'll use this to implement a more capable merging strategy.</p></section><section class="chapter"><h2 id="metadata" data-toc="metadata">Metadata</h2><p id="om1ld9_85">Let's go back to the <a href="pagination-relay-style.html" id="om1ld9_86" data-tooltip="Relay-style pagination is a common way of modeling pagination in GraphQL, where fields return Connections that contain a list of Edges:">example</a> where Relay-style pagination is used.</p><p id="om1ld9_87">Configure the <code class="code" id="om1ld9_88">paginationArgs</code> as seen previously:</p><div class="code-block" data-lang="none">
+extend type Query
+@fieldPolicy(forField: &quot;usersConnection&quot; paginationArgs: &quot;first,after,last,before&quot;)
+</div><p id="om1ld9_90">Now let's store in the metadata of each <code class="code" id="om1ld9_91">UserConnection</code> field the values of the <code class="code" id="om1ld9_92">before</code> and <code class="code" id="om1ld9_93">after</code> arguments of the field returning it, as well as the values of the first and last cursor in its list. This will allow us to insert new pages in the correct position later on.</p><p id="om1ld9_94">This is done by passing a <a href="https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-metadata-generator/index.html?query=interface%20MetadataGenerator" id="om1ld9_95" data-external="true" rel="noopener noreferrer"><code class="code" id="om1ld9_96">MetadataGenerator</code></a> to the <code class="code" id="om1ld9_97">ApolloStore</code> constructor:</p><div class="code-block" data-lang="kotlin">
+class ConnectionMetadataGenerator : MetadataGenerator {
+  @Suppress(&quot;UNCHECKED_CAST&quot;)
+  override fun metadataForObject(obj: ApolloJsonElement, context: MetadataGeneratorContext): Map&lt;String, ApolloJsonElement&gt; {
+    if (context.field.type.rawType().name == &quot;UserConnection&quot;) {
+      obj as Map&lt;String, ApolloJsonElement&gt;
+      val edges = obj[&quot;edges&quot;] as List&lt;Map&lt;String, ApolloJsonElement&gt;&gt;
+      val startCursor = edges.firstOrNull()?.get(&quot;cursor&quot;) as String?
+      val endCursor = edges.lastOrNull()?.get(&quot;cursor&quot;) as String?
+      return mapOf(
+          &quot;startCursor&quot; to startCursor,
+          &quot;endCursor&quot; to endCursor,
+          &quot;before&quot; to context.argumentValue(&quot;before&quot;),
+          &quot;after&quot; to context.argumentValue(&quot;after&quot;),
+      )
+    }
+    return emptyMap()
+  }
+}
+</div><p id="om1ld9_99">However, this cannot work yet.</p><p id="om1ld9_100">Normalization will make the <code class="code" id="om1ld9_101">usersConnection</code> field value be a <span class="control" id="om1ld9_102">reference</span> to the <code class="code" id="om1ld9_103">UserConnection</code> record, and not the actual connection. Because of this, we won't be able to access its metadata inside the <code class="code" id="om1ld9_104">RecordMerger</code> implementation. Furthermore, the <code class="code" id="om1ld9_105">edges</code> field value will be a list of <span class="control" id="om1ld9_106">references</span> to the <code class="code" id="om1ld9_107">UserEdge</code> records which will contain the item's list index in their cache key (e.g. <code class="code" id="om1ld9_108">usersConnection.edges.0</code>, <code class="code" id="om1ld9_109">usersConnection.edges.1</code>) which will break the merging logic.</p></section><section class="chapter"><h2 id="embedded-fields" data-toc="embedded-fields">Embedded fields</h2><p id="om1ld9_110">To remediate this, we can configure the cache to skip normalization for certain fields. When doing so, the value will be embedded directly into the record instead of being referenced.</p><p id="om1ld9_111">This is done with the <code class="code" id="om1ld9_112">embeddedFields</code> argument of the <code class="code" id="om1ld9_113">@typePolicy</code> directive:</p><div class="code-block" data-lang="none">
+# Embed the value of the `usersConnection` field in the record
+extend type Query @typePolicy(embeddedFields: &quot;usersConnection&quot;)
+
+# Embed the values of the `edges` field in the record
+extend type UserConnection @typePolicy(embeddedFields: &quot;edges&quot;)
+</div><aside class="prompt" data-type="tip" data-title="" id="om1ld9_115"><p id="om1ld9_116">This can also be done programmatically by configuring the <code class="code" id="om1ld9_117">ApolloStore</code> with an <a href="https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-embedded-fields-provider/index.html?query=interface%20EmbeddedFieldsProvider" id="om1ld9_118" data-external="true" rel="noopener noreferrer"><code class="code" id="om1ld9_119">EmbeddedFieldsProvider</code></a> implementation.</p></aside><p id="om1ld9_120">Now that we have the metadata and embedded fields in place, we can implement the <code class="code" id="om1ld9_121">RecordMerger</code> (simplified for brevity):</p><div class="code-block" data-lang="kotlin">
+object ConnectionFieldMerger : FieldRecordMerger.FieldMerger {
+  @Suppress(&quot;UNCHECKED_CAST&quot;)
+  override fun mergeFields(existing: FieldRecordMerger.FieldInfo, incoming: FieldRecordMerger.FieldInfo): FieldRecordMerger.FieldInfo {
+    // Get existing field metadata
+    val existingStartCursor = existing.metadata[&quot;startCursor&quot;]
+    val existingEndCursor = existing.metadata[&quot;endCursor&quot;]
+
+    // Get incoming field metadata
+    val incomingBeforeArgument = incoming.metadata[&quot;before&quot;]
+    val incomingAfterArgument = incoming.metadata[&quot;after&quot;]
+
+    // Get the lists
+    val existingList = (existing.value as Map&lt;String, ApolloJsonElement&gt;)[&quot;edges&quot;] as List&lt;*&gt;
+    val incomingList = (incoming.value as Map&lt;String, ApolloJsonElement&gt;)[&quot;edges&quot;] as List&lt;*&gt;
+
+    // Merge the lists
+    val mergedList: List&lt;*&gt; = if (incomingAfterArgument == existingEndCursor) {
+      // We received the next page: its `after` argument matches the last cursor of the existing list
+      existingList + incomingList
+    } else if (incomingBeforeArgument == existingStartCursor) {
+      // We received the previous page: its `before` argument matches the first cursor of the existing list
+      incomingList + existingList
+    } else {
+      // We received a list which is neither the previous nor the next page.
+      // Handle this case by resetting the cache with this page
+      incomingList
+    }
+
+    val mergedFieldValue = existing.value.toMutableMap()
+    mergedFieldValue[&quot;edges&quot;] = mergedList
+    return FieldRecordMerger.FieldInfo(
+        value = mergedFieldValue,
+        metadata = mapOf() // Omitted for brevity
+    )
+  }
+}
+</div><p id="om1ld9_123">A full implementation of <code class="code" id="om1ld9_124">ConnectionFieldMerger</code> can be found <a href="https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/blob/main/normalized-cache-incubating/src/commonMain/kotlin/com/apollographql/cache/normalized/api/RecordMerger.kt#L136" id="om1ld9_125" data-external="true" rel="noopener noreferrer">here</a>.</p></section><div class="last-modified">Last modified: 19 December 2024</div><div data-feedback-placeholder="true"></div><div class="navigation-links _bottom"><a href="pagination-relay-style.html" class="navigation-links__prev">Relay-style pagination</a><a href="pagination-manual.html" class="navigation-links__next">Managing pagination manually</a></div></article><div id="disqus_thread"></div></div></section></main></div><script src="https://resources.jetbrains.com/writerside/apidoc/6.10.0-b267/app.js"></script></body></html>
