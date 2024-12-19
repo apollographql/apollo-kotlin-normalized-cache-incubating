@@ -64,7 +64,7 @@ internal class DefaultApolloStore(
   }
 
   override suspend fun publish(keys: Set<String>) {
-    if (keys.isEmpty()) {
+    if (keys.isEmpty() && keys !== ApolloStore.ALL_KEYS) {
       return
     }
 
