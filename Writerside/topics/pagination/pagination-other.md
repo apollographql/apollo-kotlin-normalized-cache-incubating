@@ -1,220 +1,13 @@
-# Pagination
+# Other types of pagination
 
-When using the normalized cache, objects are stored in records keyed by the object's id:
-
-Query:
-
-```graphql
-query Users {
-  allUsers(groupId: 2) {
-    id
-    name
-  }
-}
-```
-
-Response:
-
-```json
-{
-  "data": {
-    "allUsers": [
-      {
-        "id": 1,
-        "name": "John Smith"
-      },
-      {
-        "id": 2,
-        "name": "Jane Doe"
-      }
-    ]
-  }
-}
-```
-
-Normalized cache:
-
-| Cache Key  | Record                                            |
-|------------|---------------------------------------------------|
-| QUERY_ROOT | allUsers(groupId: 2): [ref(user:1), ref(user:2)]  | 
-| user:1     | id: 1, name: John Smith                           |
-| user:2     | id: 2, name: Jane Doe                             |
-
-The app can watch the `Users()` query and update the UI with the whole list when the data changes.
-
-However with pagination things become less obvious:
-
-Query:
-
-```graphql
-query UsersPage($page: Int!) {
-  usersPage(groupId: 2, page: $page) {
-    id
-    name
-  }
-}
-```
-
-Response:
-
-```json
-{
-  "data": {
-    "usersPage": [
-      {
-        "id": 1,
-        "name": "John Smith"
-      },
-      {
-        "id": 2,
-        "name": "Jane Doe"
-      }
-    ]
-  }
-}
-```
-
-Normalized cache:
-
-| Cache Key  | Record                                                     |
-|------------|------------------------------------------------------------|
-| QUERY_ROOT | usersPage(groupId: 2, page: 1): [ref(user:1), ref(user:2)] |
-| user:1     | id: 1, name: John Smith                                    |
-| user:2     | id: 2, name: Jane Doe                                      |
-
-After fetching page 2, the cache will look like this:
-
-| Cache Key  | Record                                                                                                                 |
-|------------|------------------------------------------------------------------------------------------------------------------------|
-| QUERY_ROOT | usersPage(groupId: 2, page: 1): [ref(user:1), ref(user:2)], usersPage(groupId: 2, page: 2): [ref(user:3), ref(user:4)] |
-| user:1     | id: 1, name: John Smith                                                                                                |
-| user:2     | id: 2, name: Jane Doe                                                                                                  |
-| user:3     | id: 3, name: Peter Parker                                                                                              |
-| user:4     | id: 4, name: Bruce Wayne                                                                                               |
-
-Which query should the app watch to update the UI?
-
-Watching `UsersPage(page = 1)` would only notify changes to the first page.
-
-For the whole list to be reactive you'd need to watch the queries for each page, and update the corresponding segment of the list. While technically possible, this is cumbersome to implement.
-
-You could skip watching altogether and only update the list when scrolling to its end, but that would mean that changes to individual items would not be reflected in the list UI.
-
-What we need is having the whole list in a single record, so we can watch a single query.
-
-## Using ApolloStore
-
-The cache can be updated manually using the `ApolloStore` class.
-
-```kotlin
-suspend fun fetchAndMergePage(nextPage: Int) {
-  // 1. Get the current list from the cache
-  val listQuery = UsersPageQuery(page = 1)
-  val cacheResponse = apolloClient.query(listQuery).fetchPolicy(FetchPolicy.CacheOnly).execute()
-
-  // 2. Fetch the next page from the network (don't update the cache yet)
-  val networkResponse = apolloClient.query(UsersPageQuery(page = nextPage)).fetchPolicy(FetchPolicy.NetworkOnly).execute()
-
-  // 3. Merge the next page with the current list
-  val mergedList = cacheResponse.data.usersPage.items + networkResponse.data.usersPage.items
-  val dataWithMergedList = networkResponse.data.copy(
-      usersPage = networkResponse.data.usersPage.copy(
-          items = mergedList
-      )
-  )
-
-  // 4. Update the cache with the merged list
-  val keys = apolloClient.apolloStore.writeOperation(operation = listQuery, operationData = dataWithMergedList)
-  apolloClient.apolloStore.publish(keys)
-}
-```
-
-Note that in this simple example, we need to remember the last fetched page, so we can know which page to fetch next. This can be stored in shared preferences for instance.
-However in most cases the API can return a "page info" object containing the information needed to fetch the next page, and this can be stored in the cache with the rest of the data.
-
-An example of doing this is available [here](https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/tree/main/samples/pagination/manual).
-
-## Using the incubating pagination support
-
-### Relay-style pagination
-
-[Relay-style pagination](https://relay.dev/graphql/connections.htm) is a common way of modeling pagination in GraphQL, where fields return `Connection`s that contain a list of `Edges`:
-
-```graphql
-type Query {
-  usersConnection(first: Int = 10, after: String = null, last: Int = null, before: String = null): UserConnection!
-}
-
-type UserConnection {
-  pageInfo: PageInfo!
-  edges: [UserEdge!]!
-}
-
-type PageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-  endCursor: String
-}
-
-type UserEdge {
-  cursor: String!
-  node: User!
-}
-
-type User {
-  id: ID!
-  name: String!
-}
-```
-
-```graphql
-query UsersConnection($first: Int, $after: String, $last: Int, $before: String) {
-  usersConnection(first: $first, after: $after, last: $last, before: $before) {
-    edges {
-      cursor
-      node {
-        name
-      }
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-  }
-}
-```
-
-If your schema uses this pagination style, the library supports it out of the box: use the `connectionFields` argument to specify the fields that return a connection:
-
-```graphql
-extend type Query @typePolicy(connectionFields: "usersConnection")
-```
-
-In Kotlin configure the `ApolloStore` like this, using the generated `Pagination` object:
-
-```kotlin
-val apolloStore = ApolloStore(
-  normalizedCacheFactory = cacheFactory,
-  metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
-  recordMerger = ConnectionRecordMerger
-)
-
-```
-
-Query `UsersConnection()` to fetch new pages and update the cache, and watch it to observe the full list.
-
-An example of doing this is available [here](https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/tree/main/samples/pagination/pagination-support).
-
-### Other types of pagination
-
-If your schema uses a different pagination style, you can still use the pagination support, with more configuration needed.
+If your schema doesn't use [Relay-style](https://relay.dev/graphql/connections.htm) pagination, you can still use the pagination support,
+with more configuration needed.
 
 #### Pagination arguments
 
 The `@fieldPolicy` directive has a `paginationArgs` argument that can be used to specify the arguments that should be omitted from the field key.
 
-Going back to the example above with `usersPage`:
+Going back to [the example](pagination-home.md) with `usersPage`:
 
 
 ```graphql
@@ -250,7 +43,7 @@ This is because the field key is now the same for all pages and the default merg
 
 #### Record merging
 
-To fix this we need to supply the store with a piece of code that can merge the lists in a sensible way.
+To fix this, we need to supply the store with a piece of code that can merge the lists in a sensible way.
 This is done by passing a [`RecordMerger`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-record-merger/index.html?query=interface%20RecordMerger) to the `ApolloStore` constructor:
 
 ```kotlin
@@ -285,14 +78,15 @@ With this, the cache will be as expected after fetching the second page:
 The `RecordMerger` shown above is simplistic: it will always append new items to the end of the existing list.
 In a real app, we need to look at the contents of the incoming page and decide if and where to append / insert the items.
 
-To do that it is usually necessary to have access to the arguments that were used to fetch the existing/incoming lists (e.g. the page number), to decide what to do with the new items.
+To do that it is usually necessary to have access to the arguments that were used to fetch the existing/incoming lists (e.g. the page number),
+to decide what to do with the new items.
 For instance if the existing list is for page 1 and the incoming one is for page 2, we should append.
 
 Fields in records can have arbitrary metadata attached to them, in addition to their value. We'll use this to implement a more capable merging strategy.
 
 #### Metadata
 
-Let's go back to the above example where Relay-style pagination is used.
+Let's go back to the [example](pagination-relay-style.md) where Relay-style pagination is used.
 
 Configure the `paginationArgs` as seen previously:
 
@@ -301,7 +95,8 @@ extend type Query
 @fieldPolicy(forField: "usersConnection" paginationArgs: "first,after,last,before")
 ```
 
-Now let's store in the metadata of each `UserConnection` field the values of the `before` and `after` arguments of the field returning it, as well as the values of the first and last cursor in its list.
+Now let's store in the metadata of each `UserConnection` field the values of the `before` and `after` arguments of the field returning it,
+as well as the values of the first and last cursor in its list.
 This will allow us to insert new pages in the correct position later on.
 
 This is done by passing a [`MetadataGenerator`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-metadata-generator/index.html?query=interface%20MetadataGenerator) to the `ApolloStore` constructor:
@@ -331,11 +126,13 @@ However, this cannot work yet.
 
 Normalization will make the `usersConnection` field value be a **reference** to the `UserConnection` record, and not the actual connection.
 Because of this, we won't be able to access its metadata inside the `RecordMerger` implementation.
-Furthermore, the `edges` field value will be a list of **references** to the `UserEdge` records which will contain the item's list index in their cache key (e.g. `usersConnection.edges.0`, `usersConnection.edges.1`) which will break the merging logic.
+Furthermore, the `edges` field value will be a list of **references** to the `UserEdge` records which will contain the item's list index in their
+cache key (e.g. `usersConnection.edges.0`, `usersConnection.edges.1`) which will break the merging logic.
 
 #### Embedded fields
 
-To remediate this, we can configure the cache to skip normalization for certain fields. When doing so, the value will be embedded directly into the record instead of being referenced.
+To remediate this, we can configure the cache to skip normalization for certain fields. When doing so, the value will be embedded directly into
+the record instead of being referenced.
 
 This is done with the `embeddedFields` argument of the `@typePolicy` directive:
 
