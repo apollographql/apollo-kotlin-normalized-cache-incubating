@@ -45,7 +45,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 class WatcherTest {
@@ -650,7 +649,7 @@ class WatcherTest {
     apolloClient.query(query)
         .fetchPolicy(FetchPolicy.CacheOnly)
         .watch()
-        .test(timeout = 3.hours) {
+        .test {
           // Start empty
           assertIs<CacheMissException>(awaitItem().exception)
 
