@@ -1,6 +1,6 @@
 # Next version (unreleased)
 
-PUT_CHANGELOG_HERE
+- Add `ApolloStore.ALL_KEYS` to notify all watchers (#87)
 
 # Version 0.0.5
 _2024-12-18_

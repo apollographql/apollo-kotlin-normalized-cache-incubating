@@ -85,6 +85,10 @@ abstract interface com.apollographql.cache.normalized/ApolloStore { // com.apoll
         final val data // com.apollographql.cache.normalized/ApolloStore.ReadResult.data|{}data[0]
             final fun <get-data>(): #A1 // com.apollographql.cache.normalized/ApolloStore.ReadResult.data.<get-data>|<get-data>(){}[0]
     }
+    final object Companion { // com.apollographql.cache.normalized/ApolloStore.Companion|null[0]
+        final val ALL_KEYS // com.apollographql.cache.normalized/ApolloStore.Companion.ALL_KEYS|{}ALL_KEYS[0]
+            final fun <get-ALL_KEYS>(): kotlin.collections/AbstractSet<kotlin/String> // com.apollographql.cache.normalized/ApolloStore.Companion.ALL_KEYS.<get-ALL_KEYS>|<get-ALL_KEYS>(){}[0]
+    }
 }
 final class com.apollographql.cache.normalized.api/CacheControlCacheResolver : com.apollographql.cache.normalized.api/CacheResolver { // com.apollographql.cache.normalized.api/CacheControlCacheResolver|null[0]
     constructor <init>(com.apollographql.cache.normalized.api/CacheResolver = ...) // com.apollographql.cache.normalized.api/CacheControlCacheResolver.<init>|<init>(com.apollographql.cache.normalized.api.CacheResolver){}[0]
