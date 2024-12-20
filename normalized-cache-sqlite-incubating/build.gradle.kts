@@ -31,20 +31,15 @@ android {
 
 
 configure<app.cash.sqldelight.gradle.SqlDelightExtension> {
-  databases.create("JsonDatabase") {
-    packageName = "com.apollographql.cache.normalized.sql.internal.json"
-    schemaOutputDirectory = file("sqldelight/json/schema")
-    srcDirs("src/commonMain/sqldelight/json/")
-  }
   databases.create("BlobDatabase") {
-    packageName = "com.apollographql.cache.normalized.sql.internal.blob"
-    schemaOutputDirectory = file("sqldelight/blob/schema")
-    srcDirs("src/commonMain/sqldelight/blob/")
+    packageName.set("com.apollographql.cache.normalized.sql.internal.blob")
+    schemaOutputDirectory.set(file("sqldelight/blob/schema"))
+    srcDirs.setFrom("src/commonMain/sqldelight/blob/")
   }
   databases.create("Blob2Database") {
-    packageName = "com.apollographql.cache.normalized.sql.internal.blob2"
-    schemaOutputDirectory = file("sqldelight/blob2/schema")
-    srcDirs("src/commonMain/sqldelight/blob2/")
+    packageName.set("com.apollographql.cache.normalized.sql.internal.blob2")
+    schemaOutputDirectory.set(file("sqldelight/blob2/schema"))
+    srcDirs.setFrom("src/commonMain/sqldelight/blob2/")
   }
 }
 

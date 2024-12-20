@@ -1,0 +1,39 @@
+type Query {
+  me: User!
+  user(id: ID!): User
+  users(ids: [ID!]!): [User!]!
+  repositories(first: Int, after: String): [Repository!]!
+  projects: [Project!]!
+  metaProjects: [[Project!]!]!
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String
+  admin: Boolean!
+  repositories: [Repository!]!
+}
+
+type Repository {
+  id: ID!
+  stars: Int!
+  starGazers: [User!]!
+}
+
+type Project {
+  id: ID!
+  name: String!
+  description: String
+  owner: User!
+  collaborators: [User!]!
+  velocity: Int!
+  isUrgent: Boolean!
+  type: ProjectType!
+}
+
+type ProjectType {
+  id: ID!
+  name: String!
+  owners: [User!]!
+}

@@ -1,0 +1,7 @@
+-- Version 1 is either the blob schema (do nothing) or the legacy json schema (drop and create)
+DROP TABLE IF EXISTS records;
+
+CREATE TABLE IF NOT EXISTS blobs (
+  key TEXT NOT NULL PRIMARY KEY,
+  blob BLOB NOT NULL
+) WITHOUT ROWID;

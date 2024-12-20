@@ -1,0 +1,182 @@
+package test
+
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.exception.CacheMissException
+import com.apollographql.apollo.mpp.currentTimeMillis
+import com.apollographql.apollo.testing.internal.runTest
+import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.CacheHeaders
+import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.DefaultRecordMerger
+import com.apollographql.cache.normalized.api.Record
+import com.apollographql.cache.normalized.api.RecordValue
+import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
+import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
+import com.apollographql.cache.normalized.store
+import com.apollographql.mockserver.MockServer
+import com.apollographql.mockserver.enqueueString
+import okio.use
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import com.apollographql.apollo.cache.normalized.ApolloStore as LegacyApolloStore
+import com.apollographql.apollo.cache.normalized.api.CacheKey as LegacyCacheKey
+import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory as LegacyMemoryCacheFactory
+import com.apollographql.apollo.cache.normalized.api.NormalizedCache as LegacyNormalizedCache
+import com.apollographql.apollo.cache.normalized.api.Record as LegacyRecord
+import com.apollographql.apollo.cache.normalized.api.RecordValue as LegacyRecordValue
+import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory as LegacySqlNormalizedCacheFactory
+import com.apollographql.apollo.cache.normalized.store as legacyStore
+
+// language=JSON
+private val REPOSITORY_LIST_RESPONSE = """
+  {
+    "data": {
+      "repositories": [
+        {
+          "__typename": "Repository",
+          "id": "0",
+          "stars": 10,
+          "starGazers": [
+            {
+              "__typename": "User",
+              "id": "0",
+              "name": "John"
+            },
+            {
+              "__typename": "User",
+              "id": "1",
+              "name": "Jane"
+            }
+          ]
+        }
+      ]
+    }
+  }
+""".trimIndent()
+
+private val REPOSITORY_LIST_DATA = RepositoryListQuery.Data(
+    repositories = listOf(
+        RepositoryListQuery.Repository(
+            id = "0",
+            stars = 10,
+            starGazers = listOf(
+                RepositoryListQuery.StarGazer(id = "0", name = "John", __typename = "User"),
+                RepositoryListQuery.StarGazer(id = "1", name = "Jane", __typename = "User"),
+            ),
+            __typename = "Repository"
+        )
+    )
+)
+
+class MigrationTest {
+  @Test
+  fun canOpenLegacyDb() = runTest {
+    val mockServer = MockServer()
+    val name = "apollo-${currentTimeMillis()}.db"
+
+    // Create a legacy store with some data
+    val legacyStore = LegacyApolloStore(LegacyMemoryCacheFactory().chain(LegacySqlNormalizedCacheFactory(name = name)))
+    ApolloClient.Builder()
+        .serverUrl(mockServer.url())
+        .legacyStore(legacyStore)
+        .build()
+        .use { apolloClient ->
+          mockServer.enqueueString(REPOSITORY_LIST_RESPONSE)
+          apolloClient.query(RepositoryListQuery())
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .execute()
+        }
+
+    // Open the legacy store which empties it. Add/read some data to make sure it works.
+    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory(name = name)))
+    ApolloClient.Builder()
+        .serverUrl(mockServer.url())
+        .store(store)
+        .build()
+        .use { apolloClient ->
+          // Expected cache miss: the db has been cleared
+          var response = apolloClient.query(RepositoryListQuery())
+              .fetchPolicy(FetchPolicy.CacheOnly)
+              .execute()
+          assertIs<CacheMissException>(response.exception)
+
+          // Add some data
+          mockServer.enqueueString(REPOSITORY_LIST_RESPONSE)
+          apolloClient.query(RepositoryListQuery())
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .execute()
+
+          // Read the data back
+          response = apolloClient.query(RepositoryListQuery())
+              .fetchPolicy(FetchPolicy.CacheOnly)
+              .execute()
+          assertEquals(REPOSITORY_LIST_DATA, response.data)
+
+          // Clean up
+          store.clearAll()
+        }
+  }
+
+  @Test
+  fun migrateDb() = runTest {
+    val mockServer = MockServer()
+    // Create a legacy store with some data
+    val legacyStore = LegacyApolloStore(LegacySqlNormalizedCacheFactory(name = "legacy.db")).also { it.clearAll() }
+    ApolloClient.Builder()
+        .serverUrl(mockServer.url())
+        .legacyStore(legacyStore)
+        .build()
+        .use { apolloClient ->
+          mockServer.enqueueString(REPOSITORY_LIST_RESPONSE)
+          apolloClient.query(RepositoryListQuery())
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .execute()
+        }
+
+    // Create a modern store and migrate the legacy data
+    val store = ApolloStore(SqlNormalizedCacheFactory(name = "modern.db")).also { it.clearAll() }
+    store.migrateFrom(legacyStore)
+
+    // Read the data back
+    ApolloClient.Builder()
+        .serverUrl(mockServer.url())
+        .store(store)
+        .build()
+        .use { apolloClient ->
+          val response = apolloClient.query(RepositoryListQuery())
+              .fetchPolicy(FetchPolicy.CacheOnly)
+              .execute()
+          assertEquals(REPOSITORY_LIST_DATA, response.data)
+        }
+  }
+}
+
+private fun ApolloStore.migrateFrom(legacyStore: LegacyApolloStore) {
+  accessCache { cache ->
+    cache.merge(
+        records = legacyStore.accessCache { it.allRecords() }.map { it.toRecord() },
+        cacheHeaders = CacheHeaders.NONE,
+        recordMerger = DefaultRecordMerger,
+    )
+  }
+}
+
+private fun LegacyNormalizedCache.allRecords(): List<LegacyRecord> {
+  return dump().values.fold(emptyList()) { acc, map -> acc + map.values }
+}
+
+private fun LegacyRecord.toRecord(): Record = Record(
+    key = key,
+    fields = fields.mapValues { (_, value) -> value.toRecordValue() },
+    mutationId = mutationId
+)
+
+private fun LegacyRecordValue.toRecordValue(): RecordValue = when (this) {
+  is Map<*, *> -> mapValues { (_, value) -> value.toRecordValue() }
+  is List<*> -> map { it.toRecordValue() }
+  is LegacyCacheKey -> CacheKey(key)
+  else -> this
+}
