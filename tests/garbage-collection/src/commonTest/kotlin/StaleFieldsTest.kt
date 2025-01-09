@@ -30,9 +30,18 @@ import kotlin.time.Duration.Companion.seconds
 
 class StaleFieldsTest {
   @Test
-  fun clientControlledRemoveFields() = runTest {
+  fun clientControlledRemoveFieldsMemory() = clientControlledRemoveFields(ApolloStore(MemoryCacheFactory()))
+
+  @Test
+  fun clientControlledRemoveFieldsSql() = clientControlledRemoveFields(ApolloStore(SqlNormalizedCacheFactory()))
+
+  @Test
+  fun clientControlledRemoveFieldsChained() =
+    clientControlledRemoveFields(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+
+  private fun clientControlledRemoveFields(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = apolloStore.also { it.clearAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
@@ -98,9 +107,18 @@ class StaleFieldsTest {
   }
 
   @Test
-  fun clientControlledRemoveRecords() = runTest {
+  fun clientControlledRemoveRecordsMemory() = clientControlledRemoveRecords(ApolloStore(MemoryCacheFactory()))
+
+  @Test
+  fun clientControlledRemoveRecordsSql() = clientControlledRemoveRecords(ApolloStore(SqlNormalizedCacheFactory()))
+
+  @Test
+  fun clientControlledRemoveRecordsChained() =
+    clientControlledRemoveRecords(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+
+  private fun clientControlledRemoveRecords(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = apolloStore.also { it.clearAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
@@ -167,9 +185,18 @@ class StaleFieldsTest {
   }
 
   @Test
-  fun serverControlledRemoveFields() = runTest {
+  fun serverControlledRemoveFieldsMemory() = serverControlledRemoveFields(ApolloStore(MemoryCacheFactory()))
+
+  @Test
+  fun serverControlledRemoveFieldsSql() = serverControlledRemoveFields(ApolloStore(SqlNormalizedCacheFactory()))
+
+  @Test
+  fun serverControlledRemoveFieldsChained() =
+    serverControlledRemoveFields(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+
+  private fun serverControlledRemoveFields(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = apolloStore.also { it.clearAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)

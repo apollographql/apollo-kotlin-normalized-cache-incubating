@@ -2,9 +2,9 @@ package com.apollographql.cache.normalized.sql
 
 import com.apollographql.apollo.exception.apolloExceptionHandler
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
-import com.apollographql.cache.normalized.api.ApolloCacheHeaders.EVICT_AFTER_READ
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
@@ -17,66 +17,29 @@ class SqlNormalizedCache internal constructor(
     private val recordDatabase: RecordDatabase,
 ) : NormalizedCache {
 
-  private fun <T> maybeTransaction(condition: Boolean, block: () -> T): T {
-    return if (condition) {
-      recordDatabase.transaction {
-        block()
-      }
-    } else {
-      block()
-    }
-  }
-
   override fun loadRecord(key: String, cacheHeaders: CacheHeaders): Record? {
-    if (cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
-      return null
-    }
-    val evictAfterRead = cacheHeaders.hasHeader(EVICT_AFTER_READ)
-    return maybeTransaction(evictAfterRead) {
-      try {
-        recordDatabase.select(key)
-      } catch (e: Exception) {
-        // Unable to read the record from the database, it is possibly corrupted - treat this as a cache miss
-        apolloExceptionHandler(Exception("Unable to read a record from the database", e))
-        null
-      }?.also {
-        if (evictAfterRead) {
-          recordDatabase.delete(key)
-        }
-      }
-    }
+    return loadRecords(keys = listOf(key), cacheHeaders = cacheHeaders).firstOrNull()
   }
 
   override fun loadRecords(keys: Collection<String>, cacheHeaders: CacheHeaders): Collection<Record> {
     if (cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
       return emptyList()
     }
-    val evictAfterRead = cacheHeaders.hasHeader(EVICT_AFTER_READ)
-    return maybeTransaction(evictAfterRead) {
-      try {
-        internalGetRecords(keys)
-      } catch (e: Exception) {
-        // Unable to read the records from the database, it is possibly corrupted - treat this as a cache miss
-        apolloExceptionHandler(Exception("Unable to read records from the database", e))
-        emptyList()
-      }.also {
-        if (evictAfterRead) {
-          it.forEach { record ->
-            recordDatabase.delete(record.key)
-          }
-        }
-      }
+    return try {
+      selectRecords(keys)
+    } catch (e: Exception) {
+      // Unable to read the records from the database, it is possibly corrupted - treat this as a cache miss
+      apolloExceptionHandler(Exception("Unable to read records from the database", e))
+      emptyList()
     }
   }
 
   override fun clearAll() {
-    recordDatabase.deleteAll()
+    recordDatabase.deleteAllRecords()
   }
 
   override fun remove(cacheKey: CacheKey, cascade: Boolean): Boolean {
-    return recordDatabase.transaction {
-      internalDeleteRecords(setOf(cacheKey.key), cascade) > 0
-    }
+    return remove(cacheKeys = listOf(cacheKey), cascade = cascade) > 0
   }
 
   override fun remove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
@@ -87,22 +50,13 @@ class SqlNormalizedCache internal constructor(
 
   override fun remove(pattern: String): Int {
     return recordDatabase.transaction {
-      recordDatabase.deleteMatching(pattern)
+      recordDatabase.deleteRecordsMatching(pattern)
       recordDatabase.changes().toInt()
     }
   }
 
   override fun merge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
-    if (cacheHeaders.hasHeader(ApolloCacheHeaders.DO_NOT_STORE) || cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
-      return emptySet()
-    }
-    return try {
-      internalUpdateRecord(record = record, cacheHeaders = cacheHeaders, recordMerger = recordMerger)
-    } catch (e: Exception) {
-      // Unable to merge the record in the database, it is possibly corrupted - treat this as a cache miss
-      apolloExceptionHandler(Exception("Unable to merge a record from the database", e))
-      emptySet()
-    }
+    return merge(records = listOf(record), cacheHeaders = cacheHeaders, recordMerger = recordMerger)
   }
 
   override fun merge(records: Collection<Record>, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
@@ -113,24 +67,24 @@ class SqlNormalizedCache internal constructor(
       internalUpdateRecords(records = records, cacheHeaders = cacheHeaders, recordMerger = recordMerger)
     } catch (e: Exception) {
       // Unable to merge the records in the database, it is possibly corrupted - treat this as a cache miss
-      apolloExceptionHandler(Exception("Unable to merge records from the database", e))
+      apolloExceptionHandler(Exception("Unable to merge records into the database", e))
       emptySet()
     }
   }
 
   override fun dump(): Map<KClass<*>, Map<String, Record>> {
-    return mapOf(this::class to recordDatabase.selectAll().associateBy { it.key })
+    return mapOf(this::class to recordDatabase.selectAllRecords().associateBy { it.key })
   }
 
   private fun getReferencedKeysRecursively(keys: Collection<String>, visited: MutableSet<String> = mutableSetOf()): Set<String> {
     if (keys.isEmpty()) return emptySet()
-    val referencedKeys = recordDatabase.select(keys - visited).flatMap { it.referencedFields() }.map { it.key }.toSet()
+    val referencedKeys = recordDatabase.selectRecords(keys - visited).flatMap { it.referencedFields() }.map { it.key }.toSet()
     visited += keys
     return referencedKeys + getReferencedKeysRecursively(referencedKeys, visited)
   }
 
   /**
-   * Assume an enclosing transaction
+   * Assumes an enclosing transaction
    */
   private fun internalDeleteRecords(keys: Collection<String>, cascade: Boolean): Int {
     val referencedKeys = if (cascade) {
@@ -139,59 +93,48 @@ class SqlNormalizedCache internal constructor(
       emptySet()
     }
     return (keys + referencedKeys).chunked(999).sumOf { chunkedKeys ->
-      recordDatabase.delete(chunkedKeys)
+      recordDatabase.deleteRecords(chunkedKeys)
       recordDatabase.changes().toInt()
     }
   }
 
   /**
-   * Update records, loading the previous ones
+   * Update records.
    *
-   * This is an optimization over [internalUpdateRecord]
+   * As an optimization, the [records] fields are directly upserted into the db when possible. This is possible when using
+   * the [DefaultRecordMerger], and [ApolloCacheHeaders.ERRORS_REPLACE_CACHED_VALUES] is set to true.
+   * Otherwise, the [records] must be merged programmatically using the given [recordMerger], requiring to load the existing records from
+   * the db first.
    */
   private fun internalUpdateRecords(records: Collection<Record>, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
-    var updatedRecordKeys: Set<String> = emptySet()
     val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
     val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
-    recordDatabase.transaction {
-      val oldRecords = internalGetRecords(
-          keys = records.map { it.key },
-      ).associateBy { it.key }
-
-      updatedRecordKeys = records.flatMap { record ->
-        val oldRecord = oldRecords[record.key]
-        if (oldRecord == null) {
-          recordDatabase.insert(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
-          record.fieldKeys()
-        } else {
-          val (mergedRecord, changedKeys) = recordMerger.merge(RecordMergerContext(existing = oldRecord, incoming = record, cacheHeaders = cacheHeaders))
-          if (mergedRecord.isNotEmpty()) {
-            recordDatabase.update(mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
-          }
-          changedKeys
+    val errorsReplaceCachedValues = cacheHeaders.headerValue(ApolloCacheHeaders.ERRORS_REPLACE_CACHED_VALUES) == "true"
+    return if (recordMerger is DefaultRecordMerger && errorsReplaceCachedValues) {
+      recordDatabase.transaction {
+        for (record in records) {
+          recordDatabase.insertOrUpdateRecord(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
         }
-      }.toSet()
-    }
-    return updatedRecordKeys
-  }
-
-  /**
-   * Update a single [Record], loading the previous one
-   */
-  private fun internalUpdateRecord(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
-    val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
-    val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
-    return recordDatabase.transaction {
-      val oldRecord = recordDatabase.select(record.key)
-      if (oldRecord == null) {
-        recordDatabase.insert(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
+      }
+      records.flatMap { record ->
         record.fieldKeys()
-      } else {
-        val (mergedRecord, changedKeys) = recordMerger.merge(RecordMergerContext(existing = oldRecord, incoming = record, cacheHeaders = cacheHeaders))
-        if (mergedRecord.isNotEmpty()) {
-          recordDatabase.update(mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
-        }
-        changedKeys
+      }.toSet()
+    } else {
+      recordDatabase.transaction {
+        val existingRecords = selectRecords(records.map { it.key }).associateBy { it.key }
+        records.flatMap { record ->
+          val existingRecord = existingRecords[record.key]
+          if (existingRecord == null) {
+            recordDatabase.insertOrUpdateRecord(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
+            record.fieldKeys()
+          } else {
+            val (mergedRecord, changedKeys) = recordMerger.merge(RecordMergerContext(existing = existingRecord, incoming = record.withDates(receivedDate = receivedDate, expirationDate = expirationDate), cacheHeaders = cacheHeaders))
+            if (mergedRecord.isNotEmpty()) {
+              recordDatabase.insertOrUpdateRecord(mergedRecord)
+            }
+            changedKeys
+          }
+        }.toSet()
       }
     }
   }
@@ -200,9 +143,9 @@ class SqlNormalizedCache internal constructor(
    * Loads a list of records, making sure to not query more than 999 at a time
    * to help with the SQLite limitations
    */
-  private fun internalGetRecords(keys: Collection<String>): List<Record> {
+  private fun selectRecords(keys: Collection<String>): List<Record> {
     return keys.chunked(999).flatMap { chunkedKeys ->
-      recordDatabase.select(chunkedKeys)
+      recordDatabase.selectRecords(chunkedKeys)
     }
   }
 }

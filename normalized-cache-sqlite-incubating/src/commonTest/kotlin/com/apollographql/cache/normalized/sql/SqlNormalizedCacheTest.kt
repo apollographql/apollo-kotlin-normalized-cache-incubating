@@ -13,8 +13,8 @@ import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
-import com.apollographql.cache.normalized.sql.internal.BlobRecordDatabase
-import com.apollographql.cache.normalized.sql.internal.blob.BlobQueries
+import com.apollographql.cache.normalized.sql.internal.RecordDatabase
+import com.apollographql.cache.normalized.sql.internal.fields.FieldsQueries
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -122,35 +122,6 @@ class SqlNormalizedCacheTest {
     assertNull(cache.loadRecord(STANDARD_KEY, CacheHeaders.NONE))
   }
 
-  // Tests for StandardCacheHeader compliance
-  @Test
-  fun testHeader_evictAfterRead() {
-    createRecord(STANDARD_KEY)
-    val record = cache.loadRecord(STANDARD_KEY, CacheHeaders.builder()
-        .addHeader(ApolloCacheHeaders.EVICT_AFTER_READ, "true").build()
-    )
-    assertNotNull(record)
-    val nullRecord = cache.loadRecord(STANDARD_KEY, CacheHeaders.builder()
-        .addHeader(ApolloCacheHeaders.EVICT_AFTER_READ, "true").build()
-    )
-    assertNull(nullRecord)
-  }
-
-  @Test
-  fun testHeader_evictAfterBatchRead() {
-    createRecord(STANDARD_KEY)
-    createRecord(QUERY_ROOT_KEY)
-    val selectionSet = setOf(STANDARD_KEY, QUERY_ROOT_KEY)
-    val records = cache.loadRecords(selectionSet, CacheHeaders.builder()
-        .addHeader(ApolloCacheHeaders.EVICT_AFTER_READ, "true").build()
-    )
-    assertEquals(records.size, 2)
-    val emptyRecords = cache.loadRecords(selectionSet, CacheHeaders.builder()
-        .addHeader(ApolloCacheHeaders.EVICT_AFTER_READ, "true").build()
-    )
-    assertTrue(emptyRecords.isEmpty())
-  }
-
   @Test
   fun testHeader_noCache() {
     cache.merge(
@@ -227,14 +198,14 @@ class SqlNormalizedCacheTest {
 
   @Test
   fun exceptionCallsExceptionHandler() {
-    val badCache = SqlNormalizedCache(BlobRecordDatabase(BlobQueries(BadDriver)))
+    val badCache = SqlNormalizedCache(RecordDatabase(FieldsQueries(BadDriver)))
     var throwable: Throwable? = null
     apolloExceptionHandler = {
       throwable = it
     }
 
     badCache.loadRecord(STANDARD_KEY, CacheHeaders.NONE)
-    assertEquals("Unable to read a record from the database", throwable!!.message)
+    assertEquals("Unable to read records from the database", throwable!!.message)
     assertEquals("bad cache", throwable!!.cause!!.message)
 
     throwable = null
@@ -249,7 +220,7 @@ class SqlNormalizedCacheTest {
         cacheHeaders = CacheHeaders.NONE,
         recordMerger = DefaultRecordMerger,
     )
-    assertEquals("Unable to merge a record from the database", throwable!!.message)
+    assertEquals("Unable to merge records into the database", throwable!!.message)
     assertEquals("bad cache", throwable!!.cause!!.message)
   }
 

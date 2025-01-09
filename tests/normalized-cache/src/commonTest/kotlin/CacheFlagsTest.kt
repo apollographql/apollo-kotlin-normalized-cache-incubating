@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import normalizer.HeroNameQuery
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
@@ -46,29 +45,6 @@ class CacheFlagsTest {
     apolloClient.query(query).doNotStore(true).execute()
 
     // Since the previous request was not stored, this should fail
-    assertIs<CacheMissException>(
-        apolloClient.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute().exception
-    )
-  }
-
-  @Test
-  fun testEvictAfterRead() = runTest(before = { setUp() }) {
-    val query = HeroNameQuery()
-    val data = HeroNameQuery.Data(HeroNameQuery.Hero("R2-D2"))
-    apolloClient.enqueueTestResponse(query, data)
-
-    // Store the data
-    apolloClient.query(query).fetchPolicy(FetchPolicy.NetworkOnly).execute()
-
-    // This should work and evict the entries
-    val response = apolloClient.query(query)
-        .fetchPolicy(FetchPolicy.CacheOnly)
-        .cacheHeaders(CacheHeaders.builder().addHeader(ApolloCacheHeaders.EVICT_AFTER_READ, "true").build())
-        .execute()
-
-    assertEquals("R2-D2", response.data?.hero?.name)
-
-    // Second time should fail
     assertIs<CacheMissException>(
         apolloClient.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute().exception
     )

@@ -1,74 +1,32 @@
 package com.apollographql.cache.normalized.sql.internal
 
+import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Error.Builder
 import com.apollographql.apollo.api.json.JsonNumber
 import com.apollographql.cache.normalized.api.CacheKey
-import com.apollographql.cache.normalized.api.Record
 import okio.Buffer
 import okio.utf8Size
 
 /**
- * A serializer that serializes/deserializes a [Record] to a [ByteArray]
- *
- * It's a very basic implementation that encodes a record like below
- *
- * number of entries - Int
- * ------
- * name of the entry0 - String
- * timestamp of entry0 - Long?
- * value of entry0 - Any?
- * ------
- * name of the entry1 - String
- * timestamp of entry1 - Long?
- * value of entry1 - Any?
- * ------
- * etc...
- *
- * For each value, the type of the value is encoded using a single identifier byte so that deserialization can deserialize
- * to the expected type
- *
- * This should be revisited/optimized
+ * A serializer that serializes/deserializes [ApolloJsonElement]s to/from [ByteArray]s.
  */
-internal object BlobRecordSerializer {
-  fun serialize(record: Record): ByteArray {
+internal object ApolloJsonElementSerializer {
+  fun serialize(jsonElement: ApolloJsonElement): ByteArray {
     val buffer = Buffer()
-
-    buffer.writeAny(record.metadata)
-    val keys = record.fields.keys
-    buffer.writeInt(keys.size)
-    for (key in keys) {
-      buffer.writeString(key)
-      buffer.writeAny(record.fields[key])
-    }
-
+    buffer.writeAny(jsonElement)
     return buffer.readByteArray()
   }
 
-  /**
-   * returns the [Record] for the given Json
-   *
-   * @throws Exception if the [Record] cannot be deserialized
-   */
-  @Suppress("UNCHECKED_CAST")
-  fun deserialize(key: String, bytes: ByteArray): Record {
+  fun deserialize(bytes: ByteArray?): ApolloJsonElement {
+    if (bytes == null) return null
     val buffer = Buffer().write(bytes)
-
-    val metadata = buffer.readAny() as Map<String, Map<String, Any?>>
-
-    val fields = mutableMapOf<String, Any?>()
-    val size = buffer.readInt()
-
-    for (i in 0.until(size)) {
-      val name = buffer.readString()
-      fields[name] = buffer.readAny()
-    }
-
-    return Record(key, fields, null, metadata)
+    return buffer.readAny()
   }
 
   private fun Buffer.writeString(value: String) {
-    writeInt(value.utf8Size().toInt())
+    // TODO: special case for empty string, saves 4 bytes
+    writeInt(value.utf8Size().toInt()) // TODO: sizes should be unsigned
     writeUtf8(value)
   }
 
@@ -76,7 +34,7 @@ internal object BlobRecordSerializer {
     return readUtf8(readInt().toLong())
   }
 
-  private fun Buffer.writeAny(value: Any?) {
+  private fun Buffer.writeAny(value: ApolloJsonElement) {
     when (value) {
       is String -> {
         buffer.writeByte(STRING)
@@ -104,7 +62,7 @@ internal object BlobRecordSerializer {
       }
 
       is Boolean -> {
-        buffer.writeByte(BOOLEAN)
+        buffer.writeByte(BOOLEAN) // TODO: 1 byte for BOOLEAN_TRUE, 1 byte for BOOLEAN_FALSE
         buffer.writeByte(if (value) 1 else 0)
       }
 
@@ -114,16 +72,16 @@ internal object BlobRecordSerializer {
       }
 
       is List<*> -> {
-        buffer.writeByte(LIST)
-        buffer.writeInt(value.size)
+        buffer.writeByte(LIST) // TODO: special case for empty list, saves 4 bytes
+        buffer.writeInt(value.size) // TODO: sizes should be unsigned
         value.forEach {
           buffer.writeAny(it)
         }
       }
 
       is Map<*, *> -> {
-        buffer.writeByte(MAP)
-        buffer.writeInt(value.size)
+        buffer.writeByte(MAP) // TODO: special case for empty map, saves 4 bytes
+        buffer.writeInt(value.size) // TODO: sizes should be unsigned
         @Suppress("UNCHECKED_CAST")
         value as Map<String, Any?>
         value.forEach {
@@ -155,7 +113,7 @@ internal object BlobRecordSerializer {
     }
   }
 
-  private fun Buffer.readAny(): Any? {
+  private fun Buffer.readAny(): ApolloJsonElement {
     return when (val what = readByte().toInt()) {
       STRING -> readString()
       INT -> readInt()
@@ -213,7 +171,7 @@ internal object BlobRecordSerializer {
 
   private const val STRING = 0
   private const val INT = 1
-  private const val LONG = 2
+  private const val LONG = 2 // TODO replace INT and LONG by BYTE, UBYTE, SHORT, USHORT, UINT for smaller values
   private const val BOOLEAN = 3
   private const val DOUBLE = 4
   private const val JSON_NUMBER = 5
