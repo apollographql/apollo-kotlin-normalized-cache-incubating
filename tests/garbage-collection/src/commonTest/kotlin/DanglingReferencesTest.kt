@@ -13,6 +13,7 @@ import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.store
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
+import kotlinx.coroutines.test.TestResult
 import okio.use
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,9 +22,19 @@ import kotlin.test.assertTrue
 
 class DanglingReferencesTest {
   @Test
-  fun simple() = runTest {
+  fun simpleMemory() = simple(ApolloStore(MemoryCacheFactory()))
+
+  @Test
+  fun simpleSql() = simple(ApolloStore(SqlNormalizedCacheFactory()))
+
+  @Test
+  fun simpleChained(): TestResult {
+    return simple(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+  }
+
+  private fun simple(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = apolloStore.also { it.clearAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
@@ -54,9 +65,17 @@ class DanglingReferencesTest {
   }
 
   @Test
-  fun multiple() = runTest {
+  fun multipleMemory() = multiple(ApolloStore(MemoryCacheFactory()))
+
+  @Test
+  fun multipleSql() = multiple(ApolloStore(SqlNormalizedCacheFactory()))
+
+  @Test
+  fun multipleChained() = multiple(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+
+  private fun multiple(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = apolloStore.also { it.clearAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)

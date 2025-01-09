@@ -1,0 +1,41 @@
+CREATE TABLE field (
+  key TEXT NOT NULL,
+  field TEXT NOT NULL,
+  value BLOB,
+  metadata BLOB,
+  received_date INTEGER,
+  expiration_date INTEGER,
+  PRIMARY KEY (key, field) ON CONFLICT REPLACE
+)
+WITHOUT ROWID;
+
+selectRecords:
+SELECT key, field, value, metadata, received_date, expiration_date FROM field WHERE key IN ?;
+
+selectAllRecords:
+SELECT key, field, value, metadata, received_date, expiration_date FROM field;
+
+insertOrUpdateField:
+INSERT INTO field (key, field, value, metadata, received_date, expiration_date) VALUES (?, ?, ?, ?, ?, ?);
+
+deleteRecords:
+DELETE FROM field WHERE key IN ?;
+
+deleteRecordsMatching:
+DELETE FROM field WHERE key LIKE ? ESCAPE '\';
+
+deleteAllRecords:
+DELETE FROM field;
+
+trimByReceivedDate:
+DELETE FROM field
+WHERE (key, field) IN (
+  SELECT key, field
+  FROM field
+  WHERE received_date IS NOT NULL
+  ORDER BY received_date ASC
+  LIMIT ?
+);
+
+changes:
+SELECT changes();

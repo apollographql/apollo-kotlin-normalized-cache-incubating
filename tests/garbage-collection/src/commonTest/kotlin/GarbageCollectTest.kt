@@ -23,9 +23,17 @@ import kotlin.time.Duration.Companion.seconds
 
 class GarbageCollectTest {
   @Test
-  fun garbageCollect() = runTest {
+  fun garbageCollectMemory() = garbageCollect(ApolloStore(MemoryCacheFactory()))
+
+  @Test
+  fun garbageCollectSql() = garbageCollect(ApolloStore(SqlNormalizedCacheFactory()))
+
+  @Test
+  fun garbageCollectChained() = garbageCollect(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+
+  private fun garbageCollect(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = apolloStore.also { it.clearAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)

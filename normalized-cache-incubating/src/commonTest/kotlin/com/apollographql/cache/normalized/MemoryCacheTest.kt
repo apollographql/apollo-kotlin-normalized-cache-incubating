@@ -4,9 +4,9 @@ import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
-import com.apollographql.cache.normalized.memory.MemoryCache
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
+import com.apollographql.cache.normalized.memory.MemoryCache
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -183,21 +183,6 @@ class MemoryCacheTest {
     primaryCache.clearCurrentCache()
 
     assertEquals(testRecord.fields, primaryCache.loadRecord(testRecord.key, CacheHeaders.NONE)?.fields)
-  }
-
-
-  // Tests for StandardCacheHeader compliance.
-  @Test
-  fun testHeader_evictAfterRead() {
-    val lruCache = createCache()
-    val testRecord = createTestRecord("1")
-
-    lruCache.merge(testRecord, CacheHeaders.NONE, DefaultRecordMerger)
-
-    val headers = CacheHeaders.builder().addHeader(ApolloCacheHeaders.EVICT_AFTER_READ, "true").build()
-
-    assertNotNull(lruCache.loadRecord(testRecord.key, headers))
-    assertNull(lruCache.loadRecord(testRecord.key, headers))
   }
 
   @Test

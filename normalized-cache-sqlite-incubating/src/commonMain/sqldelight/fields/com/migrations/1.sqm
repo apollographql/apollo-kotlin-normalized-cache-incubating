@@ -1,0 +1,13 @@
+-- Version 1 is either the fields schema (do nothing) or the legacy json schema (drop and create)
+DROP TABLE IF EXISTS records;
+
+CREATE TABLE IF NOT EXISTS field (
+  key TEXT NOT NULL,
+  field TEXT NOT NULL,
+  value BLOB,
+  metadata BLOB,
+  received_date INTEGER,
+  expiration_date INTEGER,
+  PRIMARY KEY (key, field) ON CONFLICT REPLACE
+)
+WITHOUT ROWID;
