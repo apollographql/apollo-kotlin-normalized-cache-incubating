@@ -8,6 +8,7 @@ public final class com/apollographql/cache/normalized/sql/SqlNormalizedCache : c
 	public fun remove (Lcom/apollographql/cache/normalized/api/CacheKey;Z)Z
 	public fun remove (Ljava/lang/String;)I
 	public fun remove (Ljava/util/Collection;Z)I
+	public fun trim (JF)J
 }
 
 public final class com/apollographql/cache/normalized/sql/SqlNormalizedCacheFactory_jvmKt {
@@ -17,10 +18,6 @@ public final class com/apollographql/cache/normalized/sql/SqlNormalizedCacheFact
 	public static final fun SqlNormalizedCacheFactory (Ljava/lang/String;Ljava/util/Properties;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
 	public static synthetic fun SqlNormalizedCacheFactory$default (Ljava/lang/String;ILjava/lang/Object;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
 	public static synthetic fun SqlNormalizedCacheFactory$default (Ljava/lang/String;Ljava/util/Properties;ILjava/lang/Object;)Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;
-}
-
-public final class com/apollographql/cache/normalized/sql/TrimmableNormalizedCacheFactory : com/apollographql/cache/normalized/api/NormalizedCacheFactory {
-	public fun create ()Lcom/apollographql/cache/normalized/api/NormalizedCache;
 }
 
 public final class com/apollographql/cache/normalized/sql/VersionKt {
@@ -61,6 +58,7 @@ public final class com/apollographql/cache/normalized/sql/internal/fields/Fields
 public final class com/apollographql/cache/normalized/sql/internal/fields/FieldsQueries : app/cash/sqldelight/TransacterImpl {
 	public fun <init> (Lapp/cash/sqldelight/db/SqlDriver;)V
 	public final fun changes ()Lapp/cash/sqldelight/ExecutableQuery;
+	public final fun count ()Lapp/cash/sqldelight/Query;
 	public final fun deleteAllRecords ()V
 	public final fun deleteRecords (Ljava/util/Collection;)V
 	public final fun deleteRecordsMatching (Ljava/lang/String;)V

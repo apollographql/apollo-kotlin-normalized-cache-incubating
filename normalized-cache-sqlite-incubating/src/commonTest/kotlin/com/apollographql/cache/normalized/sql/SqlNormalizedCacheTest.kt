@@ -14,7 +14,6 @@ import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.sql.internal.RecordDatabase
-import com.apollographql.cache.normalized.sql.internal.fields.FieldsQueries
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -198,7 +197,7 @@ class SqlNormalizedCacheTest {
 
   @Test
   fun exceptionCallsExceptionHandler() {
-    val badCache = SqlNormalizedCache(RecordDatabase(FieldsQueries(BadDriver)))
+    val badCache = SqlNormalizedCache(RecordDatabase(BadDriver))
     var throwable: Throwable? = null
     apolloExceptionHandler = {
       throwable = it

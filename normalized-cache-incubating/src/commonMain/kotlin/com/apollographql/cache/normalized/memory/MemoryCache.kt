@@ -163,6 +163,14 @@ class MemoryCache(
   internal fun clearCurrentCache() {
     lruCache.clear()
   }
+
+  override fun trim(maxSizeBytes: Long, trimFactor: Float): Long {
+    return if (nextCache == null) {
+      -1
+    } else {
+      lockWrite { nextCache.trim(maxSizeBytes, trimFactor) }
+    }
+  }
 }
 
 class MemoryCacheFactory @JvmOverloads constructor(

@@ -60,6 +60,7 @@ abstract interface com.apollographql.cache.normalized.api/NormalizedCache : com.
     abstract fun remove(com.apollographql.cache.normalized.api/CacheKey, kotlin/Boolean): kotlin/Boolean // com.apollographql.cache.normalized.api/NormalizedCache.remove|remove(com.apollographql.cache.normalized.api.CacheKey;kotlin.Boolean){}[0]
     abstract fun remove(kotlin.collections/Collection<com.apollographql.cache.normalized.api/CacheKey>, kotlin/Boolean): kotlin/Int // com.apollographql.cache.normalized.api/NormalizedCache.remove|remove(kotlin.collections.Collection<com.apollographql.cache.normalized.api.CacheKey>;kotlin.Boolean){}[0]
     abstract fun remove(kotlin/String): kotlin/Int // com.apollographql.cache.normalized.api/NormalizedCache.remove|remove(kotlin.String){}[0]
+    open fun trim(kotlin/Long, kotlin/Float = ...): kotlin/Long // com.apollographql.cache.normalized.api/NormalizedCache.trim|trim(kotlin.Long;kotlin.Float){}[0]
 
     final object Companion { // com.apollographql.cache.normalized.api/NormalizedCache.Companion|null[0]
         final fun prettifyDump(kotlin.collections/Map<kotlin.reflect/KClass<*>, kotlin.collections/Map<kotlin/String, com.apollographql.cache.normalized.api/Record>>): kotlin/String // com.apollographql.cache.normalized.api/NormalizedCache.Companion.prettifyDump|prettifyDump(kotlin.collections.Map<kotlin.reflect.KClass<*>,kotlin.collections.Map<kotlin.String,com.apollographql.cache.normalized.api.Record>>){}[0]
@@ -403,6 +404,7 @@ final class com.apollographql.cache.normalized.memory/MemoryCache : com.apollogr
     final fun remove(com.apollographql.cache.normalized.api/CacheKey, kotlin/Boolean): kotlin/Boolean // com.apollographql.cache.normalized.memory/MemoryCache.remove|remove(com.apollographql.cache.normalized.api.CacheKey;kotlin.Boolean){}[0]
     final fun remove(kotlin.collections/Collection<com.apollographql.cache.normalized.api/CacheKey>, kotlin/Boolean): kotlin/Int // com.apollographql.cache.normalized.memory/MemoryCache.remove|remove(kotlin.collections.Collection<com.apollographql.cache.normalized.api.CacheKey>;kotlin.Boolean){}[0]
     final fun remove(kotlin/String): kotlin/Int // com.apollographql.cache.normalized.memory/MemoryCache.remove|remove(kotlin.String){}[0]
+    final fun trim(kotlin/Long, kotlin/Float): kotlin/Long // com.apollographql.cache.normalized.memory/MemoryCache.trim|trim(kotlin.Long;kotlin.Float){}[0]
 }
 
 final class com.apollographql.cache.normalized.memory/MemoryCacheFactory : com.apollographql.cache.normalized.api/NormalizedCacheFactory { // com.apollographql.cache.normalized.memory/MemoryCacheFactory|null[0]

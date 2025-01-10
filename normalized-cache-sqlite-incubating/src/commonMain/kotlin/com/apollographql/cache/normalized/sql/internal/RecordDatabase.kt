@@ -1,14 +1,20 @@
 package com.apollographql.cache.normalized.sql.internal
 
+import app.cash.sqldelight.Query
+import app.cash.sqldelight.db.QueryResult
+import app.cash.sqldelight.db.SqlDriver
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.expirationDate
 import com.apollographql.cache.normalized.api.receivedDate
 import com.apollographql.cache.normalized.sql.internal.fields.Field_
+import com.apollographql.cache.normalized.sql.internal.fields.FieldsDatabase
 import com.apollographql.cache.normalized.sql.internal.fields.FieldsQueries
 
-internal class RecordDatabase(private val fieldsQueries: FieldsQueries) {
+internal class RecordDatabase(private val driver: SqlDriver) {
+  private val fieldsQueries: FieldsQueries = FieldsDatabase(driver).fieldsQueries
+
   fun <T> transaction(body: () -> T): T {
     return fieldsQueries.transactionWithResult {
       body()
@@ -107,8 +113,23 @@ internal class RecordDatabase(private val fieldsQueries: FieldsQueries) {
     fieldsQueries.deleteAllRecords()
   }
 
-  fun trimByReceivedDate(limit: Int) {
-    fieldsQueries.trimByReceivedDate(limit.toLong())
+  fun databaseSize(): Long {
+    return driver.executeQuery(null, "SELECT page_count * page_size FROM pragma_page_count(), pragma_page_size();", {
+      it.next()
+      QueryResult.Value(it.getLong(0)!!)
+    }, 0).value
+  }
+
+  fun count(): Query<Long> {
+    return fieldsQueries.count()
+  }
+
+  fun trimByReceivedDate(limit: Long) {
+    fieldsQueries.trimByReceivedDate(limit)
+  }
+
+  fun vacuum() {
+    driver.execute(null, "VACUUM", 0)
   }
 
   fun changes(): Long {

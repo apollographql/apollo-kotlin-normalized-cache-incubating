@@ -148,4 +148,16 @@ class SqlNormalizedCache internal constructor(
       recordDatabase.selectRecords(chunkedKeys)
     }
   }
+
+  override fun trim(maxSizeBytes: Long, trimFactor: Float): Long {
+    val size = recordDatabase.databaseSize()
+    return if (size >= maxSizeBytes) {
+      val count = recordDatabase.count().executeAsOne()
+      recordDatabase.trimByReceivedDate((count * trimFactor).toLong())
+      recordDatabase.vacuum()
+      recordDatabase.databaseSize()
+    } else {
+      size
+    }
+  }
 }

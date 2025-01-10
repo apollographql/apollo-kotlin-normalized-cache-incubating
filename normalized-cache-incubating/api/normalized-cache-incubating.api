@@ -449,10 +449,16 @@ public abstract interface class com/apollographql/cache/normalized/api/Normalize
 	public abstract fun remove (Lcom/apollographql/cache/normalized/api/CacheKey;Z)Z
 	public abstract fun remove (Ljava/lang/String;)I
 	public abstract fun remove (Ljava/util/Collection;Z)I
+	public abstract fun trim (JF)J
 }
 
 public final class com/apollographql/cache/normalized/api/NormalizedCache$Companion {
 	public final fun prettifyDump (Ljava/util/Map;)Ljava/lang/String;
+}
+
+public final class com/apollographql/cache/normalized/api/NormalizedCache$DefaultImpls {
+	public static fun trim (Lcom/apollographql/cache/normalized/api/NormalizedCache;JF)J
+	public static synthetic fun trim$default (Lcom/apollographql/cache/normalized/api/NormalizedCache;JFILjava/lang/Object;)J
 }
 
 public abstract class com/apollographql/cache/normalized/api/NormalizedCacheFactory {
@@ -583,6 +589,7 @@ public final class com/apollographql/cache/normalized/memory/MemoryCache : com/a
 	public fun remove (Lcom/apollographql/cache/normalized/api/CacheKey;Z)Z
 	public fun remove (Ljava/lang/String;)I
 	public fun remove (Ljava/util/Collection;Z)I
+	public fun trim (JF)J
 }
 
 public final class com/apollographql/cache/normalized/memory/MemoryCacheFactory : com/apollographql/cache/normalized/api/NormalizedCacheFactory {
