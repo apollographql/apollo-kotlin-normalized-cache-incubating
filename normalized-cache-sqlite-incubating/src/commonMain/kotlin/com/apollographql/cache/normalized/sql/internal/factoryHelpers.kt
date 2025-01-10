@@ -35,7 +35,7 @@ internal fun createRecordDatabase(driver: SqlDriver): RecordDatabase {
     "Apollo: Cannot find the '$expectedTableName' table (found '$tableNames' instead)"
   }
 
-  return RecordDatabase(FieldsDatabase(driver).fieldsQueries)
+  return RecordDatabase(driver)
 }
 
 internal fun getSchema(): SqlSchema<QueryResult.Value<Unit>> = FieldsDatabase.Schema

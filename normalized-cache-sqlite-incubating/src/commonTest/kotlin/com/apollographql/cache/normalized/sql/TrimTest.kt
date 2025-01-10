@@ -4,21 +4,14 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.withDates
-import org.junit.Test
-import java.io.File
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class TrimTest {
   @Test
   fun trimTest() {
-    val dbName = "build/test.db"
-    val dbUrl = "jdbc:sqlite:$dbName"
-    val dbFile = File(dbName)
-
-    dbFile.delete()
-
-    val cache = TrimmableNormalizedCacheFactory(dbUrl).create()
+    val cache = SqlNormalizedCacheFactory().create().also { it.clearAll() }
 
     val largeString = "".padStart(1024, '?')
 
@@ -40,13 +33,14 @@ class TrimTest {
     }
     cache.merge(newRecords, CacheHeaders.NONE, recordMerger = DefaultRecordMerger)
 
-    assertEquals(9596928, dbFile.length())
+    val sizeBeforeTrim = cache.trim(-1)
+    assertEquals(8515584, sizeBeforeTrim)
 
     // Trim the cache by 10%
-    val trimmedCache = TrimmableNormalizedCacheFactory(dbUrl, 9596928, 0.1f).create()
+    val sizeAfterTrim = cache.trim(8515584, 0.1f)
 
-    assertEquals(8548352, dbFile.length())
+    assertEquals(7667712, sizeAfterTrim)
     // The oldest key must have been removed
-    assertNull(trimmedCache.loadRecord("old", CacheHeaders.NONE))
+    assertNull(cache.loadRecord("old", CacheHeaders.NONE))
   }
 }

@@ -27,6 +27,9 @@ DELETE FROM field WHERE key LIKE ? ESCAPE '\';
 deleteAllRecords:
 DELETE FROM field;
 
+count:
+SELECT count(*) FROM field;
+
 trimByReceivedDate:
 DELETE FROM field
 WHERE (key, field) IN (
