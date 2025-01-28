@@ -6,5 +6,6 @@ listOf(pluginManagement.repositories, dependencyResolutionManagement.repositorie
     mavenCentral()
     google()
     gradlePluginPortal()
+    maven("https://storage.googleapis.com/gradleup/m2")
   }
 }

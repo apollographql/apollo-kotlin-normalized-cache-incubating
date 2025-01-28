@@ -1,10 +1,10 @@
-import com.gradleup.librarian.gradle.librarianModule
+import com.gradleup.librarian.gradle.Librarian
 
 plugins {
-  alias(libs.plugins.kotlin.jvm)
+  id("org.jetbrains.kotlin.jvm")
 }
 
-librarianModule(true)
+Librarian.module(project)
 
 dependencies {
   implementation(libs.apollo.compiler)

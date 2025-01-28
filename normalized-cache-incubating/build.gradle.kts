@@ -1,11 +1,11 @@
-import com.gradleup.librarian.gradle.librarianModule
+import com.gradleup.librarian.gradle.Librarian
 
 plugins {
-  alias(libs.plugins.kotlin.multiplatform)
-  alias(libs.plugins.atomicfu)
+  id("org.jetbrains.kotlin.multiplatform")
+  id("org.jetbrains.kotlin.plugin.atomicfu")
 }
 
-librarianModule(true)
+Librarian.module(project)
 
 kotlin {
   configureKmp(
