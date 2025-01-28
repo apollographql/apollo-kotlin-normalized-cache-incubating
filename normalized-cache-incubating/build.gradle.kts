@@ -22,6 +22,7 @@ kotlin {
         implementation(libs.okio)
         api(libs.uuid)
         implementation(libs.atomicfu.library)
+        implementation(libs.apollo.execution)
       }
     }
 

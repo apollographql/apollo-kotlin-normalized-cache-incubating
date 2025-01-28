@@ -273,6 +273,16 @@ fun <T> MutableExecutionOptions<T>.storeReceiveDate(storeReceiveDate: Boolean) =
 )
 
 /**
+ * @param retrievePartialResponses Whether to return partial data from the cache (`true`), or no data with a [CacheMissException] whenever a field
+ * is missing (`false`).
+ *
+ * Default: false
+ */
+fun <T> MutableExecutionOptions<T>.retrievePartialResponses(retrievePartialResponses: Boolean) = addExecutionContext(
+    RetrievePartialResponsesContext(retrievePartialResponses)
+)
+
+/**
  * @param storeExpirationDate Whether to store the expiration date in the cache.
  *
  * The expiration date is computed from the response HTTP headers
@@ -405,19 +415,43 @@ internal val ExecutionOptions.cacheHeaders: CacheHeaders
 internal val <D : Operation.Data> ApolloRequest<D>.watchContext: WatchContext?
   get() = executionContext[WatchContext]
 
-/**
- * @param isCacheHit true if this was a cache hit
- * @param cacheMissException the exception while reading the cache. Note that it's possible to have [isCacheHit] == false && [cacheMissException] == null
- * if no cache read was attempted
- */
+internal val <D : Operation.Data> ApolloRequest<D>.retrievePartialResponses
+  get() = executionContext[RetrievePartialResponsesContext]?.value ?: false
+
+
 class CacheInfo private constructor(
     val cacheStartMillis: Long,
     val cacheEndMillis: Long,
     val networkStartMillis: Long,
     val networkEndMillis: Long,
+
+    /**
+     * True if the response is from the cache, false if it's from the network.
+     */
+    val isFromCache: Boolean,
+
+    /**
+     * True if all the fields are found in the cache, false for full or partial cache misses.
+     */
     val isCacheHit: Boolean,
+
+    /**
+     * The exception that occurred while reading the cache.
+     * Always `null` if [isFromCache] is false, or when partial responses are enabled.
+     * @see MutableExecutionOptions.retrievePartialResponses
+     */
     val cacheMissException: CacheMissException?,
+
+    /**
+     * The exception that occurred while reading the network.
+     * Always `null` if [isFromCache] is true.
+     */
     val networkException: ApolloException?,
+
+    /**
+     * True if at least one field in the response is stale.
+     * Always `false` if [isFromCache] is false.
+     */
     val isStale: Boolean,
 ) : ExecutionContext.Element {
   override val key: ExecutionContext.Key<*>
@@ -430,6 +464,7 @@ class CacheInfo private constructor(
         .cacheEndMillis(cacheEndMillis)
         .networkStartMillis(networkStartMillis)
         .networkEndMillis(networkEndMillis)
+        .fromCache(isFromCache)
         .cacheHit(isCacheHit)
         .cacheMissException(cacheMissException)
         .networkException(networkException)
@@ -441,6 +476,7 @@ class CacheInfo private constructor(
     private var cacheEndMillis: Long = 0
     private var networkStartMillis: Long = 0
     private var networkEndMillis: Long = 0
+    private var fromCache: Boolean = false
     private var cacheHit: Boolean = false
     private var cacheMissException: CacheMissException? = null
     private var networkException: ApolloException? = null
@@ -460,6 +496,10 @@ class CacheInfo private constructor(
 
     fun networkEndMillis(networkEndMillis: Long) = apply {
       this.networkEndMillis = networkEndMillis
+    }
+
+    fun fromCache(fromCache: Boolean) = apply {
+      this.fromCache = fromCache
     }
 
     fun cacheHit(cacheHit: Boolean) = apply {
@@ -483,6 +523,7 @@ class CacheInfo private constructor(
         cacheEndMillis = cacheEndMillis,
         networkStartMillis = networkStartMillis,
         networkEndMillis = networkEndMillis,
+        isFromCache = fromCache,
         isCacheHit = cacheHit,
         cacheMissException = cacheMissException,
         networkException = networkException,
@@ -499,7 +540,7 @@ class CacheInfo private constructor(
  */
 val <D : Operation.Data> ApolloResponse<D>.isFromCache: Boolean
   get() {
-    return cacheInfo?.isCacheHit == true || exception is CacheMissException
+    return cacheInfo?.isFromCache == true
   }
 
 val <D : Operation.Data> ApolloResponse<D>.cacheInfo
@@ -559,7 +600,6 @@ internal class StoreExpirationDateContext(val value: Boolean) : ExecutionContext
   companion object Key : ExecutionContext.Key<StoreExpirationDateContext>
 }
 
-
 internal class WriteToCacheAsynchronouslyContext(val value: Boolean) : ExecutionContext.Element {
   override val key: ExecutionContext.Key<*>
     get() = Key
@@ -595,6 +635,13 @@ internal class FetchFromCacheContext(val value: Boolean) : ExecutionContext.Elem
     get() = Key
 
   companion object Key : ExecutionContext.Key<FetchFromCacheContext>
+}
+
+internal class RetrievePartialResponsesContext(val value: Boolean) : ExecutionContext.Element {
+  override val key: ExecutionContext.Key<*>
+    get() = Key
+
+  companion object Key : ExecutionContext.Key<RetrievePartialResponsesContext>
 }
 
 internal fun <D : Operation.Data> ApolloRequest.Builder<D>.fetchFromCache(fetchFromCache: Boolean) = apply {

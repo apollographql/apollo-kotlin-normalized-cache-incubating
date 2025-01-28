@@ -26,6 +26,7 @@ import com.apollographql.cache.normalized.doNotStore
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.memoryCacheOnly
 import com.apollographql.cache.normalized.optimisticData
+import com.apollographql.cache.normalized.retrievePartialResponses
 import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.cache.normalized.storeReceiveDate
 import com.apollographql.cache.normalized.writeToCacheAsynchronously
@@ -201,18 +202,53 @@ internal class ApolloCacheInterceptor(
     }
   }
 
-  private fun <D : Query.Data> readFromCache(
+  private suspend fun <D : Query.Data> readFromCache(
       request: ApolloRequest<D>,
       customScalarAdapters: CustomScalarAdapters,
   ): ApolloResponse<D> {
+    var cacheHeaders = request.cacheHeaders
+    if (request.memoryCacheOnly) {
+      cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
+    }
+    return if (request.retrievePartialResponses) {
+      readFromCachePartial(request, customScalarAdapters, cacheHeaders)
+    } else {
+      readFromCacheThrowCacheMiss(request, customScalarAdapters, cacheHeaders)
+    }
+  }
+
+  private suspend fun <D : Query.Data> readFromCachePartial(
+      request: ApolloRequest<D>,
+      customScalarAdapters: CustomScalarAdapters,
+      cacheHeaders: CacheHeaders,
+  ): ApolloResponse<D> {
+    val startMillis = currentTimeMillis()
+    val response = store.readOperationPartial(
+        operation = request.operation,
+        schema = cacheHeaders.headerValue("schema")!!, // TODO
+        customScalarAdapters = customScalarAdapters,
+        cacheHeaders = cacheHeaders,
+    )
+    return response.newBuilder()
+        .requestUuid(request.requestUuid)
+        .cacheInfo(
+            response.cacheInfo!!.newBuilder()
+                .cacheStartMillis(startMillis)
+                .cacheEndMillis(currentTimeMillis())
+                .build()
+        )
+        .isLast(true)
+        .build()
+  }
+
+  private fun <D : Query.Data> readFromCacheThrowCacheMiss(
+      request: ApolloRequest<D>,
+      customScalarAdapters: CustomScalarAdapters,
+      cacheHeaders: CacheHeaders,
+  ): ApolloResponse<D> {
     val operation = request.operation
     val startMillis = currentTimeMillis()
-
     val readResult = try {
-      var cacheHeaders = request.cacheHeaders
-      if (request.memoryCacheOnly) {
-        cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
-      }
       store.readOperation(
           operation = operation,
           customScalarAdapters = customScalarAdapters,
@@ -229,6 +265,7 @@ internal class ApolloCacheInterceptor(
               CacheInfo.Builder()
                   .cacheStartMillis(startMillis)
                   .cacheEndMillis(currentTimeMillis())
+                  .fromCache(true)
                   .cacheHit(false)
                   .cacheMissException(e)
                   .stale(e.stale)
@@ -249,6 +286,7 @@ internal class ApolloCacheInterceptor(
             CacheInfo.Builder()
                 .cacheStartMillis(startMillis)
                 .cacheEndMillis(currentTimeMillis())
+                .fromCache(true)
                 .cacheHit(true)
                 .stale(readResult.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
                 .build()

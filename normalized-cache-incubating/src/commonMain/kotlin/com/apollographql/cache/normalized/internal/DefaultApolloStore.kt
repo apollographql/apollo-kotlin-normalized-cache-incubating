@@ -1,11 +1,20 @@
 package com.apollographql.cache.normalized.internal
 
+import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.Error
+import com.apollographql.apollo.api.ExecutionContext
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.variables
+import com.apollographql.apollo.execution.ExecutableSchema
+import com.apollographql.apollo.execution.GraphQLRequest
+import com.apollographql.apollo.execution.GraphQLResponse
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.ApolloStore.ReadResult
+import com.apollographql.cache.normalized.CacheInfo
+import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
@@ -19,7 +28,9 @@ import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.api.readDataFromCacheInternal
+import com.apollographql.cache.normalized.cacheInfo
 import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -118,11 +129,86 @@ internal class DefaultApolloStore(
         cacheKey = CacheKey.rootKey(),
         variables = variables,
         fieldKeyGenerator = fieldKeyGenerator,
+        retrievePartialResponses = false,
     )
     return ReadResult(
         data = batchReaderData.toData(operation.adapter(), customScalarAdapters, variables),
         cacheHeaders = batchReaderData.cacheHeaders,
     )
+  }
+
+  override suspend fun <D : Operation.Data> readOperationPartial(
+      operation: Operation<D>,
+      schema: String,
+      customScalarAdapters: CustomScalarAdapters,
+      cacheHeaders: CacheHeaders,
+  ): ApolloResponse<D> {
+    val variables = operation.variables(customScalarAdapters, true)
+    val batchReaderData = operation.readDataFromCacheInternal(
+        cache = cache,
+        cacheResolver = cacheResolver,
+        cacheHeaders = cacheHeaders,
+        cacheKey = CacheKey.rootKey(),
+        variables = variables,
+        fieldKeyGenerator = fieldKeyGenerator,
+        retrievePartialResponses = true,
+    )
+    val dataAsMapWithCacheMisses: Map<String, Any?> = batchReaderData.toMap()
+    val graphQLRequest = GraphQLRequest.Builder()
+        .document(operation.document())
+        .variables(variables.valueMap)
+        .build()
+    val graphQLResponse: GraphQLResponse = ExecutableSchema.Builder()
+        .schema(schema)
+        .resolver { resolveInfo ->
+          dataAsMapWithCacheMisses.valueAtPath(resolveInfo.path)
+        }
+        .build()
+        .execute(graphQLRequest, ExecutionContext.Empty)
+
+    @Suppress("UNCHECKED_CAST")
+    val dataAsMapWithNullFields = graphQLResponse.data as Map<String, Any?>?
+    val falseVariablesCustomScalarAdapter =
+      customScalarAdapters.newBuilder().falseVariables(variables.valueMap.filter { it.value == false }.keys).build()
+    val data = dataAsMapWithNullFields?.let { operation.adapter().fromJson(it.jsonReader(), falseVariablesCustomScalarAdapter) }
+    return ApolloResponse.Builder(operation, uuid4())
+        .data(data)
+        .errors(graphQLResponse.errors)
+        .cacheInfo(
+            CacheInfo.Builder()
+                .fromCache(true)
+                .stale(batchReaderData.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
+                .cacheHit(graphQLResponse.errors.isNullOrEmpty())
+                .build()
+        )
+        .build()
+  }
+
+  private fun Map<String, Any?>.valueAtPath(path: List<Any>): Any? {
+    var value: Any? = this
+    for (key in path) {
+      value = when (value) {
+        is List<*> -> {
+          value[key as Int]
+        }
+
+        is Map<*, *> -> {
+          @Suppress("UNCHECKED_CAST")
+          value as Map<String, Any?>
+          value[key]
+        }
+
+        is Error -> {
+          // Short circuit if we encounter a cache miss error
+          return value
+        }
+
+        else -> {
+          error("Unknown value type: $value")
+        }
+      }
+    }
+    return value
   }
 
   override fun <D : Fragment.Data> readFragment(
@@ -140,6 +226,7 @@ internal class DefaultApolloStore(
         cacheKey = cacheKey,
         variables = variables,
         fieldKeyGenerator = fieldKeyGenerator,
+        retrievePartialResponses = false,
     )
     return ReadResult(
         data = batchReaderData.toData(fragment.adapter(), customScalarAdapters, variables),
