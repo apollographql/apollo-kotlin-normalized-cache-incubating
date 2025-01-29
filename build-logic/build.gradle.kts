@@ -16,7 +16,11 @@ group = "com.apollographql.cache.build"
 
 dependencies {
   compileOnly(gradleApi())
-  compileOnly(libs.kotlin.plugin)
+  implementation(libs.kotlin.plugin)
+  implementation(libs.librarian)
+  implementation(libs.atomicfu.plugin)
+  implementation(libs.sqldelight.plugin)
+  implementation(libs.android.plugin)
 }
 
 java {
