@@ -9,23 +9,30 @@
 abstract interface com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase : app.cash.sqldelight/Transacter { // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase|null[0]
     abstract val blobQueries // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase.blobQueries|{}blobQueries[0]
         abstract fun <get-blobQueries>(): com.apollographql.cache.normalized.sql.internal.blob/BlobQueries // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase.blobQueries.<get-blobQueries>|<get-blobQueries>(){}[0]
+
     final object Companion { // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase.Companion|null[0]
-        final fun invoke(app.cash.sqldelight.db/SqlDriver): com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase.Companion.invoke|invoke(app.cash.sqldelight.db.SqlDriver){}[0]
         final val Schema // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase.Companion.Schema|{}Schema[0]
             final fun <get-Schema>(): app.cash.sqldelight.db/SqlSchema<app.cash.sqldelight.db/QueryResult.Value<kotlin/Unit>> // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase.Companion.Schema.<get-Schema>|<get-Schema>(){}[0]
+
+        final fun invoke(app.cash.sqldelight.db/SqlDriver): com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase // com.apollographql.cache.normalized.sql.internal.blob/BlobDatabase.Companion.invoke|invoke(app.cash.sqldelight.db.SqlDriver){}[0]
     }
 }
+
 abstract interface com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database : app.cash.sqldelight/Transacter { // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database|null[0]
     abstract val blob2Queries // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database.blob2Queries|{}blob2Queries[0]
         abstract fun <get-blob2Queries>(): com.apollographql.cache.normalized.sql.internal.blob2/Blob2Queries // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database.blob2Queries.<get-blob2Queries>|<get-blob2Queries>(){}[0]
+
     final object Companion { // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database.Companion|null[0]
-        final fun invoke(app.cash.sqldelight.db/SqlDriver): com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database.Companion.invoke|invoke(app.cash.sqldelight.db.SqlDriver){}[0]
         final val Schema // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database.Companion.Schema|{}Schema[0]
             final fun <get-Schema>(): app.cash.sqldelight.db/SqlSchema<app.cash.sqldelight.db/QueryResult.Value<kotlin/Unit>> // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database.Companion.Schema.<get-Schema>|<get-Schema>(){}[0]
+
+        final fun invoke(app.cash.sqldelight.db/SqlDriver): com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Database.Companion.invoke|invoke(app.cash.sqldelight.db.SqlDriver){}[0]
     }
 }
+
 final class com.apollographql.cache.normalized.sql.internal.blob/BlobQueries : app.cash.sqldelight/TransacterImpl { // com.apollographql.cache.normalized.sql.internal.blob/BlobQueries|null[0]
     constructor <init>(app.cash.sqldelight.db/SqlDriver) // com.apollographql.cache.normalized.sql.internal.blob/BlobQueries.<init>|<init>(app.cash.sqldelight.db.SqlDriver){}[0]
+
     final fun <#A1: kotlin/Any> recordForKey(kotlin/String, kotlin/Function2<kotlin/String, kotlin/ByteArray, #A1>): app.cash.sqldelight/Query<#A1> // com.apollographql.cache.normalized.sql.internal.blob/BlobQueries.recordForKey|recordForKey(kotlin.String;kotlin.Function2<kotlin.String,kotlin.ByteArray,0:0>){0§<kotlin.Any>}[0]
     final fun <#A1: kotlin/Any> recordsForKeys(kotlin.collections/Collection<kotlin/String>, kotlin/Function2<kotlin/String, kotlin/ByteArray, #A1>): app.cash.sqldelight/Query<#A1> // com.apollographql.cache.normalized.sql.internal.blob/BlobQueries.recordsForKeys|recordsForKeys(kotlin.collections.Collection<kotlin.String>;kotlin.Function2<kotlin.String,kotlin.ByteArray,0:0>){0§<kotlin.Any>}[0]
     final fun <#A1: kotlin/Any> selectRecords(kotlin/Function2<kotlin/String, kotlin/ByteArray, #A1>): app.cash.sqldelight/Query<#A1> // com.apollographql.cache.normalized.sql.internal.blob/BlobQueries.selectRecords|selectRecords(kotlin.Function2<kotlin.String,kotlin.ByteArray,0:0>){0§<kotlin.Any>}[0]
@@ -40,21 +47,26 @@ final class com.apollographql.cache.normalized.sql.internal.blob/BlobQueries : a
     final fun selectRecords(): app.cash.sqldelight/Query<com.apollographql.cache.normalized.sql.internal.blob/Blobs> // com.apollographql.cache.normalized.sql.internal.blob/BlobQueries.selectRecords|selectRecords(){}[0]
     final fun update(kotlin/ByteArray, kotlin/String) // com.apollographql.cache.normalized.sql.internal.blob/BlobQueries.update|update(kotlin.ByteArray;kotlin.String){}[0]
 }
+
 final class com.apollographql.cache.normalized.sql.internal.blob/Blobs { // com.apollographql.cache.normalized.sql.internal.blob/Blobs|null[0]
     constructor <init>(kotlin/String, kotlin/ByteArray) // com.apollographql.cache.normalized.sql.internal.blob/Blobs.<init>|<init>(kotlin.String;kotlin.ByteArray){}[0]
+
+    final val blob // com.apollographql.cache.normalized.sql.internal.blob/Blobs.blob|{}blob[0]
+        final fun <get-blob>(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob/Blobs.blob.<get-blob>|<get-blob>(){}[0]
+    final val key // com.apollographql.cache.normalized.sql.internal.blob/Blobs.key|{}key[0]
+        final fun <get-key>(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob/Blobs.key.<get-key>|<get-key>(){}[0]
+
     final fun component1(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob/Blobs.component1|component1(){}[0]
     final fun component2(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob/Blobs.component2|component2(){}[0]
     final fun copy(kotlin/String = ..., kotlin/ByteArray = ...): com.apollographql.cache.normalized.sql.internal.blob/Blobs // com.apollographql.cache.normalized.sql.internal.blob/Blobs.copy|copy(kotlin.String;kotlin.ByteArray){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // com.apollographql.cache.normalized.sql.internal.blob/Blobs.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.apollographql.cache.normalized.sql.internal.blob/Blobs.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob/Blobs.toString|toString(){}[0]
-    final val blob // com.apollographql.cache.normalized.sql.internal.blob/Blobs.blob|{}blob[0]
-        final fun <get-blob>(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob/Blobs.blob.<get-blob>|<get-blob>(){}[0]
-    final val key // com.apollographql.cache.normalized.sql.internal.blob/Blobs.key|{}key[0]
-        final fun <get-key>(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob/Blobs.key.<get-key>|<get-key>(){}[0]
 }
+
 final class com.apollographql.cache.normalized.sql.internal.blob2/Blob2Queries : app.cash.sqldelight/TransacterImpl { // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Queries|null[0]
     constructor <init>(app.cash.sqldelight.db/SqlDriver) // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Queries.<init>|<init>(app.cash.sqldelight.db.SqlDriver){}[0]
+
     final fun <#A1: kotlin/Any> recordForKey(kotlin/String, kotlin/Function2<kotlin/String, kotlin/ByteArray, #A1>): app.cash.sqldelight/Query<#A1> // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Queries.recordForKey|recordForKey(kotlin.String;kotlin.Function2<kotlin.String,kotlin.ByteArray,0:0>){0§<kotlin.Any>}[0]
     final fun <#A1: kotlin/Any> recordsForKeys(kotlin.collections/Collection<kotlin/String>, kotlin/Function2<kotlin/String, kotlin/ByteArray, #A1>): app.cash.sqldelight/Query<#A1> // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Queries.recordsForKeys|recordsForKeys(kotlin.collections.Collection<kotlin.String>;kotlin.Function2<kotlin.String,kotlin.ByteArray,0:0>){0§<kotlin.Any>}[0]
     final fun <#A1: kotlin/Any> selectRecords(kotlin/Function3<kotlin/String, kotlin/ByteArray, kotlin/Long?, #A1>): app.cash.sqldelight/Query<#A1> // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Queries.selectRecords|selectRecords(kotlin.Function3<kotlin.String,kotlin.ByteArray,kotlin.Long?,0:0>){0§<kotlin.Any>}[0]
@@ -71,8 +83,17 @@ final class com.apollographql.cache.normalized.sql.internal.blob2/Blob2Queries :
     final fun trim(kotlin/Long) // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Queries.trim|trim(kotlin.Long){}[0]
     final fun update(kotlin/ByteArray, kotlin/Long?, kotlin/String) // com.apollographql.cache.normalized.sql.internal.blob2/Blob2Queries.update|update(kotlin.ByteArray;kotlin.Long?;kotlin.String){}[0]
 }
+
 final class com.apollographql.cache.normalized.sql.internal.blob2/Blobs { // com.apollographql.cache.normalized.sql.internal.blob2/Blobs|null[0]
     constructor <init>(kotlin/String, kotlin/ByteArray, kotlin/Long?) // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.<init>|<init>(kotlin.String;kotlin.ByteArray;kotlin.Long?){}[0]
+
+    final val blob // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.blob|{}blob[0]
+        final fun <get-blob>(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.blob.<get-blob>|<get-blob>(){}[0]
+    final val date // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.date|{}date[0]
+        final fun <get-date>(): kotlin/Long? // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.date.<get-date>|<get-date>(){}[0]
+    final val key // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.key|{}key[0]
+        final fun <get-key>(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.key.<get-key>|<get-key>(){}[0]
+
     final fun component1(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.component1|component1(){}[0]
     final fun component2(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.component2|component2(){}[0]
     final fun component3(): kotlin/Long? // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.component3|component3(){}[0]
@@ -80,39 +101,40 @@ final class com.apollographql.cache.normalized.sql.internal.blob2/Blobs { // com
     final fun equals(kotlin/Any?): kotlin/Boolean // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.toString|toString(){}[0]
-    final val blob // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.blob|{}blob[0]
-        final fun <get-blob>(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.blob.<get-blob>|<get-blob>(){}[0]
-    final val date // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.date|{}date[0]
-        final fun <get-date>(): kotlin/Long? // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.date.<get-date>|<get-date>(){}[0]
-    final val key // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.key|{}key[0]
-        final fun <get-key>(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/Blobs.key.<get-key>|<get-key>(){}[0]
 }
+
 final class com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey { // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey|null[0]
     constructor <init>(kotlin/String, kotlin/ByteArray) // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.<init>|<init>(kotlin.String;kotlin.ByteArray){}[0]
+
+    final val blob // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.blob|{}blob[0]
+        final fun <get-blob>(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.blob.<get-blob>|<get-blob>(){}[0]
+    final val key // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.key|{}key[0]
+        final fun <get-key>(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.key.<get-key>|<get-key>(){}[0]
+
     final fun component1(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.component1|component1(){}[0]
     final fun component2(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.component2|component2(){}[0]
     final fun copy(kotlin/String = ..., kotlin/ByteArray = ...): com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.copy|copy(kotlin.String;kotlin.ByteArray){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.toString|toString(){}[0]
-    final val blob // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.blob|{}blob[0]
-        final fun <get-blob>(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.blob.<get-blob>|<get-blob>(){}[0]
-    final val key // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.key|{}key[0]
-        final fun <get-key>(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/RecordForKey.key.<get-key>|<get-key>(){}[0]
 }
+
 final class com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys { // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys|null[0]
     constructor <init>(kotlin/String, kotlin/ByteArray) // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.<init>|<init>(kotlin.String;kotlin.ByteArray){}[0]
+
+    final val blob // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.blob|{}blob[0]
+        final fun <get-blob>(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.blob.<get-blob>|<get-blob>(){}[0]
+    final val key // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.key|{}key[0]
+        final fun <get-key>(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.key.<get-key>|<get-key>(){}[0]
+
     final fun component1(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.component1|component1(){}[0]
     final fun component2(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.component2|component2(){}[0]
     final fun copy(kotlin/String = ..., kotlin/ByteArray = ...): com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.copy|copy(kotlin.String;kotlin.ByteArray){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.toString|toString(){}[0]
-    final val blob // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.blob|{}blob[0]
-        final fun <get-blob>(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.blob.<get-blob>|<get-blob>(){}[0]
-    final val key // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.key|{}key[0]
-        final fun <get-key>(): kotlin/String // com.apollographql.cache.normalized.sql.internal.blob2/RecordsForKeys.key.<get-key>|<get-key>(){}[0]
 }
+
 final class com.apollographql.cache.normalized.sql/SqlNormalizedCache : com.apollographql.cache.normalized.api/NormalizedCache { // com.apollographql.cache.normalized.sql/SqlNormalizedCache|null[0]
     final fun clearAll() // com.apollographql.cache.normalized.sql/SqlNormalizedCache.clearAll|clearAll(){}[0]
     final fun dump(): kotlin.collections/Map<kotlin.reflect/KClass<*>, kotlin.collections/Map<kotlin/String, com.apollographql.cache.normalized.api/Record>> // com.apollographql.cache.normalized.sql/SqlNormalizedCache.dump|dump(){}[0]
@@ -124,8 +146,10 @@ final class com.apollographql.cache.normalized.sql/SqlNormalizedCache : com.apol
     final fun remove(kotlin.collections/Collection<com.apollographql.cache.normalized.api/CacheKey>, kotlin/Boolean): kotlin/Int // com.apollographql.cache.normalized.sql/SqlNormalizedCache.remove|remove(kotlin.collections.Collection<com.apollographql.cache.normalized.api.CacheKey>;kotlin.Boolean){}[0]
     final fun remove(kotlin/String): kotlin/Int // com.apollographql.cache.normalized.sql/SqlNormalizedCache.remove|remove(kotlin.String){}[0]
 }
+
 final const val com.apollographql.cache.normalized.sql/VERSION // com.apollographql.cache.normalized.sql/VERSION|{}VERSION[0]
     final fun <get-VERSION>(): kotlin/String // com.apollographql.cache.normalized.sql/VERSION.<get-VERSION>|<get-VERSION>(){}[0]
+
 final fun com.apollographql.cache.normalized.sql/SqlNormalizedCacheFactory(app.cash.sqldelight.db/SqlDriver): com.apollographql.cache.normalized.api/NormalizedCacheFactory // com.apollographql.cache.normalized.sql/SqlNormalizedCacheFactory|SqlNormalizedCacheFactory(app.cash.sqldelight.db.SqlDriver){}[0]
 final fun com.apollographql.cache.normalized.sql/SqlNormalizedCacheFactory(kotlin/String? = ...): com.apollographql.cache.normalized.api/NormalizedCacheFactory // com.apollographql.cache.normalized.sql/SqlNormalizedCacheFactory|SqlNormalizedCacheFactory(kotlin.String?){}[0]
 final fun com.apollographql.cache.normalized.sql/SqlNormalizedCacheFactory(kotlin/String?, kotlin/String?): com.apollographql.cache.normalized.api/NormalizedCacheFactory // com.apollographql.cache.normalized.sql/SqlNormalizedCacheFactory|SqlNormalizedCacheFactory(kotlin.String?;kotlin.String?){}[0]
