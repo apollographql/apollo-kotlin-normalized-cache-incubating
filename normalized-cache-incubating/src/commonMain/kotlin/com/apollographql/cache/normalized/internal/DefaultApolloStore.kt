@@ -8,6 +8,7 @@ import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.variables
+import com.apollographql.apollo.ast.GQLDocument
 import com.apollographql.apollo.execution.ExecutableSchema
 import com.apollographql.apollo.execution.GraphQLRequest
 import com.apollographql.apollo.execution.GraphQLResponse
@@ -139,7 +140,7 @@ internal class DefaultApolloStore(
 
   override suspend fun <D : Operation.Data> readOperationPartial(
       operation: Operation<D>,
-      schema: String,
+      schema: GQLDocument,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
   ): ApolloResponse<D> {

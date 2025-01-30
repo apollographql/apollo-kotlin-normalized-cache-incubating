@@ -6,22 +6,21 @@ import com.apollographql.apollo.api.Error.Location
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
-import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
-import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.apolloStore
-import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.retrievePartialResponses
+import com.apollographql.cache.normalized.schema
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import okio.use
+import test.cache.Schema
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -59,11 +58,8 @@ class CachePartialResultTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory())
-        .cacheHeaders(CacheHeaders.builder()
-            .addHeader("schema", SCHEMA)
-            .build()
-        )
         .retrievePartialResponses(true)
+        .schema(Schema.schema)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(MeWithoutNickNameWithEmailQuery())
@@ -160,10 +156,6 @@ class CachePartialResultTest {
     )
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .cacheHeaders(CacheHeaders.builder()
-            .addHeader("schema", SCHEMA)
-            .build()
-        )
         .store(
             ApolloStore(
                 normalizedCacheFactory = MemoryCacheFactory(),
@@ -172,6 +164,7 @@ class CachePartialResultTest {
             )
         )
         .retrievePartialResponses(true)
+        .schema(Schema.schema)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(UsersQuery(listOf("1", "2", "3")))
@@ -262,11 +255,8 @@ class CachePartialResultTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory())
-        .cacheHeaders(CacheHeaders.builder()
-            .addHeader("schema", SCHEMA)
-            .build()
-        )
         .retrievePartialResponses(true)
+        .schema(Schema.schema)
         .build()
         .use { apolloClient ->
           // Prime the cache
@@ -437,11 +427,8 @@ class CachePartialResultTest {
                 cacheResolver = IdCacheKeyResolver()
             )
         )
-        .cacheHeaders(CacheHeaders.builder()
-            .addHeader("schema", SCHEMA)
-            .build()
-        )
         .retrievePartialResponses(true)
+        .schema(Schema.schema)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(DefaultProjectQuery())
@@ -463,8 +450,6 @@ class CachePartialResultTest {
               networkResult.data
           )
 
-          println(NormalizedCache.prettifyDump(apolloClient.apolloStore.dump()))
-
           val cacheResult = apolloClient.query(DefaultProjectQuery())
               .fetchPolicy(FetchPolicy.CacheOnly)
               .execute()
@@ -475,33 +460,6 @@ class CachePartialResultTest {
         }
   }
 }
-
-private const val SCHEMA = """
-type Query {
-  me: User!
-  users(ids: [ID!]!): [User]!
-  project(id: ID! = "42"): Project
-}
-
-type User {
-  id: ID!
-  firstName: String!
-  lastName: String!
-  nickName: String
-  email: String!
-  bestFriend: User
-  projects: [Project!]!
-  mainProject: Project!
-}
-
-type Project {
-  id: ID!
-  name: String!
-  description: String
-  lead: User
-  users: [User!]!
-}
-"""
 
 /**
  * Helps using assertEquals.

@@ -6,6 +6,7 @@ import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.JsonNumber
+import com.apollographql.apollo.ast.GQLDocument
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
@@ -80,12 +81,13 @@ interface ApolloStore {
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
    * @param operation the operation to read
+   * @param schema the schema to use for reading the operation
    *
    * @throws [com.apollographql.apollo.exception.ApolloException] on cache read errors
    */
   suspend fun <D : Operation.Data> readOperationPartial(
       operation: Operation<D>,
-      schema: String,
+      schema: GQLDocument,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
   ): ApolloResponse<D>

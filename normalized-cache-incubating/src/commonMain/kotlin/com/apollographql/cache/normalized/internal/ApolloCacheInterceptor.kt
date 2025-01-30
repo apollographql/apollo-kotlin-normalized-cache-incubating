@@ -27,6 +27,7 @@ import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.memoryCacheOnly
 import com.apollographql.cache.normalized.optimisticData
 import com.apollographql.cache.normalized.retrievePartialResponses
+import com.apollographql.cache.normalized.schema
 import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.cache.normalized.storeReceiveDate
 import com.apollographql.cache.normalized.writeToCacheAsynchronously
@@ -225,7 +226,7 @@ internal class ApolloCacheInterceptor(
     val startMillis = currentTimeMillis()
     val response = store.readOperationPartial(
         operation = request.operation,
-        schema = cacheHeaders.headerValue("schema")!!, // TODO
+        schema = request.schema ?: error("schema is required for partial responses"),
         customScalarAdapters = customScalarAdapters,
         cacheHeaders = cacheHeaders,
     )

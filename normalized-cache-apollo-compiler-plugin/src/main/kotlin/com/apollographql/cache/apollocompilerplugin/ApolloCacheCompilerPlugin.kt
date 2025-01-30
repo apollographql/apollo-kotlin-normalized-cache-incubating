@@ -18,16 +18,22 @@ import java.io.File
 class ApolloCacheCompilerPluginProvider : ApolloCompilerPluginProvider {
   override fun create(environment: ApolloCompilerPluginEnvironment): ApolloCompilerPlugin {
     return ApolloCacheCompilerPlugin(
+        logger = environment.logger,
         packageName = environment.arguments["packageName"] as? String
             ?: throw IllegalArgumentException("packageName argument is required and must be a String"),
-        logger = environment.logger,
+        generateSchema = when (val generateSchema = environment.arguments["generateSchema"]) {
+          null -> false
+          is Boolean -> generateSchema
+          else -> throw IllegalArgumentException("generateSchema argument must be a Boolean")
+        }
     )
   }
 }
 
 class ApolloCacheCompilerPlugin(
-    private val packageName: String,
     private val logger: ApolloCompilerPluginLogger,
+    private val packageName: String,
+    private val generateSchema: Boolean,
 ) : ApolloCompilerPlugin {
   override fun foreignSchemas(): List<ForeignSchema> {
     return listOf(
@@ -40,7 +46,12 @@ class ApolloCacheCompilerPlugin(
     return object : SchemaListener {
       override fun onSchema(schema: Schema, outputDirectory: File) {
         val maxAges = schema.getMaxAges(logger)
-        Codegen("$packageName.cache", outputDirectory, maxAges).generate()
+        Codegen(
+            packageName = "$packageName.cache",
+            outputDirectory = outputDirectory,
+            maxAges = maxAges,
+            schema = schema.takeIf { generateSchema },
+        ).generate()
       }
     }
   }

@@ -38,5 +38,10 @@ kotlin {
 apollo {
   service("service") {
     packageName.set("test")
+
+    plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin") {
+      argument("packageName", packageName.get())
+      argument("generateSchema", true)
+    }
   }
 }
