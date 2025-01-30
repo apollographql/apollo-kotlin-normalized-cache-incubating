@@ -43,5 +43,7 @@ apollo {
       argument("packageName", packageName.get())
       argument("generateSchema", true)
     }
+
+    mapScalar("Category", "test.Category", "test.CategoryAdapter")
   }
 }

@@ -459,6 +459,64 @@ class CachePartialResultTest {
           )
         }
   }
+
+  @Test
+  fun customScalar() = runTest(before = { setUp() }, after = { tearDown() }) {
+    mockServer.enqueueString(
+        // language=JSON
+        """
+        {
+          "data": {
+            "user": {
+              "__typename": "User",
+              "id": "1",
+              "firstName": "John",
+              "lastName": "Smith",
+              "category": {
+                "code": 1,
+                "name": "First"
+              }
+            }
+          }
+        }
+        """
+    )
+    ApolloClient.Builder()
+        .serverUrl(mockServer.url())
+        .normalizedCache(MemoryCacheFactory())
+        .returnPartialResponses(true)
+        .schema(Schema.schema)
+        .build()
+        .use { apolloClient ->
+          val networkResult = apolloClient.query(UserByCategoryQuery(Category(2, "Second")))
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .execute()
+          assertEquals(
+              UserByCategoryQuery.Data(
+                  UserByCategoryQuery.User(
+
+                      firstName = "John",
+                      lastName = "Smith",
+                      category = Category(
+                          code = 1,
+                          name = "First"
+                      ),
+                      id = "1",
+                      __typename = "User",
+                  )
+              ),
+              networkResult.data
+          )
+
+          val cacheResult = apolloClient.query(UserByCategoryQuery(Category(2, "Second")))
+              .fetchPolicy(FetchPolicy.CacheOnly)
+              .execute()
+          assertEquals(
+              networkResult.data,
+              cacheResult.data
+          )
+        }
+  }
 }
 
 /**

@@ -73,3 +73,11 @@ query DefaultProjectQuery($id: ID! = "42") {
     description
   }
 }
+
+query UserByCategoryQuery($category: Category!) {
+  user(category: $category) {
+    firstName
+    lastName
+    category
+  }
+}

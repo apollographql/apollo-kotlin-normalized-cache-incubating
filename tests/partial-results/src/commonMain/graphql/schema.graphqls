@@ -2,6 +2,7 @@ type Query {
   me: User!
   users(ids: [ID!]!): [User]!
   project(id: ID! = "1"): Project
+  user(category: Category!): User!
 }
 
 type User {
@@ -13,6 +14,7 @@ type User {
   bestFriend: User
   projects: [Project!]!
   mainProject: Project!
+  category: Category!
 }
 
 type Project {
@@ -22,3 +24,5 @@ type Project {
   lead: User
   users: [User!]!
 }
+
+scalar Category

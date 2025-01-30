@@ -9,10 +9,13 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.variables
 import com.apollographql.apollo.ast.GQLDocument
+import com.apollographql.apollo.ast.GQLValue
 import com.apollographql.apollo.exception.CacheMissException
+import com.apollographql.apollo.execution.Coercing
 import com.apollographql.apollo.execution.ExecutableSchema
 import com.apollographql.apollo.execution.GraphQLRequest
 import com.apollographql.apollo.execution.GraphQLResponse
+import com.apollographql.apollo.execution.JsonValue
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.ApolloStore.ReadResult
 import com.apollographql.cache.normalized.CacheInfo
@@ -206,6 +209,7 @@ internal class DefaultApolloStore(
         .resolver { resolveInfo ->
           dataAsMapWithCacheMisses.valueAtPath(resolveInfo.path)
         }
+        .addCoercing("Category", PassThroughCoercing)
         .build()
         .execute(graphQLRequest, ExecutionContext.Empty)
 
@@ -253,6 +257,20 @@ internal class DefaultApolloStore(
       }
     }
     return value
+  }
+
+  private object PassThroughCoercing : Coercing<Any?> {
+    override fun deserialize(value: JsonValue): Any? {
+      return value
+    }
+
+    override fun parseLiteral(value: GQLValue): Any {
+      return value
+    }
+
+    override fun serialize(internalValue: Any?): JsonValue {
+      return internalValue
+    }
   }
 
   override fun <D : Fragment.Data> readFragment(
