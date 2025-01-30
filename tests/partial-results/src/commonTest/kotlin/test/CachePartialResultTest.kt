@@ -13,7 +13,7 @@ import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
-import com.apollographql.cache.normalized.retrievePartialResponses
+import com.apollographql.cache.normalized.returnPartialResponses
 import com.apollographql.cache.normalized.schema
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storePartialResponses
@@ -58,7 +58,7 @@ class CachePartialResultTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory())
-        .retrievePartialResponses(true)
+        .returnPartialResponses(true)
         .schema(Schema.schema)
         .build()
         .use { apolloClient ->
@@ -163,7 +163,7 @@ class CachePartialResultTest {
                 cacheResolver = IdCacheKeyResolver()
             )
         )
-        .retrievePartialResponses(true)
+        .returnPartialResponses(true)
         .schema(Schema.schema)
         .build()
         .use { apolloClient ->
@@ -255,7 +255,7 @@ class CachePartialResultTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory())
-        .retrievePartialResponses(true)
+        .returnPartialResponses(true)
         .schema(Schema.schema)
         .build()
         .use { apolloClient ->
@@ -427,7 +427,7 @@ class CachePartialResultTest {
                 cacheResolver = IdCacheKeyResolver()
             )
         )
-        .retrievePartialResponses(true)
+        .returnPartialResponses(true)
         .schema(Schema.schema)
         .build()
         .use { apolloClient ->

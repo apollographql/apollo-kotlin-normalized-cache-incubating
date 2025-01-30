@@ -275,13 +275,13 @@ fun <T> MutableExecutionOptions<T>.storeReceiveDate(storeReceiveDate: Boolean) =
 )
 
 /**
- * @param retrievePartialResponses Whether to return partial data from the cache (`true`), or no data with a [CacheMissException] whenever a field
+ * @param returnPartialResponses Whether to return partial data from the cache (`true`), or no data with a [CacheMissException] whenever a field
  * is missing (`false`).
  *
  * Default: false
  */
-fun <T> MutableExecutionOptions<T>.retrievePartialResponses(retrievePartialResponses: Boolean) = addExecutionContext(
-    RetrievePartialResponsesContext(retrievePartialResponses)
+fun <T> MutableExecutionOptions<T>.returnPartialResponses(returnPartialResponses: Boolean) = addExecutionContext(
+    ReturnPartialResponsesContext(returnPartialResponses)
 )
 
 /**
@@ -430,8 +430,8 @@ internal val ExecutionOptions.cacheHeaders: CacheHeaders
 internal val <D : Operation.Data> ApolloRequest<D>.watchContext: WatchContext?
   get() = executionContext[WatchContext]
 
-internal val <D : Operation.Data> ApolloRequest<D>.retrievePartialResponses
-  get() = executionContext[RetrievePartialResponsesContext]?.value ?: false
+internal val <D : Operation.Data> ApolloRequest<D>.returnPartialResponses
+  get() = executionContext[ReturnPartialResponsesContext]?.value ?: false
 
 internal val <D : Operation.Data> ApolloRequest<D>.schema: GQLDocument?
   get() = executionContext[SchemaContext]?.value
@@ -456,7 +456,7 @@ class CacheInfo private constructor(
     /**
      * The exception that occurred while reading the cache.
      * Always `null` if [isFromCache] is false, or when partial responses are enabled.
-     * @see MutableExecutionOptions.retrievePartialResponses
+     * @see MutableExecutionOptions.returnPartialResponses
      */
     val cacheMissException: CacheMissException?,
 
@@ -655,11 +655,11 @@ internal class FetchFromCacheContext(val value: Boolean) : ExecutionContext.Elem
   companion object Key : ExecutionContext.Key<FetchFromCacheContext>
 }
 
-internal class RetrievePartialResponsesContext(val value: Boolean) : ExecutionContext.Element {
+internal class ReturnPartialResponsesContext(val value: Boolean) : ExecutionContext.Element {
   override val key: ExecutionContext.Key<*>
     get() = Key
 
-  companion object Key : ExecutionContext.Key<RetrievePartialResponsesContext>
+  companion object Key : ExecutionContext.Key<ReturnPartialResponsesContext>
 }
 
 internal class SchemaContext(val value: GQLDocument) : ExecutionContext.Element {

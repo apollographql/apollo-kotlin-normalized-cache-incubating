@@ -9,7 +9,6 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.api.Subscription
 import com.apollographql.apollo.exception.ApolloException
-import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.exception.DefaultApolloException
 import com.apollographql.apollo.exception.apolloExceptionHandler
 import com.apollographql.apollo.interceptor.ApolloInterceptor
@@ -26,7 +25,7 @@ import com.apollographql.cache.normalized.doNotStore
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.memoryCacheOnly
 import com.apollographql.cache.normalized.optimisticData
-import com.apollographql.cache.normalized.retrievePartialResponses
+import com.apollographql.cache.normalized.returnPartialResponses
 import com.apollographql.cache.normalized.schema
 import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.cache.normalized.storeReceiveDate
@@ -211,27 +210,18 @@ internal class ApolloCacheInterceptor(
     if (request.memoryCacheOnly) {
       cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
     }
-    return if (request.retrievePartialResponses) {
-      readFromCachePartial(request, customScalarAdapters, cacheHeaders)
-    } else {
-      readFromCacheThrowCacheMiss(request, customScalarAdapters, cacheHeaders)
-    }
-  }
-
-  private suspend fun <D : Query.Data> readFromCachePartial(
-      request: ApolloRequest<D>,
-      customScalarAdapters: CustomScalarAdapters,
-      cacheHeaders: CacheHeaders,
-  ): ApolloResponse<D> {
     val startMillis = currentTimeMillis()
-    val response = store.readOperationPartial(
+    val returnPartialResponses = request.returnPartialResponses
+    val response = store.readOperation(
         operation = request.operation,
-        schema = request.schema ?: error("schema is required for partial responses"),
         customScalarAdapters = customScalarAdapters,
         cacheHeaders = cacheHeaders,
+        returnPartialResponses = returnPartialResponses,
+        schema = if (returnPartialResponses) request.schema ?: error("schema is required for partial responses") else null,
     )
     return response.newBuilder()
         .requestUuid(request.requestUuid)
+        .addExecutionContext(request.executionContext)
         .cacheInfo(
             response.cacheInfo!!.newBuilder()
                 .cacheStartMillis(startMillis)
@@ -241,61 +231,6 @@ internal class ApolloCacheInterceptor(
         .isLast(true)
         .build()
   }
-
-  private fun <D : Query.Data> readFromCacheThrowCacheMiss(
-      request: ApolloRequest<D>,
-      customScalarAdapters: CustomScalarAdapters,
-      cacheHeaders: CacheHeaders,
-  ): ApolloResponse<D> {
-    val operation = request.operation
-    val startMillis = currentTimeMillis()
-    val readResult = try {
-      store.readOperation(
-          operation = operation,
-          customScalarAdapters = customScalarAdapters,
-          cacheHeaders = cacheHeaders,
-      )
-    } catch (e: CacheMissException) {
-      return ApolloResponse.Builder(
-          requestUuid = request.requestUuid,
-          operation = operation,
-      )
-          .exception(e)
-          .addExecutionContext(request.executionContext)
-          .cacheInfo(
-              CacheInfo.Builder()
-                  .cacheStartMillis(startMillis)
-                  .cacheEndMillis(currentTimeMillis())
-                  .fromCache(true)
-                  .cacheHit(false)
-                  .cacheMissException(e)
-                  .stale(e.stale)
-                  .build()
-          )
-          .isLast(true)
-          .build()
-    }
-
-    return ApolloResponse.Builder(
-        requestUuid = request.requestUuid,
-        operation = operation,
-    )
-        .data(readResult.data)
-        .addExecutionContext(request.executionContext)
-        .cacheHeaders(readResult.cacheHeaders)
-        .cacheInfo(
-            CacheInfo.Builder()
-                .cacheStartMillis(startMillis)
-                .cacheEndMillis(currentTimeMillis())
-                .fromCache(true)
-                .cacheHit(true)
-                .stale(readResult.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
-                .build()
-        )
-        .isLast(true)
-        .build()
-  }
-
 
   private fun <D : Operation.Data> readFromNetwork(
       request: ApolloRequest<D>,

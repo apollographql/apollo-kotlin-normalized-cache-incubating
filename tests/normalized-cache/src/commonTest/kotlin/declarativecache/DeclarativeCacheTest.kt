@@ -36,7 +36,7 @@ class DeclarativeCacheTest {
     store.writeOperation(otherOperation, otherData)
 
     // Get the "promo" book again, the title must be updated
-    val data = store.readOperation(promoOperation, CustomScalarAdapters.Empty).data
+    val data = store.readOperation(promoOperation, CustomScalarAdapters.Empty).data!!
 
     assertEquals("Other", data.promoBook?.title)
   }
@@ -56,7 +56,7 @@ class DeclarativeCacheTest {
     store.writeOperation(otherOperation, otherData)
 
     // Get the "promo" library again, the address must be updated
-    val data = store.readOperation(promoOperation, CustomScalarAdapters.Empty).data
+    val data = store.readOperation(promoOperation, CustomScalarAdapters.Empty).data!!
 
     assertEquals("OtherAddress", data.promoLibrary?.address)
   }
@@ -70,7 +70,7 @@ class DeclarativeCacheTest {
     store.writeOperation(bookQuery1, bookData1)
 
     val bookQuery2 = GetBookQuery("42")
-    val bookData2 = store.readOperation(bookQuery2, CustomScalarAdapters.Empty).data
+    val bookData2 = store.readOperation(bookQuery2, CustomScalarAdapters.Empty).data!!
 
     assertEquals("Promo", bookData2.book?.title)
 
@@ -86,7 +86,7 @@ class DeclarativeCacheTest {
     store.writeOperation(authorQuery1, authorData1)
 
     val authorQuery2 = GetAuthorQuery("Pierre", "Bordage")
-    val authorData2 = store.readOperation(authorQuery2, CustomScalarAdapters.Empty).data
+    val authorData2 = store.readOperation(authorQuery2, CustomScalarAdapters.Empty).data!!
 
     assertEquals("Pierre", authorData2.author?.firstName)
     assertEquals("Bordage", authorData2.author?.lastName)
@@ -117,13 +117,13 @@ class DeclarativeCacheTest {
     store.writeOperation(promoOperation, GetPromoBookQuery.Data(GetPromoBookQuery.PromoBook("Title4", "4", "Book")))
 
     var operation = GetBooksQuery(listOf("4", "1"))
-    var data = store.readOperation(operation, CustomScalarAdapters.Empty).data
+    var data = store.readOperation(operation, CustomScalarAdapters.Empty).data!!
 
     assertEquals("Title4", data.books.get(0).title)
     assertEquals("Title1", data.books.get(1).title)
 
     operation = GetBooksQuery(listOf("3"))
-    data = store.readOperation(operation, CustomScalarAdapters.Empty).data
+    data = store.readOperation(operation, CustomScalarAdapters.Empty).data!!
 
     assertEquals("Title3", data.books.get(0).title)
   }

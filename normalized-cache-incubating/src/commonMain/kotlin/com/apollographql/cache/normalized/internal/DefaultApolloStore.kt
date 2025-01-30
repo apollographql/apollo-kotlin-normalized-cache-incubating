@@ -9,6 +9,7 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.variables
 import com.apollographql.apollo.ast.GQLDocument
+import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.execution.ExecutableSchema
 import com.apollographql.apollo.execution.GraphQLRequest
 import com.apollographql.apollo.execution.GraphQLResponse
@@ -29,6 +30,7 @@ import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.api.readDataFromCacheInternal
+import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.cacheInfo
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
@@ -117,28 +119,68 @@ internal class DefaultApolloStore(
     )
   }
 
-  override fun <D : Operation.Data> readOperation(
+  override suspend fun <D : Operation.Data> readOperation(
       operation: Operation<D>,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
-  ): ReadResult<D> {
-    val variables = operation.variables(customScalarAdapters, true)
-    val batchReaderData = operation.readDataFromCacheInternal(
-        cache = cache,
-        cacheResolver = cacheResolver,
-        cacheHeaders = cacheHeaders,
-        cacheKey = CacheKey.rootKey(),
-        variables = variables,
-        fieldKeyGenerator = fieldKeyGenerator,
-        retrievePartialResponses = false,
-    )
-    return ReadResult(
-        data = batchReaderData.toData(operation.adapter(), customScalarAdapters, variables),
-        cacheHeaders = batchReaderData.cacheHeaders,
-    )
+      returnPartialResponses: Boolean,
+      schema: GQLDocument?,
+  ): ApolloResponse<D> {
+    return if (returnPartialResponses) {
+      readOperationPartial(operation, schema!!, customScalarAdapters, cacheHeaders)
+    } else {
+      readOperationThrowCacheMiss(operation, customScalarAdapters, cacheHeaders)
+    }
   }
 
-  override suspend fun <D : Operation.Data> readOperationPartial(
+  private fun <D : Operation.Data> readOperationThrowCacheMiss(
+      operation: Operation<D>,
+      customScalarAdapters: CustomScalarAdapters,
+      cacheHeaders: CacheHeaders,
+  ): ApolloResponse<D> {
+    return try {
+      val variables = operation.variables(customScalarAdapters, true)
+      val batchReaderData = operation.readDataFromCacheInternal(
+          cache = cache,
+          cacheResolver = cacheResolver,
+          cacheHeaders = cacheHeaders,
+          cacheKey = CacheKey.rootKey(),
+          variables = variables,
+          fieldKeyGenerator = fieldKeyGenerator,
+          returnPartialResponses = false,
+      )
+      val readResult = ReadResult(
+          data = batchReaderData.toData(operation.adapter(), customScalarAdapters, variables),
+          cacheHeaders = batchReaderData.cacheHeaders,
+      )
+      ApolloResponse.Builder(operation, uuid4())
+          .data(readResult.data)
+          .cacheHeaders(readResult.cacheHeaders)
+          .cacheInfo(
+              CacheInfo.Builder()
+                  .fromCache(true)
+                  .cacheHit(true)
+                  .stale(readResult.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
+                  .build()
+          )
+          .build()
+    } catch (e: CacheMissException) {
+      ApolloResponse.Builder(operation, uuid4())
+          .data(null)
+          .exception(e)
+          .cacheInfo(
+              CacheInfo.Builder()
+                  .fromCache(true)
+                  .cacheHit(false)
+                  .cacheMissException(e)
+                  .stale(e.stale)
+                  .build()
+          )
+          .build()
+    }
+  }
+
+  private suspend fun <D : Operation.Data> readOperationPartial(
       operation: Operation<D>,
       schema: GQLDocument,
       customScalarAdapters: CustomScalarAdapters,
@@ -152,7 +194,7 @@ internal class DefaultApolloStore(
         cacheKey = CacheKey.rootKey(),
         variables = variables,
         fieldKeyGenerator = fieldKeyGenerator,
-        retrievePartialResponses = true,
+        returnPartialResponses = true,
     )
     val dataAsMapWithCacheMisses: Map<String, Any?> = batchReaderData.toMap()
     val graphQLRequest = GraphQLRequest.Builder()
@@ -175,11 +217,12 @@ internal class DefaultApolloStore(
     return ApolloResponse.Builder(operation, uuid4())
         .data(data)
         .errors(graphQLResponse.errors)
+        .cacheHeaders(batchReaderData.cacheHeaders)
         .cacheInfo(
             CacheInfo.Builder()
                 .fromCache(true)
-                .stale(batchReaderData.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
                 .cacheHit(graphQLResponse.errors.isNullOrEmpty())
+                .stale(batchReaderData.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
                 .build()
         )
         .build()
@@ -227,7 +270,7 @@ internal class DefaultApolloStore(
         cacheKey = cacheKey,
         variables = variables,
         fieldKeyGenerator = fieldKeyGenerator,
-        retrievePartialResponses = false,
+        returnPartialResponses = false,
     )
     return ReadResult(
         data = batchReaderData.toData(fragment.adapter(), customScalarAdapters, variables),

@@ -53,7 +53,7 @@ fun <D : Executable.Data> Executable<D>.readDataFromCache(
       cacheHeaders = cacheHeaders,
       variables = variables,
       fieldKeyGenerator = fieldKeyGenerator,
-      retrievePartialResponses = false,
+      returnPartialResponses = false,
   ).toData(adapter(), customScalarAdapters, variables)
 }
 
@@ -74,7 +74,7 @@ fun <D : Executable.Data> Executable<D>.readDataFromCache(
       cacheHeaders = cacheHeaders,
       variables = variables,
       fieldKeyGenerator = fieldKeyGenerator,
-      retrievePartialResponses = false,
+      returnPartialResponses = false,
   ).toData(adapter(), customScalarAdapters, variables)
 }
 
@@ -85,7 +85,7 @@ internal fun <D : Executable.Data> Executable<D>.readDataFromCacheInternal(
     cacheHeaders: CacheHeaders,
     variables: Executable.Variables,
     fieldKeyGenerator: FieldKeyGenerator,
-    retrievePartialResponses: Boolean,
+    returnPartialResponses: Boolean,
 ): CacheBatchReaderData = readInternal(
     cacheKey = cacheKey,
     cache = cache,
@@ -93,7 +93,7 @@ internal fun <D : Executable.Data> Executable<D>.readDataFromCacheInternal(
     cacheHeaders = cacheHeaders,
     variables = variables,
     fieldKeyGenerator = fieldKeyGenerator,
-    retrievePartialResponses = retrievePartialResponses,
+    returnPartialResponses = returnPartialResponses,
 )
 
 
@@ -104,7 +104,7 @@ private fun <D : Executable.Data> Executable<D>.readInternal(
     cacheHeaders: CacheHeaders,
     variables: Executable.Variables,
     fieldKeyGenerator: FieldKeyGenerator,
-    retrievePartialResponses: Boolean,
+    returnPartialResponses: Boolean,
 ): CacheBatchReaderData {
   return CacheBatchReader(
       cache = cache,
@@ -115,7 +115,7 @@ private fun <D : Executable.Data> Executable<D>.readInternal(
       rootSelections = rootField().selections,
       rootField = rootField(),
       fieldKeyGenerator = fieldKeyGenerator,
-      retrievePartialResponses = retrievePartialResponses,
+      returnPartialResponses = returnPartialResponses,
   ).collectData()
 }
 

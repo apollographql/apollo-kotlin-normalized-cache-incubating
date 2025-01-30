@@ -32,7 +32,7 @@ internal class CacheBatchReader(
     private val rootSelections: List<CompiledSelection>,
     private val rootField: CompiledField,
     private val fieldKeyGenerator: FieldKeyGenerator,
-    private val retrievePartialResponses: Boolean,
+    private val returnPartialResponses: Boolean,
 ) {
   /**
    * @param key: the key of the record we need to fetch
@@ -116,7 +116,7 @@ internal class CacheBatchReader(
             // This happens the very first time we read the cache
             record = Record(pendingReference.key, emptyMap())
           } else {
-            if (retrievePartialResponses) {
+            if (returnPartialResponses) {
               data[pendingReference.path] =
                 cacheMissError(key = pendingReference.key, fieldName = null, stale = false, path = pendingReference.path)
               return@forEach
@@ -148,7 +148,7 @@ internal class CacheBatchReader(
                 )
             ).unwrap()
           } catch (e: CacheMissException) {
-            if (retrievePartialResponses) {
+            if (returnPartialResponses) {
               cacheMissError(e, pendingReference.path + it.responseName)
             } else {
               throw e
@@ -232,7 +232,7 @@ internal class CacheBatchReader(
                 )
             ).unwrap()
           } catch (e: CacheMissException) {
-            if (retrievePartialResponses) {
+            if (returnPartialResponses) {
               cacheMissError(e, path + it.responseName)
             } else {
               throw e
