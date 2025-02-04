@@ -14,13 +14,12 @@ import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.returnPartialResponses
-import com.apollographql.cache.normalized.schema
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import okio.use
-import test.cache.Schema
+import test.fragment.UserFields
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -59,7 +58,6 @@ class CachePartialResultTest {
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory())
         .returnPartialResponses(true)
-        .schema(Schema.schema)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(MeWithoutNickNameWithEmailQuery())
@@ -164,7 +162,6 @@ class CachePartialResultTest {
             )
         )
         .returnPartialResponses(true)
-        .schema(Schema.schema)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(UsersQuery(listOf("1", "2", "3")))
@@ -256,7 +253,6 @@ class CachePartialResultTest {
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory())
         .returnPartialResponses(true)
-        .schema(Schema.schema)
         .build()
         .use { apolloClient ->
           // Prime the cache
@@ -388,6 +384,8 @@ class CachePartialResultTest {
           assertNull(cacheResult3.data)
           assertErrorsEquals(
               listOf(
+                  Error.Builder("Object 'User:2' not found in the cache").path(listOf("me", "bestFriend")).build(),
+                  Error.Builder("Object 'User:3' not found in the cache").path(listOf("me", "projects", 0, "lead")).build(),
                   Error.Builder("Object 'User:4' not found in the cache").path(listOf("me", "projects", 0, "users", 0)).build()
               ),
               cacheResult3.errors
@@ -428,7 +426,6 @@ class CachePartialResultTest {
             )
         )
         .returnPartialResponses(true)
-        .schema(Schema.schema)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(DefaultProjectQuery())
@@ -485,7 +482,6 @@ class CachePartialResultTest {
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory())
         .returnPartialResponses(true)
-        .schema(Schema.schema)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(UserByCategoryQuery(Category(2, "Second")))
@@ -517,6 +513,76 @@ class CachePartialResultTest {
           )
         }
   }
+
+  @Test
+  fun fragmentsAndAliases() = runTest(before = { setUp() }, after = { tearDown() }) {
+    mockServer.enqueueString(
+        // language=JSON
+        """
+        {
+          "data": {
+            "me": {
+              "__typename": "User",
+              "id": "1",
+              "firstName0": "John",
+              "lastName": "Smith",
+              "nickName0": "JS",
+              "email0": "jdoe@example.com",
+              "category": {
+                "code": 1,
+                "name": "First"
+              }
+            }
+          }
+        }
+        """
+    )
+    ApolloClient.Builder()
+        .serverUrl(mockServer.url())
+        .normalizedCache(MemoryCacheFactory())
+        .returnPartialResponses(true)
+        .build()
+        .use { apolloClient ->
+          val networkResult = apolloClient.query(WithFragmentsQuery())
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .execute()
+          assertEquals(
+              WithFragmentsQuery.Data(
+                  WithFragmentsQuery.Me(
+                      __typename = "User",
+                      id = "1",
+                      firstName0 = "John",
+                      onUser = WithFragmentsQuery.OnUser(
+                          lastName = "Smith",
+                          onUser = WithFragmentsQuery.OnUser1(
+                              nickName0 = "JS"
+                          ),
+                          __typename = "User",
+                      ),
+                      userFields = UserFields(
+                          email0 = "jdoe@example.com",
+                          category = Category(
+                              code = 1,
+                              name = "First"
+                          ),
+                          id = "1",
+                          __typename = "User",
+                      ),
+                  )
+              ),
+              networkResult.data
+          )
+
+          val cacheResult = apolloClient.query(WithFragmentsQuery())
+              .fetchPolicy(FetchPolicy.CacheOnly)
+              .execute()
+          assertEquals(
+              networkResult.data,
+              cacheResult.data
+          )
+        }
+  }
+
 }
 
 /**

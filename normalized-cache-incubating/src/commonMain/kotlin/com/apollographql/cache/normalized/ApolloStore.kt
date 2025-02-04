@@ -6,7 +6,6 @@ import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.JsonNumber
-import com.apollographql.apollo.ast.GQLDocument
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
@@ -63,20 +62,18 @@ interface ApolloStore {
    *
    * When [returnPartialResponses] is `true`, the returned [ApolloResponse.data] has `null` values for any missing fields if their
    * type is nullable, bubbling up to their parent otherwise. Missing fields have a corresponding [com.apollographql.apollo.api.Error]
-   * in [ApolloResponse.errors]. A [schema] must be provided to read partial responses.
+   * in [ApolloResponse.errors].
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
    * @param operation the operation to read
    * @param returnPartialResponses whether to return partial responses
-   * @param schema the schema to use for reading the operation - required when [returnPartialResponses] is `true`
    */
-  suspend fun <D : Operation.Data> readOperation(
+  fun <D : Operation.Data> readOperation(
       operation: Operation<D>,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
       returnPartialResponses: Boolean = false,
-      schema: GQLDocument? = null,
   ): ApolloResponse<D>
 
   /**

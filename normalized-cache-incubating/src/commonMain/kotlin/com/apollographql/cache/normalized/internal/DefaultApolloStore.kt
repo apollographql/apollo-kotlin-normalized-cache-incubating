@@ -1,21 +1,18 @@
 package com.apollographql.cache.normalized.internal
 
 import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.CompiledField
+import com.apollographql.apollo.api.CompiledFragment
+import com.apollographql.apollo.api.CompiledListType
+import com.apollographql.apollo.api.CompiledNotNullType
+import com.apollographql.apollo.api.CompiledSelection
 import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.Error
-import com.apollographql.apollo.api.ExecutionContext
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.variables
-import com.apollographql.apollo.ast.GQLDocument
-import com.apollographql.apollo.ast.GQLValue
 import com.apollographql.apollo.exception.CacheMissException
-import com.apollographql.apollo.execution.Coercing
-import com.apollographql.apollo.execution.ExecutableSchema
-import com.apollographql.apollo.execution.GraphQLRequest
-import com.apollographql.apollo.execution.GraphQLResponse
-import com.apollographql.apollo.execution.JsonValue
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.ApolloStore.ReadResult
 import com.apollographql.cache.normalized.CacheInfo
@@ -122,15 +119,14 @@ internal class DefaultApolloStore(
     )
   }
 
-  override suspend fun <D : Operation.Data> readOperation(
+  override fun <D : Operation.Data> readOperation(
       operation: Operation<D>,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
       returnPartialResponses: Boolean,
-      schema: GQLDocument?,
   ): ApolloResponse<D> {
     return if (returnPartialResponses) {
-      readOperationPartial(operation, schema!!, customScalarAdapters, cacheHeaders)
+      readOperationPartial(operation, customScalarAdapters, cacheHeaders)
     } else {
       readOperationThrowCacheMiss(operation, customScalarAdapters, cacheHeaders)
     }
@@ -183,9 +179,8 @@ internal class DefaultApolloStore(
     }
   }
 
-  private suspend fun <D : Operation.Data> readOperationPartial(
+  private fun <D : Operation.Data> readOperationPartial(
       operation: Operation<D>,
-      schema: GQLDocument,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
   ): ApolloResponse<D> {
@@ -199,78 +194,109 @@ internal class DefaultApolloStore(
         fieldKeyGenerator = fieldKeyGenerator,
         returnPartialResponses = true,
     )
-    val dataAsMapWithCacheMisses: Map<String, Any?> = batchReaderData.toMap()
-    val graphQLRequest = GraphQLRequest.Builder()
-        .document(operation.document())
-        .variables(variables.valueMap)
-        .build()
-    val graphQLResponse: GraphQLResponse = ExecutableSchema.Builder()
-        .schema(schema)
-        .resolver { resolveInfo ->
-          dataAsMapWithCacheMisses.valueAtPath(resolveInfo.path)
-        }
-        .addCoercing("Category", PassThroughCoercing)
-        .build()
-        .execute(graphQLRequest, ExecutionContext.Empty)
+    val dataWithErrors: Map<String, Any?> = batchReaderData.toMap()
+    val errors = mutableListOf<Error>()
 
     @Suppress("UNCHECKED_CAST")
-    val dataAsMapWithNullFields = graphQLResponse.data as Map<String, Any?>?
+    val dataWithNullBubbling: Map<String, Any?>? = nullBubble(dataWithErrors, operation.rootField(), errors) as Map<String, Any?>?
     val falseVariablesCustomScalarAdapter =
       customScalarAdapters.newBuilder().falseVariables(variables.valueMap.filter { it.value == false }.keys).build()
-    val data = dataAsMapWithNullFields?.let { operation.adapter().fromJson(it.jsonReader(), falseVariablesCustomScalarAdapter) }
+    val data = dataWithNullBubbling?.let { operation.adapter().fromJson(it.jsonReader(), falseVariablesCustomScalarAdapter) }
     return ApolloResponse.Builder(operation, uuid4())
         .data(data)
-        .errors(graphQLResponse.errors)
+        .errors(errors.takeIf { it.isNotEmpty() })
         .cacheHeaders(batchReaderData.cacheHeaders)
         .cacheInfo(
             CacheInfo.Builder()
                 .fromCache(true)
-                .cacheHit(graphQLResponse.errors.isNullOrEmpty())
+                .cacheHit(errors.isEmpty())
                 .stale(batchReaderData.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
                 .build()
         )
         .build()
   }
 
-  private fun Map<String, Any?>.valueAtPath(path: List<Any>): Any? {
-    var value: Any? = this
-    for (key in path) {
-      value = when (value) {
-        is List<*> -> {
-          value[key as Int]
-        }
+  /**
+   * If a position contains an Error, replace it by a null if the field's type is nullable, bubble up if not.
+   */
+  private fun nullBubble(dataWithErrors: Any?, field: CompiledField, errors: MutableList<Error>): Any? {
+    return when (dataWithErrors) {
+      is Map<*, *> -> {
+        @Suppress("UNCHECKED_CAST")
+        dataWithErrors as Map<String, Any?>
+        dataWithErrors.mapValues { (key, value) ->
+          val selection = field.fieldSelections()[key]
+              ?: // Scalar
+              return@mapValues value
+          when (value) {
+            is Error -> {
+              errors.add(value)
+              if (selection.type is CompiledNotNullType) {
+                return null
+              }
+              null
+            }
 
-        is Map<*, *> -> {
-          @Suppress("UNCHECKED_CAST")
-          value as Map<String, Any?>
-          value[key]
-        }
-
-        is Error -> {
-          // Short circuit if we encounter a cache miss error
-          return value
-        }
-
-        else -> {
-          error("Unknown value type: $value")
+            else -> {
+              nullBubble(value, selection, errors).also {
+                if (it == null && selection.type is CompiledNotNullType) {
+                  return null
+                }
+              }
+            }
+          }
         }
       }
+
+      is List<*> -> {
+        dataWithErrors.mapIndexed { index, value ->
+          val listType = if (field.type is CompiledNotNullType) {
+            (field.type as CompiledNotNullType).ofType as? CompiledListType
+          } else {
+            field.type as? CompiledListType
+          }
+          if (listType == null) {
+            // Scalar
+            return@mapIndexed value
+          }
+          val elementType = listType.ofType
+          when (value) {
+            is Error -> {
+              errors.add(value)
+              if (elementType is CompiledNotNullType) {
+                return null
+              }
+              null
+            }
+
+            else -> {
+              nullBubble(value, field, errors).also {
+                if (it == null && elementType is CompiledNotNullType) {
+                  return null
+                }
+              }
+            }
+          }
+        }
+      }
+
+      else -> {
+        dataWithErrors
+      }
     }
-    return value
   }
 
-  private object PassThroughCoercing : Coercing<Any?> {
-    override fun deserialize(value: JsonValue): Any? {
-      return value
-    }
+  private fun CompiledSelection.fieldSelections(): Map<String, CompiledField> {
+    fun CompiledSelection.fieldSelections(): List<CompiledField> {
+      return when (this) {
+        is CompiledField -> selections.filterIsInstance<CompiledField>() + selections.filterIsInstance<CompiledFragment>()
+            .flatMap { it.fieldSelections() }
 
-    override fun parseLiteral(value: GQLValue): Any {
-      return value
+        is CompiledFragment -> selections.filterIsInstance<CompiledField>() + selections.filterIsInstance<CompiledFragment>()
+            .flatMap { it.fieldSelections() }
+      }
     }
-
-    override fun serialize(internalValue: Any?): JsonValue {
-      return internalValue
-    }
+    return fieldSelections().associateBy { it.responseName }
   }
 
   override fun <D : Fragment.Data> readFragment(

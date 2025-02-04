@@ -81,3 +81,22 @@ query UserByCategoryQuery($category: Category!) {
     category
   }
 }
+
+query WithFragmentsQuery {
+  me {
+    id
+    firstName0: firstName
+    ... on User {
+      lastName
+      ... on User {
+        nickName0: nickName
+      }
+    }
+    ... UserFields
+  }
+}
+
+fragment UserFields on User {
+  email0: email
+  category
+}

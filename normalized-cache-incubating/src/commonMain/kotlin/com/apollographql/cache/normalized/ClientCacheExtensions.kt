@@ -14,8 +14,6 @@ import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.api.http.get
-import com.apollographql.apollo.ast.GQLDocument
-import com.apollographql.apollo.ast.toGQLDocument
 import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.interceptor.ApolloInterceptor
@@ -285,19 +283,6 @@ fun <T> MutableExecutionOptions<T>.returnPartialResponses(returnPartialResponses
 )
 
 /**
- * @param schema The schema to use when reading the cache with partial results.
- */
-fun <T> MutableExecutionOptions<T>.schema(schema: GQLDocument) = addExecutionContext(
-    SchemaContext(schema)
-)
-
-/**
- * @param schema The schema to use when reading the cache with partial results.
- */
-fun <T> MutableExecutionOptions<T>.schema(schema: String) = schema(schema.toGQLDocument())
-
-
-/**
  * @param storeExpirationDate Whether to store the expiration date in the cache.
  *
  * The expiration date is computed from the response HTTP headers
@@ -432,10 +417,6 @@ internal val <D : Operation.Data> ApolloRequest<D>.watchContext: WatchContext?
 
 internal val <D : Operation.Data> ApolloRequest<D>.returnPartialResponses
   get() = executionContext[ReturnPartialResponsesContext]?.value ?: false
-
-internal val <D : Operation.Data> ApolloRequest<D>.schema: GQLDocument?
-  get() = executionContext[SchemaContext]?.value
-
 
 class CacheInfo private constructor(
     val cacheStartMillis: Long,
@@ -661,14 +642,6 @@ internal class ReturnPartialResponsesContext(val value: Boolean) : ExecutionCont
 
   companion object Key : ExecutionContext.Key<ReturnPartialResponsesContext>
 }
-
-internal class SchemaContext(val value: GQLDocument) : ExecutionContext.Element {
-  override val key: ExecutionContext.Key<*>
-    get() = Key
-
-  companion object Key : ExecutionContext.Key<SchemaContext>
-}
-
 
 internal fun <D : Operation.Data> ApolloRequest.Builder<D>.fetchFromCache(fetchFromCache: Boolean) = apply {
   addExecutionContext(FetchFromCacheContext(fetchFromCache))

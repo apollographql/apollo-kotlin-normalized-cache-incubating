@@ -26,7 +26,6 @@ import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.memoryCacheOnly
 import com.apollographql.cache.normalized.optimisticData
 import com.apollographql.cache.normalized.returnPartialResponses
-import com.apollographql.cache.normalized.schema
 import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.cache.normalized.storeReceiveDate
 import com.apollographql.cache.normalized.writeToCacheAsynchronously
@@ -202,7 +201,7 @@ internal class ApolloCacheInterceptor(
     }
   }
 
-  private suspend fun <D : Query.Data> readFromCache(
+  private fun <D : Query.Data> readFromCache(
       request: ApolloRequest<D>,
       customScalarAdapters: CustomScalarAdapters,
   ): ApolloResponse<D> {
@@ -217,7 +216,6 @@ internal class ApolloCacheInterceptor(
         customScalarAdapters = customScalarAdapters,
         cacheHeaders = cacheHeaders,
         returnPartialResponses = returnPartialResponses,
-        schema = if (returnPartialResponses) request.schema ?: error("schema is required for partial responses") else null,
     )
     return response.newBuilder()
         .requestUuid(request.requestUuid)
