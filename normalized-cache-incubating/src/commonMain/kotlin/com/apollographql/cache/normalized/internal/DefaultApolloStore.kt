@@ -222,11 +222,15 @@ internal class DefaultApolloStore(
   private fun propagateErrors(dataWithErrors: Any?, field: CompiledField, errors: MutableList<Error>): Any? {
     return when (dataWithErrors) {
       is Map<*, *> -> {
+        if (field.selections.isEmpty()) {
+          // This is a scalar represented as a Map.
+          return dataWithErrors
+        }
         @Suppress("UNCHECKED_CAST")
         dataWithErrors as Map<String, Any?>
         dataWithErrors.mapValues { (key, value) ->
           val selection = field.fieldSelection(key)
-              ?: // Scalar
+              ?: // Should never happen
               return@mapValues value
           when (value) {
             is Error -> {
@@ -249,16 +253,16 @@ internal class DefaultApolloStore(
       }
 
       is List<*> -> {
-        dataWithErrors.mapIndexed { index, value ->
-          val listType = if (field.type is CompiledNotNullType) {
-            (field.type as CompiledNotNullType).ofType as? CompiledListType
-          } else {
-            field.type as? CompiledListType
-          }
-          if (listType == null) {
-            // Scalar
-            return@mapIndexed value
-          }
+        val listType = if (field.type is CompiledNotNullType) {
+          (field.type as CompiledNotNullType).ofType
+        } else {
+          field.type
+        }
+        if (listType !is CompiledListType) {
+          // This is a scalar represented as a List.
+          return dataWithErrors
+        }
+        dataWithErrors.map { value ->
           val elementType = listType.ofType
           when (value) {
             is Error -> {

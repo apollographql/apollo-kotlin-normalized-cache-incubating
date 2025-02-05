@@ -79,6 +79,7 @@ query UserByCategoryQuery($category: Category!) {
     firstName
     lastName
     category
+    moreInfo
   }
 }
 

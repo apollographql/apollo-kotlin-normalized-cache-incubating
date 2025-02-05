@@ -480,7 +480,8 @@ class CachePartialResultTest {
               "category": {
                 "code": 1,
                 "name": "First"
-              }
+              },
+              "moreInfo": [0, "no", false, {}, []]
             }
           }
         }
@@ -510,6 +511,7 @@ class CachePartialResultTest {
                           code = 1,
                           name = "First"
                       ),
+                      moreInfo = listOf(0, "no", false, mapOf<String, Any?>(), emptyList<Any?>()),
                       id = "1",
                       __typename = "User",
                   )
