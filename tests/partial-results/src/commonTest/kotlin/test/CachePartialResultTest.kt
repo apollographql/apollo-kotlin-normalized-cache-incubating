@@ -7,9 +7,12 @@ import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheControlCacheResolver
+import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
+import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
@@ -485,7 +488,13 @@ class CachePartialResultTest {
     )
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .normalizedCache(MemoryCacheFactory())
+        .store(
+            ApolloStore(
+                normalizedCacheFactory = MemoryCacheFactory(),
+                cacheKeyGenerator = IdCacheKeyGenerator(),
+                cacheResolver = IdCacheKeyResolver()
+            )
+        )
         .returnPartialResponses(true)
         .build()
         .use { apolloClient ->
@@ -495,7 +504,6 @@ class CachePartialResultTest {
           assertEquals(
               UserByCategoryQuery.Data(
                   UserByCategoryQuery.User(
-
                       firstName = "John",
                       lastName = "Smith",
                       category = Category(
@@ -516,6 +524,24 @@ class CachePartialResultTest {
               networkResult.data,
               cacheResult.data
           )
+
+          // Remove the category from the cache
+          apolloClient.apolloStore.accessCache { cache ->
+            val record = cache.loadRecord("User:1", CacheHeaders.NONE)!!
+            cache.remove(CacheKey("User", "1"), false)
+            cache.merge(Record(record.key, record.fields - "category"), CacheHeaders.NONE, DefaultRecordMerger)
+          }
+          val cacheMissResult = apolloClient.query(UserByCategoryQuery(Category(2, "Second")))
+              .fetchPolicy(FetchPolicy.CacheOnly)
+              .execute()
+          // Due to null bubbling the whole data is null
+          assertNull(cacheMissResult.data)
+          assertErrorsEquals(
+              listOf(
+                  Error.Builder("Object 'User:1' has no field named 'category' in the cache").path(listOf("user", "category")).build()
+              ),
+              cacheMissResult.errors
+          )
         }
   }
 
@@ -530,6 +556,14 @@ class CachePartialResultTest {
               "__typename": "User",
               "id": "1",
               "firstName0": "John",
+              "mainProject": {
+                "id": "1",
+                "lead0": {
+                  "id": "2",
+                  "__typename": "User",
+                  "firstName": "Jane"
+                }
+              },
               "lastName": "Smith",
               "nickName0": "JS",
               "email0": "jdoe@example.com",
@@ -557,6 +591,14 @@ class CachePartialResultTest {
                       __typename = "User",
                       id = "1",
                       firstName0 = "John",
+                      mainProject = WithFragmentsQuery.MainProject(
+                          id = "1",
+                          lead0 = WithFragmentsQuery.Lead0(
+                              id = "2",
+                              __typename = "User",
+                              firstName = "Jane",
+                          ),
+                      ),
                       onUser = WithFragmentsQuery.OnUser(
                           lastName = "Smith",
                           onUser = WithFragmentsQuery.OnUser1(
@@ -584,6 +626,49 @@ class CachePartialResultTest {
           assertEquals(
               networkResult.data,
               cacheResult.data
+          )
+
+          // Remove lead from the cache
+          apolloClient.apolloStore.remove(CacheKey("User", "2"))
+
+          val cacheMissResult = apolloClient.query(WithFragmentsQuery())
+              .fetchPolicy(FetchPolicy.CacheOnly)
+              .execute()
+          assertEquals(
+              WithFragmentsQuery.Data(
+                  WithFragmentsQuery.Me(
+                      __typename = "User",
+                      id = "1",
+                      firstName0 = "John",
+                      mainProject = WithFragmentsQuery.MainProject(
+                          id = "1",
+                          lead0 = null,
+                      ),
+                      onUser = WithFragmentsQuery.OnUser(
+                          lastName = "Smith",
+                          onUser = WithFragmentsQuery.OnUser1(
+                              nickName0 = "JS"
+                          ),
+                          __typename = "User",
+                      ),
+                      userFields = UserFields(
+                          email0 = "jdoe@example.com",
+                          category = Category(
+                              code = 1,
+                              name = "First"
+                          ),
+                          id = "1",
+                          __typename = "User",
+                      ),
+                  )
+              ),
+              cacheMissResult.data
+          )
+          assertErrorsEquals(
+              listOf(
+                  Error.Builder("Object 'User:2' not found in the cache").path(listOf("me", "mainProject", "lead0")).build()
+              ),
+              cacheMissResult.errors
           )
         }
   }

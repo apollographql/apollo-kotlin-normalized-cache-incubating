@@ -225,7 +225,7 @@ internal class DefaultApolloStore(
         @Suppress("UNCHECKED_CAST")
         dataWithErrors as Map<String, Any?>
         dataWithErrors.mapValues { (key, value) ->
-          val selection = field.fieldSelections()[key]
+          val selection = field.fieldSelection(key)
               ?: // Scalar
               return@mapValues value
           when (value) {
@@ -286,7 +286,7 @@ internal class DefaultApolloStore(
     }
   }
 
-  private fun CompiledSelection.fieldSelections(): Map<String, CompiledField> {
+  private fun CompiledSelection.fieldSelection(responseName: String): CompiledField? {
     fun CompiledSelection.fieldSelections(): List<CompiledField> {
       return when (this) {
         is CompiledField -> selections.filterIsInstance<CompiledField>() + selections.filterIsInstance<CompiledFragment>()
@@ -296,7 +296,15 @@ internal class DefaultApolloStore(
             .flatMap { it.fieldSelections() }
       }
     }
-    return fieldSelections().associateBy { it.responseName }
+    // Fields can be selected multiple times, combine the selections
+    return fieldSelections().filter { it.responseName == responseName }.reduceOrNull { acc, compiledField ->
+      CompiledField.Builder(
+          name = acc.name,
+          type = acc.type,
+      )
+          .selections(acc.selections + compiledField.selections)
+          .build()
+    }
   }
 
   override fun <D : Fragment.Data> readFragment(

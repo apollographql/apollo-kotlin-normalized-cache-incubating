@@ -94,6 +94,22 @@ query WithFragmentsQuery {
     }
     ... UserFields
   }
+
+  me {
+    firstName0: firstName
+    mainProject {
+      id
+      lead0: lead {
+        id
+      }
+    }
+    mainProject {
+      lead0: lead {
+        id
+        firstName
+      }
+    }
+  }
 }
 
 fragment UserFields on User {
