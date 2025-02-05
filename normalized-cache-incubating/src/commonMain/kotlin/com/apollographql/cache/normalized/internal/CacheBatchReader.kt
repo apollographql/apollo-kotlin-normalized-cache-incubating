@@ -118,7 +118,7 @@ internal class CacheBatchReader(
           } else {
             if (returnPartialResponses) {
               data[pendingReference.path] =
-                cacheMissError(key = pendingReference.key, fieldName = null, stale = false, path = pendingReference.path)
+                cacheMissError(CacheMissException(key = pendingReference.key, fieldName = null, stale = false), path = pendingReference.path)
               return@forEach
             } else {
               throw CacheMissException(pendingReference.key)
@@ -292,22 +292,19 @@ internal class CacheBatchReader(
     }
   }
 
-  private fun cacheMissError(key: String, fieldName: String?, stale: Boolean, path: List<Any>): Error {
-    val message = if (fieldName == null) {
-      "Object '$key' not found in the cache"
+  private fun cacheMissError(exception: CacheMissException, path: List<Any>): Error {
+    val message = if (exception.fieldName == null) {
+      "Object '${exception.key}' not found in the cache"
     } else {
-      if (stale) {
-        "Field '$key' on object '$fieldName' is stale in the cache"
+      if (exception.stale) {
+        "Field '${exception.key}' on object '${exception.fieldName}' is stale in the cache"
       } else {
-        "Object '$key' has no field named '$fieldName' in the cache"
+        "Object '${exception.key}' has no field named '${exception.fieldName}' in the cache"
       }
     }
     return Error.Builder(message)
-        .path(path)
+        .path(path = path)
+        .putExtension("exception", exception)
         .build()
-  }
-
-  private fun cacheMissError(exception: CacheMissException, path: List<Any>): Error {
-    return cacheMissError(key = exception.key, fieldName = exception.fieldName, stale = exception.stale, path = path)
   }
 }

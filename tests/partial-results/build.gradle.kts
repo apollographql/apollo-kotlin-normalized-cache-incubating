@@ -41,7 +41,6 @@ apollo {
 
     plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin") {
       argument("packageName", packageName.get())
-      argument("generateSchema", true)
     }
 
     mapScalar("Category", "test.Category", "test.CategoryAdapter")

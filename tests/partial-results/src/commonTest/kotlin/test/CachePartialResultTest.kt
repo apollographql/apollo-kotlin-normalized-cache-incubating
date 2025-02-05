@@ -6,9 +6,11 @@ import com.apollographql.apollo.api.Error.Location
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.CacheControlCacheResolver
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
+import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
@@ -16,14 +18,17 @@ import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.returnPartialResponses
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storePartialResponses
+import com.apollographql.cache.normalized.storeReceiveDate
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import okio.use
+import test.cache.Cache
 import test.fragment.UserFields
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.time.Duration
 
 class CachePartialResultTest {
   private lateinit var mockServer: MockServer
@@ -583,6 +588,70 @@ class CachePartialResultTest {
         }
   }
 
+  @Test
+  fun cacheControl() = runTest(before = { setUp() }, after = { tearDown() }) {
+    mockServer.enqueueString(
+        // language=JSON
+        """
+        {
+          "data": {
+            "me": {
+              "__typename": "User",
+              "id": "1",
+              "firstName": "John",
+              "lastName": "Smith",
+              "nickName": "JS"
+            }
+          }
+        }
+        """
+    )
+    ApolloClient.Builder()
+        .serverUrl(mockServer.url())
+        .normalizedCache(MemoryCacheFactory(), cacheResolver = CacheControlCacheResolver(SchemaCoordinatesMaxAgeProvider(Cache.maxAges, Duration.INFINITE)))
+        .storeReceiveDate(true)
+        .returnPartialResponses(true)
+        .build()
+        .use { apolloClient ->
+          val networkResult = apolloClient.query(MeWithNickNameQuery())
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .execute()
+          assertEquals(
+              MeWithNickNameQuery.Data(
+                  MeWithNickNameQuery.Me(
+                      __typename = "User",
+                      id = "1",
+                      firstName = "John",
+                      lastName = "Smith",
+                      nickName = "JS"
+                  )
+              ),
+              networkResult.data
+          )
+
+          val cacheMissResult = apolloClient.query(MeWithNickNameQuery())
+              .fetchPolicy(FetchPolicy.CacheOnly)
+              .execute()
+          assertEquals(
+              MeWithNickNameQuery.Data(
+                  MeWithNickNameQuery.Me(
+                      id = "1",
+                      firstName = "John",
+                      lastName = "Smith",
+                      nickName = null,
+                      __typename = "User"
+                  )
+              ),
+              cacheMissResult.data
+          )
+          assertErrorsEquals(
+              listOf(
+                  Error.Builder("Field 'User:1' on object 'nickName' is stale in the cache").path(listOf("me", "nickName")).build()
+              ),
+              cacheMissResult.errors
+          )
+        }
+  }
 }
 
 /**
@@ -592,8 +661,6 @@ private data class ComparableError(
     val message: String,
     val locations: List<Location>?,
     val path: List<Any>?,
-    val extensions: Map<String, Any?>?,
-    val nonStandardFields: Map<String, Any?>?,
 )
 
 private fun assertErrorsEquals(expected: Iterable<Error>?, actual: Iterable<Error>?) =
@@ -602,15 +669,11 @@ private fun assertErrorsEquals(expected: Iterable<Error>?, actual: Iterable<Erro
         message = it.message,
         locations = it.locations,
         path = it.path,
-        extensions = it.extensions,
-        nonStandardFields = it.nonStandardFields
     )
   }, actual?.map {
     ComparableError(
         message = it.message,
         locations = it.locations,
         path = it.path,
-        extensions = it.extensions,
-        nonStandardFields = it.nonStandardFields
     )
   })
