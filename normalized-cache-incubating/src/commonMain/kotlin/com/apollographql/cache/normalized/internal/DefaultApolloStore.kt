@@ -128,11 +128,11 @@ internal class DefaultApolloStore(
     return if (returnPartialResponses) {
       readOperationPartial(operation, customScalarAdapters, cacheHeaders)
     } else {
-      readOperationThrowCacheMiss(operation, customScalarAdapters, cacheHeaders)
+      readOperationCacheMissException(operation, customScalarAdapters, cacheHeaders)
     }
   }
 
-  private fun <D : Operation.Data> readOperationThrowCacheMiss(
+  private fun <D : Operation.Data> readOperationCacheMissException(
       operation: Operation<D>,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
@@ -198,10 +198,10 @@ internal class DefaultApolloStore(
     val errors = mutableListOf<Error>()
 
     @Suppress("UNCHECKED_CAST")
-    val dataWithNullBubbling: Map<String, Any?>? = nullBubble(dataWithErrors, operation.rootField(), errors) as Map<String, Any?>?
+    val dataWithNulls: Map<String, Any?>? = propagateErrors(dataWithErrors, operation.rootField(), errors) as Map<String, Any?>?
     val falseVariablesCustomScalarAdapter =
       customScalarAdapters.newBuilder().falseVariables(variables.valueMap.filter { it.value == false }.keys).build()
-    val data = dataWithNullBubbling?.let { operation.adapter().fromJson(it.jsonReader(), falseVariablesCustomScalarAdapter) }
+    val data = dataWithNulls?.let { operation.adapter().fromJson(it.jsonReader(), falseVariablesCustomScalarAdapter) }
     return ApolloResponse.Builder(operation, uuid4())
         .data(data)
         .errors(errors.takeIf { it.isNotEmpty() })
@@ -217,9 +217,9 @@ internal class DefaultApolloStore(
   }
 
   /**
-   * If a position contains an Error, replace it by a null if the field's type is nullable, bubble up if not.
+   * If a position contains an Error, replace it by a null if the field's type is nullable, propagate the error if not.
    */
-  private fun nullBubble(dataWithErrors: Any?, field: CompiledField, errors: MutableList<Error>): Any? {
+  private fun propagateErrors(dataWithErrors: Any?, field: CompiledField, errors: MutableList<Error>): Any? {
     return when (dataWithErrors) {
       is Map<*, *> -> {
         @Suppress("UNCHECKED_CAST")
@@ -238,7 +238,7 @@ internal class DefaultApolloStore(
             }
 
             else -> {
-              nullBubble(value, selection, errors).also {
+              propagateErrors(value, selection, errors).also {
                 if (it == null && selection.type is CompiledNotNullType) {
                   return null
                 }
@@ -270,7 +270,7 @@ internal class DefaultApolloStore(
             }
 
             else -> {
-              nullBubble(value, field, errors).also {
+              propagateErrors(value, field, errors).also {
                 if (it == null && elementType is CompiledNotNullType) {
                   return null
                 }
