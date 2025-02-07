@@ -1,8 +1,13 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.ApolloRequest
+import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Error.Location
+import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.interceptor.ApolloInterceptor
+import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
@@ -15,15 +20,17 @@ import com.apollographql.cache.normalized.api.IdCacheKeyResolver
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
 import com.apollographql.cache.normalized.apolloStore
+import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.fetchPolicyInterceptor
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
-import com.apollographql.cache.normalized.returnPartialResponses
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.cache.normalized.storeReceiveDate
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
+import kotlinx.coroutines.flow.Flow
 import okio.use
 import test.cache.Cache
 import test.fragment.UserFields
@@ -65,7 +72,6 @@ class CachePartialResultTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory())
-        .returnPartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(MeWithoutNickNameWithEmailQuery())
@@ -88,7 +94,7 @@ class CachePartialResultTest {
           )
 
           val cacheResult = apolloClient.query(MeWithoutNickNameWithoutEmailQuery())
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               MeWithoutNickNameWithoutEmailQuery.Data(
@@ -103,7 +109,7 @@ class CachePartialResultTest {
           )
 
           val cacheMissResult = apolloClient.query(MeWithNickNameQuery())
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               MeWithNickNameQuery.Data(
@@ -169,7 +175,6 @@ class CachePartialResultTest {
                 cacheResolver = IdCacheKeyResolver()
             )
         )
-        .returnPartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(UsersQuery(listOf("1", "2", "3")))
@@ -200,7 +205,7 @@ class CachePartialResultTest {
           )
 
           val cacheResult = apolloClient.query(UsersQuery(listOf("1", "2", "3")))
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               networkResult.data,
@@ -260,7 +265,6 @@ class CachePartialResultTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory())
-        .returnPartialResponses(true)
         .build()
         .use { apolloClient ->
           // Prime the cache
@@ -306,7 +310,7 @@ class CachePartialResultTest {
           // Remove project lead from the cache
           apolloClient.apolloStore.remove(CacheKey("User", "3"))
           val cacheResult = apolloClient.query(MeWithBestFriendQuery())
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               MeWithBestFriendQuery.Data(
@@ -348,7 +352,7 @@ class CachePartialResultTest {
           // Remove best friend from the cache
           apolloClient.apolloStore.remove(CacheKey("User", "2"))
           val cacheResult2 = apolloClient.query(MeWithBestFriendQuery())
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               MeWithBestFriendQuery.Data(
@@ -386,7 +390,7 @@ class CachePartialResultTest {
           // Remove project user from the cache
           apolloClient.apolloStore.remove(CacheKey("User", "4"))
           val cacheResult3 = apolloClient.query(MeWithBestFriendQuery())
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           // Due to null bubbling the whole data is null
           assertNull(cacheResult3.data)
@@ -433,7 +437,6 @@ class CachePartialResultTest {
                 cacheResolver = IdCacheKeyResolver()
             )
         )
-        .returnPartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(DefaultProjectQuery())
@@ -456,7 +459,7 @@ class CachePartialResultTest {
           )
 
           val cacheResult = apolloClient.query(DefaultProjectQuery())
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               networkResult.data,
@@ -496,7 +499,6 @@ class CachePartialResultTest {
                 cacheResolver = IdCacheKeyResolver()
             )
         )
-        .returnPartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(UserByCategoryQuery(Category(2, "Second")))
@@ -520,7 +522,7 @@ class CachePartialResultTest {
           )
 
           val cacheResult = apolloClient.query(UserByCategoryQuery(Category(2, "Second")))
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               networkResult.data,
@@ -534,7 +536,7 @@ class CachePartialResultTest {
             cache.merge(Record(record.key, record.fields - "category"), CacheHeaders.NONE, DefaultRecordMerger)
           }
           val cacheMissResult = apolloClient.query(UserByCategoryQuery(Category(2, "Second")))
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           // Due to null bubbling the whole data is null
           assertNull(cacheMissResult.data)
@@ -581,7 +583,6 @@ class CachePartialResultTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory())
-        .returnPartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(WithFragmentsQuery())
@@ -623,7 +624,7 @@ class CachePartialResultTest {
           )
 
           val cacheResult = apolloClient.query(WithFragmentsQuery())
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               networkResult.data,
@@ -634,7 +635,7 @@ class CachePartialResultTest {
           apolloClient.apolloStore.remove(CacheKey("User", "2"))
 
           val cacheMissResult = apolloClient.query(WithFragmentsQuery())
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               WithFragmentsQuery.Data(
@@ -697,7 +698,6 @@ class CachePartialResultTest {
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory(), cacheResolver = CacheControlCacheResolver(SchemaCoordinatesMaxAgeProvider(Cache.maxAges, Duration.INFINITE)))
         .storeReceiveDate(true)
-        .returnPartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(MeWithNickNameQuery())
@@ -717,7 +717,7 @@ class CachePartialResultTest {
           )
 
           val cacheMissResult = apolloClient.query(MeWithNickNameQuery())
-              .fetchPolicy(FetchPolicy.CacheOnly)
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               MeWithNickNameQuery.Data(
@@ -738,6 +738,17 @@ class CachePartialResultTest {
               cacheMissResult.errors
           )
         }
+  }
+}
+
+val PartialCacheOnlyInterceptor = object : ApolloInterceptor {
+  override fun <D : Operation.Data> intercept(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
+    return chain.proceed(
+        request = request
+            .newBuilder()
+            .fetchFromCache(true)
+            .build()
+    )
   }
 }
 

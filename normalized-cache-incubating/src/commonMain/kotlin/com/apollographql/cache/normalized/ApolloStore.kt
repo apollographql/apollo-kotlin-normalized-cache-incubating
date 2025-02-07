@@ -57,23 +57,18 @@ interface ApolloStore {
   /**
    * Reads an operation from the store.
    *
-   * When [returnPartialResponses] is `false`, in case of missing data the returned [ApolloResponse.data] is `null` and
-   * [ApolloResponse.exception] is a [com.apollographql.apollo.exception.CacheMissException].
-   *
-   * When [returnPartialResponses] is `true`, the returned [ApolloResponse.data] has `null` values for any missing fields if their
-   * type is nullable, bubbling up to their parent otherwise. Missing fields have a corresponding [com.apollographql.apollo.api.Error]
+   * The returned [ApolloResponse.data] has `null` values for any missing fields if their type is nullable, propagating up to their parent
+   * otherwise. Missing fields have a corresponding [com.apollographql.apollo.api.Error]
    * in [ApolloResponse.errors].
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
    * @param operation the operation to read
-   * @param returnPartialResponses whether to return partial responses
    */
   fun <D : Operation.Data> readOperation(
       operation: Operation<D>,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
-      returnPartialResponses: Boolean = false,
   ): ApolloResponse<D>
 
   /**

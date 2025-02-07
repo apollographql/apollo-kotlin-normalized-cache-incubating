@@ -148,6 +148,7 @@ internal class CacheBatchReader(
                 )
             ).unwrap()
           } catch (e: CacheMissException) {
+            if (e.stale) isStale = true
             if (returnPartialResponses) {
               cacheMissError(e, pendingReference.path + it.responseName)
             } else {
@@ -232,6 +233,7 @@ internal class CacheBatchReader(
                 )
             ).unwrap()
           } catch (e: CacheMissException) {
+            if (e.stale) isStale = true
             if (returnPartialResponses) {
               cacheMissError(e, path + it.responseName)
             } else {

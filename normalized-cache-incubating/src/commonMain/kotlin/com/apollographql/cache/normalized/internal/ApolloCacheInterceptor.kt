@@ -25,7 +25,6 @@ import com.apollographql.cache.normalized.doNotStore
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.memoryCacheOnly
 import com.apollographql.cache.normalized.optimisticData
-import com.apollographql.cache.normalized.returnPartialResponses
 import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.cache.normalized.storeReceiveDate
 import com.apollographql.cache.normalized.writeToCacheAsynchronously
@@ -210,12 +209,10 @@ internal class ApolloCacheInterceptor(
       cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
     }
     val startMillis = currentTimeMillis()
-    val returnPartialResponses = request.returnPartialResponses
     val response = store.readOperation(
         operation = request.operation,
         customScalarAdapters = customScalarAdapters,
         cacheHeaders = cacheHeaders,
-        returnPartialResponses = returnPartialResponses,
     )
     return response.newBuilder()
         .requestUuid(request.requestUuid)

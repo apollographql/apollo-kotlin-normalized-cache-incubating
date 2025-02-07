@@ -12,7 +12,6 @@ import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.variables
-import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.ApolloStore.ReadResult
 import com.apollographql.cache.normalized.CacheInfo
@@ -120,66 +119,6 @@ internal class DefaultApolloStore(
   }
 
   override fun <D : Operation.Data> readOperation(
-      operation: Operation<D>,
-      customScalarAdapters: CustomScalarAdapters,
-      cacheHeaders: CacheHeaders,
-      returnPartialResponses: Boolean,
-  ): ApolloResponse<D> {
-    return if (returnPartialResponses) {
-      readOperationPartial(operation, customScalarAdapters, cacheHeaders)
-    } else {
-      readOperationCacheMissException(operation, customScalarAdapters, cacheHeaders)
-    }
-  }
-
-  private fun <D : Operation.Data> readOperationCacheMissException(
-      operation: Operation<D>,
-      customScalarAdapters: CustomScalarAdapters,
-      cacheHeaders: CacheHeaders,
-  ): ApolloResponse<D> {
-    return try {
-      val variables = operation.variables(customScalarAdapters, true)
-      val batchReaderData = operation.readDataFromCacheInternal(
-          cache = cache,
-          cacheResolver = cacheResolver,
-          cacheHeaders = cacheHeaders,
-          cacheKey = CacheKey.rootKey(),
-          variables = variables,
-          fieldKeyGenerator = fieldKeyGenerator,
-          returnPartialResponses = false,
-      )
-      val readResult = ReadResult(
-          data = batchReaderData.toData(operation.adapter(), customScalarAdapters, variables),
-          cacheHeaders = batchReaderData.cacheHeaders,
-      )
-      ApolloResponse.Builder(operation, uuid4())
-          .data(readResult.data)
-          .cacheHeaders(readResult.cacheHeaders)
-          .cacheInfo(
-              CacheInfo.Builder()
-                  .fromCache(true)
-                  .cacheHit(true)
-                  .stale(readResult.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
-                  .build()
-          )
-          .build()
-    } catch (e: CacheMissException) {
-      ApolloResponse.Builder(operation, uuid4())
-          .data(null)
-          .exception(e)
-          .cacheInfo(
-              CacheInfo.Builder()
-                  .fromCache(true)
-                  .cacheHit(false)
-                  .cacheMissException(e)
-                  .stale(e.stale)
-                  .build()
-          )
-          .build()
-    }
-  }
-
-  private fun <D : Operation.Data> readOperationPartial(
       operation: Operation<D>,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,

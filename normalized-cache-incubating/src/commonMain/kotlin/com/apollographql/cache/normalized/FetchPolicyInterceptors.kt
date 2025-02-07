@@ -32,7 +32,7 @@ val CacheOnlyInterceptor = object : ApolloInterceptor {
             .newBuilder()
             .fetchFromCache(true)
             .build()
-    )
+    ).map { it.cacheMissAsException() }
   }
 }
 
@@ -56,7 +56,7 @@ val CacheFirstInterceptor = object : ApolloInterceptor {
               .newBuilder()
               .fetchFromCache(true)
               .build()
-      ).single()
+      ).single().cacheMissAsException()
       emit(cacheResponse.newBuilder().isLast(cacheResponse.exception == null).build())
       if (cacheResponse.exception == null) {
         return@flow
@@ -102,7 +102,7 @@ val NetworkFirstInterceptor = object : ApolloInterceptor {
               .newBuilder()
               .fetchFromCache(true)
               .build()
-      ).single()
+      ).single().cacheMissAsException()
       emit(cacheResponse)
     }
   }
@@ -119,13 +119,28 @@ val CacheAndNetworkInterceptor = object : ApolloInterceptor {
               .newBuilder()
               .fetchFromCache(true)
               .build()
-      ).single()
+      ).single().cacheMissAsException()
 
       emit(cacheResponse.newBuilder().isLast(false).build())
 
       val networkResponses = chain.proceed(request)
       emitAll(networkResponses)
     }
+  }
+}
+
+private fun <D : Operation.Data> ApolloResponse<D>.cacheMissAsException(): ApolloResponse<D> {
+  return if (cacheInfo!!.isCacheHit) {
+    this
+  } else {
+    val cacheMissException = errors.orEmpty().mapNotNull { it.extensions?.get("exception") as? ApolloException }.reduceOrNull { acc, e ->
+      acc.addSuppressed(e)
+      acc
+    }
+    newBuilder()
+        .exception(cacheMissException)
+        .data(null)
+        .build()
   }
 }
 

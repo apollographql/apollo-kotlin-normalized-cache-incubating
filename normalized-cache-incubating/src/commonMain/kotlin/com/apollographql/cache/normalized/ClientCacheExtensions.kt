@@ -273,16 +273,6 @@ fun <T> MutableExecutionOptions<T>.storeReceiveDate(storeReceiveDate: Boolean) =
 )
 
 /**
- * @param returnPartialResponses Whether to return partial data from the cache (`true`), or no data with a [CacheMissException] whenever a field
- * is missing (`false`).
- *
- * Default: false
- */
-fun <T> MutableExecutionOptions<T>.returnPartialResponses(returnPartialResponses: Boolean) = addExecutionContext(
-    ReturnPartialResponsesContext(returnPartialResponses)
-)
-
-/**
  * @param storeExpirationDate Whether to store the expiration date in the cache.
  *
  * The expiration date is computed from the response HTTP headers
@@ -415,9 +405,6 @@ internal val ExecutionOptions.cacheHeaders: CacheHeaders
 internal val <D : Operation.Data> ApolloRequest<D>.watchContext: WatchContext?
   get() = executionContext[WatchContext]
 
-internal val <D : Operation.Data> ApolloRequest<D>.returnPartialResponses
-  get() = executionContext[ReturnPartialResponsesContext]?.value ?: false
-
 class CacheInfo private constructor(
     val cacheStartMillis: Long,
     val cacheEndMillis: Long,
@@ -430,20 +417,17 @@ class CacheInfo private constructor(
     val isFromCache: Boolean,
 
     /**
-     * True if all the fields are found in the cache, false for full or partial cache misses.
+     * True if **all** the fields are found in the cache, false for full or partial cache misses.
      */
     val isCacheHit: Boolean,
 
     /**
      * The exception that occurred while reading the cache.
-     * Always `null` if [isFromCache] is false, or when partial responses are enabled.
-     * @see MutableExecutionOptions.returnPartialResponses
      */
     val cacheMissException: CacheMissException?,
 
     /**
      * The exception that occurred while reading the network.
-     * Always `null` if [isFromCache] is true.
      */
     val networkException: ApolloException?,
 
@@ -636,18 +620,11 @@ internal class FetchFromCacheContext(val value: Boolean) : ExecutionContext.Elem
   companion object Key : ExecutionContext.Key<FetchFromCacheContext>
 }
 
-internal class ReturnPartialResponsesContext(val value: Boolean) : ExecutionContext.Element {
-  override val key: ExecutionContext.Key<*>
-    get() = Key
-
-  companion object Key : ExecutionContext.Key<ReturnPartialResponsesContext>
-}
-
-internal fun <D : Operation.Data> ApolloRequest.Builder<D>.fetchFromCache(fetchFromCache: Boolean) = apply {
+fun <D : Operation.Data> ApolloRequest.Builder<D>.fetchFromCache(fetchFromCache: Boolean) = apply {
   addExecutionContext(FetchFromCacheContext(fetchFromCache))
 }
 
-internal val <D : Operation.Data> ApolloRequest<D>.fetchFromCache
+val <D : Operation.Data> ApolloRequest<D>.fetchFromCache
   get() = executionContext[FetchFromCacheContext]?.value ?: false
 
 fun <D : Operation.Data> ApolloResponse.Builder<D>.cacheHeaders(cacheHeaders: CacheHeaders) =
