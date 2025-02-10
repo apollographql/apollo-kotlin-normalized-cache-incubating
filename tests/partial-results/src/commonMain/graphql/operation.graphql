@@ -117,3 +117,15 @@ fragment UserFields on User {
   email0: email
   category
 }
+
+query MeWithEmployeeInfoQuery {
+  me @catch(to: NULL) {
+    firstName
+    lastName
+    employeeInfo {
+      id
+      salary @catch(to: THROW)
+      department
+    }
+  }
+}

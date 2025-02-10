@@ -733,7 +733,72 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Field 'User:1' on object 'nickName' is stale in the cache").path(listOf("me", "nickName")).build()
+                  Error.Builder("Field 'nickName' on object 'User:1' is stale in the cache").path(listOf("me", "nickName")).build()
+              ),
+              cacheMissResult.errors
+          )
+        }
+  }
+
+  @Test
+  fun cacheControlWithSemanticNonNull() = runTest(before = { setUp() }, after = { tearDown() }) {
+    mockServer.enqueueString(
+        // language=JSON
+        """
+        {
+          "data": {
+            "me": {
+              "__typename": "User",
+              "id": "1",
+              "firstName": "John",
+              "lastName": "Smith",
+              "employeeInfo": {
+                "id": "1",
+                "salary": 100000,
+                "department": "Engineering"
+              }
+            }
+          }
+        }
+        """
+    )
+    ApolloClient.Builder()
+        .serverUrl(mockServer.url())
+        .normalizedCache(MemoryCacheFactory(), cacheResolver = CacheControlCacheResolver(SchemaCoordinatesMaxAgeProvider(Cache.maxAges, Duration.INFINITE)))
+        .storeReceiveDate(true)
+        .build()
+        .use { apolloClient ->
+          val networkResult = apolloClient.query(MeWithEmployeeInfoQuery())
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .execute()
+          assertEquals(
+              MeWithEmployeeInfoQuery.Data(
+                  MeWithEmployeeInfoQuery.Me(
+                      __typename = "User",
+                      id = "1",
+                      firstName = "John",
+                      lastName = "Smith",
+                      employeeInfo = MeWithEmployeeInfoQuery.EmployeeInfo(
+                          id = "1",
+                          salary = 100000,
+                          department = "Engineering"
+                      )
+                  )
+              ),
+              networkResult.data
+          )
+
+          val cacheMissResult = apolloClient.query(MeWithEmployeeInfoQuery())
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
+              .execute()
+          assertEquals(
+              MeWithEmployeeInfoQuery.Data(null),
+              cacheMissResult.data
+          )
+          assertErrorsEquals(
+              listOf(
+                  Error.Builder("Field 'salary' on object 'User:1.employeeInfo' is stale in the cache")
+                      .path(listOf("me", "employeeInfo", "salary")).build()
               ),
               cacheMissResult.errors
           )

@@ -139,8 +139,19 @@ internal class DefaultApolloStore(
     @Suppress("UNCHECKED_CAST")
     val dataWithNulls: Map<String, Any?>? = propagateErrors(dataWithErrors, operation.rootField(), errors) as Map<String, Any?>?
     val falseVariablesCustomScalarAdapter =
-      customScalarAdapters.newBuilder().falseVariables(variables.valueMap.filter { it.value == false }.keys).build()
-    val data = dataWithNulls?.let { operation.adapter().fromJson(it.jsonReader(), falseVariablesCustomScalarAdapter) }
+      customScalarAdapters.newBuilder()
+          .falseVariables(variables.valueMap.filter { it.value == false }.keys)
+          .errors(errors)
+          .build()
+    val data = dataWithNulls?.let {
+      // Embed the data in a { "data": ... } object to match the expected paths of the operation adapter
+      val jsonReader = mapOf("data" to it).jsonReader()
+      jsonReader.beginObject()
+      jsonReader.nextName()
+      val data = operation.adapter().fromJson(jsonReader, falseVariablesCustomScalarAdapter)
+      jsonReader.endObject()
+      data
+    }
     return ApolloResponse.Builder(operation, uuid4())
         .data(data)
         .errors(errors.takeIf { it.isNotEmpty() })
