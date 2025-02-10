@@ -2,12 +2,12 @@
 DROP TABLE IF EXISTS records;
 
 CREATE TABLE IF NOT EXISTS field (
-  key TEXT NOT NULL,
+  record TEXT NOT NULL,
   field TEXT NOT NULL,
   value BLOB,
   metadata BLOB,
   received_date INTEGER,
   expiration_date INTEGER,
-  PRIMARY KEY (key, field) ON CONFLICT REPLACE
+  PRIMARY KEY (record, field) ON CONFLICT REPLACE
 )
 WITHOUT ROWID;

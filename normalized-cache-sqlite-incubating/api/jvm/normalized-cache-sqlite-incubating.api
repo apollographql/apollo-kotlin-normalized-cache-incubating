@@ -37,9 +37,9 @@ public final class com/apollographql/cache/normalized/sql/internal/fields/Field_
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getExpiration_date ()Ljava/lang/Long;
 	public final fun getField_ ()Ljava/lang/String;
-	public final fun getKey ()Ljava/lang/String;
 	public final fun getMetadata ()[B
 	public final fun getReceived_date ()Ljava/lang/Long;
+	public final fun getRecord ()Ljava/lang/String;
 	public final fun getValue_ ()[B
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
