@@ -299,7 +299,7 @@ internal class CacheBatchReader(
       "Object '${exception.key}' not found in the cache"
     } else {
       if (exception.stale) {
-        "Field '${exception.key}' on object '${exception.fieldName}' is stale in the cache"
+        "Field '${exception.fieldName}' on object '${exception.key}' is stale in the cache"
       } else {
         "Object '${exception.key}' has no field named '${exception.fieldName}' in the cache"
       }
