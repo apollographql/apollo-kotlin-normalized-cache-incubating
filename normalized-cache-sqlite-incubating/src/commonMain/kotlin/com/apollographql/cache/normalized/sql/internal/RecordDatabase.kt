@@ -25,12 +25,12 @@ internal class RecordDatabase(private val driver: SqlDriver) {
    * @param keys the keys of the records to select, size must be <= 999
    */
   fun selectRecords(keys: Collection<String>): List<Record> {
-    val fieldsByRecordKey: Map<String, List<Field_>> = fieldsQueries.selectRecords(keys).executeAsList().groupBy { it.key }
+    val fieldsByRecordKey: Map<String, List<Field_>> = fieldsQueries.selectRecords(keys).executeAsList().groupBy { it.record }
     return fieldsByRecordKey.toRecords()
   }
 
   fun selectAllRecords(): List<Record> {
-    val fieldsByRecordKey: Map<String, List<Field_>> = fieldsQueries.selectAllRecords().executeAsList().groupBy { it.key }
+    val fieldsByRecordKey: Map<String, List<Field_>> = fieldsQueries.selectAllRecords().executeAsList().groupBy { it.record }
     return fieldsByRecordKey.toRecords()
   }
 
@@ -63,7 +63,7 @@ internal class RecordDatabase(private val driver: SqlDriver) {
   fun insertOrUpdateRecord(record: Record) {
     for ((field, value) in record.fields) {
       insertOrUpdateField(
-          key = record.key,
+          record = record.key,
           field = field,
           value = value,
           metadata = record.metadata[field],
@@ -74,7 +74,7 @@ internal class RecordDatabase(private val driver: SqlDriver) {
   }
 
   private fun insertOrUpdateField(
-      key: String,
+      record: String,
       field: String,
       value: ApolloJsonElement,
       metadata: Map<String, ApolloJsonElement>?,
@@ -82,7 +82,7 @@ internal class RecordDatabase(private val driver: SqlDriver) {
       expirationDate: Long?,
   ) {
     fieldsQueries.insertOrUpdateField(
-        key = key,
+        record = record,
         field_ = field,
         value_ = ApolloJsonElementSerializer.serialize(value),
         metadata = metadata
