@@ -1,11 +1,21 @@
 package com.apollographql.cache.normalized.internal
 
+import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.CompiledField
+import com.apollographql.apollo.api.CompiledFragment
+import com.apollographql.apollo.api.CompiledListType
+import com.apollographql.apollo.api.CompiledNotNullType
+import com.apollographql.apollo.api.CompiledSelection
 import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.variables
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.ApolloStore.ReadResult
+import com.apollographql.cache.normalized.CacheInfo
+import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
@@ -19,7 +29,10 @@ import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.api.readDataFromCacheInternal
+import com.apollographql.cache.normalized.cacheHeaders
+import com.apollographql.cache.normalized.cacheInfo
 import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -109,7 +122,7 @@ internal class DefaultApolloStore(
       operation: Operation<D>,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
-  ): ReadResult<D> {
+  ): ApolloResponse<D> {
     val variables = operation.variables(customScalarAdapters, true)
     val batchReaderData = operation.readDataFromCacheInternal(
         cache = cache,
@@ -118,11 +131,123 @@ internal class DefaultApolloStore(
         cacheKey = CacheKey.rootKey(),
         variables = variables,
         fieldKeyGenerator = fieldKeyGenerator,
+        returnPartialResponses = true,
     )
-    return ReadResult(
-        data = batchReaderData.toData(operation.adapter(), customScalarAdapters, variables),
-        cacheHeaders = batchReaderData.cacheHeaders,
-    )
+    val dataWithErrors: Map<String, Any?> = batchReaderData.toMap()
+    val errors = mutableListOf<Error>()
+
+    @Suppress("UNCHECKED_CAST")
+    val dataWithNulls: Map<String, Any?>? = propagateErrors(dataWithErrors, operation.rootField(), errors) as Map<String, Any?>?
+    val falseVariablesCustomScalarAdapter =
+      customScalarAdapters.newBuilder().falseVariables(variables.valueMap.filter { it.value == false }.keys).build()
+    val data = dataWithNulls?.let { operation.adapter().fromJson(it.jsonReader(), falseVariablesCustomScalarAdapter) }
+    return ApolloResponse.Builder(operation, uuid4())
+        .data(data)
+        .errors(errors.takeIf { it.isNotEmpty() })
+        .cacheHeaders(batchReaderData.cacheHeaders)
+        .cacheInfo(
+            CacheInfo.Builder()
+                .fromCache(true)
+                .cacheHit(errors.isEmpty())
+                .stale(batchReaderData.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
+                .build()
+        )
+        .build()
+  }
+
+  /**
+   * If a position contains an Error, replace it by a null if the field's type is nullable, propagate the error if not.
+   */
+  private fun propagateErrors(dataWithErrors: Any?, field: CompiledField, errors: MutableList<Error>): Any? {
+    return when (dataWithErrors) {
+      is Map<*, *> -> {
+        if (field.selections.isEmpty()) {
+          // This is a scalar represented as a Map.
+          return dataWithErrors
+        }
+        @Suppress("UNCHECKED_CAST")
+        dataWithErrors as Map<String, Any?>
+        dataWithErrors.mapValues { (key, value) ->
+          val selection = field.fieldSelection(key)
+              ?: // Should never happen
+              return@mapValues value
+          when (value) {
+            is Error -> {
+              errors.add(value)
+              if (selection.type is CompiledNotNullType) {
+                return null
+              }
+              null
+            }
+
+            else -> {
+              propagateErrors(value, selection, errors).also {
+                if (it == null && selection.type is CompiledNotNullType) {
+                  return null
+                }
+              }
+            }
+          }
+        }
+      }
+
+      is List<*> -> {
+        val listType = if (field.type is CompiledNotNullType) {
+          (field.type as CompiledNotNullType).ofType
+        } else {
+          field.type
+        }
+        if (listType !is CompiledListType) {
+          // This is a scalar represented as a List.
+          return dataWithErrors
+        }
+        dataWithErrors.map { value ->
+          val elementType = listType.ofType
+          when (value) {
+            is Error -> {
+              errors.add(value)
+              if (elementType is CompiledNotNullType) {
+                return null
+              }
+              null
+            }
+
+            else -> {
+              propagateErrors(value, field, errors).also {
+                if (it == null && elementType is CompiledNotNullType) {
+                  return null
+                }
+              }
+            }
+          }
+        }
+      }
+
+      else -> {
+        dataWithErrors
+      }
+    }
+  }
+
+  private fun CompiledSelection.fieldSelection(responseName: String): CompiledField? {
+    fun CompiledSelection.fieldSelections(): List<CompiledField> {
+      return when (this) {
+        is CompiledField -> selections.filterIsInstance<CompiledField>() + selections.filterIsInstance<CompiledFragment>()
+            .flatMap { it.fieldSelections() }
+
+        is CompiledFragment -> selections.filterIsInstance<CompiledField>() + selections.filterIsInstance<CompiledFragment>()
+            .flatMap { it.fieldSelections() }
+      }
+    }
+    // Fields can be selected multiple times, combine the selections
+    return fieldSelections().filter { it.responseName == responseName }.reduceOrNull { acc, compiledField ->
+      CompiledField.Builder(
+          name = acc.name,
+          type = acc.type,
+      )
+          .selections(acc.selections + compiledField.selections)
+          .build()
+    }
   }
 
   override fun <D : Fragment.Data> readFragment(
@@ -140,6 +265,7 @@ internal class DefaultApolloStore(
         cacheKey = cacheKey,
         variables = variables,
         fieldKeyGenerator = fieldKeyGenerator,
+        returnPartialResponses = false,
     )
     return ReadResult(
         data = batchReaderData.toData(fragment.adapter(), customScalarAdapters, variables),

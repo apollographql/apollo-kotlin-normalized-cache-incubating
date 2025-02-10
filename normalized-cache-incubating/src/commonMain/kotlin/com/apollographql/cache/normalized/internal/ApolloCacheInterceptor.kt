@@ -9,7 +9,6 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.api.Subscription
 import com.apollographql.apollo.exception.ApolloException
-import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.exception.DefaultApolloException
 import com.apollographql.apollo.exception.apolloExceptionHandler
 import com.apollographql.apollo.interceptor.ApolloInterceptor
@@ -205,58 +204,28 @@ internal class ApolloCacheInterceptor(
       request: ApolloRequest<D>,
       customScalarAdapters: CustomScalarAdapters,
   ): ApolloResponse<D> {
-    val operation = request.operation
-    val startMillis = currentTimeMillis()
-
-    val readResult = try {
-      var cacheHeaders = request.cacheHeaders
-      if (request.memoryCacheOnly) {
-        cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
-      }
-      store.readOperation(
-          operation = operation,
-          customScalarAdapters = customScalarAdapters,
-          cacheHeaders = cacheHeaders,
-      )
-    } catch (e: CacheMissException) {
-      return ApolloResponse.Builder(
-          requestUuid = request.requestUuid,
-          operation = operation,
-      )
-          .exception(e)
-          .addExecutionContext(request.executionContext)
-          .cacheInfo(
-              CacheInfo.Builder()
-                  .cacheStartMillis(startMillis)
-                  .cacheEndMillis(currentTimeMillis())
-                  .cacheHit(false)
-                  .cacheMissException(e)
-                  .stale(e.stale)
-                  .build()
-          )
-          .isLast(true)
-          .build()
+    var cacheHeaders = request.cacheHeaders
+    if (request.memoryCacheOnly) {
+      cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
     }
-
-    return ApolloResponse.Builder(
-        requestUuid = request.requestUuid,
-        operation = operation,
+    val startMillis = currentTimeMillis()
+    val response = store.readOperation(
+        operation = request.operation,
+        customScalarAdapters = customScalarAdapters,
+        cacheHeaders = cacheHeaders,
     )
-        .data(readResult.data)
+    return response.newBuilder()
+        .requestUuid(request.requestUuid)
         .addExecutionContext(request.executionContext)
-        .cacheHeaders(readResult.cacheHeaders)
         .cacheInfo(
-            CacheInfo.Builder()
+            response.cacheInfo!!.newBuilder()
                 .cacheStartMillis(startMillis)
                 .cacheEndMillis(currentTimeMillis())
-                .cacheHit(true)
-                .stale(readResult.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
                 .build()
         )
         .isLast(true)
         .build()
   }
-
 
   private fun <D : Operation.Data> readFromNetwork(
       request: ApolloRequest<D>,

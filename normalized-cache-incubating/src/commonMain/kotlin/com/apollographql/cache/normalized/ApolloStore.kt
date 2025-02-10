@@ -1,5 +1,6 @@
 package com.apollographql.cache.normalized
 
+import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Fragment
@@ -56,20 +57,19 @@ interface ApolloStore {
   /**
    * Reads an operation from the store.
    *
+   * The returned [ApolloResponse.data] has `null` values for any missing fields if their type is nullable, propagating up to their parent
+   * otherwise. Missing fields have a corresponding [com.apollographql.apollo.api.Error]
+   * in [ApolloResponse.errors].
+   *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
    * @param operation the operation to read
-   *
-   * @throws [com.apollographql.apollo.exception.CacheMissException] on cache miss
-   * @throws [com.apollographql.apollo.exception.ApolloException] on other cache read errors
-   *
-   * @return the operation data with optional headers from the [NormalizedCache]
    */
   fun <D : Operation.Data> readOperation(
       operation: Operation<D>,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
-  ): ReadResult<D>
+  ): ApolloResponse<D>
 
   /**
    * Reads a fragment from the store.

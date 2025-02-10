@@ -111,7 +111,7 @@ class NormalizationTest {
         ),
     )
 
-    val data = apolloStore.readOperation(Issue2818Query()).data
+    val data = apolloStore.readOperation(Issue2818Query()).data!!
     assertEquals("section-name", data.home.sectionA?.name)
     assertEquals("section-id", data.home.sectionFragment.sectionA?.id)
     assertEquals("https://...", data.home.sectionFragment.sectionA?.imageUrl)

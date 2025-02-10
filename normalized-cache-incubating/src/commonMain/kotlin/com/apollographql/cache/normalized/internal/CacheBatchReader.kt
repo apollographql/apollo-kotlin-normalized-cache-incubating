@@ -5,6 +5,7 @@ import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.CompiledFragment
 import com.apollographql.apollo.api.CompiledSelection
 import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.json.MapJsonReader
 import com.apollographql.apollo.exception.CacheMissException
@@ -31,6 +32,7 @@ internal class CacheBatchReader(
     private val rootSelections: List<CompiledSelection>,
     private val rootField: CompiledField,
     private val fieldKeyGenerator: FieldKeyGenerator,
+    private val returnPartialResponses: Boolean,
 ) {
   /**
    * @param key: the key of the record we need to fetch
@@ -45,10 +47,11 @@ internal class CacheBatchReader(
   )
 
   /**
-   * The objects read from the cache with only the fields that are selected and maybe some values changed
-   * The key is the path to the object
+   * The objects read from the cache, as a `Map<String, Any?>` with only the fields that are selected and maybe some values changed.
+   * Can also be an [Error] in case of a cache miss.
+   * The key is the path to the object.
    */
-  private val data = mutableMapOf<List<Any>, Map<String, Any?>>()
+  private val data = mutableMapOf<List<Any>, Any>()
 
   /**
    * True if at least one of the resolved fields is stale
@@ -61,9 +64,6 @@ internal class CacheBatchReader(
     val fields = mutableListOf<CompiledField>()
   }
 
-  /**
-   *
-   */
   private fun collect(selections: List<CompiledSelection>, parentType: String, typename: String?, state: CollectState) {
     selections.forEach { compiledSelection ->
       when (compiledSelection) {
@@ -116,7 +116,13 @@ internal class CacheBatchReader(
             // This happens the very first time we read the cache
             record = Record(pendingReference.key, emptyMap())
           } else {
-            throw CacheMissException(pendingReference.key)
+            if (returnPartialResponses) {
+              data[pendingReference.path] =
+                cacheMissError(CacheMissException(key = pendingReference.key, fieldName = null, stale = false), path = pendingReference.path)
+              return@forEach
+            } else {
+              throw CacheMissException(pendingReference.key)
+            }
           }
         }
 
@@ -128,18 +134,27 @@ internal class CacheBatchReader(
             return@mapNotNull null
           }
 
-          val value = cacheResolver.resolveField(
-              ResolverContext(
-                  field = it,
-                  variables = variables,
-                  parent = record,
-                  parentKey = record.key,
-                  parentType = pendingReference.parentType,
-                  cacheHeaders = cacheHeaders,
-                  fieldKeyGenerator = fieldKeyGenerator,
-                  path = pendingReference.fieldPath + it,
-              )
-          ).unwrap()
+          val value = try {
+            cacheResolver.resolveField(
+                ResolverContext(
+                    field = it,
+                    variables = variables,
+                    parent = record,
+                    parentKey = record.key,
+                    parentType = pendingReference.parentType,
+                    cacheHeaders = cacheHeaders,
+                    fieldKeyGenerator = fieldKeyGenerator,
+                    path = pendingReference.fieldPath + it,
+                )
+            ).unwrap()
+          } catch (e: CacheMissException) {
+            if (e.stale) isStale = true
+            if (returnPartialResponses) {
+              cacheMissError(e, pendingReference.path + it.responseName)
+            } else {
+              throw e
+            }
+          }
           value.registerCacheKeys(pendingReference.path + it.responseName, pendingReference.fieldPath + it, it.selections, it.type.rawType().name)
 
           it.responseName to value
@@ -204,18 +219,27 @@ internal class CacheBatchReader(
             return@mapNotNull null
           }
 
-          val value = cacheResolver.resolveField(
-              ResolverContext(
-                  field = it,
-                  variables = variables,
-                  parent = this,
-                  parentKey = "",
-                  parentType = parentType,
-                  cacheHeaders = cacheHeaders,
-                  fieldKeyGenerator = fieldKeyGenerator,
-                  path = fieldPath + it,
-              )
-          ).unwrap()
+          val value = try {
+            cacheResolver.resolveField(
+                ResolverContext(
+                    field = it,
+                    variables = variables,
+                    parent = this,
+                    parentKey = "",
+                    parentType = parentType,
+                    cacheHeaders = cacheHeaders,
+                    fieldKeyGenerator = fieldKeyGenerator,
+                    path = fieldPath + it,
+                )
+            ).unwrap()
+          } catch (e: CacheMissException) {
+            if (e.stale) isStale = true
+            if (returnPartialResponses) {
+              cacheMissError(e, path + it.responseName)
+            } else {
+              throw e
+            }
+          }
           value.registerCacheKeys(path + it.responseName, fieldPath + it, it.selections, it.type.rawType().name)
         }
       }
@@ -223,7 +247,7 @@ internal class CacheBatchReader(
   }
 
   internal class CacheBatchReaderData(
-      private val data: Map<List<Any>, Map<String, Any?>>,
+      private val data: Map<List<Any>, Any>,
       val cacheHeaders: CacheHeaders,
   ) {
     fun <D : Executable.Data> toData(
@@ -239,7 +263,7 @@ internal class CacheBatchReader(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun toMap(): Map<String, Any?> {
+    internal fun toMap(): Map<String, Any?> {
       return data[emptyList()].replaceCacheKeys(emptyList()) as Map<String, Any?>
     }
 
@@ -263,10 +287,26 @@ internal class CacheBatchReader(
         }
 
         else -> {
-          // Scalar value
+          // Scalar value or CacheMissException
           this
         }
       }
     }
+  }
+
+  private fun cacheMissError(exception: CacheMissException, path: List<Any>): Error {
+    val message = if (exception.fieldName == null) {
+      "Object '${exception.key}' not found in the cache"
+    } else {
+      if (exception.stale) {
+        "Field '${exception.key}' on object '${exception.fieldName}' is stale in the cache"
+      } else {
+        "Object '${exception.key}' has no field named '${exception.fieldName}' in the cache"
+      }
+    }
+    return Error.Builder(message)
+        .path(path = path)
+        .putExtension("exception", exception)
+        .build()
   }
 }
