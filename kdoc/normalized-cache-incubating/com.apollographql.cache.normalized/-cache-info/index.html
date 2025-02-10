@@ -62,7 +62,7 @@
   <div class="breadcrumbs"><a href="../../index.html">normalized-cache-incubating</a><span class="delimiter">/</span><a href="../index.html">com.apollographql.cache.normalized</a><span class="delimiter">/</span><span class="current">CacheInfo</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Cache</span><wbr><span><span>Info</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">CacheInfo</a> : <span data-unresolved-link="com.apollographql.apollo.api/ExecutionContext.Element///PointingToDeclaration/">ExecutionContext.Element</span></div><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":normalized-cache-incubating/commonMain" data-filterable-set=":normalized-cache-incubating/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>is</span><wbr><span>Cache</span><wbr><span><span>Hit</span></span></u></div></span></div><div><div class="title"><p class="paragraph">true if this was a cache hit</p></div></div></div></div><div class="table-row" data-filterable-current=":normalized-cache-incubating/commonMain" data-filterable-set=":normalized-cache-incubating/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>cache</span><wbr><span>Miss</span><wbr><span><span>Exception</span></span></u></div></span></div><div><div class="title"><p class="paragraph">the exception while reading the cache. Note that it's possible to have <a href="is-cache-hit.html">isCacheHit</a> == false &amp;&amp;<a href="cache-miss-exception.html">cacheMissException</a> == null if no cache read was attempted</p></div></div></div></div></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">CacheInfo</a> : <span data-unresolved-link="com.apollographql.apollo.api/ExecutionContext.Element///PointingToDeclaration/">ExecutionContext.Element</span></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -128,7 +128,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="cache-miss-exception.html">cacheMissException</a><span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.exception/CacheMissException///PointingToDeclaration/">CacheMissException</span><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="cache-miss-exception.html">cacheMissException</a><span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.exception/CacheMissException///PointingToDeclaration/">CacheMissException</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The exception that occurred while reading the cache.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -158,7 +158,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="is-cache-hit.html">isCacheHit</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="is-cache-hit.html">isCacheHit</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True if <strong>all</strong> the fields are found in the cache, false for full or partial cache misses.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1152221607%2FProperties%2F-1280694530" anchor-label="isFromCache" id="-1152221607%2FProperties%2F-1280694530" data-filterable-set=":normalized-cache-incubating/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache-incubating/commonMain" data-filterable-set=":normalized-cache-incubating/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-from-cache.html"><span>is</span><wbr><span>From</span><wbr><span><span>Cache</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1152221607%2FProperties%2F-1280694530"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="is-from-cache.html">isFromCache</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True if the response is from the cache, false if it's from the network.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -173,7 +188,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="is-stale.html">isStale</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="is-stale.html">isStale</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True if at least one field in the response is stale. Always <code class="lang-kotlin">false</code> if <a href="is-from-cache.html">isFromCache</a> is false.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -218,7 +233,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="network-exception.html">networkException</a><span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.exception/ApolloException///PointingToDeclaration/">ApolloException</span><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache-incubating/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="network-exception.html">networkException</a><span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.exception/ApolloException///PointingToDeclaration/">ApolloException</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The exception that occurred while reading the network.</p></div></div></div>
                 </div>
               </div>
             </div>
