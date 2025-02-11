@@ -1,5 +1,10 @@
 # Next version (unreleased)
 
+PUT_CHANGELOG_HERE
+
+# Version 0.0.6
+_2025-02-11_
+
 - Add `ApolloStore.ALL_KEYS` to notify all watchers (#87)
 - Support partial responses from the cache (#57)
 
