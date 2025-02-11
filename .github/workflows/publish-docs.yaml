@@ -8,7 +8,7 @@ on:
 env:
   INSTANCE: 'Writerside/doc'
   ARTIFACT: 'webHelpDOC2-all.zip'
-  DOCKER_VERSION: '241.16003'
+  DOCKER_VERSION: '243.22562'
 
 jobs:
   build-docs:
