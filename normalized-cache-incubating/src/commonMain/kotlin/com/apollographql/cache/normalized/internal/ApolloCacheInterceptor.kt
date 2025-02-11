@@ -26,7 +26,7 @@ import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.memoryCacheOnly
 import com.apollographql.cache.normalized.optimisticData
 import com.apollographql.cache.normalized.storePartialResponses
-import com.apollographql.cache.normalized.storeReceiveDate
+import com.apollographql.cache.normalized.storeReceivedDate
 import com.apollographql.cache.normalized.writeToCacheAsynchronously
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
@@ -75,8 +75,8 @@ internal class ApolloCacheInterceptor(
     maybeAsync(request) {
       val cacheKeys = if (response.data != null) {
         var cacheHeaders = request.cacheHeaders + response.cacheHeaders
-        if (request.storeReceiveDate) {
-          cacheHeaders += nowReceiveDateCacheHeaders()
+        if (request.storeReceivedDate) {
+          cacheHeaders += nowReceivedDateCacheHeaders()
         }
         if (request.memoryCacheOnly) {
           cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
@@ -248,7 +248,7 @@ internal class ApolloCacheInterceptor(
   }
 
   companion object {
-    private fun nowReceiveDateCacheHeaders(): CacheHeaders {
+    private fun nowReceivedDateCacheHeaders(): CacheHeaders {
       return CacheHeaders.Builder().addHeader(ApolloCacheHeaders.RECEIVED_DATE, (currentTimeMillis() / 1000).toString()).build()
     }
   }

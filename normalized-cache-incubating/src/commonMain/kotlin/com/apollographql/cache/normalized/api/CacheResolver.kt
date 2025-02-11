@@ -9,7 +9,7 @@ import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.cache.normalized.api.CacheResolver.ResolvedValue
 import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.storeExpirationDate
-import com.apollographql.cache.normalized.storeReceiveDate
+import com.apollographql.cache.normalized.storeReceivedDate
 import kotlin.jvm.JvmSuppressWildcards
 import kotlin.time.Duration
 
@@ -142,7 +142,7 @@ object DefaultCacheResolver : CacheResolver {
  * A cache resolver that raises a cache miss if the field's received date is older than its max age
  * (configurable via [maxAgeProvider]) or if its expiration date has passed.
  *
- * Received dates are stored by calling `storeReceiveDate(true)` on your `ApolloClient`.
+ * Received dates are stored by calling `storeReceivedDate(true)` on your `ApolloClient`.
  *
  * Expiration dates are stored by calling `storeExpirationDate(true)` on your `ApolloClient`.
  *
@@ -151,7 +151,7 @@ object DefaultCacheResolver : CacheResolver {
  * @param maxAgeProvider the provider for the max age of fields
  * @param delegateResolver the resolver to delegate to for non-stale fields, by default [FieldPolicyCacheResolver]
  *
- * @see MutableExecutionOptions.storeReceiveDate
+ * @see MutableExecutionOptions.storeReceivedDate
  * @see MutableExecutionOptions.storeExpirationDate
  * @see MutableExecutionOptions.maxStale
  */

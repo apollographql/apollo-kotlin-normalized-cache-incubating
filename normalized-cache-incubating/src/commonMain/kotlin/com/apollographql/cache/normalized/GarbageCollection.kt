@@ -70,7 +70,7 @@ fun ApolloStore.removeUnreachableRecords(): Set<CacheKey> {
  * A field is stale if its received date is older than its max age (configurable via [maxAgeProvider]) or if its expiration date has
  * passed. A maximum staleness can be passed.
  *
- * Received dates are stored by calling `storeReceiveDate(true)` on your `ApolloClient`.
+ * Received dates are stored by calling `storeReceivedDate(true)` on your `ApolloClient`.
  *
  * Expiration dates are stored by calling `storeExpirationDate(true)` on your `ApolloClient`.
  *

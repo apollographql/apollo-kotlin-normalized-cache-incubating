@@ -12,7 +12,7 @@ import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeUnreachableRecords
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.store
-import com.apollographql.cache.normalized.storeReceiveDate
+import com.apollographql.cache.normalized.storeReceivedDate
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import okio.use
@@ -30,7 +30,7 @@ class ReachableCacheKeysTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
-        .storeReceiveDate(true)
+        .storeReceivedDate(true)
         .build()
         .use { apolloClient ->
           val query = MainQuery(userIds = listOf("42", "43"))
