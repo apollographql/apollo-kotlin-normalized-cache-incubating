@@ -31,9 +31,16 @@ Then update your imports:
 ```kotlin
 // Replace
 import com.apollographql.apollo.cache.normalized.* 
-
 // With
 import com.apollographql.cache.normalized.*
+
+// Replace
+import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory
+// With
+import com.apollographql.cache.normalized.memory.MemoryCacheFactory
+
+
+
 ```
 
 ## Database schema

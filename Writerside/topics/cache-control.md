@@ -29,7 +29,8 @@ val apolloClient = ApolloClient.builder()
 
 When storing fields, the cache can also store their **received date**. This date can then be compared to the current date when resolving a field to determine if its age is above its **maximum age**.
 
-To store the **received date** of fields, call [`.storeReceivedDate(true)`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/store-receive-date.html?query=fun%20%3CT%3E%20MutableExecutionOptions%3CT%3E.storeReceiveDate(storeReceiveDate:%20Boolean):%20T), and set your client's cache resolver to [`CacheControlCacheResolver`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-cache-control-cache-resolver/index.html):
+To store the **received date** of fields, call [`.storeReceivedDate(true)`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/store-receive-date.html?query=fun%20%3CT%3E%20MutableExecutionOptions%3CT%3E.storeReceivedDate(storeReceivedDate:%20Boolean):%20T), and set your client's cache resolver to [
+`CacheControlCacheResolver`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-cache-control-cache-resolver/index.html):
 
 ```kotlin
 val apolloClient = ApolloClient.builder()

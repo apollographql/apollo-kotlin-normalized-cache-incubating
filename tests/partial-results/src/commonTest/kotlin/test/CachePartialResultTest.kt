@@ -27,7 +27,7 @@ import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storePartialResponses
-import com.apollographql.cache.normalized.storeReceiveDate
+import com.apollographql.cache.normalized.storeReceivedDate
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import kotlinx.coroutines.flow.Flow
@@ -697,7 +697,7 @@ class CachePartialResultTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory(), cacheResolver = CacheControlCacheResolver(SchemaCoordinatesMaxAgeProvider(Cache.maxAges, Duration.INFINITE)))
-        .storeReceiveDate(true)
+        .storeReceivedDate(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(MeWithNickNameQuery())
@@ -765,7 +765,7 @@ class CachePartialResultTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .normalizedCache(MemoryCacheFactory(), cacheResolver = CacheControlCacheResolver(SchemaCoordinatesMaxAgeProvider(Cache.maxAges, Duration.INFINITE)))
-        .storeReceiveDate(true)
+        .storeReceivedDate(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(MeWithEmployeeInfoQuery())

@@ -264,12 +264,12 @@ fun <T> MutableExecutionOptions<T>.storePartialResponses(storePartialResponses: 
 )
 
 /**
- * @param storeReceiveDate Whether to store the receive date in the cache.
+ * @param storeReceivedDate Whether to store the receive date in the cache.
  *
  * Default: false
  */
-fun <T> MutableExecutionOptions<T>.storeReceiveDate(storeReceiveDate: Boolean) = addExecutionContext(
-    StoreReceiveDateContext(storeReceiveDate)
+fun <T> MutableExecutionOptions<T>.storeReceivedDate(storeReceivedDate: Boolean) = addExecutionContext(
+    StoreReceivedDateContext(storeReceivedDate)
 )
 
 /**
@@ -390,8 +390,8 @@ internal val <D : Operation.Data> ApolloRequest<D>.memoryCacheOnly
 internal val <D : Operation.Data> ApolloRequest<D>.storePartialResponses
   get() = executionContext[StorePartialResponsesContext]?.value ?: false
 
-internal val <D : Operation.Data> ApolloRequest<D>.storeReceiveDate
-  get() = executionContext[StoreReceiveDateContext]?.value ?: false
+internal val <D : Operation.Data> ApolloRequest<D>.storeReceivedDate
+  get() = executionContext[StoreReceivedDateContext]?.value ?: false
 
 internal val <D : Operation.Data> ApolloRequest<D>.writeToCacheAsynchronously
   get() = executionContext[WriteToCacheAsynchronouslyContext]?.value ?: false
@@ -569,11 +569,11 @@ internal class StorePartialResponsesContext(val value: Boolean) : ExecutionConte
   companion object Key : ExecutionContext.Key<StorePartialResponsesContext>
 }
 
-internal class StoreReceiveDateContext(val value: Boolean) : ExecutionContext.Element {
+internal class StoreReceivedDateContext(val value: Boolean) : ExecutionContext.Element {
   override val key: ExecutionContext.Key<*>
     get() = Key
 
-  companion object Key : ExecutionContext.Key<StoreReceiveDateContext>
+  companion object Key : ExecutionContext.Key<StoreReceivedDateContext>
 }
 
 internal class StoreExpirationDateContext(val value: Boolean) : ExecutionContext.Element {

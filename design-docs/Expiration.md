@@ -25,13 +25,13 @@ and instead use the `Record.metadata` map which can store arbitrary data per fie
  * A cache resolver that raises a cache miss if the field's received date is older than its max age
  * (configurable via [maxAgeProvider]) or its expiration date has passed.
  *
- * Received dates are stored by calling `storeReceiveDate(true)` on your `ApolloClient`.
+ * Received dates are stored by calling `storeReceivedDate(true)` on your `ApolloClient`.
  *
  * Expiration dates are stored by calling `storeExpirationDate(true)` on your `ApolloClient`.
  *
  * A maximum staleness can be configured via the [ApolloCacheHeaders.MAX_STALE] cache header.
  *
- * @see MutableExecutionOptions.storeReceiveDate
+ * @see MutableExecutionOptions.storeReceivedDate
  * @see MutableExecutionOptions.storeExpirationDate
  * @see MutableExecutionOptions.maxStale
  */
