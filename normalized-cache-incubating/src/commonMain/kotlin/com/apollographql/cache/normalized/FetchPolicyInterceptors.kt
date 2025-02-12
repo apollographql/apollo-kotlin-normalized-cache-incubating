@@ -140,6 +140,7 @@ private fun <D : Operation.Data> ApolloResponse<D>.cacheMissAsException(): Apoll
     newBuilder()
         .exception(cacheMissException)
         .data(null)
+        .errors(null)
         .build()
   }
 }
