@@ -26,7 +26,20 @@ class SqlNormalizedCache internal constructor(
       return emptyList()
     }
     return try {
-      selectRecords(keys)
+      recordDatabase.selectRecords(keys)
+    } catch (e: Exception) {
+      // Unable to read the records from the database, it is possibly corrupted - treat this as a cache miss
+      apolloExceptionHandler(Exception("Unable to read records from the database", e))
+      emptyList()
+    }
+  }
+
+  override fun loadRecords(keysAndFields: Map<String, Set<String>>, cacheHeaders: CacheHeaders): Collection<Record> {
+    if (cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
+      return emptyList()
+    }
+    return try {
+      recordDatabase.selectRecords(keysAndFields)
     } catch (e: Exception) {
       // Unable to read the records from the database, it is possibly corrupted - treat this as a cache miss
       apolloExceptionHandler(Exception("Unable to read records from the database", e))
@@ -121,7 +134,7 @@ class SqlNormalizedCache internal constructor(
       }.toSet()
     } else {
       recordDatabase.transaction {
-        val existingRecords = selectRecords(records.map { it.key }).associateBy { it.key }
+        val existingRecords = recordDatabase.selectRecords(records.associate { it.key to it.fields.keys }).associateBy { it.key }
         records.flatMap { record ->
           val existingRecord = existingRecords[record.key]
           if (existingRecord == null) {
@@ -136,16 +149,6 @@ class SqlNormalizedCache internal constructor(
           }
         }.toSet()
       }
-    }
-  }
-
-  /**
-   * Loads a list of records, making sure to not query more than 999 at a time
-   * to help with the SQLite limitations
-   */
-  private fun selectRecords(keys: Collection<String>): List<Record> {
-    return keys.chunked(999).flatMap { chunkedKeys ->
-      recordDatabase.selectRecords(chunkedKeys)
     }
   }
 

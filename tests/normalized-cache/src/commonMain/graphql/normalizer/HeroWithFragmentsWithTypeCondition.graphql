@@ -1,0 +1,14 @@
+query HeroWithFragmentsWithTypeCondition {
+  hero {
+    name
+    ...DroidDetails
+  }
+}
+
+fragment DroidDetails on Droid {
+  birthDate
+  friends {
+    id
+    name
+  }
+}

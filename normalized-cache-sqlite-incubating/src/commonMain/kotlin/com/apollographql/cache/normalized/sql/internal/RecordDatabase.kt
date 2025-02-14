@@ -2,6 +2,7 @@ package com.apollographql.cache.normalized.sql.internal
 
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.db.QueryResult
+import app.cash.sqldelight.db.SqlCursor
 import app.cash.sqldelight.db.SqlDriver
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
@@ -22,11 +23,74 @@ internal class RecordDatabase(private val driver: SqlDriver) {
   }
 
   /**
-   * @param keys the keys of the records to select, size must be <= 999
+   * @param keys the keys of the records to select
    */
   fun selectRecords(keys: Collection<String>): List<Record> {
-    val fieldsByRecordKey: Map<String, List<Field_>> = fieldsQueries.selectRecords(keys).executeAsList().groupBy { it.record }
+    // SQLite has a limitation of 999 parameters per query
+    val fieldsByRecordKey: Map<String, List<Field_>> = keys.chunked(999).flatMap { chunkedKeys ->
+      fieldsQueries.selectRecords(chunkedKeys).executeAsList()
+    }.groupBy { it.record }
     return fieldsByRecordKey.toRecords()
+  }
+
+  /**
+   * @param keysAndFields the keys and fields of the records to select
+   */
+  fun selectRecords(keysAndFields: Map<String, Set<String>>): List<Record> {
+    val mapper: (SqlCursor) -> Field_ = { cursor ->
+      Field_(
+          record = cursor.getString(0)!!,
+          field_ = cursor.getString(1)!!,
+          value_ = cursor.getBytes(2),
+          metadata = cursor.getBytes(3),
+          received_date = cursor.getLong(4),
+          expiration_date = cursor.getLong(5),
+      )
+    }
+    val filters = keysAndFields.flatMap { (record, fields) ->
+      fields.map { field -> record to field }
+    }
+    // SQLite has a limitation of 999 parameters per query. Since each filter is 2 parameters, we chunk to half of that.
+    val fieldsByRecordKey = filters.chunked(499).flatMap { chunkedFilters ->
+      SelectRecordsWithFilterQuery(chunkedFilters, mapper).executeAsList()
+    }.groupBy { it.record }
+    return fieldsByRecordKey.toRecords()
+  }
+
+  private inner class SelectRecordsWithFilterQuery<out T : Any>(
+      private val filters: List<Pair<String, String>>,
+      mapper: (SqlCursor) -> T,
+  ) : Query<T>(mapper) {
+    override fun addListener(listener: Listener) {
+      driver.addListener("field", listener = listener)
+    }
+
+    override fun removeListener(listener: Listener) {
+      driver.removeListener("field", listener = listener)
+    }
+
+    override fun <R> execute(mapper: (SqlCursor) -> QueryResult<R>): QueryResult<R> {
+      val placeholders = filters.joinToString(", ") { "(?, ?)" }
+      val sql = """
+        WITH filter(record, field) AS (VALUES $placeholders)
+        SELECT f.record, f.field, f.value, f.metadata, f.received_date, f.expiration_date
+        FROM field f
+        JOIN filter ON f.record = filter.record AND f.field = filter.field
+      """.trimIndent()
+
+      val parameters = filters.flatMap { listOf(it.first, it.second) }
+      return driver.executeQuery(
+          identifier = null,
+          sql = sql,
+          mapper = mapper,
+          parameters = parameters.size,
+          binders = {
+            for ((index, parameter) in parameters.withIndex()) {
+              bindString(index, parameter)
+            }
+          }
+      )
+    }
   }
 
   fun selectAllRecords(): List<Record> {

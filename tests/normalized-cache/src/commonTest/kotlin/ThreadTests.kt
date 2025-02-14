@@ -83,6 +83,13 @@ class ThreadTests {
       return delegate.loadRecords(keys, cacheHeaders)
     }
 
+    override fun loadRecords(keysAndFields: Map<String, Set<String>>, cacheHeaders: CacheHeaders): Collection<Record> {
+      check(currentThreadId() != mainThreadId) {
+        "Cache access on main thread"
+      }
+      return delegate.loadRecords(keysAndFields, cacheHeaders)
+    }
+
     override fun dump(): Map<KClass<*>, Map<String, Record>> {
       check(currentThreadId() != mainThreadId) {
         "Cache access on main thread"

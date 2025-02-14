@@ -64,6 +64,17 @@ class MemoryCache(
     recordsByKey.values.filterNotNull() + nextCachedRecords
   }
 
+  override fun loadRecords(keysAndFields: Map<String, Set<String>>, cacheHeaders: CacheHeaders): Collection<Record> = lockRead {
+    val recordsByKey: Map<String, Record?> = keysAndFields.keys.associateWith { key -> lruCache[key] }
+    val missingKeys = recordsByKey.filterValues { it == null }.keys
+    val missingKeysAndFields = missingKeys.associateWith { keysAndFields.getValue(it) }
+    val nextCachedRecords = nextCache?.loadRecords(missingKeysAndFields, cacheHeaders).orEmpty()
+    for (record in nextCachedRecords) {
+      lruCache[record.key] = record
+    }
+    recordsByKey.values.filterNotNull() + nextCachedRecords
+  }
+
   override fun clearAll() {
     lockWrite {
       lruCache.clear()

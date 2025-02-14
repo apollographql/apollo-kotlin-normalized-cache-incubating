@@ -21,5 +21,11 @@ interface ReadOnlyNormalizedCache {
    */
   fun loadRecords(keys: Collection<String>, cacheHeaders: CacheHeaders): Collection<Record>
 
+  /**
+   * TODO
+   * Returned records may contain more or fewer fields than requested.
+   */
+  fun loadRecords(keysAndFields: Map<String, Set<String>>, cacheHeaders: CacheHeaders): Collection<Record>
+
   fun dump(): Map<@JvmSuppressWildcards KClass<*>, Map<String, Record>>
 }

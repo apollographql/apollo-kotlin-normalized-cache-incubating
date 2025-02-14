@@ -1,0 +1,15 @@
+query HeroWithFragmentsAndSkip($skipSomeFields: Boolean!) {
+  hero {
+    name
+    appearsIn @skip(if: $skipSomeFields)
+    ...HeroDetails @skip(if: $skipSomeFields)
+  }
+}
+
+fragment HeroDetails on Character {
+  birthDate
+  friends {
+    id
+    name
+  }
+}

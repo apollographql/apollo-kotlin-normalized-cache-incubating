@@ -11,6 +11,7 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.DataWithErrors
+import com.apollographql.cache.normalized.api.FieldKeyContext
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.ReadOnlyNormalizedCache
 import com.apollographql.cache.normalized.api.Record
@@ -67,11 +68,13 @@ internal class CacheBatchReader(
     selections.forEach { compiledSelection ->
       when (compiledSelection) {
         is CompiledField -> {
-          state.fields.add(compiledSelection)
+          if (!compiledSelection.shouldSkip(state.variables.valueMap)) {
+            state.fields.add(compiledSelection)
+          }
         }
 
         is CompiledFragment -> {
-          if ((typename in compiledSelection.possibleTypes || compiledSelection.typeCondition == parentType) && !compiledSelection.shouldSkip(state.variables.valueMap)) {
+          if ((typename in compiledSelection.possibleTypes || compiledSelection.typeCondition == parentType || typename == null) && !compiledSelection.shouldSkip(state.variables.valueMap)) {
             collect(compiledSelection.selections, parentType, typename, state)
           }
         }
@@ -104,7 +107,17 @@ internal class CacheBatchReader(
     )
 
     while (pendingReferences.isNotEmpty()) {
-      val records = cache.loadRecords(pendingReferences.map { it.key }, cacheHeaders).associateBy { it.key }
+      val keysAndFields = mutableMapOf<String, Set<String>>()
+      for (pendingReference in pendingReferences) {
+        val fields =
+          collectAndMergeSameDirectives(pendingReference.selections, pendingReference.parentType, variables, null)
+              .map { compiledField ->
+                fieldKeyGenerator.getFieldKey(FieldKeyContext(pendingReference.parentType, compiledField, variables))
+              }
+              .toSet()
+        keysAndFields[pendingReference.key] = keysAndFields[pendingReference.key].orEmpty() + fields
+      }
+      val records = cache.loadRecords(keysAndFields, cacheHeaders).associateBy { it.key }
 
       val copy = pendingReferences.toList()
       pendingReferences.clear()
@@ -128,11 +141,7 @@ internal class CacheBatchReader(
         val collectedFields =
           collectAndMergeSameDirectives(pendingReference.selections, pendingReference.parentType, variables, record["__typename"] as? String)
 
-        val map = collectedFields.mapNotNull {
-          if (it.shouldSkip(variables.valueMap)) {
-            return@mapNotNull null
-          }
-
+        val map = collectedFields.map {
           val value = try {
             cacheResolver.resolveField(
                 ResolverContext(
