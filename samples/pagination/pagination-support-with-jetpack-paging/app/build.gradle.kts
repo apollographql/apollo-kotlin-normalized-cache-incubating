@@ -3,7 +3,7 @@ fun prop(key: String) = project.findProperty(key).toString()
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.apollographql.apollo").version("4.1.0")
+    id("com.apollographql.apollo").version("4.1.1")
     id("org.jetbrains.kotlin.plugin.compose").version("2.0.21")
 }
 
@@ -77,7 +77,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
 
     implementation("com.apollographql.apollo:apollo-runtime")
-    implementation("com.apollographql.cache:normalized-cache-sqlite-incubating:0.0.4")
+    implementation("com.apollographql.cache:normalized-cache-sqlite-incubating:0.0.6")
 
     implementation("androidx.paging:paging-runtime-ktx:3.3.2")
     implementation("androidx.paging:paging-compose:3.3.2")
