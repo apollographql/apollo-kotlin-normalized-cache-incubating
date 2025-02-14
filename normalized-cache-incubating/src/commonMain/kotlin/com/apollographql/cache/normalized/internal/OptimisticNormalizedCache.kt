@@ -25,6 +25,13 @@ internal class OptimisticNormalizedCache(private val wrapped: NormalizedCache) :
     }
   }
 
+  override fun loadRecords(keysAndFields: Map<String, Set<String>>, cacheHeaders: CacheHeaders): Collection<Record> {
+    val nonOptimisticRecords = wrapped.loadRecords(keysAndFields, cacheHeaders).associateBy { it.key }
+    return keysAndFields.keys.mapNotNull { key ->
+      nonOptimisticRecords[key].mergeJournalRecord(key)
+    }
+  }
+
   override fun merge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     return wrapped.merge(record, cacheHeaders, recordMerger)
   }

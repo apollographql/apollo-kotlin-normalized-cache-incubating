@@ -1,0 +1,31 @@
+{
+  "data": {
+    "hero": {
+      "__typename": "Droid",
+      "name": "R2-D2",
+      "appearsIn": [
+        "NEWHOPE",
+        "EMPIRE",
+        "JEDI"
+      ],
+      "birthDate": "1977-05-25T00:00:00.000Z",
+      "friends": [
+        {
+          "__typename": "Human",
+          "id": "1000",
+          "name": "Luke Skywalker"
+        },
+        {
+          "__typename": "Human",
+          "id": "1002",
+          "name": "Han Solo"
+        },
+        {
+          "__typename": "Human",
+          "id": "1003",
+          "name": "Leia Organa"
+        }
+      ]
+    }
+  }
+}
