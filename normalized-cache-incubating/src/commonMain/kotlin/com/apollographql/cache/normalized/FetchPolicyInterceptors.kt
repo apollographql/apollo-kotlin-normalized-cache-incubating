@@ -129,8 +129,12 @@ val CacheAndNetworkInterceptor = object : ApolloInterceptor {
   }
 }
 
-private fun <D : Operation.Data> ApolloResponse<D>.cacheMissAsException(): ApolloResponse<D> {
-  return if (cacheInfo!!.isCacheHit) {
+/**
+ * If this response is a cache miss, returns a response with an exception, otherwise returns this response.
+ * This can be used to accommodate [com.apollographql.apollo.ApolloCall.execute] which splits responses based on exceptions.
+ */
+fun <D : Operation.Data> ApolloResponse<D>.cacheMissAsException(): ApolloResponse<D> {
+  return if (cacheInfo?.isCacheHit == true) {
     this
   } else {
     val cacheMissException = errors.orEmpty().mapNotNull { it.extensions?.get("exception") as? ApolloException }.reduceOrNull { acc, e ->
