@@ -94,6 +94,7 @@ public final class com/apollographql/cache/normalized/FetchPolicy : java/lang/En
 }
 
 public final class com/apollographql/cache/normalized/FetchPolicyInterceptors {
+	public static final fun cacheMissAsException (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/apollo/api/ApolloResponse;
 	public static final fun getCacheAndNetworkInterceptor ()Lcom/apollographql/apollo/interceptor/ApolloInterceptor;
 	public static final fun getCacheFirstInterceptor ()Lcom/apollographql/apollo/interceptor/ApolloInterceptor;
 	public static final fun getCacheOnlyInterceptor ()Lcom/apollographql/apollo/interceptor/ApolloInterceptor;
