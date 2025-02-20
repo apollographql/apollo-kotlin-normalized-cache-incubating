@@ -1,5 +1,7 @@
 package com.apollographql.cache.normalized.sql.internal
 
+import com.apollographql.apollo.api.Error
+import com.apollographql.apollo.api.Error.Builder
 import com.apollographql.apollo.api.json.JsonNumber
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
@@ -134,6 +136,21 @@ internal object BlobRecordSerializer {
         buffer.writeByte(NULL)
       }
 
+      is Error -> {
+        buffer.writeByte(ERROR)
+        buffer.writeString(value.message)
+        buffer.writeInt(value.locations?.size ?: 0)
+        for (location in value.locations.orEmpty()) {
+          buffer.writeInt(location.line)
+          buffer.writeInt(location.column)
+        }
+        buffer.writeInt(value.path?.size ?: 0)
+        for (path in value.path.orEmpty()) {
+          buffer.writeAny(path)
+        }
+        buffer.writeAny(value.extensions)
+      }
+
       else -> error("Trying to write unsupported Record value: $value")
     }
   }
@@ -165,6 +182,31 @@ internal object BlobRecordSerializer {
       }
 
       NULL -> null
+
+      ERROR -> {
+        val message = readString()
+        val locations = 0.until(readInt()).map {
+          Error.Location(readInt(), readInt())
+        }
+        val path = 0.until(readInt()).map {
+          readAny()!!
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        val extensions = readAny() as Map<String, Any?>?
+        Builder(message = message)
+            .path(path)
+            .apply {
+              for ((key, value) in extensions.orEmpty()) {
+                putExtension(key, value)
+              }
+              if (locations.isNotEmpty()) {
+                locations(locations)
+              }
+            }
+            .build()
+      }
+
       else -> error("Trying to read unsupported Record value: $what")
     }
   }
@@ -179,4 +221,5 @@ internal object BlobRecordSerializer {
   private const val MAP = 7
   private const val CACHE_KEY = 8
   private const val NULL = 9
+  private const val ERROR = 10
 }

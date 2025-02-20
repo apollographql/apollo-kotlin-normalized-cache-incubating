@@ -31,6 +31,7 @@ import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.api.readDataFromCacheInternal
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.cacheInfo
+import com.apollographql.cache.normalized.exception
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.channels.BufferOverflow
@@ -106,10 +107,12 @@ internal class DefaultApolloStore(
   override fun <D : Operation.Data> normalize(
       operation: Operation<D>,
       data: D,
+      errors: List<Error>?,
       customScalarAdapters: CustomScalarAdapters,
   ): Map<String, Record> {
     return operation.normalize(
         data = data,
+        errors = errors,
         customScalarAdapters = customScalarAdapters,
         cacheKeyGenerator = cacheKeyGenerator,
         metadataGenerator = metadataGenerator,
@@ -152,6 +155,8 @@ internal class DefaultApolloStore(
       jsonReader.endObject()
       data
     }
+    // Cache miss errors have an exception
+    val isCacheHit = errors.none { it.exception != null }
     return ApolloResponse.Builder(operation, uuid4())
         .data(data)
         .errors(errors.takeIf { it.isNotEmpty() })
@@ -159,7 +164,7 @@ internal class DefaultApolloStore(
         .cacheInfo(
             CacheInfo.Builder()
                 .fromCache(true)
-                .cacheHit(errors.isEmpty())
+                .cacheHit(isCacheHit)
                 .stale(batchReaderData.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
                 .build()
         )
@@ -291,11 +296,13 @@ internal class DefaultApolloStore(
   override fun <D : Operation.Data> writeOperation(
       operation: Operation<D>,
       operationData: D,
+      errors: List<Error>?,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
   ): Set<String> {
     val records = operation.normalize(
         data = operationData,
+        errors = errors,
         customScalarAdapters = customScalarAdapters,
         cacheKeyGenerator = cacheKeyGenerator,
         metadataGenerator = metadataGenerator,
@@ -315,12 +322,13 @@ internal class DefaultApolloStore(
   ): Set<String> {
     val records = fragment.normalize(
         data = fragmentData,
+        rootKey = cacheKey.key,
+        errors = null,
         customScalarAdapters = customScalarAdapters,
         cacheKeyGenerator = cacheKeyGenerator,
         metadataGenerator = metadataGenerator,
         fieldKeyGenerator = fieldKeyGenerator,
-        embeddedFieldsProvider = embeddedFieldsProvider,
-        rootKey = cacheKey.key
+        embeddedFieldsProvider = embeddedFieldsProvider
     ).values
 
     return cache.merge(records, cacheHeaders, recordMerger)
@@ -334,6 +342,7 @@ internal class DefaultApolloStore(
   ): Set<String> {
     val records = operation.normalize(
         data = operationData,
+        errors = null,
         customScalarAdapters = customScalarAdapters,
         cacheKeyGenerator = cacheKeyGenerator,
         metadataGenerator = metadataGenerator,
@@ -362,12 +371,12 @@ internal class DefaultApolloStore(
   ): Set<String> {
     val records = fragment.normalize(
         data = fragmentData,
+        rootKey = cacheKey.key,
         customScalarAdapters = customScalarAdapters,
         cacheKeyGenerator = cacheKeyGenerator,
         metadataGenerator = metadataGenerator,
         fieldKeyGenerator = fieldKeyGenerator,
         embeddedFieldsProvider = embeddedFieldsProvider,
-        rootKey = cacheKey.key
     ).values.map { record ->
       Record(
           key = record.key,

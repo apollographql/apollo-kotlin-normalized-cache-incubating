@@ -213,7 +213,7 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object 'User:3' not found in the cache").path(listOf("users", 2)).build()
+                  Error.Builder("User `3` not found").path(listOf("users", 2)).build()
               ),
               cacheResult.errors
           )

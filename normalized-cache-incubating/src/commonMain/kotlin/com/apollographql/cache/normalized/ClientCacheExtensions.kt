@@ -7,6 +7,7 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.CacheDumpProviderContext
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.ExecutionContext
 import com.apollographql.apollo.api.ExecutionOptions
 import com.apollographql.apollo.api.MutableExecutionOptions
@@ -251,11 +252,12 @@ fun <T> MutableExecutionOptions<T>.memoryCacheOnly(memoryCacheOnly: Boolean) = a
 )
 
 /**
- * @param storePartialResponses Whether to store partial responses.
+ * @param storePartialResponses Whether to store partial responses and field errors.
  *
- * Errors are not stored in the cache and are therefore not replayed on cache reads.
  * Set this to true if you want to store partial responses at the risk of also returning partial responses
  * in subsequent cache reads.
+ *
+ * Field errors are also stored in the cache and will be returned on cache reads.
  *
  * Default: false
  */
@@ -632,3 +634,14 @@ fun <D : Operation.Data> ApolloResponse.Builder<D>.cacheHeaders(cacheHeaders: Ca
 
 val <D : Operation.Data> ApolloResponse<D>.cacheHeaders
   get() = executionContext[CacheHeadersContext]?.value ?: CacheHeaders.NONE
+
+
+internal const val EXTENSION_EXCEPTION = "exception"
+
+/**
+ * Some errors returned when reading the cache (e.g. cache misses) may have additional information in the form of
+ * an exception. Use this property to access it.
+ * This will always be null for errors of network responses.
+ */
+val Error.exception: ApolloException?
+  get() = extensions?.get(EXTENSION_EXCEPTION) as? ApolloException

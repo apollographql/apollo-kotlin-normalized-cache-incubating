@@ -1,7 +1,6 @@
 package pagination
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
@@ -25,8 +24,7 @@ class EmbedTest {
                 listOf(GetHeroQuery.Friend("Luke", GetHeroQuery.Pet("Snoopy")), GetHeroQuery.Friend("Leia", GetHeroQuery.Pet("Fluffy")))
             )
         ),
-        CustomScalarAdapters.Empty,
-        object : CacheKeyGenerator {
+        cacheKeyGenerator = object : CacheKeyGenerator {
           override fun cacheKeyForObject(obj: Map<String, Any?>, context: CacheKeyGeneratorContext): CacheKey? {
             return null
           }

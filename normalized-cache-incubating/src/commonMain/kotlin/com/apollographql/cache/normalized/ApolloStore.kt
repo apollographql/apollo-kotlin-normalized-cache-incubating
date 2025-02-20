@@ -2,11 +2,13 @@ package com.apollographql.cache.normalized
 
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.JsonNumber
 import com.apollographql.apollo.interceptor.ApolloInterceptor
+import com.apollographql.cache.normalized.ApolloStore.Companion.ALL_KEYS
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
@@ -58,7 +60,7 @@ interface ApolloStore {
    * Reads an operation from the store.
    *
    * The returned [ApolloResponse.data] has `null` values for any missing fields if their type is nullable, propagating up to their parent
-   * otherwise. Missing fields have a corresponding [com.apollographql.apollo.api.Error]
+   * otherwise. Missing fields have a corresponding [Error]
    * in [ApolloResponse.errors].
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
@@ -92,12 +94,13 @@ interface ApolloStore {
   ): ReadResult<D>
 
   /**
-   * Write an operation to the store.
+   * Writes an operation to the store.
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
    * @param operation the operation to write
    * @param operationData the operation data to write
+   * @param errors the operation errors to write
    * @return the changed keys
    *
    * @see publish
@@ -105,12 +108,13 @@ interface ApolloStore {
   fun <D : Operation.Data> writeOperation(
       operation: Operation<D>,
       operationData: D,
+      errors: List<Error>? = null,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
   ): Set<String>
 
   /**
-   * Write a fragment to the store.
+   * Writes a fragment to the store.
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
@@ -217,10 +221,12 @@ interface ApolloStore {
 
   /**
    * Normalizes operation data to a map of [Record] keyed by [Record.key].
+   * If field [errors] are passed, they will be inlined in the returned [Record]s.
    */
   fun <D : Operation.Data> normalize(
       operation: Operation<D>,
       data: D,
+      errors: List<Error>?,
       customScalarAdapters: CustomScalarAdapters,
   ): Map<String, Record>
 

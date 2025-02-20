@@ -124,12 +124,16 @@ class ResolverContext(
     val path: List<CompiledField>,
 )
 
+fun ResolverContext.getFieldKey(): String {
+  return fieldKeyGenerator.getFieldKey(FieldKeyContext(parentType, field, variables))
+}
+
 /**
  * A cache resolver that uses the parent to resolve fields.
  */
 object DefaultCacheResolver : CacheResolver {
   override fun resolveField(context: ResolverContext): Any? {
-    val fieldKey = context.fieldKeyGenerator.getFieldKey(FieldKeyContext(context.parentType, context.field, context.variables))
+    val fieldKey = context.getFieldKey()
     if (!context.parent.containsKey(fieldKey)) {
       throw CacheMissException(context.parentKey, fieldKey)
     }
@@ -187,7 +191,7 @@ class CacheControlCacheResolver(
         if (staleDuration >= maxStale) {
           throw CacheMissException(
               key = context.parentKey,
-              fieldName = context.fieldKeyGenerator.getFieldKey(FieldKeyContext(context.parentType, context.field, context.variables)),
+              fieldName = context.getFieldKey(),
               stale = true
           )
         }
@@ -203,7 +207,7 @@ class CacheControlCacheResolver(
         if (staleDuration >= maxStale) {
           throw CacheMissException(
               key = context.parentKey,
-              fieldName = context.fieldKeyGenerator.getFieldKey(FieldKeyContext(context.parentType, context.field, context.variables)),
+              fieldName = context.getFieldKey(),
               stale = true
           )
         }

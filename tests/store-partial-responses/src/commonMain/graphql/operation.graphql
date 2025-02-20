@@ -1,0 +1,136 @@
+query MeWithoutNickNameWithEmailQuery {
+  me {
+    firstName
+    lastName
+    email
+
+    ... on User {
+      id
+    }
+  }
+}
+
+query MeWithoutNickNameWithoutEmailQuery {
+  me {
+    id
+    firstName
+    lastName
+  }
+}
+
+query MeWithNickNameQuery {
+  me {
+    id
+    firstName
+    lastName
+    nickName
+  }
+}
+
+query UsersQuery($ids: [ID!]!) {
+  users(ids: $ids) {
+    id
+    firstName
+    lastName
+    email
+  }
+}
+
+query MeWithBestFriendQuery {
+  me {
+    id
+    firstName
+    lastName
+    bestFriend {
+      id
+      firstName
+      lastName
+    }
+    projects {
+      lead {
+        id
+        firstName
+        lastName
+      }
+      users {
+        id
+        firstName
+        lastName
+      }
+    }
+  }
+}
+
+query DefaultProjectQuery($id: ID! = "42") {
+  project(id: $id) {
+    id
+    name
+    description
+  }
+  project2: project(id: "44") {
+    id
+    name
+    description
+  }
+}
+
+query UserByCategoryQuery($category: Category!) {
+  user(category: $category) {
+    firstName
+    lastName
+    category
+    moreInfo
+  }
+}
+
+query WithFragmentsQuery {
+  me {
+    id
+    firstName0: firstName
+    ... on User {
+      lastName
+      ... on User {
+        nickName0: nickName
+      }
+    }
+    ... UserFields
+  }
+
+  me {
+    firstName0: firstName
+    mainProject {
+      id
+      lead0: lead {
+        id
+      }
+    }
+    mainProject {
+      lead0: lead {
+        id
+        firstName
+      }
+    }
+  }
+}
+
+fragment UserFields on User {
+  email0: email
+  category
+  bestFriend0:bestFriend {
+    id
+    firstName
+    lastName
+  }
+}
+
+query MeWithEmployeeInfoQuery {
+  me @catch(to: NULL) {
+    firstName
+    lastName
+    employeeInfo {
+      id
+      salary @catch(to: THROW)
+      department
+    }
+  }
+}

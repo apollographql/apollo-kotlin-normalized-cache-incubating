@@ -5,7 +5,7 @@ public abstract interface class com/apollographql/cache/normalized/ApolloStore {
 	public abstract fun dispose ()V
 	public abstract fun dump ()Ljava/util/Map;
 	public abstract fun getChangedKeys ()Lkotlinx/coroutines/flow/SharedFlow;
-	public abstract fun normalize (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;)Ljava/util/Map;
+	public abstract fun normalize (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/List;Lcom/apollographql/apollo/api/CustomScalarAdapters;)Ljava/util/Map;
 	public abstract fun publish (Ljava/util/Set;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun readFragment (Lcom/apollographql/apollo/api/Fragment;Lcom/apollographql/cache/normalized/api/CacheKey;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/ApolloStore$ReadResult;
 	public abstract fun readOperation (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/apollo/api/ApolloResponse;
@@ -13,7 +13,7 @@ public abstract interface class com/apollographql/cache/normalized/ApolloStore {
 	public abstract fun remove (Ljava/util/List;Z)I
 	public abstract fun rollbackOptimisticUpdates (Ljava/util/UUID;)Ljava/util/Set;
 	public abstract fun writeFragment (Lcom/apollographql/apollo/api/Fragment;Lcom/apollographql/cache/normalized/api/CacheKey;Lcom/apollographql/apollo/api/Fragment$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Set;
-	public abstract fun writeOperation (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Set;
+	public abstract fun writeOperation (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/List;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Set;
 	public abstract fun writeOptimisticUpdates (Lcom/apollographql/apollo/api/Fragment;Lcom/apollographql/cache/normalized/api/CacheKey;Lcom/apollographql/apollo/api/Fragment$Data;Ljava/util/UUID;Lcom/apollographql/apollo/api/CustomScalarAdapters;)Ljava/util/Set;
 	public abstract fun writeOptimisticUpdates (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/UUID;Lcom/apollographql/apollo/api/CustomScalarAdapters;)Ljava/util/Set;
 }
@@ -28,7 +28,7 @@ public final class com/apollographql/cache/normalized/ApolloStore$DefaultImpls {
 	public static synthetic fun remove$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/cache/normalized/api/CacheKey;ZILjava/lang/Object;)Z
 	public static synthetic fun remove$default (Lcom/apollographql/cache/normalized/ApolloStore;Ljava/util/List;ZILjava/lang/Object;)I
 	public static synthetic fun writeFragment$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Fragment;Lcom/apollographql/cache/normalized/api/CacheKey;Lcom/apollographql/apollo/api/Fragment$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Ljava/util/Set;
-	public static synthetic fun writeOperation$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Ljava/util/Set;
+	public static synthetic fun writeOperation$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/List;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Ljava/util/Set;
 	public static synthetic fun writeOptimisticUpdates$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Fragment;Lcom/apollographql/cache/normalized/api/CacheKey;Lcom/apollographql/apollo/api/Fragment$Data;Ljava/util/UUID;Lcom/apollographql/apollo/api/CustomScalarAdapters;ILjava/lang/Object;)Ljava/util/Set;
 	public static synthetic fun writeOptimisticUpdates$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/UUID;Lcom/apollographql/apollo/api/CustomScalarAdapters;ILjava/lang/Object;)Ljava/util/Set;
 }
@@ -148,6 +148,7 @@ public final class com/apollographql/cache/normalized/NormalizedCache {
 	public static final fun getApolloStore (Lcom/apollographql/apollo/ApolloClient;)Lcom/apollographql/cache/normalized/ApolloStore;
 	public static final fun getCacheHeaders (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/cache/normalized/api/CacheHeaders;
 	public static final fun getCacheInfo (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/cache/normalized/CacheInfo;
+	public static final fun getException (Lcom/apollographql/apollo/api/Error;)Lcom/apollographql/apollo/exception/ApolloException;
 	public static final fun getFetchFromCache (Lcom/apollographql/apollo/api/ApolloRequest;)Z
 	public static final fun isFromCache (Lcom/apollographql/apollo/api/ApolloResponse;)Z
 	public static final fun maxStale-HG0u8IE (Lcom/apollographql/apollo/api/MutableExecutionOptions;J)Ljava/lang/Object;
@@ -262,6 +263,10 @@ public final class com/apollographql/cache/normalized/api/CacheResolver$Resolved
 	public fun <init> (Ljava/lang/Object;Lcom/apollographql/cache/normalized/api/CacheHeaders;)V
 	public final fun getCacheHeaders ()Lcom/apollographql/cache/normalized/api/CacheHeaders;
 	public final fun getValue ()Ljava/lang/Object;
+}
+
+public final class com/apollographql/cache/normalized/api/CacheResolverKt {
+	public static final fun getFieldKey (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/lang/String;
 }
 
 public final class com/apollographql/cache/normalized/api/ConnectionEmbeddedFieldsProvider : com/apollographql/cache/normalized/api/EmbeddedFieldsProvider {
@@ -444,10 +449,10 @@ public abstract class com/apollographql/cache/normalized/api/NormalizedCacheFact
 
 public final class com/apollographql/cache/normalized/api/OperationCacheExtensionsKt {
 	public static final fun dependentKeys (Ljava/util/Collection;)Ljava/util/Set;
-	public static final fun normalize (Lcom/apollographql/apollo/api/Executable;Lcom/apollographql/apollo/api/Executable$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Ljava/lang/String;)Ljava/util/Map;
-	public static final fun normalize (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Ljava/util/Map;
-	public static synthetic fun normalize$default (Lcom/apollographql/apollo/api/Executable;Lcom/apollographql/apollo/api/Executable$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/Map;
-	public static synthetic fun normalize$default (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ILjava/lang/Object;)Ljava/util/Map;
+	public static final fun normalize (Lcom/apollographql/apollo/api/Executable;Lcom/apollographql/apollo/api/Executable$Data;Ljava/lang/String;Ljava/util/List;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Ljava/util/Map;
+	public static final fun normalize (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/List;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Ljava/util/Map;
+	public static synthetic fun normalize$default (Lcom/apollographql/apollo/api/Executable;Lcom/apollographql/apollo/api/Executable$Data;Ljava/lang/String;Ljava/util/List;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ILjava/lang/Object;)Ljava/util/Map;
+	public static synthetic fun normalize$default (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/List;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ILjava/lang/Object;)Ljava/util/Map;
 	public static final fun readDataFromCache (Lcom/apollographql/apollo/api/Executable;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/ReadOnlyNormalizedCache;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/apollo/api/Executable$Data;
 	public static final fun readDataFromCache (Lcom/apollographql/apollo/api/Executable;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/ReadOnlyNormalizedCache;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;)Lcom/apollographql/apollo/api/Executable$Data;
 	public static final fun readDataFromCache (Lcom/apollographql/apollo/api/Executable;Lcom/apollographql/cache/normalized/api/CacheKey;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/ReadOnlyNormalizedCache;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/apollo/api/Executable$Data;

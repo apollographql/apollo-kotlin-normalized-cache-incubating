@@ -7,6 +7,7 @@ import com.apollographql.apollo.api.CompiledNamedType
 import com.apollographql.apollo.api.CompiledNotNullType
 import com.apollographql.apollo.api.CompiledSelection
 import com.apollographql.apollo.api.CompiledType
+import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.isComposite
 import com.apollographql.apollo.api.json.ApolloJsonElement
@@ -182,6 +183,9 @@ internal class Normalizer(
     }
 
     return when {
+      // Keep errors as-is
+      value is Error -> value
+
       type is CompiledListType -> {
         check(value is List<*>)
         value.mapIndexed { index, item ->

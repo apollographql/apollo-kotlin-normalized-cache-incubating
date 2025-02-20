@@ -81,7 +81,7 @@ internal class ApolloCacheInterceptor(
         if (request.memoryCacheOnly) {
           cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
         }
-        store.writeOperation(request.operation, response.data!!, customScalarAdapters, cacheHeaders)
+        store.writeOperation(request.operation, response.data!!, response.errors, customScalarAdapters, cacheHeaders)
       } else {
         emptySet()
       }

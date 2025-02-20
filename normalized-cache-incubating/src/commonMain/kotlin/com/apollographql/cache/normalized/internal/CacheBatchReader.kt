@@ -9,6 +9,7 @@ import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.json.MapJsonReader
 import com.apollographql.apollo.exception.CacheMissException
+import com.apollographql.cache.normalized.EXTENSION_EXCEPTION
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
@@ -306,7 +307,7 @@ internal class CacheBatchReader(
     }
     return Error.Builder(message)
         .path(path = path)
-        .putExtension("exception", exception)
+        .putExtension(EXTENSION_EXCEPTION, exception)
         .build()
   }
 }

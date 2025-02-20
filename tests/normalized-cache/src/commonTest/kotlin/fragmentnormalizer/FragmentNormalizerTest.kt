@@ -95,9 +95,8 @@ class FragmentNormalizerTest {
 
     val records = ConversationFragmentImpl().normalize(
         fragment,
-        CustomScalarAdapters.Empty,
-        IdCacheKeyGenerator(),
         rootKey = "1",
+        cacheKeyGenerator = IdCacheKeyGenerator(),
     )
 
     assertContains(records.keys, "1.author")

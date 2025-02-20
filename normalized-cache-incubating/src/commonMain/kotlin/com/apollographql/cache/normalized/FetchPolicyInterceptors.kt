@@ -137,7 +137,7 @@ fun <D : Operation.Data> ApolloResponse<D>.cacheMissAsException(): ApolloRespons
   return if (cacheInfo?.isCacheHit == true) {
     this
   } else {
-    val cacheMissException = errors.orEmpty().mapNotNull { it.extensions?.get("exception") as? ApolloException }.reduceOrNull { acc, e ->
+    val cacheMissException = errors.orEmpty().mapNotNull { it.exception }.reduceOrNull { acc, e ->
       acc.addSuppressed(e)
       acc
     }
