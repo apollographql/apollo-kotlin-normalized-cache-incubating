@@ -10,6 +10,7 @@ import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.conflateFetchPolicyInterceptorResponses
 import com.apollographql.apollo.exception.ApolloCompositeException
 import com.apollographql.apollo.exception.ApolloException
+import com.apollographql.apollo.exception.ApolloGraphQLException
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.exception.DefaultApolloException
 import com.apollographql.apollo.interceptor.ApolloInterceptor
@@ -32,7 +33,7 @@ val CacheOnlyInterceptor = object : ApolloInterceptor {
             .newBuilder()
             .fetchFromCache(true)
             .build()
-    ).map { it.cacheMissAsException() }
+    ).map { it.errorsAsException() }
   }
 }
 
@@ -56,7 +57,7 @@ val CacheFirstInterceptor = object : ApolloInterceptor {
               .newBuilder()
               .fetchFromCache(true)
               .build()
-      ).single().cacheMissAsException()
+      ).single().errorsAsException()
       emit(cacheResponse.newBuilder().isLast(cacheResponse.exception == null).build())
       if (cacheResponse.exception == null) {
         return@flow
@@ -102,7 +103,7 @@ val NetworkFirstInterceptor = object : ApolloInterceptor {
               .newBuilder()
               .fetchFromCache(true)
               .build()
-      ).single().cacheMissAsException()
+      ).single().errorsAsException()
       emit(cacheResponse)
     }
   }
@@ -119,7 +120,7 @@ val CacheAndNetworkInterceptor = object : ApolloInterceptor {
               .newBuilder()
               .fetchFromCache(true)
               .build()
-      ).single().cacheMissAsException()
+      ).single().errorsAsException()
 
       emit(cacheResponse.newBuilder().isLast(false).build())
 
@@ -130,14 +131,14 @@ val CacheAndNetworkInterceptor = object : ApolloInterceptor {
 }
 
 /**
- * If this response is a cache miss, returns a response with an exception, otherwise returns this response.
+ * If this response has errors, returns a response with an exception, otherwise returns this response.
  * This can be used to accommodate [com.apollographql.apollo.ApolloCall.execute] which splits responses based on exceptions.
  */
-fun <D : Operation.Data> ApolloResponse<D>.cacheMissAsException(): ApolloResponse<D> {
+fun <D : Operation.Data> ApolloResponse<D>.errorsAsException(): ApolloResponse<D> {
   return if (cacheInfo?.isCacheHit == true) {
     this
   } else {
-    val cacheMissException = errors.orEmpty().mapNotNull { it.exception }.reduceOrNull { acc, e ->
+    val cacheMissException = errors.orEmpty().map { it.exception ?: ApolloGraphQLException(it) }.reduceOrNull { acc, e ->
       acc.addSuppressed(e)
       acc
     }

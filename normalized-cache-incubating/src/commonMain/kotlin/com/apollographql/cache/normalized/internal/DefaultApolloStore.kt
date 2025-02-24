@@ -31,7 +31,6 @@ import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.api.readDataFromCacheInternal
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.cacheInfo
-import com.apollographql.cache.normalized.exception
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.channels.BufferOverflow
@@ -155,8 +154,6 @@ internal class DefaultApolloStore(
       jsonReader.endObject()
       data
     }
-    // Cache miss errors have an exception
-    val isCacheHit = errors.none { it.exception != null }
     return ApolloResponse.Builder(operation, uuid4())
         .data(data)
         .errors(errors.takeIf { it.isNotEmpty() })
@@ -164,7 +161,7 @@ internal class DefaultApolloStore(
         .cacheInfo(
             CacheInfo.Builder()
                 .fromCache(true)
-                .cacheHit(isCacheHit)
+                .cacheHit(errors.isEmpty())
                 .stale(batchReaderData.cacheHeaders.headerValue(ApolloCacheHeaders.STALE) == "true")
                 .build()
         )

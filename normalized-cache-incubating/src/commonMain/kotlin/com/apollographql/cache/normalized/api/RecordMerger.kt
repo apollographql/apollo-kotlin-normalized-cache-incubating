@@ -1,5 +1,6 @@
 package com.apollographql.cache.normalized.api
 
+import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.cache.normalized.api.FieldRecordMerger.FieldMerger
 
@@ -12,19 +13,31 @@ interface RecordMerger {
    *
    * @return a pair of the resulting merged Record and a set of field keys which have changed or were added.
    */
-  fun merge(existing: Record, incoming: Record): Pair<Record, Set<String>>
+  fun merge(context: RecordMergerContext): Pair<Record, Set<String>>
 }
+
+class RecordMergerContext(
+    val existing: Record,
+    val incoming: Record,
+    val cacheHeaders: CacheHeaders,
+)
 
 /**
  * A [RecordMerger] that merges fields by replacing them with the incoming fields.
  */
 object DefaultRecordMerger : RecordMerger {
-  override fun merge(existing: Record, incoming: Record): Pair<Record, Set<String>> {
+  override fun merge(context: RecordMergerContext): Pair<Record, Set<String>> {
+    val existing = context.existing
+    val incoming = context.incoming
+    val errorsReplaceCachedValues = context.cacheHeaders.headerValue(ApolloCacheHeaders.ERRORS_REPLACE_CACHED_VALUES) == "true"
     val changedKeys = mutableSetOf<String>()
     val mergedFields = existing.fields.toMutableMap()
 
     for ((fieldKey, incomingFieldValue) in incoming.fields) {
       val hasExistingFieldValue = existing.fields.containsKey(fieldKey)
+      if (hasExistingFieldValue && incomingFieldValue is Error && !errorsReplaceCachedValues) {
+        continue
+      }
       val existingFieldValue = existing.fields[fieldKey]
       if (!hasExistingFieldValue || existingFieldValue != incomingFieldValue) {
         mergedFields[fieldKey] = incomingFieldValue
@@ -77,13 +90,19 @@ class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
       val metadata: Map<String, ApolloJsonElement>,
   )
 
-  override fun merge(existing: Record, incoming: Record): Pair<Record, Set<String>> {
+  override fun merge(context: RecordMergerContext): Pair<Record, Set<String>> {
+    val existing = context.existing
+    val incoming = context.incoming
+    val errorsReplaceCachedValues = context.cacheHeaders.headerValue(ApolloCacheHeaders.ERRORS_REPLACE_CACHED_VALUES) == "true"
     val changedKeys = mutableSetOf<String>()
     val mergedFields = existing.fields.toMutableMap()
     val mergedMetadata = existing.metadata.toMutableMap()
 
     for ((fieldKey, incomingFieldValue) in incoming.fields) {
       val hasExistingFieldValue = existing.fields.containsKey(fieldKey)
+      if (hasExistingFieldValue && incomingFieldValue is Error && !errorsReplaceCachedValues) {
+        continue
+      }
       val existingFieldValue = existing.fields[fieldKey]
       if (!hasExistingFieldValue) {
         mergedFields[fieldKey] = incomingFieldValue

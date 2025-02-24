@@ -22,10 +22,10 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.cacheInfo
 import com.apollographql.cache.normalized.doNotStore
+import com.apollographql.cache.normalized.errorsReplaceCachedValues
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.memoryCacheOnly
 import com.apollographql.cache.normalized.optimisticData
-import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.cache.normalized.storeReceivedDate
 import com.apollographql.cache.normalized.writeToCacheAsynchronously
 import kotlinx.coroutines.flow.Flow
@@ -68,10 +68,6 @@ internal class ApolloCacheInterceptor(
     if (response.data == null) {
       return
     }
-    if (response.hasErrors() && !request.storePartialResponses) {
-      return
-    }
-
     maybeAsync(request) {
       val cacheKeys = if (response.data != null) {
         var cacheHeaders = request.cacheHeaders + response.cacheHeaders
@@ -80,6 +76,9 @@ internal class ApolloCacheInterceptor(
         }
         if (request.memoryCacheOnly) {
           cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
+        }
+        if (request.errorsReplaceCachedValues) {
+          cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.ERRORS_REPLACE_CACHED_VALUES, "true").build()
         }
         store.writeOperation(request.operation, response.data!!, response.errors, customScalarAdapters, cacheHeaders)
       } else {

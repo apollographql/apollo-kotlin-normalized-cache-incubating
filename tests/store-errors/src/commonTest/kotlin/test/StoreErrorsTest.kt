@@ -1,25 +1,34 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.ApolloRequest
+import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Error.Location
+import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.interceptor.ApolloInterceptor
+import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.errorsReplaceCachedValues
+import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.fetchPolicyInterceptor
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.store
-import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
+import kotlinx.coroutines.flow.Flow
 import okio.use
 import test.fragment.UserFields
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
-class StorePartialResponsesTest {
+class StoreErrorsTest {
   private lateinit var mockServer: MockServer
 
   private fun setUp() {
@@ -77,7 +86,6 @@ class StorePartialResponsesTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
-        .storePartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(MeWithNickNameQuery())
@@ -103,6 +111,7 @@ class StorePartialResponsesTest {
           )
 
           val cacheResult = apolloClient.query(MeWithNickNameQuery())
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
           assertEquals(
               networkResult.data,
@@ -166,7 +175,6 @@ class StorePartialResponsesTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
-        .storePartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(UsersQuery(listOf("1", "2", "3")))
@@ -201,7 +209,9 @@ class StorePartialResponsesTest {
               networkResult.errors
           )
 
-          val cacheResult = apolloClient.query(UsersQuery(listOf("1", "2", "3"))).execute()
+          val cacheResult = apolloClient.query(UsersQuery(listOf("1", "2", "3")))
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
+              .execute()
           assertEquals(
               networkResult.data,
               cacheResult.data,
@@ -273,7 +283,6 @@ class StorePartialResponsesTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
-        .storePartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(MeWithBestFriendQuery())
@@ -315,7 +324,9 @@ class StorePartialResponsesTest {
               ),
               networkResult.errors
           )
-          val cacheResult = apolloClient.query(MeWithBestFriendQuery()).execute()
+          val cacheResult = apolloClient.query(MeWithBestFriendQuery())
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
+              .execute()
           assertEquals(
               networkResult.data,
               cacheResult.data
@@ -368,7 +379,6 @@ class StorePartialResponsesTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
-        .storePartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(DefaultProjectQuery())
@@ -392,7 +402,9 @@ class StorePartialResponsesTest {
               networkResult.errors
           )
 
-          val cacheResult = apolloClient.query(DefaultProjectQuery()).execute()
+          val cacheResult = apolloClient.query(DefaultProjectQuery())
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
+              .execute()
           assertEquals(
               networkResult.data,
               cacheResult.data
@@ -459,7 +471,6 @@ class StorePartialResponsesTest {
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
-        .storePartialResponses(true)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(WithFragmentsQuery())
@@ -508,16 +519,192 @@ class StorePartialResponsesTest {
               networkResult.errors
           )
 
-          val cacheResult = apolloClient.query(WithFragmentsQuery()).execute()
+          val cacheResult = apolloClient.query(WithFragmentsQuery())
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
+              .execute()
           assertEquals(
               networkResult.data,
               cacheResult.data
           )
         }
   }
+
+
+  @Test
+  fun errorsReplaceCachedValuesMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
+    errorsReplaceCachedValues(memoryStore)
+  }
+
+  @Test
+  fun errorsReplaceCachedValuesSql() = runTest(before = { setUp() }, after = { tearDown() }) {
+    errorsReplaceCachedValues(sqlStore)
+  }
+
+  @Test
+  fun errorsReplaceCachedValuesMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
+    errorsReplaceCachedValues(memoryThenSqlStore)
+  }
+
+  private suspend fun errorsReplaceCachedValues(store: ApolloStore) {
+    mockServer.enqueueString(
+        // language=JSON
+        """
+          {
+            "data": {
+              "me": {
+                "__typename": "User",
+                "id": "1",
+                "firstName": "John",
+                "lastName": "Smith",
+                "nickName": "JS"
+              }
+            }
+          }
+          """
+    )
+    mockServer.enqueueString(
+        // language=JSON
+        """
+          {
+            "data": {
+              "me": {
+                "__typename": "User",
+                "id": "1",
+                "firstName": "Johnny",
+                "lastName": "Smith",
+                "nickName": null
+              }
+            },
+            "errors": [
+              {
+                "message": "'nickName' can't be reached",
+                "path": ["me", "nickName"]
+              }
+            ]
+          }
+          """
+    )
+    mockServer.enqueueString(
+        // language=JSON
+        """
+          {
+            "data": {
+              "me": {
+                "__typename": "User",
+                "id": "1",
+                "firstName": "Johnny Boy",
+                "lastName": "Smith",
+                "nickName": null
+              }
+            },
+            "errors": [
+              {
+                "message": "'nickName' can't be reached",
+                "path": ["me", "nickName"]
+              }
+            ]
+          }
+          """
+    )
+
+
+    ApolloClient.Builder()
+        .serverUrl(mockServer.url())
+        .store(store)
+        .build()
+        .use { apolloClient ->
+          val noErrorNetworkResult = apolloClient.query(MeWithNickNameQuery())
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .execute()
+          assertEquals(
+              MeWithNickNameQuery.Data(
+                  MeWithNickNameQuery.Me(
+                      __typename = "User",
+                      id = "1",
+                      firstName = "John",
+                      lastName = "Smith",
+                      nickName = "JS"
+                  )
+              ),
+              noErrorNetworkResult.data
+          )
+          assertNull(noErrorNetworkResult.errors)
+
+          var cacheResult = apolloClient.query(MeWithNickNameQuery())
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
+              .execute()
+          assertEquals(
+              noErrorNetworkResult.data,
+              cacheResult.data
+          )
+          assertNull(cacheResult.errors)
+
+          apolloClient.query(MeWithNickNameQuery())
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .execute()
+          cacheResult = apolloClient.query(MeWithNickNameQuery())
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
+              .execute()
+          assertEquals(
+              MeWithNickNameQuery.Data(
+                  MeWithNickNameQuery.Me(
+                      __typename = "User",
+                      id = "1",
+                      firstName = "Johnny",
+                      lastName = "Smith",
+                      nickName = "JS"
+                  )
+              ),
+              cacheResult.data
+          )
+          assertNull(cacheResult.errors)
+
+          apolloClient.query(MeWithNickNameQuery())
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .errorsReplaceCachedValues(true)
+              .execute()
+          cacheResult = apolloClient.query(MeWithNickNameQuery())
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
+              .execute()
+          assertEquals(
+              MeWithNickNameQuery.Data(
+                  MeWithNickNameQuery.Me(
+                      __typename = "User",
+                      id = "1",
+                      firstName = "Johnny Boy",
+                      lastName = "Smith",
+                      nickName = null
+                  )
+              ),
+              cacheResult.data
+          )
+          assertErrorsEquals(
+              listOf(
+                  Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName")).build()
+              ),
+              cacheResult.errors
+          )
+        }
+  }
+
+
+  // TODO tests with ApolloStore directly
+
+
 }
 
-// TODO tests with ApolloStore directly
+
+val PartialCacheOnlyInterceptor = object : ApolloInterceptor {
+  override fun <D : Operation.Data> intercept(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
+    return chain.proceed(
+        request = request
+            .newBuilder()
+            .fetchFromCache(true)
+            .build()
+    )
+  }
+}
+
 
 /**
  * Helps using assertEquals.

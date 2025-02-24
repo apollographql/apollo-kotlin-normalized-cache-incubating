@@ -1,5 +1,6 @@
 package com.apollographql.cache.normalized.internal
 
+import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.json.JsonNumber
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
@@ -17,6 +18,7 @@ internal object RecordWeigher {
   private const val SIZE_OF_RECORD_OVERHEAD = 16
   private const val SIZE_OF_CACHE_KEY_OVERHEAD = 16
   private const val SIZE_OF_NULL = 4
+  private const val SIZE_OF_ERROR_OVERHEAD = 16
 
   @JvmStatic
   fun byteChange(newValue: Any?, oldValue: Any?): Int {
@@ -55,6 +57,15 @@ internal object RecordWeigher {
 
       is CacheKey -> {
         SIZE_OF_CACHE_KEY_OVERHEAD + field.key.commonAsUtf8ToByteArray().size
+      }
+
+      is Error -> {
+        SIZE_OF_ERROR_OVERHEAD +
+            field.message.commonAsUtf8ToByteArray().size +
+            (field.locations?.size ?: 0) * SIZE_OF_INT * 2 +
+            weighField(field.path) +
+            weighField(field.extensions) +
+            weighField(field.nonStandardFields)
       }
 
       else -> error("Unknown field type in Record: '$field'")

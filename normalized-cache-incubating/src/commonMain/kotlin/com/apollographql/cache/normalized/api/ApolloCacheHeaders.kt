@@ -38,4 +38,9 @@ object ApolloCacheHeaders {
    * True if the returned data is considered stale
    */
   const val STALE = "apollo-stale"
+
+  /**
+   * True if field errors are allowed to replace cached values.
+   */
+  const val ERRORS_REPLACE_CACHED_VALUES = "apollo-errors-replace-cached-values"
 }

@@ -26,7 +26,6 @@ import com.apollographql.cache.normalized.fetchPolicyInterceptor
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.store
-import com.apollographql.cache.normalized.storePartialResponses
 import com.apollographql.cache.normalized.storeReceivedDate
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
@@ -179,7 +178,6 @@ class CachePartialResultTest {
         .use { apolloClient ->
           val networkResult = apolloClient.query(UsersQuery(listOf("1", "2", "3")))
               .fetchPolicy(FetchPolicy.NetworkOnly)
-              .storePartialResponses(true)
               .execute()
           assertEquals(
               UsersQuery.Data(

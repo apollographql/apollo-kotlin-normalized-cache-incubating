@@ -94,7 +94,7 @@ public final class com/apollographql/cache/normalized/FetchPolicy : java/lang/En
 }
 
 public final class com/apollographql/cache/normalized/FetchPolicyInterceptors {
-	public static final fun cacheMissAsException (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/apollo/api/ApolloResponse;
+	public static final fun errorsAsException (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/apollo/api/ApolloResponse;
 	public static final fun getCacheAndNetworkInterceptor ()Lcom/apollographql/apollo/interceptor/ApolloInterceptor;
 	public static final fun getCacheFirstInterceptor ()Lcom/apollographql/apollo/interceptor/ApolloInterceptor;
 	public static final fun getCacheOnlyInterceptor ()Lcom/apollographql/apollo/interceptor/ApolloInterceptor;
@@ -142,6 +142,7 @@ public final class com/apollographql/cache/normalized/NormalizedCache {
 	public static final fun configureApolloClientBuilder2 (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Z)Lcom/apollographql/apollo/ApolloClient$Builder;
 	public static synthetic fun configureApolloClientBuilder2$default (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ZILjava/lang/Object;)Lcom/apollographql/apollo/ApolloClient$Builder;
 	public static final fun doNotStore (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
+	public static final fun errorsReplaceCachedValues (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
 	public static final fun fetchFromCache (Lcom/apollographql/apollo/api/ApolloRequest$Builder;Z)Lcom/apollographql/apollo/api/ApolloRequest$Builder;
 	public static final fun fetchPolicy (Lcom/apollographql/apollo/api/MutableExecutionOptions;Lcom/apollographql/cache/normalized/FetchPolicy;)Ljava/lang/Object;
 	public static final fun fetchPolicyInterceptor (Lcom/apollographql/apollo/api/MutableExecutionOptions;Lcom/apollographql/apollo/interceptor/ApolloInterceptor;)Ljava/lang/Object;
@@ -160,7 +161,7 @@ public final class com/apollographql/cache/normalized/NormalizedCache {
 	public static final fun store (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/ApolloStore;Z)Lcom/apollographql/apollo/ApolloClient$Builder;
 	public static synthetic fun store$default (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/ApolloStore;ZILjava/lang/Object;)Lcom/apollographql/apollo/ApolloClient$Builder;
 	public static final fun storeExpirationDate (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
-	public static final fun storePartialResponses (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
+	public static final fun storePartialResponses (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Void;
 	public static final fun storeReceivedDate (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
 	public static final fun watch (Lcom/apollographql/apollo/ApolloCall;)Lkotlinx/coroutines/flow/Flow;
 	public static final fun watch (Lcom/apollographql/apollo/ApolloCall;Lcom/apollographql/apollo/api/Query$Data;)Lkotlinx/coroutines/flow/Flow;
@@ -179,6 +180,7 @@ public final class com/apollographql/cache/normalized/VersionKt {
 
 public final class com/apollographql/cache/normalized/api/ApolloCacheHeaders {
 	public static final field DO_NOT_STORE Ljava/lang/String;
+	public static final field ERRORS_REPLACE_CACHED_VALUES Ljava/lang/String;
 	public static final field EVICT_AFTER_READ Ljava/lang/String;
 	public static final field EXPIRATION_DATE Ljava/lang/String;
 	public static final field INSTANCE Lcom/apollographql/cache/normalized/api/ApolloCacheHeaders;
@@ -309,7 +311,7 @@ public final class com/apollographql/cache/normalized/api/DefaultFieldKeyGenerat
 
 public final class com/apollographql/cache/normalized/api/DefaultRecordMerger : com/apollographql/cache/normalized/api/RecordMerger {
 	public static final field INSTANCE Lcom/apollographql/cache/normalized/api/DefaultRecordMerger;
-	public fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/Record;)Lkotlin/Pair;
+	public fun merge (Lcom/apollographql/cache/normalized/api/RecordMergerContext;)Lkotlin/Pair;
 }
 
 public final class com/apollographql/cache/normalized/api/EmbeddedFieldsContext {
@@ -344,7 +346,7 @@ public final class com/apollographql/cache/normalized/api/FieldPolicyCacheResolv
 
 public final class com/apollographql/cache/normalized/api/FieldRecordMerger : com/apollographql/cache/normalized/api/RecordMerger {
 	public fun <init> (Lcom/apollographql/cache/normalized/api/FieldRecordMerger$FieldMerger;)V
-	public fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/Record;)Lkotlin/Pair;
+	public fun merge (Lcom/apollographql/cache/normalized/api/RecordMergerContext;)Lkotlin/Pair;
 }
 
 public final class com/apollographql/cache/normalized/api/FieldRecordMerger$FieldInfo {
@@ -526,7 +528,14 @@ public final class com/apollographql/cache/normalized/api/RecordKt {
 }
 
 public abstract interface class com/apollographql/cache/normalized/api/RecordMerger {
-	public abstract fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/Record;)Lkotlin/Pair;
+	public abstract fun merge (Lcom/apollographql/cache/normalized/api/RecordMergerContext;)Lkotlin/Pair;
+}
+
+public final class com/apollographql/cache/normalized/api/RecordMergerContext {
+	public fun <init> (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/CacheHeaders;)V
+	public final fun getCacheHeaders ()Lcom/apollographql/cache/normalized/api/CacheHeaders;
+	public final fun getExisting ()Lcom/apollographql/cache/normalized/api/Record;
+	public final fun getIncoming ()Lcom/apollographql/cache/normalized/api/Record;
 }
 
 public final class com/apollographql/cache/normalized/api/RecordMergerKt {

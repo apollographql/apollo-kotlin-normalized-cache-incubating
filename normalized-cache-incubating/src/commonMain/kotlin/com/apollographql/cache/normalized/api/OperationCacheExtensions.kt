@@ -68,20 +68,20 @@ private fun Map<String, Any?>.withErrors(errors: List<Error>?): Map<String, Any?
 @Suppress("UNCHECKED_CAST")
 private fun Map<String, Any?>.withValueAt(path: List<Any>, value: Any?): Map<String, Any?> {
   var node: Any? = this.toMutableMap()
-  var root = node
+  val root = node
   for ((i, key) in path.withIndex()) {
     if (key is String) {
       node as MutableMap<String, Any?>
       if (i == path.lastIndex) {
         node[key] = value
       } else {
-        when (val value = node[key]) {
+        when (val v = node[key]) {
           is Map<*, *> -> {
-            node[key] = value.toMutableMap()
+            node[key] = v.toMutableMap()
           }
 
           is List<*> -> {
-            node[key] = value.toMutableList()
+            node[key] = v.toMutableList()
           }
 
           else -> break
@@ -94,18 +94,19 @@ private fun Map<String, Any?>.withValueAt(path: List<Any>, value: Any?): Map<Str
       if (i == path.lastIndex) {
         node[key] = value
       } else {
-        when (val value = node[key]) {
+        when (val v = node[key]) {
           is Map<*, *> -> {
-            node[key] = value.toMutableMap()
+            node[key] = v.toMutableMap()
           }
 
           is List<*> -> {
-            node[key] = value.toMutableList()
+            node[key] = v.toMutableList()
           }
 
           else -> break
         }
       }
+      node = node[key]!!
     }
   }
   return root as Map<String, Any?>
