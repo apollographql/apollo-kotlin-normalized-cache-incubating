@@ -3,26 +3,4 @@ extend schema
   url: "https://specs.apollo.dev/kotlin_labs/v0.3",
   import: ["@fieldPolicy", "@typePolicy"]
 )
-@link(
-  url: "https://specs.apollo.dev/cache/v0.1",
-  import: ["@cacheControl", "@cacheControlField"]
-)
-@link(
-  url: "https://specs.apollo.dev/nullability/v0.4",
-  import: ["@semanticNonNull", "@catch", "@catchByDefault", "CatchTo", "@semanticNonNullField"]
-)
-
-extend schema @catchByDefault(to: NULL)
-
-
 extend type User @typePolicy(keyFields: "id")
-
-extend type User @cacheControlField(name: "nickName", maxAge: 0)
-
-
-extend type User @semanticNonNullField(name: "employeeInfo")
-
-extend type EmployeeInfo @semanticNonNullField(name: "salary")
-@semanticNonNullField(name: "department")
-
-extend type EmployeeInfo @cacheControlField(name: "salary", maxAge: 0)

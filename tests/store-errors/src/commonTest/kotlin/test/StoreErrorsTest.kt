@@ -3,6 +3,7 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Error.Location
 import com.apollographql.apollo.api.Operation
@@ -11,6 +12,7 @@ import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.errorsReplaceCachedValues
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
@@ -26,6 +28,7 @@ import test.fragment.UserFields
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class StoreErrorsTest {
@@ -687,12 +690,85 @@ class StoreErrorsTest {
         }
   }
 
+  @Test
+  fun normalize() = runTest(before = { setUp() }, after = { tearDown() }) {
+    val normalized: Map<String, Record> = memoryStore.normalize(
+        operation = MeWithNickNameQuery(),
+        data = MeWithNickNameQuery.Data(
+            MeWithNickNameQuery.Me(
+                __typename = "User",
+                id = "1",
+                firstName = "John",
+                lastName = "Smith",
+                nickName = null
+            )
+        ),
+        errors = listOf(
+            Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName")).build()
+        ),
+        customScalarAdapters = CustomScalarAdapters.Empty,
+    )
+    assertEquals("User", normalized["User:1"]!!["__typename"])
+    assertEquals("1", normalized["User:1"]!!["id"])
+    assertEquals("John", normalized["User:1"]!!["firstName"])
+    assertEquals("Smith", normalized["User:1"]!!["lastName"])
+    assertErrorsEquals(Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName"))
+        .build(), normalized["User:1"]!!["nickName"] as Error
+    )
+  }
 
-  // TODO tests with ApolloStore directly
+  @Test
+  fun writeOperationMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
+    writeOperation(memoryStore)
+  }
 
+  @Test
+  fun writeOperationSql() = runTest(before = { setUp() }, after = { tearDown() }) {
+    writeOperation(sqlStore)
+  }
 
+  @Test
+  fun writeOperationMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
+    writeOperation(memoryThenSqlStore)
+  }
+
+  private fun writeOperation(store: ApolloStore) {
+    store.writeOperation(
+        operation = MeWithNickNameQuery(),
+        operationData = MeWithNickNameQuery.Data(
+            MeWithNickNameQuery.Me(
+                __typename = "User",
+                id = "1",
+                firstName = "John",
+                lastName = "Smith",
+                nickName = null
+            )
+        ),
+        errors = listOf(
+            Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName")).build()
+        ),
+    )
+    val responseFromCache = store.readOperation(MeWithNickNameQuery())
+    assertEquals(
+        MeWithNickNameQuery.Data(
+            MeWithNickNameQuery.Me(
+                __typename = "User",
+                id = "1",
+                firstName = "John",
+                lastName = "Smith",
+                nickName = null
+            )
+        ),
+        responseFromCache.data,
+    )
+    assertErrorsEquals(
+        listOf(
+            Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName")).build()
+        ),
+        responseFromCache.errors
+    )
+  }
 }
-
 
 val PartialCacheOnlyInterceptor = object : ApolloInterceptor {
   override fun <D : Operation.Data> intercept(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
@@ -729,3 +805,12 @@ private fun assertErrorsEquals(expected: Iterable<Error>?, actual: Iterable<Erro
         path = it.path,
     )
   })
+
+private fun assertErrorsEquals(expected: Error?, actual: Error?) {
+  if (expected == null) {
+    assertNull(actual)
+    return
+  }
+  assertNotNull(actual)
+  assertErrorsEquals(listOf(expected), listOf(actual))
+}
