@@ -138,12 +138,12 @@ fun <D : Operation.Data> ApolloResponse<D>.errorsAsException(): ApolloResponse<D
   return if (cacheInfo?.isCacheHit == true) {
     this
   } else {
-    val cacheMissException = errors.orEmpty().map { it.exception ?: ApolloGraphQLException(it) }.reduceOrNull { acc, e ->
+    val exception = errors.orEmpty().map { it.cacheMissException ?: ApolloGraphQLException(it) }.reduceOrNull { acc, e ->
       acc.addSuppressed(e)
       acc
     }
     newBuilder()
-        .exception(cacheMissException)
+        .exception(exception)
         .data(null)
         .errors(null)
         .build()

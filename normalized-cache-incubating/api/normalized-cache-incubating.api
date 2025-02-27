@@ -82,6 +82,10 @@ public final class com/apollographql/cache/normalized/CacheMissLoggingIntercepto
 	public fun intercept (Lcom/apollographql/apollo/api/ApolloRequest;Lcom/apollographql/apollo/interceptor/ApolloInterceptorChain;)Lkotlinx/coroutines/flow/Flow;
 }
 
+public final class com/apollographql/cache/normalized/ErrorExtensionsKt {
+	public static final fun getCacheMissException (Lcom/apollographql/apollo/api/Error;)Lcom/apollographql/apollo/exception/CacheMissException;
+}
+
 public final class com/apollographql/cache/normalized/FetchPolicy : java/lang/Enum {
 	public static final field CacheAndNetwork Lcom/apollographql/cache/normalized/FetchPolicy;
 	public static final field CacheFirst Lcom/apollographql/cache/normalized/FetchPolicy;
@@ -149,7 +153,6 @@ public final class com/apollographql/cache/normalized/NormalizedCache {
 	public static final fun getApolloStore (Lcom/apollographql/apollo/ApolloClient;)Lcom/apollographql/cache/normalized/ApolloStore;
 	public static final fun getCacheHeaders (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/cache/normalized/api/CacheHeaders;
 	public static final fun getCacheInfo (Lcom/apollographql/apollo/api/ApolloResponse;)Lcom/apollographql/cache/normalized/CacheInfo;
-	public static final fun getException (Lcom/apollographql/apollo/api/Error;)Lcom/apollographql/apollo/exception/ApolloException;
 	public static final fun getFetchFromCache (Lcom/apollographql/apollo/api/ApolloRequest;)Z
 	public static final fun isFromCache (Lcom/apollographql/apollo/api/ApolloResponse;)Z
 	public static final fun maxStale-HG0u8IE (Lcom/apollographql/apollo/api/MutableExecutionOptions;J)Ljava/lang/Object;

@@ -7,7 +7,6 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.CacheDumpProviderContext
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
-import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.ExecutionContext
 import com.apollographql.apollo.api.ExecutionOptions
 import com.apollographql.apollo.api.MutableExecutionOptions
@@ -633,14 +632,3 @@ fun <D : Operation.Data> ApolloResponse.Builder<D>.cacheHeaders(cacheHeaders: Ca
 
 val <D : Operation.Data> ApolloResponse<D>.cacheHeaders
   get() = executionContext[CacheHeadersContext]?.value ?: CacheHeaders.NONE
-
-
-internal const val EXTENSION_EXCEPTION = "exception"
-
-/**
- * Some errors returned when reading the cache (e.g. cache misses) may have additional information in the form of
- * an exception. Use this property to access it.
- * This will always be null for errors of network responses.
- */
-val Error.exception: ApolloException?
-  get() = extensions?.get(EXTENSION_EXCEPTION) as? ApolloException

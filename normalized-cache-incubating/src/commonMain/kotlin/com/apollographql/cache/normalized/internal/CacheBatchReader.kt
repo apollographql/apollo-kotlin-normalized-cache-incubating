@@ -9,7 +9,6 @@ import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.json.MapJsonReader
 import com.apollographql.apollo.exception.CacheMissException
-import com.apollographql.cache.normalized.EXTENSION_EXCEPTION
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
@@ -18,6 +17,7 @@ import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.ReadOnlyNormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.ResolverContext
+import com.apollographql.cache.normalized.cacheMissException
 import kotlin.jvm.JvmSuppressWildcards
 
 /**
@@ -288,7 +288,7 @@ internal class CacheBatchReader(
         }
 
         else -> {
-          // Scalar value or CacheMissException
+          // Scalar value or Error
           this
         }
       }
@@ -307,7 +307,7 @@ internal class CacheBatchReader(
     }
     return Error.Builder(message)
         .path(path = path)
-        .putExtension(EXTENSION_EXCEPTION, exception)
+        .cacheMissException(exception)
         .build()
   }
 }
