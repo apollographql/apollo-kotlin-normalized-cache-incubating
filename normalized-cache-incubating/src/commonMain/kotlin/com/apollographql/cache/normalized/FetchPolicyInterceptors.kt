@@ -132,7 +132,7 @@ val CacheAndNetworkInterceptor = object : ApolloInterceptor {
 
 /**
  * If this response has errors, returns a response with an exception, otherwise returns this response.
- * This can be used to accommodate [com.apollographql.apollo.ApolloCall.execute] which splits responses based on exceptions.
+ * This can be used to accommodate [com.apollographql.apollo.ApolloCall.execute] which splits responses based on exceptions and should only be called on cache responses.
  */
 fun <D : Operation.Data> ApolloResponse<D>.errorsAsException(): ApolloResponse<D> {
   return if (cacheInfo?.isCacheHit == true) {
