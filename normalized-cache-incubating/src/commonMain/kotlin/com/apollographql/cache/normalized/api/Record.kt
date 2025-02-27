@@ -11,19 +11,6 @@ import com.benasher44.uuid.Uuid
  */
 class Record(
     val key: String,
-    /**
-     * a list of fields. Values can be
-     * - Int
-     * - Long
-     * - Double
-     * - Boolean
-     * - String
-     * - List
-     * - CacheKey (for composite types)
-     * - Map (for custom scalars)
-     * - null
-     * - Error (for GraphQL errors)
-     */
     val fields: Map<String, RecordValue>,
     val mutationId: Uuid? = null,
 
