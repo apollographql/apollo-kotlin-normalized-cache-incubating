@@ -13,6 +13,7 @@ import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.Record
+import com.apollographql.cache.normalized.api.withErrors
 import com.apollographql.cache.normalized.errorsReplaceCachedValues
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
@@ -692,20 +693,22 @@ class StoreErrorsTest {
 
   @Test
   fun normalize() = runTest(before = { setUp() }, after = { tearDown() }) {
+    val query = MeWithNickNameQuery()
+    val dataWithErrors = MeWithNickNameQuery.Data(
+        MeWithNickNameQuery.Me(
+            __typename = "User",
+            id = "1",
+            firstName = "John",
+            lastName = "Smith",
+            nickName = null
+        )
+    ).withErrors(
+        query,
+        listOf(Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName")).build()),
+    )
     val normalized: Map<String, Record> = memoryStore.normalize(
-        operation = MeWithNickNameQuery(),
-        data = MeWithNickNameQuery.Data(
-            MeWithNickNameQuery.Me(
-                __typename = "User",
-                id = "1",
-                firstName = "John",
-                lastName = "Smith",
-                nickName = null
-            )
-        ),
-        errors = listOf(
-            Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName")).build()
-        ),
+        executable = query,
+        dataWithErrors = dataWithErrors,
         customScalarAdapters = CustomScalarAdapters.Empty,
     )
     assertEquals("User", normalized["User:1"]!!["__typename"])
@@ -735,7 +738,7 @@ class StoreErrorsTest {
   private fun writeOperation(store: ApolloStore) {
     store.writeOperation(
         operation = MeWithNickNameQuery(),
-        operationData = MeWithNickNameQuery.Data(
+        data = MeWithNickNameQuery.Data(
             MeWithNickNameQuery.Me(
                 __typename = "User",
                 id = "1",

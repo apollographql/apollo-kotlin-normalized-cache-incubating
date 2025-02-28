@@ -1,18 +1,16 @@
 package com.apollographql.cache.normalized.internal
 
-import com.apollographql.apollo.api.Adapter
 import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.CompiledFragment
 import com.apollographql.apollo.api.CompiledSelection
-import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Executable
-import com.apollographql.apollo.api.json.MapJsonReader
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheResolver
+import com.apollographql.cache.normalized.api.DataWithErrors
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.ReadOnlyNormalizedCache
 import com.apollographql.cache.normalized.api.Record
@@ -251,44 +249,40 @@ internal class CacheBatchReader(
       private val data: Map<List<Any>, Any>,
       val cacheHeaders: CacheHeaders,
   ) {
-    fun <D : Executable.Data> toData(
-        adapter: Adapter<D>,
-        customScalarAdapters: CustomScalarAdapters,
-        variables: Executable.Variables,
-    ): D {
-      val reader = MapJsonReader(toMap())
-      return adapter.fromJson(
-          reader,
-          customScalarAdapters.newBuilder().falseVariables(variables.valueMap.filter { it.value == false }.keys).build()
-      )
-    }
-
     @Suppress("UNCHECKED_CAST")
-    internal fun toMap(): Map<String, Any?> {
-      return data[emptyList()].replaceCacheKeys(emptyList()) as Map<String, Any?>
+    internal fun toMap(withErrors: Boolean = true): DataWithErrors {
+      return data[emptyList()].replaceCacheKeys(emptyList(), withErrors) as DataWithErrors
     }
 
-    private fun Any?.replaceCacheKeys(path: List<Any>): Any? {
+    private fun Any?.replaceCacheKeys(path: List<Any>, withErrors: Boolean): Any? {
       return when (this) {
         is CacheKey -> {
-          data[path].replaceCacheKeys(path)
+          data[path].replaceCacheKeys(path, withErrors)
         }
 
         is List<*> -> {
           mapIndexed { index, src ->
-            src.replaceCacheKeys(path + index)
+            src.replaceCacheKeys(path + index, withErrors)
           }
         }
 
         is Map<*, *> -> {
           // This will traverse Map custom scalars but this is ok as it shouldn't contain any CacheKey
           mapValues {
-            it.value.replaceCacheKeys(path + (it.key as String))
+            it.value.replaceCacheKeys(path + (it.key as String), withErrors)
+          }
+        }
+
+        is Error -> {
+          if (withErrors) {
+            this
+          } else {
+            null
           }
         }
 
         else -> {
-          // Scalar value or Error
+          // Scalar value
           this
         }
       }

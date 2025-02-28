@@ -141,7 +141,7 @@ internal class ApolloCacheInterceptor(
         @Suppress("UNCHECKED_CAST")
         store.writeOptimisticUpdates(
             operation = request.operation,
-            operationData = optimisticData as D,
+            data = optimisticData as D,
             mutationId = request.requestUuid,
             customScalarAdapters = customScalarAdapters,
         ).also { store.publish(it) }

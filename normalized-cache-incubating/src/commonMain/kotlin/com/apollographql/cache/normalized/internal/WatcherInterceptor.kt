@@ -11,6 +11,7 @@ import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.ApolloStoreInterceptor
 import com.apollographql.cache.normalized.api.dependentKeys
+import com.apollographql.cache.normalized.api.withErrors
 import com.apollographql.cache.normalized.watchContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -36,7 +37,10 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
 
     @Suppress("UNCHECKED_CAST")
     var watchedKeys: Set<String>? =
-      watchContext.data?.let { store.normalize(request.operation, it as D, null, customScalarAdapters).values.dependentKeys() }
+      watchContext.data?.let { data ->
+        val dataWithErrors = (data as D).withErrors(request.operation, null, customScalarAdapters)
+        store.normalize(request.operation, dataWithErrors, customScalarAdapters = customScalarAdapters).values.dependentKeys()
+      }
 
     return (store.changedKeys as SharedFlow<Any>)
         .onSubscription {
@@ -54,7 +58,9 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
             chain.proceed(request)
                 .onEach { response ->
                   if (response.data != null) {
-                    watchedKeys = store.normalize(request.operation, response.data!!, null, customScalarAdapters).values.dependentKeys()
+                    val dataWithErrors = response.data!!.withErrors(request.operation, response.errors, customScalarAdapters)
+                    watchedKeys =
+                      store.normalize(request.operation, dataWithErrors, customScalarAdapters = customScalarAdapters).values.dependentKeys()
                   }
                 }
           }

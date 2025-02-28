@@ -13,6 +13,7 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
 import com.apollographql.cache.normalized.api.CacheResolver
+import com.apollographql.cache.normalized.api.DataWithErrors
 import com.apollographql.cache.normalized.api.DefaultEmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
@@ -99,7 +100,7 @@ interface ApolloStore {
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
    * @param operation the operation to write
-   * @param operationData the operation data to write
+   * @param data the operation data to write
    * @param errors the operation errors to write
    * @return the changed keys
    *
@@ -107,8 +108,26 @@ interface ApolloStore {
    */
   fun <D : Operation.Data> writeOperation(
       operation: Operation<D>,
-      operationData: D,
+      data: D,
       errors: List<Error>? = null,
+      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
+      cacheHeaders: CacheHeaders = CacheHeaders.NONE,
+  ): Set<String>
+
+  /**
+   * Writes an operation to the store.
+   *
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * @param operation the operation to write
+   * @param dataWithErrors the operation data to write as a [DataWithErrors] object
+   * @return the changed keys
+   *
+   * @see publish
+   */
+  fun <D : Operation.Data> writeOperation(
+      operation: Operation<D>,
+      dataWithErrors: DataWithErrors,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
   ): Set<String>
@@ -120,7 +139,7 @@ interface ApolloStore {
    *
    * @param fragment the fragment to write
    * @param cacheKey the root where to write the fragment data to
-   * @param fragmentData the fragment data to write
+   * @param data the fragment data to write
    * @return the changed keys
    *
    * @see publish
@@ -128,7 +147,7 @@ interface ApolloStore {
   fun <D : Fragment.Data> writeFragment(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
-      fragmentData: D,
+      data: D,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
   ): Set<String>
@@ -139,7 +158,7 @@ interface ApolloStore {
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
    * @param operation the operation to write
-   * @param operationData the operation data to write
+   * @param data the operation data to write
    * @param mutationId a unique identifier for this optimistic update
    * @return the changed keys
    *
@@ -147,7 +166,7 @@ interface ApolloStore {
    */
   fun <D : Operation.Data> writeOptimisticUpdates(
       operation: Operation<D>,
-      operationData: D,
+      data: D,
       mutationId: Uuid,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
   ): Set<String>
@@ -159,7 +178,7 @@ interface ApolloStore {
    *
    * @param fragment the fragment to write
    * @param cacheKey the root where to write the fragment data to
-   * @param fragmentData the fragment data to write
+   * @param data the fragment data to write
    * @param mutationId a unique identifier for this optimistic update
    * @return the changed keys
    *
@@ -168,7 +187,7 @@ interface ApolloStore {
   fun <D : Fragment.Data> writeOptimisticUpdates(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
-      fragmentData: D,
+      data: D,
       mutationId: Uuid,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
   ): Set<String>
@@ -220,14 +239,13 @@ interface ApolloStore {
   fun remove(cacheKeys: List<CacheKey>, cascade: Boolean = true): Int
 
   /**
-   * Normalizes operation data to a map of [Record] keyed by [Record.key].
-   * If field [errors] are passed, they will be inlined in the returned [Record]s.
+   * Normalizes executable data to a map of [Record] keyed by [Record.key].
    */
-  fun <D : Operation.Data> normalize(
-      operation: Operation<D>,
-      data: D,
-      errors: List<Error>?,
-      customScalarAdapters: CustomScalarAdapters,
+  fun <D : Executable.Data> normalize(
+      executable: Executable<D>,
+      dataWithErrors: DataWithErrors,
+      rootKey: String = CacheKey.rootKey().key,
+      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
   ): Map<String, Record>
 
   /**

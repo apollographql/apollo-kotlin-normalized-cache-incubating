@@ -8,7 +8,7 @@ import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
-import com.apollographql.cache.normalized.api.normalize
+import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import httpcache.AllPlanetsQuery
 import normalizer.EpisodeHeroNameQuery
@@ -248,7 +248,7 @@ class NormalizerTest {
   companion object {
     internal fun <D : Operation.Data> records(operation: Operation<D>, name: String): Map<String, Record> {
       val response = testFixtureToJsonReader(name).toApolloResponse(operation)
-      return operation.normalize(data = response.data!!, cacheKeyGenerator = IdCacheKeyGenerator())
+      return response.data!!.normalized(operation, cacheKeyGenerator = IdCacheKeyGenerator())
     }
 
     private const val TEST_FIELD_KEY_JEDI = "hero({\"episode\":\"JEDI\"})"

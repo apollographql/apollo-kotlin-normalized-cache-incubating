@@ -7,7 +7,7 @@ import cache.include.VariableDefaultValueEmptyQuery
 import cache.include.VariableDefaultValueNullQuery
 import cache.include.VariableDefaultValueWithCQuery
 import com.apollographql.apollo.api.Operation
-import com.apollographql.cache.normalized.api.normalize
+import com.apollographql.cache.normalized.internal.normalized
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -82,7 +82,7 @@ class CacheArgumentTest {
 }
 
 private fun <D : Operation.Data> Operation<D>.fieldKey(data: D): String {
-  val record = normalize(data)
+  val record = data.normalized(this)
 
   return record.values.single().keys.single { it.startsWith("a") }
 }

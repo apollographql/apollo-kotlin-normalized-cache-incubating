@@ -114,3 +114,9 @@ fun Record.expirationDate(field: String) = metadata[field]?.get(ApolloCacheHeade
  * - [com.apollographql.apollo.api.Error]
  */
 typealias RecordValue = Any?
+
+fun Collection<Record>?.dependentKeys(): Set<String> {
+  return this?.flatMap {
+    it.fieldKeys()
+  }?.toSet() ?: emptySet()
+}
