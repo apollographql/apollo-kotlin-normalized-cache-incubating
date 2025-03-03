@@ -75,10 +75,17 @@ Now data with null fields (when possible) is returned with `Error`s in `ApolloRe
 
 `ApolloResponse.cacheInfo.isCacheHit` will be false when any field is missing.
 
-> The built-in `CacheFirst` and `CacheOnly` fetch policies treat any missing field as a full cache miss (same behavior as previous versions).
-> 
-> You can implement your own fetch policy interceptor to handle partial cache reads, as shown in [this example](https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/blob/main/tests/partial-results/src/commonTest/kotlin/test/CachePartialResultTest.kt#L809).
+### Partial responses and errors are stored
 
+Previously, partial responses were not stored by default, but you could opt in with `storePartialResponses(true)`.
+
+Now `storePartialResponses()` is removed and is the default, and errors returned by the server are stored in the cache and `readOperation()` will return them.
+
+By default, errors will not replace existing data in the cache. You can change this behavior with `errorsReplaceCachedValues(true)`.
+
+> The built-in fetch policies treat any missing or error field as a full cache miss (same behavior as previous versions).
+>
+> You can implement your own fetch policy interceptor to handle partial cache reads, as shown in [this example](https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/blob/main/tests/partial-results/src/commonTest/kotlin/test/CachePartialResultTest.kt#L809).
 
 ### Publishing changes to watchers
 
