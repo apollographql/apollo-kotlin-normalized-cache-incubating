@@ -7,6 +7,7 @@ import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
+import com.apollographql.cache.normalized.api.RecordMergerContext
 import com.apollographql.cache.normalized.api.withDates
 import com.apollographql.cache.normalized.internal.Lock
 import com.apollographql.cache.normalized.internal.patternToRegex
@@ -153,7 +154,7 @@ class MemoryCache(
       lruCache[record.key] = record.withDates(receivedDate = receivedDate, expirationDate = expirationDate)
       record.fieldKeys()
     } else {
-      val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record)
+      val (mergedRecord, changedKeys) = recordMerger.merge(RecordMergerContext(existing = oldRecord, incoming = record, cacheHeaders = cacheHeaders))
       lruCache[record.key] = mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate)
       changedKeys
     }

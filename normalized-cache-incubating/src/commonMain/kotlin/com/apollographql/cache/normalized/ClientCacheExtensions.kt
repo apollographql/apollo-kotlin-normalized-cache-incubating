@@ -250,18 +250,8 @@ fun <T> MutableExecutionOptions<T>.memoryCacheOnly(memoryCacheOnly: Boolean) = a
     MemoryCacheOnlyContext(memoryCacheOnly)
 )
 
-/**
- * @param storePartialResponses Whether to store partial responses.
- *
- * Errors are not stored in the cache and are therefore not replayed on cache reads.
- * Set this to true if you want to store partial responses at the risk of also returning partial responses
- * in subsequent cache reads.
- *
- * Default: false
- */
-fun <T> MutableExecutionOptions<T>.storePartialResponses(storePartialResponses: Boolean) = addExecutionContext(
-    StorePartialResponsesContext(storePartialResponses)
-)
+@Deprecated(level = DeprecationLevel.ERROR, message = "This method has no effect and will be removed in a future release. Partial responses are always stored in the cache.")
+fun <T> MutableExecutionOptions<T>.storePartialResponses(storePartialResponses: Boolean): Nothing = throw UnsupportedOperationException()
 
 /**
  * @param storeReceivedDate Whether to store the receive date in the cache.
@@ -270,6 +260,15 @@ fun <T> MutableExecutionOptions<T>.storePartialResponses(storePartialResponses: 
  */
 fun <T> MutableExecutionOptions<T>.storeReceivedDate(storeReceivedDate: Boolean) = addExecutionContext(
     StoreReceivedDateContext(storeReceivedDate)
+)
+
+/**
+ * @param errorsReplaceCachedValues Whether field errors should replace existing values in the cache (true) or be discarded (false).
+ *
+ * Default: false
+ */
+fun <T> MutableExecutionOptions<T>.errorsReplaceCachedValues(errorsReplaceCachedValues: Boolean) = addExecutionContext(
+    ErrorsReplaceCachedValuesContext(errorsReplaceCachedValues)
 )
 
 /**
@@ -387,9 +386,6 @@ internal val <D : Operation.Data> ApolloRequest<D>.doNotStore
 internal val <D : Operation.Data> ApolloRequest<D>.memoryCacheOnly
   get() = executionContext[MemoryCacheOnlyContext]?.value ?: false
 
-internal val <D : Operation.Data> ApolloRequest<D>.storePartialResponses
-  get() = executionContext[StorePartialResponsesContext]?.value ?: false
-
 internal val <D : Operation.Data> ApolloRequest<D>.storeReceivedDate
   get() = executionContext[StoreReceivedDateContext]?.value ?: false
 
@@ -404,6 +400,10 @@ internal val ExecutionOptions.cacheHeaders: CacheHeaders
 
 internal val <D : Operation.Data> ApolloRequest<D>.watchContext: WatchContext?
   get() = executionContext[WatchContext]
+
+internal val <D : Operation.Data> ApolloRequest<D>.errorsReplaceCachedValues
+  get() = executionContext[ErrorsReplaceCachedValuesContext]?.value ?: false
+
 
 class CacheInfo private constructor(
     val cacheStartMillis: Long,
@@ -562,13 +562,6 @@ internal class MemoryCacheOnlyContext(val value: Boolean) : ExecutionContext.Ele
   companion object Key : ExecutionContext.Key<MemoryCacheOnlyContext>
 }
 
-internal class StorePartialResponsesContext(val value: Boolean) : ExecutionContext.Element {
-  override val key: ExecutionContext.Key<*>
-    get() = Key
-
-  companion object Key : ExecutionContext.Key<StorePartialResponsesContext>
-}
-
 internal class StoreReceivedDateContext(val value: Boolean) : ExecutionContext.Element {
   override val key: ExecutionContext.Key<*>
     get() = Key
@@ -618,6 +611,13 @@ internal class FetchFromCacheContext(val value: Boolean) : ExecutionContext.Elem
     get() = Key
 
   companion object Key : ExecutionContext.Key<FetchFromCacheContext>
+}
+
+internal class ErrorsReplaceCachedValuesContext(val value: Boolean) : ExecutionContext.Element {
+  override val key: ExecutionContext.Key<*>
+    get() = Key
+
+  companion object Key : ExecutionContext.Key<ErrorsReplaceCachedValuesContext>
 }
 
 fun <D : Operation.Data> ApolloRequest.Builder<D>.fetchFromCache(fetchFromCache: Boolean) = apply {

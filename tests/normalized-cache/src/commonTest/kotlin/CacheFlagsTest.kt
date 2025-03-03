@@ -20,7 +20,6 @@ import com.apollographql.cache.normalized.doNotStore
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.store
-import com.apollographql.cache.normalized.storePartialResponses
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import normalizer.HeroNameQuery
@@ -82,31 +81,18 @@ class CacheFlagsTest {
           .build()
   )
 
-
-  @Test
-  fun partialResponsesAreNotStored() = runTest(before = { setUp() }) {
-    val query = HeroNameQuery()
-    apolloClient.enqueueTestResponse(query, partialResponseData, partialResponseErrors)
-
-    // this should not store the response
-    apolloClient.query(query).execute()
-
-    assertIs<CacheMissException>(
-        apolloClient.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute().exception
-    )
-  }
-
   @Test
   fun storePartialResponse() = runTest(before = { setUp() }) {
     val query = HeroNameQuery()
     apolloClient.enqueueTestResponse(query, partialResponseData, partialResponseErrors)
 
     // this should store the response
-    apolloClient.query(query).storePartialResponses(true).execute()
+    apolloClient.query(query).execute()
 
     val response = apolloClient.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute()
     assertNotNull(response.data)
   }
+
 
   @Test
   fun doNotStoreWhenSetInResponse() = runTest(before = { setUp() }) {

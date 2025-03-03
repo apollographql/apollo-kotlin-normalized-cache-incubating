@@ -1,15 +1,12 @@
 package com.apollographql.cache.normalized.internal
 
 import com.apollographql.apollo.api.ApolloResponse
-import com.apollographql.apollo.api.CompiledField
-import com.apollographql.apollo.api.CompiledFragment
-import com.apollographql.apollo.api.CompiledListType
-import com.apollographql.apollo.api.CompiledNotNullType
-import com.apollographql.apollo.api.CompiledSelection
 import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.Error
+import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.variables
 import com.apollographql.cache.normalized.ApolloStore
@@ -20,6 +17,7 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
 import com.apollographql.cache.normalized.api.CacheResolver
+import com.apollographql.cache.normalized.api.DataWithErrors
 import com.apollographql.cache.normalized.api.EmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.MetadataGenerator
@@ -27,8 +25,8 @@ import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
-import com.apollographql.cache.normalized.api.normalize
-import com.apollographql.cache.normalized.api.readDataFromCacheInternal
+import com.apollographql.cache.normalized.api.propagateErrors
+import com.apollographql.cache.normalized.api.withErrors
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.cacheInfo
 import com.benasher44.uuid.Uuid
@@ -58,11 +56,11 @@ internal class DefaultApolloStore(
        * Also, we have had issues before where one or several watchers would loop forever, creating useless network requests.
        * There is unfortunately very little evidence of how it could happen, but I could reproduce under the following conditions:
        * 1. A field that returns ever-changing values (think current time for an example)
-       * 2. A refetch policy that uses the network ([NetworkOnly] or [CacheFirst] do for an example)
+       * 2. A refetch policy that uses the network ([com.apollographql.cache.normalized.FetchPolicy.NetworkOnly] or [com.apollographql.cache.normalized.FetchPolicy.CacheFirst] do for an example)
        *
        * In that case, a single watcher will trigger itself endlessly.
        *
-       * My current understanding is that here as well, the fix is probably best done at the callsite by not using [NetworkOnly]
+       * My current understanding is that here as well, the fix is probably best done at the callsite by not using [com.apollographql.cache.normalized.FetchPolicy.NetworkOnly]
        * as a refetchPolicy. If that ever becomes an issue again, please make sure to write a test about it.
        */
       extraBufferCapacity = 64,
@@ -103,13 +101,15 @@ internal class DefaultApolloStore(
     return cache.remove(cacheKeys, cascade)
   }
 
-  override fun <D : Operation.Data> normalize(
-      operation: Operation<D>,
-      data: D,
+  override fun <D : Executable.Data> normalize(
+      executable: Executable<D>,
+      dataWithErrors: DataWithErrors,
+      rootKey: String,
       customScalarAdapters: CustomScalarAdapters,
   ): Map<String, Record> {
-    return operation.normalize(
-        data = data,
+    return dataWithErrors.normalized(
+        executable = executable,
+        rootKey = rootKey,
         customScalarAdapters = customScalarAdapters,
         cacheKeyGenerator = cacheKeyGenerator,
         metadataGenerator = metadataGenerator,
@@ -124,20 +124,23 @@ internal class DefaultApolloStore(
       cacheHeaders: CacheHeaders,
   ): ApolloResponse<D> {
     val variables = operation.variables(customScalarAdapters, true)
-    val batchReaderData = operation.readDataFromCacheInternal(
+    val batchReaderData = CacheBatchReader(
         cache = cache,
-        cacheResolver = cacheResolver,
         cacheHeaders = cacheHeaders,
-        cacheKey = CacheKey.rootKey(),
+        cacheResolver = cacheResolver,
         variables = variables,
+        rootKey = CacheKey.rootKey().key,
+        rootSelections = operation.rootField().selections,
+        rootField = operation.rootField(),
         fieldKeyGenerator = fieldKeyGenerator,
         returnPartialResponses = true,
-    )
-    val dataWithErrors: Map<String, Any?> = batchReaderData.toMap()
+    ).collectData()
+    val dataWithErrors: DataWithErrors = batchReaderData.toMap()
     val errors = mutableListOf<Error>()
 
     @Suppress("UNCHECKED_CAST")
-    val dataWithNulls: Map<String, Any?>? = propagateErrors(dataWithErrors, operation.rootField(), errors) as Map<String, Any?>?
+    val dataWithNulls: Map<String, ApolloJsonElement>? =
+      propagateErrors(dataWithErrors, operation.rootField(), errors) as Map<String, ApolloJsonElement>?
     val falseVariablesCustomScalarAdapter =
       customScalarAdapters.newBuilder()
           .falseVariables(variables.valueMap.filter { it.value == false }.keys)
@@ -166,101 +169,6 @@ internal class DefaultApolloStore(
         .build()
   }
 
-  /**
-   * If a position contains an Error, replace it by a null if the field's type is nullable, propagate the error if not.
-   */
-  private fun propagateErrors(dataWithErrors: Any?, field: CompiledField, errors: MutableList<Error>): Any? {
-    return when (dataWithErrors) {
-      is Map<*, *> -> {
-        if (field.selections.isEmpty()) {
-          // This is a scalar represented as a Map.
-          return dataWithErrors
-        }
-        @Suppress("UNCHECKED_CAST")
-        dataWithErrors as Map<String, Any?>
-        dataWithErrors.mapValues { (key, value) ->
-          val selection = field.fieldSelection(key)
-              ?: // Should never happen
-              return@mapValues value
-          when (value) {
-            is Error -> {
-              errors.add(value)
-              if (selection.type is CompiledNotNullType) {
-                return null
-              }
-              null
-            }
-
-            else -> {
-              propagateErrors(value, selection, errors).also {
-                if (it == null && selection.type is CompiledNotNullType) {
-                  return null
-                }
-              }
-            }
-          }
-        }
-      }
-
-      is List<*> -> {
-        val listType = if (field.type is CompiledNotNullType) {
-          (field.type as CompiledNotNullType).ofType
-        } else {
-          field.type
-        }
-        if (listType !is CompiledListType) {
-          // This is a scalar represented as a List.
-          return dataWithErrors
-        }
-        dataWithErrors.map { value ->
-          val elementType = listType.ofType
-          when (value) {
-            is Error -> {
-              errors.add(value)
-              if (elementType is CompiledNotNullType) {
-                return null
-              }
-              null
-            }
-
-            else -> {
-              propagateErrors(value, field, errors).also {
-                if (it == null && elementType is CompiledNotNullType) {
-                  return null
-                }
-              }
-            }
-          }
-        }
-      }
-
-      else -> {
-        dataWithErrors
-      }
-    }
-  }
-
-  private fun CompiledSelection.fieldSelection(responseName: String): CompiledField? {
-    fun CompiledSelection.fieldSelections(): List<CompiledField> {
-      return when (this) {
-        is CompiledField -> selections.filterIsInstance<CompiledField>() + selections.filterIsInstance<CompiledFragment>()
-            .flatMap { it.fieldSelections() }
-
-        is CompiledFragment -> selections.filterIsInstance<CompiledField>() + selections.filterIsInstance<CompiledFragment>()
-            .flatMap { it.fieldSelections() }
-      }
-    }
-    // Fields can be selected multiple times, combine the selections
-    return fieldSelections().filter { it.responseName == responseName }.reduceOrNull { acc, compiledField ->
-      CompiledField.Builder(
-          name = acc.name,
-          type = acc.type,
-      )
-          .selections(acc.selections + compiledField.selections)
-          .build()
-    }
-  }
-
   override fun <D : Fragment.Data> readFragment(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
@@ -268,20 +176,22 @@ internal class DefaultApolloStore(
       cacheHeaders: CacheHeaders,
   ): ReadResult<D> {
     val variables = fragment.variables(customScalarAdapters, true)
-
-    val batchReaderData = fragment.readDataFromCacheInternal(
+    val batchReaderData = CacheBatchReader(
         cache = cache,
-        cacheResolver = cacheResolver,
         cacheHeaders = cacheHeaders,
-        cacheKey = cacheKey,
+        cacheResolver = cacheResolver,
         variables = variables,
+        rootKey = cacheKey.key,
+        rootSelections = fragment.rootField().selections,
+        rootField = fragment.rootField(),
         fieldKeyGenerator = fieldKeyGenerator,
         returnPartialResponses = false,
-    )
-    return ReadResult(
-        data = batchReaderData.toData(fragment.adapter(), customScalarAdapters, variables),
-        cacheHeaders = batchReaderData.cacheHeaders,
-    )
+    ).collectData()
+    val dataWithErrors = batchReaderData.toMap(withErrors = false)
+    val falseVariablesCustomScalarAdapter =
+      customScalarAdapters.newBuilder().falseVariables(variables.valueMap.filter { it.value == false }.keys).build()
+    val data = fragment.adapter().fromJson(dataWithErrors.jsonReader(), falseVariablesCustomScalarAdapter)
+    return ReadResult(data = data, cacheHeaders = batchReaderData.cacheHeaders)
   }
 
   override fun <R> accessCache(block: (NormalizedCache) -> R): R {
@@ -290,55 +200,57 @@ internal class DefaultApolloStore(
 
   override fun <D : Operation.Data> writeOperation(
       operation: Operation<D>,
-      operationData: D,
+      data: D,
+      errors: List<Error>?,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
   ): Set<String> {
-    val records = operation.normalize(
-        data = operationData,
-        customScalarAdapters = customScalarAdapters,
-        cacheKeyGenerator = cacheKeyGenerator,
-        metadataGenerator = metadataGenerator,
-        fieldKeyGenerator = fieldKeyGenerator,
-        embeddedFieldsProvider = embeddedFieldsProvider,
-    ).values.toSet()
+    val dataWithErrors = data.withErrors(operation, errors, customScalarAdapters)
+    return writeOperation(operation, dataWithErrors, customScalarAdapters, cacheHeaders)
+  }
 
+  override fun <D : Operation.Data> writeOperation(
+      operation: Operation<D>,
+      dataWithErrors: DataWithErrors,
+      customScalarAdapters: CustomScalarAdapters,
+      cacheHeaders: CacheHeaders,
+  ): Set<String> {
+    val records = normalize(
+        executable = operation,
+        dataWithErrors = dataWithErrors,
+        customScalarAdapters = customScalarAdapters,
+    ).values.toSet()
     return cache.merge(records, cacheHeaders, recordMerger)
   }
 
   override fun <D : Fragment.Data> writeFragment(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
-      fragmentData: D,
+      data: D,
       customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
   ): Set<String> {
-    val records = fragment.normalize(
-        data = fragmentData,
+    val dataWithErrors = data.withErrors(fragment, null, customScalarAdapters)
+    val records = normalize(
+        executable = fragment,
+        dataWithErrors = dataWithErrors,
+        rootKey = cacheKey.key,
         customScalarAdapters = customScalarAdapters,
-        cacheKeyGenerator = cacheKeyGenerator,
-        metadataGenerator = metadataGenerator,
-        fieldKeyGenerator = fieldKeyGenerator,
-        embeddedFieldsProvider = embeddedFieldsProvider,
-        rootKey = cacheKey.key
     ).values
-
     return cache.merge(records, cacheHeaders, recordMerger)
   }
 
   override fun <D : Operation.Data> writeOptimisticUpdates(
       operation: Operation<D>,
-      operationData: D,
+      data: D,
       mutationId: Uuid,
       customScalarAdapters: CustomScalarAdapters,
   ): Set<String> {
-    val records = operation.normalize(
-        data = operationData,
+    val dataWithErrors = data.withErrors(operation, null, customScalarAdapters)
+    val records = normalize(
+        executable = operation,
+        dataWithErrors = dataWithErrors,
         customScalarAdapters = customScalarAdapters,
-        cacheKeyGenerator = cacheKeyGenerator,
-        metadataGenerator = metadataGenerator,
-        fieldKeyGenerator = fieldKeyGenerator,
-        embeddedFieldsProvider = embeddedFieldsProvider,
     ).values.map { record ->
       Record(
           key = record.key,
@@ -356,18 +268,16 @@ internal class DefaultApolloStore(
   override fun <D : Fragment.Data> writeOptimisticUpdates(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
-      fragmentData: D,
+      data: D,
       mutationId: Uuid,
       customScalarAdapters: CustomScalarAdapters,
   ): Set<String> {
-    val records = fragment.normalize(
-        data = fragmentData,
+    val dataWithErrors = data.withErrors(fragment, null, customScalarAdapters)
+    val records = normalize(
+        executable = fragment,
+        dataWithErrors = dataWithErrors,
+        rootKey = cacheKey.key,
         customScalarAdapters = customScalarAdapters,
-        cacheKeyGenerator = cacheKeyGenerator,
-        metadataGenerator = metadataGenerator,
-        fieldKeyGenerator = fieldKeyGenerator,
-        embeddedFieldsProvider = embeddedFieldsProvider,
-        rootKey = cacheKey.key
     ).values.map { record ->
       Record(
           key = record.key,

@@ -73,7 +73,7 @@ class OptimisticCacheTest {
     )
     store.writeOptimisticUpdates(
         operation = query,
-        operationData = data,
+        data = data,
         mutationId = mutationId,
     ).also {
       store.publish(it)
@@ -123,7 +123,7 @@ class OptimisticCacheTest {
         HeroAndFriendsNamesFragmentImpl(),
         mutationId = mutationId,
         cacheKey = CacheKey("""hero({"episode":"JEDI"})"""),
-        fragmentData = data,
+        data = data,
     ).also {
       store.publish(it)
     }
@@ -176,7 +176,7 @@ class OptimisticCacheTest {
     )
     store.writeOptimisticUpdates(
         operation = query1,
-        operationData = data1,
+        data = data1,
         mutationId = mutationId1,
     ).also {
       store.publish(it)
@@ -207,7 +207,7 @@ class OptimisticCacheTest {
     )
     store.writeOptimisticUpdates(
         operation = query2,
-        operationData = data2,
+        data = data2,
         mutationId = mutationId2,
     ).also {
       store.publish(it)
@@ -378,7 +378,7 @@ class OptimisticCacheTest {
     )
     store.writeOptimisticUpdates(
         operation = query1,
-        operationData = data1,
+        data = data1,
         mutationId = mutationId1,
     ).also {
       store.publish(it)
@@ -390,7 +390,7 @@ class OptimisticCacheTest {
     )
     store.writeOptimisticUpdates(
         operation = query2,
-        operationData = data2,
+        data = data2,
         mutationId = mutationId2,
     ).also {
       store.publish(it)

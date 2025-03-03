@@ -1,6 +1,6 @@
 # Next version (unreleased)
 
-PUT_CHANGELOG_HERE
+- Store errors in the cache, and remove `storePartialResponses()` (#96)
 
 # Version 0.0.6
 _2025-02-11_

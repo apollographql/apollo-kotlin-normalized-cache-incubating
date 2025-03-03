@@ -15,7 +15,7 @@ class CacheMissLoggingInterceptor(private val log: (String) -> Unit) : ApolloInt
       if (it.exception is CacheMissException) {
         log(it.exception!!.message.toString())
       } else
-        it.errors.orEmpty().mapNotNull { it.extensions?.get("exception") as? CacheMissException }.forEach {
+        it.errors.orEmpty().mapNotNull { it.cacheMissException }.forEach {
           log(it.message.toString())
         }
     }

@@ -5,8 +5,8 @@ import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
-import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.apolloStore
+import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import fragmentnormalizer.fragment.ConversationFragment
@@ -93,11 +93,10 @@ class FragmentNormalizerTest {
         false
     )
 
-    val records = ConversationFragmentImpl().normalize(
-        fragment,
-        CustomScalarAdapters.Empty,
-        IdCacheKeyGenerator(),
+    val records = fragment.normalized(
+        ConversationFragmentImpl(),
         rootKey = "1",
+        cacheKeyGenerator = IdCacheKeyGenerator(),
     )
 
     assertContains(records.keys, "1.author")

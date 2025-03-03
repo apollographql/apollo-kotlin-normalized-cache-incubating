@@ -83,12 +83,20 @@ class IdCacheKeyResolver(
     private val idListFields: List<String> = listOf("ids"),
 ) : CacheKeyResolver() {
   override fun cacheKeyForField(context: ResolverContext): CacheKey? {
+    val fieldKey = context.getFieldKey()
+    if (context.parent[fieldKey] != null) {
+      return null
+    }
     val typeName = context.field.type.rawType().name
     val id = idFields.firstNotNullOfOrNull { context.field.argumentValue(it, context.variables).getOrNull()?.toString() } ?: return null
     return CacheKey(typeName, id)
   }
 
   override fun listOfCacheKeysForField(context: ResolverContext): List<CacheKey?>? {
+    val fieldKey = context.getFieldKey()
+    if (context.parent[fieldKey] != null) {
+      return null
+    }
     val typeName = context.field.type.rawType().name
     val ids = idListFields.firstNotNullOfOrNull { context.field.argumentValue(it, context.variables).getOrNull() as? List<*> }
         ?: return null

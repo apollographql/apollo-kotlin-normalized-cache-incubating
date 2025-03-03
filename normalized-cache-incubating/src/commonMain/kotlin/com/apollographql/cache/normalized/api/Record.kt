@@ -11,18 +11,6 @@ import com.benasher44.uuid.Uuid
  */
 class Record(
     val key: String,
-    /**
-     * a list of fields. Values can be
-     * - Int
-     * - Long
-     * - Double
-     * - Boolean
-     * - String
-     * - List
-     * - CacheKey (for composite types)
-     * - Map (for custom scalars)
-     * - null
-     */
     val fields: Map<String, RecordValue>,
     val mutationId: Uuid? = null,
 
@@ -42,7 +30,7 @@ class Record(
    * A field key incorporates any GraphQL arguments in addition to the field name.
    */
   fun mergeWith(newRecord: Record): Pair<Record, Set<String>> {
-    return DefaultRecordMerger.merge(existing = this, incoming = newRecord)
+    return DefaultRecordMerger.merge(RecordMergerContext(existing = this, incoming = newRecord, cacheHeaders = CacheHeaders.NONE))
   }
 
 
@@ -123,5 +111,12 @@ fun Record.expirationDate(field: String) = metadata[field]?.get(ApolloCacheHeade
  * [RecordValue] can be any of:
  * - [com.apollographql.apollo.api.json.ApolloJsonElement]
  * - [CacheKey]
+ * - [com.apollographql.apollo.api.Error]
  */
 typealias RecordValue = Any?
+
+fun Collection<Record>?.dependentKeys(): Set<String> {
+  return this?.flatMap {
+    it.fieldKeys()
+  }?.toSet() ?: emptySet()
+}

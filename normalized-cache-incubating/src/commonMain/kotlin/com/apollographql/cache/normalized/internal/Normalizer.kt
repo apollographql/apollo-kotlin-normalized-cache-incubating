@@ -7,19 +7,27 @@ import com.apollographql.apollo.api.CompiledNamedType
 import com.apollographql.apollo.api.CompiledNotNullType
 import com.apollographql.apollo.api.CompiledSelection
 import com.apollographql.apollo.api.CompiledType
+import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.isComposite
-import com.apollographql.apollo.api.json.ApolloJsonElement
+import com.apollographql.apollo.api.variables
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
 import com.apollographql.cache.normalized.api.CacheKeyGeneratorContext
+import com.apollographql.cache.normalized.api.DataWithErrors
+import com.apollographql.cache.normalized.api.DefaultEmbeddedFieldsProvider
+import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
 import com.apollographql.cache.normalized.api.EmbeddedFieldsContext
 import com.apollographql.cache.normalized.api.EmbeddedFieldsProvider
+import com.apollographql.cache.normalized.api.EmptyMetadataGenerator
 import com.apollographql.cache.normalized.api.FieldKeyContext
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.MetadataGenerator
 import com.apollographql.cache.normalized.api.MetadataGeneratorContext
 import com.apollographql.cache.normalized.api.Record
+import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
+import com.apollographql.cache.normalized.api.withErrors
 
 /**
  * A [Normalizer] takes a [Map]<String, Any?> and turns them into a flat list of [Record]
@@ -36,7 +44,7 @@ internal class Normalizer(
   private val records = mutableMapOf<String, Record>()
 
   fun normalize(
-      map: Map<String, ApolloJsonElement>,
+      map: DataWithErrors,
       selections: List<CompiledSelection>,
       parentType: CompiledNamedType,
   ): Map<String, Record> {
@@ -59,7 +67,7 @@ internal class Normalizer(
    * @return the CacheKey if this object has a CacheKey or the new Map if the object was embedded
    */
   private fun buildFields(
-      obj: Map<String, Any?>,
+      obj: DataWithErrors,
       key: String,
       selections: List<CompiledSelection>,
       parentType: CompiledNamedType,
@@ -120,7 +128,7 @@ internal class Normalizer(
    * @return the CacheKey if this object has a CacheKey or the new Map if the object was embedded
    */
   private fun buildRecord(
-      obj: Map<String, ApolloJsonElement>,
+      obj: DataWithErrors,
       key: String,
       selections: List<CompiledSelection>,
       parentType: CompiledNamedType,
@@ -158,7 +166,7 @@ internal class Normalizer(
    *
    * @param value a json value from the response. Can be any type supported by [com.apollographql.apollo.api.json.JsonWriter]
    * @param field the field currently being normalized
-   * @param type_ the type currently being normalized. It can be different from [field.type] for lists.
+   * @param type_ the type currently being normalized. It can be different from `field.type` for lists.
    * @param embeddedFields the embedded fields of the parent
    */
   private fun replaceObjects(
@@ -182,6 +190,9 @@ internal class Normalizer(
     }
 
     return when {
+      // Keep errors as-is
+      value is Error -> value
+
       type is CompiledListType -> {
         check(value is List<*>)
         value.mapIndexed { index, item ->
@@ -248,4 +259,37 @@ internal class Normalizer(
 
   // The receiver can be null for the root query to save some space in the cache by not storing QUERY_ROOT all over the place
   private fun String?.append(next: String): String = if (this == null) next else "$this.$next"
+}
+
+/**
+ * Normalizes this executable data to a map of [Record] keyed by [Record.key].
+ */
+fun <D : Executable.Data> D.normalized(
+    executable: Executable<D>,
+    rootKey: String = CacheKey.rootKey().key,
+    customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
+    cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
+    metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
+    fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
+    embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
+): Map<String, Record> {
+  val dataWithErrors = this.withErrors(executable, null, customScalarAdapters)
+  return dataWithErrors.normalized(executable, rootKey, customScalarAdapters, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider)
+}
+
+/**
+ * Normalizes this executable data to a map of [Record] keyed by [Record.key].
+ */
+fun <D : Executable.Data> DataWithErrors.normalized(
+    executable: Executable<D>,
+    rootKey: String = CacheKey.rootKey().key,
+    customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
+    cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
+    metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
+    fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
+    embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
+): Map<String, Record> {
+  val variables = executable.variables(customScalarAdapters, withDefaultValues = true)
+  return Normalizer(variables, rootKey, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider)
+      .normalize(this, executable.rootField().selections, executable.rootField().type.rawType())
 }

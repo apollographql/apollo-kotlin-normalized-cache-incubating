@@ -16,7 +16,6 @@ extend schema @catchByDefault(to: NULL)
 
 
 extend type User @typePolicy(keyFields: "id")
-extend type Query @fieldPolicy(forField: "users", keyArgs: "ids")
 
 extend type User @cacheControlField(name: "nickName", maxAge: 0)
 

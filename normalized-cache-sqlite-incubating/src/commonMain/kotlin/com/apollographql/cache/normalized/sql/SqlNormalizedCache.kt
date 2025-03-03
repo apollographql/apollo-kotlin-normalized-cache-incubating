@@ -8,6 +8,7 @@ import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
+import com.apollographql.cache.normalized.api.RecordMergerContext
 import com.apollographql.cache.normalized.api.withDates
 import com.apollographql.cache.normalized.sql.internal.RecordDatabase
 import kotlin.reflect.KClass
@@ -163,7 +164,7 @@ class SqlNormalizedCache internal constructor(
           recordDatabase.insert(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
           record.fieldKeys()
         } else {
-          val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record)
+          val (mergedRecord, changedKeys) = recordMerger.merge(RecordMergerContext(existing = oldRecord, incoming = record, cacheHeaders = cacheHeaders))
           if (mergedRecord.isNotEmpty()) {
             recordDatabase.update(mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
           }
@@ -186,7 +187,7 @@ class SqlNormalizedCache internal constructor(
         recordDatabase.insert(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
         record.fieldKeys()
       } else {
-        val (mergedRecord, changedKeys) = recordMerger.merge(existing = oldRecord, incoming = record)
+        val (mergedRecord, changedKeys) = recordMerger.merge(RecordMergerContext(existing = oldRecord, incoming = record, cacheHeaders = cacheHeaders))
         if (mergedRecord.isNotEmpty()) {
           recordDatabase.update(mergedRecord.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
         }

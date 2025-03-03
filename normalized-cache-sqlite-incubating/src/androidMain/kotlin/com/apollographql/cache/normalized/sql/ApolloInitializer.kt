@@ -14,6 +14,7 @@ class ApolloInitializer : Initializer<Unit> {
   }
 
   companion object {
+    //noinspection StaticFieldLeak
     internal lateinit var context: Context
   }
 }

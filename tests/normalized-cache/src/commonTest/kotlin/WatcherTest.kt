@@ -3,7 +3,6 @@ package test
 import app.cash.turbine.test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloResponse
-import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.composeJsonResponse
 import com.apollographql.apollo.exception.ApolloNetworkException
 import com.apollographql.apollo.exception.CacheMissException
@@ -13,7 +12,6 @@ import com.apollographql.apollo.testing.enqueueTestResponse
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
-import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
@@ -179,7 +177,7 @@ class WatcherTest {
         )
     )
 
-    store.writeOperation(operation, data, CustomScalarAdapters.Empty, CacheHeaders.NONE).also {
+    store.writeOperation(operation, data).also {
       store.publish(it)
     }
 

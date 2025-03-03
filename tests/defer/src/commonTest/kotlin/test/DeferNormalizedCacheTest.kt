@@ -6,6 +6,7 @@ import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.exception.ApolloException
+import com.apollographql.apollo.exception.ApolloGraphQLException
 import com.apollographql.apollo.exception.ApolloHttpException
 import com.apollographql.apollo.exception.ApolloNetworkException
 import com.apollographql.apollo.exception.CacheMissException
@@ -380,11 +381,11 @@ class DeferNormalizedCacheTest {
     assertResponseListEquals(networkExpected, networkActual)
 
     mockServer.enqueueError(statusCode = 500)
-    // Because of the error the cache is missing some fields, so we get a cache miss, and fallback to the network (which also fails)
+    // Because of the error we fallback to the network (which also fails)
     val exception = apolloClient.query(WithFragmentSpreadsQuery()).execute().exception
-    check(exception is CacheMissException)
+    check(exception is ApolloGraphQLException)
     assertIs<ApolloHttpException>(exception.suppressedExceptions.first())
-    assertEquals("Object 'computers.0.screen' has no field named 'isColor'", exception.message)
+    assertEquals("GraphQL error: 'Cannot resolve isColor'", exception.message)
     mockServer.awaitRequest()
   }
 

@@ -1,7 +1,9 @@
 package com.apollographql.cache.normalized
 
+import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.Record
+import com.apollographql.cache.normalized.api.RecordMergerContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -46,7 +48,7 @@ class DefaultRecordMergerTest {
         ),
     )
 
-    val mergedRecord = DefaultRecordMerger.merge(existing, incoming).first
+    val mergedRecord = DefaultRecordMerger.merge(RecordMergerContext(existing, incoming, CacheHeaders.NONE)).first
 
     val expected = Record(
         key = "key",

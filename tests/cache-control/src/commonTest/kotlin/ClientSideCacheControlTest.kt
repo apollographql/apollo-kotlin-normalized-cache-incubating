@@ -1,7 +1,6 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.apollo.testing.internal.runTest
@@ -14,10 +13,9 @@ import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.MaxAge
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
-import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
-import com.apollographql.cache.normalized.api.normalize
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
@@ -92,7 +90,7 @@ class ClientSideCacheControlTest {
     val query = GetUserQuery()
     val data = GetUserQuery.Data(GetUserQuery.User("John", "john@doe.com", true))
 
-    val records = query.normalize(data, CustomScalarAdapters.Empty, TypePolicyCacheKeyGenerator).values
+    val records = data.normalized(query).values
 
     client.apolloStore.accessCache {
       // store records in the past
@@ -183,7 +181,7 @@ class ClientSideCacheControlTest {
 
   private fun mergeCompanyQueryResults(client: ApolloClient, secondsAgo: Int) {
     val data = GetCompanyQuery.Data(GetCompanyQuery.Company("42"))
-    val records = GetCompanyQuery().normalize(data, CustomScalarAdapters.Empty, TypePolicyCacheKeyGenerator).values
+    val records = data.normalized(GetCompanyQuery()).values
     client.apolloStore.accessCache {
       it.merge(records, receivedDate(currentTimeSeconds() - secondsAgo), DefaultRecordMerger)
     }
@@ -251,7 +249,7 @@ class ClientSideCacheControlTest {
 
   private fun mergeUserQueryResults(client: ApolloClient, secondsAgo: Int) {
     val data = GetUserQuery.Data(GetUserQuery.User("John", "john@doe.com", true))
-    val records = GetUserQuery().normalize(data, CustomScalarAdapters.Empty, TypePolicyCacheKeyGenerator).values
+    val records = data.normalized(GetUserQuery()).values
     client.apolloStore.accessCache {
       it.merge(records, receivedDate(currentTimeSeconds() - secondsAgo), DefaultRecordMerger)
     }
