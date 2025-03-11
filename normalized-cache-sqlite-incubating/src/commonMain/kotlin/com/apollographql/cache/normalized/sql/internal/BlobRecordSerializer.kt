@@ -164,7 +164,7 @@ internal object BlobRecordSerializer {
       JSON_NUMBER -> JsonNumber(readString())
       BOOLEAN -> readByte() > 0
       CACHE_KEY -> {
-        CacheKey(readString())
+        CacheKey(readString(), isHashed = true)
       }
 
       LIST -> {

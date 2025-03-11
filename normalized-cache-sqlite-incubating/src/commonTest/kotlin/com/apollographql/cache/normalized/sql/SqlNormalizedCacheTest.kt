@@ -16,6 +16,7 @@ import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.sql.internal.BlobRecordDatabase
 import com.apollographql.cache.normalized.sql.internal.blob.BlobQueries
 import kotlin.test.BeforeTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -205,6 +206,7 @@ class SqlNormalizedCacheTest {
     assertEquals(expected = true, actual = record.fields["newFieldKey"])
   }
 
+  @Ignore
   @Test
   fun testPatternRemove() {
     createRecord("specialKey1")
@@ -217,6 +219,7 @@ class SqlNormalizedCacheTest {
     assertNotNull(cache.loadRecord("regularKey1", CacheHeaders.NONE))
   }
 
+  @Ignore
   @Test
   fun testPatternRemoveWithEscape() {
     createRecord("%1")

@@ -9,6 +9,7 @@ import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.optimisticUpdates
 import com.apollographql.cache.normalized.refetchPolicy
@@ -122,7 +123,7 @@ class OptimisticCacheTest {
     store.writeOptimisticUpdates(
         HeroAndFriendsNamesFragmentImpl(),
         mutationId = mutationId,
-        cacheKey = CacheKey("""hero({"episode":"JEDI"})"""),
+        cacheKey = CacheKey("""hero({"episode":"JEDI"})""".hashed()),
         data = data,
     ).also {
       store.publish(it)

@@ -18,6 +18,7 @@ import com.apollographql.cache.normalized.errorsReplaceCachedValues
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.fetchPolicyInterceptor
+import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.store
@@ -711,12 +712,12 @@ class StoreErrorsTest {
         dataWithErrors = dataWithErrors,
         customScalarAdapters = CustomScalarAdapters.Empty,
     )
-    assertEquals("User", normalized["User:1"]!!["__typename"])
-    assertEquals("1", normalized["User:1"]!!["id"])
-    assertEquals("John", normalized["User:1"]!!["firstName"])
-    assertEquals("Smith", normalized["User:1"]!!["lastName"])
+    assertEquals("User", normalized["User:1".hashed()]!!["__typename"])
+    assertEquals("1", normalized["User:1".hashed()]!!["id"])
+    assertEquals("John", normalized["User:1".hashed()]!!["firstName"])
+    assertEquals("Smith", normalized["User:1".hashed()]!!["lastName"])
     assertErrorsEquals(Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName"))
-        .build(), normalized["User:1"]!!["nickName"] as Error
+        .build(), normalized["User:1".hashed()]!!["nickName"] as Error
     )
   }
 

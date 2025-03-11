@@ -23,6 +23,7 @@ import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.fetchPolicyInterceptor
+import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.store
@@ -124,7 +125,8 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object 'User:1' has no field named 'nickName' in the cache").path(listOf("me", "nickName")).build()
+                  Error.Builder("Object '${"User:1".hashed()}' has no field named 'nickName' in the cache").path(listOf("me", "nickName"))
+                      .build()
               ),
               cacheMissResult.errors
           )
@@ -306,7 +308,7 @@ class CachePartialResultTest {
           )
 
           // Remove project lead from the cache
-          apolloClient.apolloStore.remove(CacheKey("User", "3"))
+          apolloClient.apolloStore.remove(CacheKey("User:3".hashed()))
           val cacheResult = apolloClient.query(MeWithBestFriendQuery())
               .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
@@ -342,13 +344,13 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object 'User:3' not found in the cache").path(listOf("me", "projects", 0, "lead")).build()
+                  Error.Builder("Object '${"User:3".hashed()}' not found in the cache").path(listOf("me", "projects", 0, "lead")).build()
               ),
               cacheResult.errors
           )
 
           // Remove best friend from the cache
-          apolloClient.apolloStore.remove(CacheKey("User", "2"))
+          apolloClient.apolloStore.remove(CacheKey("User:2".hashed()))
           val cacheResult2 = apolloClient.query(MeWithBestFriendQuery())
               .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
@@ -379,14 +381,14 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object 'User:2' not found in the cache").path(listOf("me", "bestFriend")).build(),
-                  Error.Builder("Object 'User:3' not found in the cache").path(listOf("me", "projects", 0, "lead")).build(),
+                  Error.Builder("Object '${"User:2".hashed()}' not found in the cache").path(listOf("me", "bestFriend")).build(),
+                  Error.Builder("Object '${"User:3".hashed()}' not found in the cache").path(listOf("me", "projects", 0, "lead")).build(),
               ),
               cacheResult2.errors
           )
 
           // Remove project user from the cache
-          apolloClient.apolloStore.remove(CacheKey("User", "4"))
+          apolloClient.apolloStore.remove(CacheKey("User:4".hashed()))
           val cacheResult3 = apolloClient.query(MeWithBestFriendQuery())
               .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
@@ -394,9 +396,10 @@ class CachePartialResultTest {
           assertNull(cacheResult3.data)
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object 'User:2' not found in the cache").path(listOf("me", "bestFriend")).build(),
-                  Error.Builder("Object 'User:3' not found in the cache").path(listOf("me", "projects", 0, "lead")).build(),
-                  Error.Builder("Object 'User:4' not found in the cache").path(listOf("me", "projects", 0, "users", 0)).build()
+                  Error.Builder("Object '${"User:2".hashed()}' not found in the cache").path(listOf("me", "bestFriend")).build(),
+                  Error.Builder("Object '${"User:3".hashed()}' not found in the cache").path(listOf("me", "projects", 0, "lead")).build(),
+                  Error.Builder("Object '${"User:4".hashed()}' not found in the cache").path(listOf("me", "projects", 0, "users", 0))
+                      .build()
               ),
               cacheResult3.errors
           )
@@ -529,8 +532,8 @@ class CachePartialResultTest {
 
           // Remove the category from the cache
           apolloClient.apolloStore.accessCache { cache ->
-            val record = cache.loadRecord("User:1", CacheHeaders.NONE)!!
-            cache.remove(CacheKey("User", "1"), false)
+            val record = cache.loadRecord("User:1".hashed(), CacheHeaders.NONE)!!
+            cache.remove(CacheKey("User:1".hashed()), false)
             cache.merge(Record(record.key, record.fields - "category"), CacheHeaders.NONE, DefaultRecordMerger)
           }
           val cacheMissResult = apolloClient.query(UserByCategoryQuery(Category(2, "Second")))
@@ -540,7 +543,8 @@ class CachePartialResultTest {
           assertNull(cacheMissResult.data)
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object 'User:1' has no field named 'category' in the cache").path(listOf("user", "category")).build()
+                  Error.Builder("Object '${"User:1".hashed()}' has no field named 'category' in the cache").path(listOf("user", "category"))
+                      .build()
               ),
               cacheMissResult.errors
           )
@@ -630,7 +634,7 @@ class CachePartialResultTest {
           )
 
           // Remove lead from the cache
-          apolloClient.apolloStore.remove(CacheKey("User", "2"))
+          apolloClient.apolloStore.remove(CacheKey("User:2".hashed()))
 
           val cacheMissResult = apolloClient.query(WithFragmentsQuery())
               .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
@@ -667,7 +671,7 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object 'User:2' not found in the cache").path(listOf("me", "mainProject", "lead0")).build()
+                  Error.Builder("Object '${"User:2".hashed()}' not found in the cache").path(listOf("me", "mainProject", "lead0")).build()
               ),
               cacheMissResult.errors
           )
@@ -731,7 +735,8 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Field 'nickName' on object 'User:1' is stale in the cache").path(listOf("me", "nickName")).build()
+                  Error.Builder("Field 'nickName' on object '${"User:1".hashed()}' is stale in the cache").path(listOf("me", "nickName"))
+                      .build()
               ),
               cacheMissResult.errors
           )
@@ -795,7 +800,7 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Field 'salary' on object 'User:1.employeeInfo' is stale in the cache")
+                  Error.Builder("Field 'salary' on object '${"${"User:1".hashed()}.employeeInfo".hashed()}' is stale in the cache")
                       .path(listOf("me", "employeeInfo", "salary")).build()
               ),
               cacheMissResult.errors
