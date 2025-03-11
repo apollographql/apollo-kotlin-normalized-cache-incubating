@@ -8,6 +8,7 @@ import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.getReachableCacheKeys
+import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeUnreachableRecords
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
@@ -130,35 +131,35 @@ class ReachableCacheKeysTest {
           assertContentEquals(
               listOf(
                   CacheKey("QUERY_ROOT"),
-                  CacheKey("Repository:8"),
-                  CacheKey("Repository:7"),
-                  CacheKey("User:43"),
-                  CacheKey("User:42"),
-                  CacheKey("User:0"),
-                  CacheKey("Repository:6"),
-                  CacheKey("Repository:5"),
-                  CacheKey("Repository:4"),
-                  CacheKey("Repository:3"),
-                  CacheKey("Repository:2"),
-                  CacheKey("Repository:1"),
+                  CacheKey("Repository:8".hashed()),
+                  CacheKey("Repository:7".hashed()),
+                  CacheKey("User:43".hashed()),
+                  CacheKey("User:42".hashed()),
+                  CacheKey("User:0".hashed()),
+                  CacheKey("Repository:6".hashed()),
+                  CacheKey("Repository:5".hashed()),
+                  CacheKey("Repository:4".hashed()),
+                  CacheKey("Repository:3".hashed()),
+                  CacheKey("Repository:2".hashed()),
+                  CacheKey("Repository:1".hashed()),
               ),
               reachableCacheKeys
           )
 
           // Remove User 43, now Repositories 5 and 6 should not be reachable / 7 should still be reachable
-          store.remove(CacheKey("User:43"), cascade = false)
+          store.remove(CacheKey("User:43".hashed()), cascade = false)
           reachableCacheKeys = store.accessCache { it.allRecords().getReachableCacheKeys() }
           assertContentEquals(
               listOf(
                   CacheKey("QUERY_ROOT"),
-                  CacheKey("Repository:8"),
-                  CacheKey("Repository:7"),
-                  CacheKey("User:42"),
-                  CacheKey("User:0"),
-                  CacheKey("Repository:4"),
-                  CacheKey("Repository:3"),
-                  CacheKey("Repository:2"),
-                  CacheKey("Repository:1"),
+                  CacheKey("Repository:8".hashed()),
+                  CacheKey("Repository:7".hashed()),
+                  CacheKey("User:42".hashed()),
+                  CacheKey("User:0".hashed()),
+                  CacheKey("Repository:4".hashed()),
+                  CacheKey("Repository:3".hashed()),
+                  CacheKey("Repository:2".hashed()),
+                  CacheKey("Repository:1".hashed()),
               ),
               reachableCacheKeys
           )
@@ -166,38 +167,38 @@ class ReachableCacheKeysTest {
           // Add a non-reachable Repository, reachableCacheKeys should not change
           store.writeFragment(
               RepositoryFragmentImpl(),
-              CacheKey("Repository:500"),
+              CacheKey("Repository:500".hashed()),
               RepositoryFragment(id = "500", __typename = "Repository", starGazers = emptyList()),
           )
           reachableCacheKeys = store.accessCache { it.allRecords().getReachableCacheKeys() }
           assertContentEquals(
               listOf(
                   CacheKey("QUERY_ROOT"),
-                  CacheKey("Repository:8"),
-                  CacheKey("Repository:7"),
-                  CacheKey("User:42"),
-                  CacheKey("User:0"),
-                  CacheKey("Repository:4"),
-                  CacheKey("Repository:3"),
-                  CacheKey("Repository:2"),
-                  CacheKey("Repository:1"),
+                  CacheKey("Repository:8".hashed()),
+                  CacheKey("Repository:7".hashed()),
+                  CacheKey("User:42".hashed()),
+                  CacheKey("User:0".hashed()),
+                  CacheKey("Repository:4".hashed()),
+                  CacheKey("Repository:3".hashed()),
+                  CacheKey("Repository:2".hashed()),
+                  CacheKey("Repository:1".hashed()),
               ),
               reachableCacheKeys
           )
           assertEquals(
               setOf(
-                  CacheKey("User:42"),
-                  CacheKey("Repository:6"),
-                  CacheKey("User:0"),
-                  CacheKey("Repository:8"),
-                  CacheKey("Repository:3"),
-                  CacheKey("Repository:1"),
-                  CacheKey("Repository:2"),
-                  CacheKey("Repository:4"),
+                  CacheKey("User:42".hashed()),
+                  CacheKey("Repository:6".hashed()),
+                  CacheKey("User:0".hashed()),
+                  CacheKey("Repository:8".hashed()),
+                  CacheKey("Repository:3".hashed()),
+                  CacheKey("Repository:1".hashed()),
+                  CacheKey("Repository:2".hashed()),
+                  CacheKey("Repository:4".hashed()),
                   CacheKey("QUERY_ROOT"),
-                  CacheKey("Repository:5"),
-                  CacheKey("Repository:500"),
-                  CacheKey("Repository:7"),
+                  CacheKey("Repository:5".hashed()),
+                  CacheKey("Repository:500".hashed()),
+                  CacheKey("Repository:7".hashed()),
               ),
               store.accessCache { it.allRecords() }.keys.map { CacheKey(it) }.toSet()
           )
@@ -207,22 +208,22 @@ class ReachableCacheKeysTest {
           assertEquals(
               setOf(
                   CacheKey("QUERY_ROOT"),
-                  CacheKey("Repository:8"),
-                  CacheKey("Repository:7"),
-                  CacheKey("User:42"),
-                  CacheKey("User:0"),
-                  CacheKey("Repository:4"),
-                  CacheKey("Repository:3"),
-                  CacheKey("Repository:2"),
-                  CacheKey("Repository:1"),
+                  CacheKey("Repository:8".hashed()),
+                  CacheKey("Repository:7".hashed()),
+                  CacheKey("User:42".hashed()),
+                  CacheKey("User:0".hashed()),
+                  CacheKey("Repository:4".hashed()),
+                  CacheKey("Repository:3".hashed()),
+                  CacheKey("Repository:2".hashed()),
+                  CacheKey("Repository:1".hashed()),
               ),
               store.accessCache { it.allRecords() }.keys.map { CacheKey(it) }.toSet()
           )
           assertEquals(
               setOf(
-                  CacheKey("Repository:6"),
-                  CacheKey("Repository:5"),
-                  CacheKey("Repository:500"),
+                  CacheKey("Repository:6".hashed()),
+                  CacheKey("Repository:5".hashed()),
+                  CacheKey("Repository:500".hashed()),
               ),
               removedKeys
           )

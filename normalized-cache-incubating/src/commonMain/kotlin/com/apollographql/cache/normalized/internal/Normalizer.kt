@@ -155,7 +155,7 @@ internal class Normalizer(
     }
     records[key] = mergedRecord
 
-    return CacheKey(key)
+    return CacheKey(key, isHashed = true)
   }
 
 
@@ -211,6 +211,7 @@ internal class Normalizer(
         if (key == null) {
           key = path
         }
+        key = key.hashed()
         if (embeddedFields.contains(field.name)) {
           buildFields(value, key, field.selections, field.type.rawType())
               .mapValues { it.value.fieldValue }
@@ -292,4 +293,10 @@ fun <D : Executable.Data> DataWithErrors.normalized(
   val variables = executable.variables(customScalarAdapters, withDefaultValues = true)
   return Normalizer(variables, rootKey, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider)
       .normalize(this, executable.rootField().selections, executable.rootField().type.rawType())
+}
+
+
+@OptIn(ExperimentalStdlibApi::class)
+fun String.hashed(): String {
+  return hashCode().toHexString()
 }

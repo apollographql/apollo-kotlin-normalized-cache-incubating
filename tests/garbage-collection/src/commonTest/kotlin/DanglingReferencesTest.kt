@@ -7,6 +7,7 @@ import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.fetchPolicy
+import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeDanglingReferences
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
@@ -35,13 +36,13 @@ class DanglingReferencesTest {
               .execute()
 
           var allRecords = store.accessCache { it.allRecords() }
-          assertTrue(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
+          assertTrue(allRecords["Repository:0".hashed()]!!.fields.containsKey("starGazers"))
 
           // Remove User 1, now Repository 0.starGazers is a dangling reference
-          store.remove(CacheKey("User:1"), cascade = false)
+          store.remove(CacheKey("User:1".hashed()), cascade = false)
           val removedFieldsAndRecords = store.removeDanglingReferences()
           assertEquals(
-              setOf("Repository:0.starGazers"),
+              setOf("${"Repository:0".hashed()}.starGazers"),
               removedFieldsAndRecords.removedFields
           )
           assertEquals(
@@ -49,7 +50,7 @@ class DanglingReferencesTest {
               removedFieldsAndRecords.removedRecords
           )
           allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
+          assertFalse(allRecords["Repository:0".hashed()]!!.fields.containsKey("starGazers"))
         }
   }
 
@@ -74,20 +75,20 @@ class DanglingReferencesTest {
           // thus (metaProjects.0.0) is empty and removed
           // thus (QUERY_ROOT).metaProjects is a dangling reference
           // thus QUERY_ROOT is empty and removed
-          store.remove(CacheKey("User:0"), cascade = false)
+          store.remove(CacheKey("User:0".hashed()), cascade = false)
           val removedFieldsAndRecords = store.removeDanglingReferences()
           assertEquals(
               setOf(
-                  "metaProjects.0.0.type.owners",
-                  "metaProjects.0.0.type",
+                  ("metaProjects.0.0".hashed() + ".type").hashed() + ".owners",
+                  "metaProjects.0.0".hashed() + ".type",
                   "QUERY_ROOT.metaProjects",
               ),
               removedFieldsAndRecords.removedFields
           )
           assertEquals(
               setOf(
-                  CacheKey("metaProjects.0.0.type"),
-                  CacheKey("metaProjects.0.0"),
+                  CacheKey(("metaProjects.0.0".hashed() + ".type").hashed()),
+                  CacheKey("metaProjects.0.0".hashed()),
                   CacheKey("QUERY_ROOT"),
               ),
               removedFieldsAndRecords.removedRecords

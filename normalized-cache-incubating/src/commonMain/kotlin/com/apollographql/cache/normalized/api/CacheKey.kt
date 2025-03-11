@@ -1,5 +1,6 @@
 package com.apollographql.cache.normalized.api
 
+import com.apollographql.cache.normalized.internal.hashed
 import kotlin.jvm.JvmStatic
 
 /**
@@ -7,7 +8,10 @@ import kotlin.jvm.JvmStatic
  *
  * @param key The key of the object in the cache. The key must be globally unique.
  */
-class CacheKey(val key: String) {
+class CacheKey(
+    val key: String,
+    internal val isHashed: Boolean = false,
+) {
 
   /**
    * Builds a [CacheKey] from a typename and a list of Strings.
@@ -37,6 +41,10 @@ class CacheKey(val key: String) {
   }
 
   override fun toString() = "CacheKey($key)"
+
+  internal val hashedKey by lazy {
+    if (isHashed) key else key.hashed()
+  }
 
   fun serialize(): String {
     return "$SERIALIZATION_TEMPLATE{$key}"

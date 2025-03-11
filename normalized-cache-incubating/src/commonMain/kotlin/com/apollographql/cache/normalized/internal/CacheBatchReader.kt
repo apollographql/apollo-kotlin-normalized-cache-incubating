@@ -194,7 +194,7 @@ internal class CacheBatchReader(
       is CacheKey -> {
         pendingReferences.add(
             PendingReference(
-                key = key,
+                key = hashedKey,
                 selections = selections,
                 parentType = parentType,
                 path = path,
