@@ -6,8 +6,8 @@ import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.fetchPolicy
-import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeDanglingReferences
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
@@ -42,7 +42,7 @@ class DanglingReferencesTest {
           store.remove(CacheKey("User:1"), cascade = false)
           val removedFieldsAndRecords = store.removeDanglingReferences()
           assertEquals(
-              setOf("${"Repository:0".hashed()}.starGazers"),
+              setOf(CacheKey("Repository:0").fieldKey("starGazers")),
               removedFieldsAndRecords.removedFields
           )
           assertEquals(
@@ -79,15 +79,15 @@ class DanglingReferencesTest {
           val removedFieldsAndRecords = store.removeDanglingReferences()
           assertEquals(
               setOf(
-                  ("metaProjects.0.0".hashed() + ".type").hashed() + ".owners",
-                  "metaProjects.0.0".hashed() + ".type",
-                  "QUERY_ROOT.metaProjects",
+                  CacheKey(CacheKey("metaProjects.0.0").fieldKey("type")).fieldKey("owners"),
+                  CacheKey("metaProjects.0.0").fieldKey("type"),
+                  CacheKey("QUERY_ROOT").fieldKey("metaProjects"),
               ),
               removedFieldsAndRecords.removedFields
           )
           assertEquals(
               setOf(
-                  CacheKey(("metaProjects.0.0".hashed() + ".type")),
+                  CacheKey(CacheKey("metaProjects.0.0").fieldKey("type")),
                   CacheKey("metaProjects.0.0"),
                   CacheKey("QUERY_ROOT"),
               ),
@@ -96,7 +96,7 @@ class DanglingReferencesTest {
           val allRecords = store.accessCache { it.allRecords() }
           assertFalse(allRecords.containsKey(CacheKey("QUERY_ROOT")))
           assertFalse(allRecords.containsKey(CacheKey("metaProjects.0.0")))
-          assertFalse(allRecords.containsKey(CacheKey("metaProjects.0.0".hashed() + ".type")))
+          assertFalse(allRecords.containsKey(CacheKey(CacheKey("metaProjects.0.0").fieldKey("type"))))
         }
   }
 

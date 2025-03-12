@@ -120,7 +120,3 @@ fun Collection<Record>?.dependentKeys(): Set<String> {
     it.fieldKeys()
   }?.toSet() ?: emptySet()
 }
-
-internal fun CacheKey.fieldKey(fieldName: String): String {
-  return "$key.$fieldName"
-}

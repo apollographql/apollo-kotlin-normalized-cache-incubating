@@ -263,6 +263,10 @@ public final class com/apollographql/cache/normalized/api/CacheKeyGeneratorConte
 	public final fun getVariables ()Lcom/apollographql/apollo/api/Executable$Variables;
 }
 
+public final class com/apollographql/cache/normalized/api/CacheKeyKt {
+	public static final fun fieldKey-eNSUWrY (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
 public abstract class com/apollographql/cache/normalized/api/CacheKeyResolver : com/apollographql/cache/normalized/api/CacheResolver {
 	public fun <init> ()V
 	public abstract fun cacheKeyForField-fLoEQYY (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/lang/String;
