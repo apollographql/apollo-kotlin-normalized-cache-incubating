@@ -60,9 +60,9 @@ class GarbageCollectTest {
           )
           assertEquals(
               setOf(
-                  CacheKey(("metaProjects.0.0".hashed() + ".type").hashed()),
-                  CacheKey(("metaProjects.0.1".hashed() + ".type").hashed()),
-                  CacheKey(("metaProjects.1.0".hashed() + ".type").hashed()),
+                  CacheKey("metaProjects.0.0".hashed() + ".type"),
+                  CacheKey("metaProjects.0.1".hashed() + ".type"),
+                  CacheKey("metaProjects.1.0".hashed() + ".type"),
               ),
               garbageCollectResult.removedStaleFields.removedRecords
           )
@@ -78,9 +78,9 @@ class GarbageCollectTest {
           )
           assertEquals(
               setOf(
-                  CacheKey("metaProjects.0.0".hashed()),
-                  CacheKey("metaProjects.0.1".hashed()),
-                  CacheKey("metaProjects.1.0".hashed()),
+                  CacheKey("metaProjects.0.0"),
+                  CacheKey("metaProjects.0.1"),
+                  CacheKey("metaProjects.1.0"),
                   CacheKey("QUERY_ROOT"),
               ),
               garbageCollectResult.removedDanglingReferences.removedRecords
@@ -88,9 +88,9 @@ class GarbageCollectTest {
 
           assertEquals(
               setOf(
-                  CacheKey("User:0".hashed()),
-                  CacheKey("User:1".hashed()),
-                  CacheKey("User:2".hashed()),
+                  CacheKey("User:0"),
+                  CacheKey("User:1"),
+                  CacheKey("User:2"),
               ),
               garbageCollectResult.removedUnreachableRecords
           )

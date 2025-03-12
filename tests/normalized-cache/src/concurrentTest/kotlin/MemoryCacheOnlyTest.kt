@@ -5,6 +5,7 @@ import com.apollographql.apollo.testing.enqueueTestResponse
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCache
@@ -27,7 +28,7 @@ class MemoryCacheOnlyTest {
     val query = GetUserQuery()
     apolloClient.enqueueTestResponse(query, GetUserQuery.Data(GetUserQuery.User("John", "a@a.com")))
     apolloClient.query(query).memoryCacheOnly(true).execute()
-    val dump: Map<KClass<*>, Map<String, Record>> = store.dump()
+    val dump: Map<KClass<*>, Map<CacheKey, Record>> = store.dump()
     assertEquals(2, dump[MemoryCache::class]!!.size)
     assertEquals(0, dump[SqlNormalizedCache::class]!!.size)
   }

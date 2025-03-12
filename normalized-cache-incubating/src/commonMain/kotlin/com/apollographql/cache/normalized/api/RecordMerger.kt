@@ -41,7 +41,7 @@ object DefaultRecordMerger : RecordMerger {
       val existingFieldValue = existing.fields[fieldKey]
       if (!hasExistingFieldValue || existingFieldValue != incomingFieldValue) {
         mergedFields[fieldKey] = incomingFieldValue
-        changedKeys.add("${existing.key}.$fieldKey")
+        changedKeys.add(existing.key.fieldKey(fieldKey))
       }
     }
 
@@ -107,7 +107,7 @@ class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
       if (!hasExistingFieldValue) {
         mergedFields[fieldKey] = incomingFieldValue
         mergedMetadata[fieldKey] = incoming.metadata[fieldKey].orEmpty()
-        changedKeys.add("${existing.key}.$fieldKey")
+        changedKeys.add(existing.key.fieldKey(fieldKey))
       } else if (existingFieldValue != incomingFieldValue) {
         val existingFieldInfo = FieldInfo(
             value = existingFieldValue,
@@ -122,7 +122,7 @@ class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
         mergedFields[fieldKey] = mergeResult.value
         mergedMetadata[fieldKey] = mergeResult.metadata
 
-        changedKeys.add("${existing.key}.$fieldKey")
+        changedKeys.add(existing.key.fieldKey(fieldKey))
       }
     }
 

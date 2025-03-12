@@ -169,7 +169,7 @@ private fun LegacyNormalizedCache.allRecords(): List<LegacyRecord> {
 }
 
 private fun LegacyRecord.toRecord(): Record = Record(
-    key = key,
+    key = CacheKey(key),
     fields = fields.mapValues { (_, value) -> value.toRecordValue() },
     mutationId = mutationId
 )

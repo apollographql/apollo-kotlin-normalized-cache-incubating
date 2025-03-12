@@ -5,7 +5,7 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.api.json.MapJsonReader
 import com.apollographql.apollo.api.toApolloResponse
 import com.apollographql.apollo.testing.internal.runTest
-import com.apollographql.cache.normalized.internal.hashed
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.internal.normalized
 import com.example.GetCatIncludeVariableWithDefaultQuery
 import com.example.SkipFragmentWithDefaultToFalseQuery
@@ -30,7 +30,7 @@ class IncludeTest {
     }
 
     val normalized = data.normalized(operation)
-    assertNull((normalized["animal".hashed()] as Map<*, *>)["species"])
+    assertNull((normalized[CacheKey("animal")] as Map<*, *>)["species"])
   }
 
   @Test
@@ -44,6 +44,6 @@ class IncludeTest {
     }
 
     val normalized = data.normalized(operation)
-    assertNull((normalized["animal".hashed()] as Map<*, *>)["barf"])
+    assertNull((normalized[CacheKey("animal")] as Map<*, *>)["barf"])
   }
 }

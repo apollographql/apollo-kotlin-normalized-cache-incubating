@@ -12,7 +12,6 @@ import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
-import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.store
 import com.apollographql.mockserver.MockServer
@@ -46,7 +45,7 @@ class StoreTest {
 
     val heroWithFriendsFragment = store.readFragment(
         HeroWithFriendsFragmentImpl(),
-        CacheKey("Character:2001".hashed()),
+        CacheKey("Character:2001"),
     ).data
     assertEquals(heroWithFriendsFragment.id, "2001")
     assertEquals(heroWithFriendsFragment.name, "R2-D2")
@@ -60,7 +59,7 @@ class StoreTest {
 
     var fragment = store.readFragment(
         HumanWithIdFragmentImpl(),
-        CacheKey("Character:1000".hashed()),
+        CacheKey("Character:1000"),
     ).data
 
     assertEquals(fragment.id, "1000")
@@ -68,14 +67,14 @@ class StoreTest {
 
     fragment = store.readFragment(
         HumanWithIdFragmentImpl(),
-        CacheKey("Character:1002".hashed()),
+        CacheKey("Character:1002"),
     ).data
     assertEquals(fragment.id, "1002")
     assertEquals(fragment.name, "Han Solo")
 
     fragment = store.readFragment(
         HumanWithIdFragmentImpl(),
-        CacheKey("Character:1003".hashed()),
+        CacheKey("Character:1003"),
     ).data
     assertEquals(fragment.id, "1003")
     assertEquals(fragment.name, "Leia Organa")
@@ -102,7 +101,7 @@ class StoreTest {
 
     store.writeFragment(
         HeroWithFriendsFragmentImpl(),
-        CacheKey("Character:2001".hashed()),
+        CacheKey("Character:2001"),
         HeroWithFriendsFragmentImpl.Data(
             id = "2001",
             name = "R222-D222",
@@ -123,7 +122,7 @@ class StoreTest {
 
     store.writeFragment(
         HumanWithIdFragmentImpl(),
-        CacheKey("Character:1002".hashed()),
+        CacheKey("Character:1002"),
         HumanWithIdFragmentImpl.Data(
             id = "1002",
             name = "Beast"

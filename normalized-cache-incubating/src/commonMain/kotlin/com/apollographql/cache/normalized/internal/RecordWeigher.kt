@@ -27,7 +27,7 @@ internal object RecordWeigher {
 
   @JvmStatic
   fun calculateBytes(record: Record): Int {
-    var size = SIZE_OF_RECORD_OVERHEAD + record.key.length
+    var size = SIZE_OF_RECORD_OVERHEAD + record.key.key.length
     for ((key, value) in record.fields) {
       size += key.length + weighField(value)
     }

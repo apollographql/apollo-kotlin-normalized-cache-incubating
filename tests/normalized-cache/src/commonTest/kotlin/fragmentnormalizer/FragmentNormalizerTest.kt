@@ -6,7 +6,6 @@ import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.apolloStore
-import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
@@ -100,6 +99,6 @@ class FragmentNormalizerTest {
         cacheKeyGenerator = IdCacheKeyGenerator(),
     )
 
-    assertContains(records.keys, "1.author".hashed())
+    assertContains(records.keys, CacheKey("1.author"))
   }
 }
