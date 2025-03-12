@@ -46,11 +46,11 @@ internal class BlobRecordDatabase(private val blobQueries: BlobQueries) : Record
   }
 
   override fun insert(record: Record) {
-    blobQueries.insert(record.key, BlobRecordSerializer.serialize(record))
+    blobQueries.insert(record.key.key, BlobRecordSerializer.serialize(record))
   }
 
   override fun update(record: Record) {
-    blobQueries.update(BlobRecordSerializer.serialize(record), record.key)
+    blobQueries.update(BlobRecordSerializer.serialize(record), record.key.key)
   }
 
   override fun selectAll(): List<Record> {

@@ -41,7 +41,7 @@ class CacheKeyResolverTest {
         field,
         Executable.Variables(emptyMap()),
         emptyMap(),
-        "",
+        CacheKey("", isHashed = true),
         "",
         CacheHeaders(emptyMap()),
         DefaultFieldKeyGenerator,

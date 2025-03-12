@@ -27,34 +27,34 @@ class SqlNormalizedCache internal constructor(
     }
   }
 
-  override fun loadRecord(key: String, cacheHeaders: CacheHeaders): Record? {
+  override fun loadRecord(key: CacheKey, cacheHeaders: CacheHeaders): Record? {
     if (cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
       return null
     }
     val evictAfterRead = cacheHeaders.hasHeader(EVICT_AFTER_READ)
     return maybeTransaction(evictAfterRead) {
       try {
-        recordDatabase.select(key)
+        recordDatabase.select(key.key)
       } catch (e: Exception) {
         // Unable to read the record from the database, it is possibly corrupted - treat this as a cache miss
         apolloExceptionHandler(Exception("Unable to read a record from the database", e))
         null
       }?.also {
         if (evictAfterRead) {
-          recordDatabase.delete(key)
+          recordDatabase.delete(key.key)
         }
       }
     }
   }
 
-  override fun loadRecords(keys: Collection<String>, cacheHeaders: CacheHeaders): Collection<Record> {
+  override fun loadRecords(keys: Collection<CacheKey>, cacheHeaders: CacheHeaders): Collection<Record> {
     if (cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
       return emptyList()
     }
     val evictAfterRead = cacheHeaders.hasHeader(EVICT_AFTER_READ)
     return maybeTransaction(evictAfterRead) {
       try {
-        internalGetRecords(keys)
+        internalGetRecords(keys.map { it.key })
       } catch (e: Exception) {
         // Unable to read the records from the database, it is possibly corrupted - treat this as a cache miss
         apolloExceptionHandler(Exception("Unable to read records from the database", e))
@@ -62,7 +62,7 @@ class SqlNormalizedCache internal constructor(
       }.also {
         if (evictAfterRead) {
           it.forEach { record ->
-            recordDatabase.delete(record.key)
+            recordDatabase.delete(record.key.key)
           }
         }
       }
@@ -82,13 +82,6 @@ class SqlNormalizedCache internal constructor(
   override fun remove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
     return recordDatabase.transaction {
       internalDeleteRecords(cacheKeys.map { it.key }, cascade)
-    }
-  }
-
-  override fun remove(pattern: String): Int {
-    return recordDatabase.transaction {
-      recordDatabase.deleteMatching(pattern)
-      recordDatabase.changes().toInt()
     }
   }
 
@@ -118,7 +111,7 @@ class SqlNormalizedCache internal constructor(
     }
   }
 
-  override fun dump(): Map<KClass<*>, Map<String, Record>> {
+  override fun dump(): Map<KClass<*>, Map<CacheKey, Record>> {
     return mapOf(this::class to recordDatabase.selectAll().associateBy { it.key })
   }
 
@@ -155,7 +148,7 @@ class SqlNormalizedCache internal constructor(
     val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
     recordDatabase.transaction {
       val oldRecords = internalGetRecords(
-          keys = records.map { it.key },
+          keys = records.map { it.key.key },
       ).associateBy { it.key }
 
       updatedRecordKeys = records.flatMap { record ->
@@ -182,7 +175,7 @@ class SqlNormalizedCache internal constructor(
     val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
     val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
     return recordDatabase.transaction {
-      val oldRecord = recordDatabase.select(record.key)
+      val oldRecord = recordDatabase.select(record.key.key)
       if (oldRecord == null) {
         recordDatabase.insert(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
         record.fieldKeys()

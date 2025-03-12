@@ -106,7 +106,7 @@ internal class DefaultApolloStore(
       dataWithErrors: DataWithErrors,
       rootKey: String,
       customScalarAdapters: CustomScalarAdapters,
-  ): Map<String, Record> {
+  ): Map<CacheKey, Record> {
     return dataWithErrors.normalized(
         executable = executable,
         rootKey = rootKey,
@@ -129,7 +129,7 @@ internal class DefaultApolloStore(
         cacheHeaders = cacheHeaders,
         cacheResolver = cacheResolver,
         variables = variables,
-        rootKey = CacheKey.rootKey().key,
+        rootKey = CacheKey.rootKey(),
         rootSelections = operation.rootField().selections,
         rootField = operation.rootField(),
         fieldKeyGenerator = fieldKeyGenerator,
@@ -181,7 +181,7 @@ internal class DefaultApolloStore(
         cacheHeaders = cacheHeaders,
         cacheResolver = cacheResolver,
         variables = variables,
-        rootKey = cacheKey.key,
+        rootKey = cacheKey,
         rootSelections = fragment.rootField().selections,
         rootField = fragment.rootField(),
         fieldKeyGenerator = fieldKeyGenerator,
@@ -298,7 +298,7 @@ internal class DefaultApolloStore(
     return cache.merge(record, cacheHeaders, recordMerger)
   }
 
-  override fun dump(): Map<KClass<*>, Map<String, Record>> {
+  override fun dump(): Map<KClass<*>, Map<CacheKey, Record>> {
     return cache.dump()
   }
 

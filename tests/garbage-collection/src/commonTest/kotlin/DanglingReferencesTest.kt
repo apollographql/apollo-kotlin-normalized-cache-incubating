@@ -36,10 +36,10 @@ class DanglingReferencesTest {
               .execute()
 
           var allRecords = store.accessCache { it.allRecords() }
-          assertTrue(allRecords["Repository:0".hashed()]!!.fields.containsKey("starGazers"))
+          assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
 
           // Remove User 1, now Repository 0.starGazers is a dangling reference
-          store.remove(CacheKey("User:1".hashed()), cascade = false)
+          store.remove(CacheKey("User:1"), cascade = false)
           val removedFieldsAndRecords = store.removeDanglingReferences()
           assertEquals(
               setOf("${"Repository:0".hashed()}.starGazers"),
@@ -50,7 +50,7 @@ class DanglingReferencesTest {
               removedFieldsAndRecords.removedRecords
           )
           allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords["Repository:0".hashed()]!!.fields.containsKey("starGazers"))
+          assertFalse(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
         }
   }
 
@@ -75,7 +75,7 @@ class DanglingReferencesTest {
           // thus (metaProjects.0.0) is empty and removed
           // thus (QUERY_ROOT).metaProjects is a dangling reference
           // thus QUERY_ROOT is empty and removed
-          store.remove(CacheKey("User:0".hashed()), cascade = false)
+          store.remove(CacheKey("User:0"), cascade = false)
           val removedFieldsAndRecords = store.removeDanglingReferences()
           assertEquals(
               setOf(
@@ -87,16 +87,16 @@ class DanglingReferencesTest {
           )
           assertEquals(
               setOf(
-                  CacheKey(("metaProjects.0.0".hashed() + ".type").hashed()),
-                  CacheKey("metaProjects.0.0".hashed()),
+                  CacheKey(("metaProjects.0.0".hashed() + ".type")),
+                  CacheKey("metaProjects.0.0"),
                   CacheKey("QUERY_ROOT"),
               ),
               removedFieldsAndRecords.removedRecords
           )
           val allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords.containsKey("QUERY_ROOT"))
-          assertFalse(allRecords.containsKey("metaProjects.0.0"))
-          assertFalse(allRecords.containsKey("metaProjects.0.0.type"))
+          assertFalse(allRecords.containsKey(CacheKey("QUERY_ROOT")))
+          assertFalse(allRecords.containsKey(CacheKey("metaProjects.0.0")))
+          assertFalse(allRecords.containsKey(CacheKey("metaProjects.0.0".hashed() + ".type")))
         }
   }
 

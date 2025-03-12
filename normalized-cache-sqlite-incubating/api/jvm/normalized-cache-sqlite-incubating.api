@@ -1,13 +1,12 @@
 public final class com/apollographql/cache/normalized/sql/SqlNormalizedCache : com/apollographql/cache/normalized/api/NormalizedCache {
 	public fun clearAll ()V
 	public fun dump ()Ljava/util/Map;
-	public fun loadRecord (Ljava/lang/String;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/api/Record;
+	public fun loadRecord-eNSUWrY (Ljava/lang/String;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/api/Record;
 	public fun loadRecords (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Collection;
 	public fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/RecordMerger;)Ljava/util/Set;
 	public fun merge (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/RecordMerger;)Ljava/util/Set;
-	public fun remove (Lcom/apollographql/cache/normalized/api/CacheKey;Z)Z
-	public fun remove (Ljava/lang/String;)I
 	public fun remove (Ljava/util/Collection;Z)I
+	public fun remove-eNSUWrY (Ljava/lang/String;Z)Z
 }
 
 public final class com/apollographql/cache/normalized/sql/SqlNormalizedCacheFactory_jvmKt {

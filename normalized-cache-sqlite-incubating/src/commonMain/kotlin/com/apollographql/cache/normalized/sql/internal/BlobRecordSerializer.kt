@@ -64,7 +64,7 @@ internal object BlobRecordSerializer {
       fields[name] = buffer.readAny()
     }
 
-    return Record(key, fields, null, metadata)
+    return Record(CacheKey(key, isHashed = true), fields, null, metadata)
   }
 
   private fun Buffer.writeString(value: String) {

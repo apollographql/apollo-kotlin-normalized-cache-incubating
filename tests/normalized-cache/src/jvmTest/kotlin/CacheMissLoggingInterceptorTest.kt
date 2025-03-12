@@ -3,8 +3,8 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.fetchPolicy
-import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.logCacheMisses
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
@@ -55,7 +55,7 @@ class CacheMissLoggingInterceptorTest {
     assertEquals(
         listOf(
             "Object 'QUERY_ROOT' has no field named 'hero'",
-            "Object '${"hero".hashed()}' has no field named 'appearsIn'"
+            "Object '${CacheKey("hero").key}' has no field named 'appearsIn'"
         ),
         recordedLogs
     )

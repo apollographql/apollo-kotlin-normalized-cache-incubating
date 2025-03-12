@@ -46,10 +46,10 @@ class StaleFieldsTest {
               .execute()
 
           var allRecords = store.accessCache { it.allRecords() }
-          assertTrue(allRecords["Repository:0".hashed()]!!.fields.containsKey("stars"))
-          assertTrue(allRecords["Repository:0".hashed()]!!.fields.containsKey("starGazers"))
-          assertTrue(allRecords["Repository:1".hashed()]!!.fields.containsKey("stars"))
-          assertTrue(allRecords["Repository:1".hashed()]!!.fields.containsKey("starGazers"))
+          assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("stars"))
+          assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
+          assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
+          assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("starGazers"))
 
           val maxAgeProvider = SchemaCoordinatesMaxAgeProvider(
               Cache.maxAges,
@@ -67,10 +67,10 @@ class StaleFieldsTest {
               emptySet(), removedFieldsAndRecords.removedRecords
           )
           allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords["Repository:0".hashed()]!!.fields.containsKey("stars"))
-          assertTrue(allRecords["Repository:0".hashed()]!!.fields.containsKey("starGazers"))
-          assertFalse(allRecords["Repository:1".hashed()]!!.fields.containsKey("stars"))
-          assertTrue(allRecords["Repository:1".hashed()]!!.fields.containsKey("starGazers"))
+          assertFalse(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("stars"))
+          assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
+          assertFalse(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
+          assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("starGazers"))
 
           mockServer.enqueueString(REPOSITORY_LIST_RESPONSE)
           apolloClient.query(RepositoryListQuery())
@@ -91,10 +91,10 @@ class StaleFieldsTest {
               emptySet(), removedFieldsAndRecords.removedRecords
           )
           allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords["Repository:0".hashed()]!!.fields.containsKey("stars"))
-          assertFalse(allRecords["Repository:0".hashed()]!!.fields.containsKey("starGazers"))
-          assertFalse(allRecords["Repository:1".hashed()]!!.fields.containsKey("stars"))
-          assertFalse(allRecords["Repository:1".hashed()]!!.fields.containsKey("starGazers"))
+          assertFalse(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("stars"))
+          assertFalse(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
+          assertFalse(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
+          assertFalse(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("starGazers"))
         }
   }
 
@@ -114,10 +114,10 @@ class StaleFieldsTest {
               .execute()
 
           var allRecords = store.accessCache { it.allRecords() }
-          assertTrue(allRecords["projects.0".hashed()]!!.fields.containsKey("velocity"))
-          assertTrue(allRecords["projects.0".hashed()]!!.fields.containsKey("isUrgent"))
-          assertTrue(allRecords["projects.1".hashed()]!!.fields.containsKey("velocity"))
-          assertTrue(allRecords["projects.1".hashed()]!!.fields.containsKey("isUrgent"))
+          assertTrue(allRecords[CacheKey("projects.0")]!!.fields.containsKey("velocity"))
+          assertTrue(allRecords[CacheKey("projects.0")]!!.fields.containsKey("isUrgent"))
+          assertTrue(allRecords[CacheKey("projects.1")]!!.fields.containsKey("velocity"))
+          assertTrue(allRecords[CacheKey("projects.1")]!!.fields.containsKey("isUrgent"))
 
           val maxAgeProvider = SchemaCoordinatesMaxAgeProvider(
               Cache.maxAges,
@@ -135,10 +135,10 @@ class StaleFieldsTest {
               emptySet(), removedFieldsAndRecords.removedRecords
           )
           allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords["projects.0".hashed()]!!.fields.containsKey("velocity"))
-          assertTrue(allRecords["projects.0".hashed()]!!.fields.containsKey("isUrgent"))
-          assertFalse(allRecords["projects.1".hashed()]!!.fields.containsKey("velocity"))
-          assertTrue(allRecords["projects.1".hashed()]!!.fields.containsKey("isUrgent"))
+          assertFalse(allRecords[CacheKey("projects.0")]!!.fields.containsKey("velocity"))
+          assertTrue(allRecords[CacheKey("projects.0")]!!.fields.containsKey("isUrgent"))
+          assertFalse(allRecords[CacheKey("projects.1")]!!.fields.containsKey("velocity"))
+          assertTrue(allRecords[CacheKey("projects.1")]!!.fields.containsKey("isUrgent"))
 
           mockServer.enqueueString(PROJECT_LIST_RESPONSE)
           apolloClient.query(ProjectListQuery())
@@ -157,13 +157,13 @@ class StaleFieldsTest {
           )
           assertEquals(
               setOf(
-                  CacheKey("projects.0".hashed()),
-                  CacheKey("projects.1".hashed()),
+                  CacheKey("projects.0"),
+                  CacheKey("projects.1"),
               ), removedFieldsAndRecords.removedRecords
           )
           allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords.containsKey("projects.0".hashed()))
-          assertFalse(allRecords.containsKey("projects.1".hashed()))
+          assertFalse(allRecords.containsKey(CacheKey("projects.0")))
+          assertFalse(allRecords.containsKey(CacheKey("projects.1")))
         }
   }
 
@@ -183,10 +183,10 @@ class StaleFieldsTest {
               .execute()
 
           var allRecords = store.accessCache { it.allRecords() }
-          assertTrue(allRecords["Repository:0".hashed()]!!.fields.containsKey("stars"))
-          assertTrue(allRecords["Repository:0".hashed()]!!.fields.containsKey("starGazers"))
-          assertTrue(allRecords["Repository:1".hashed()]!!.fields.containsKey("stars"))
-          assertTrue(allRecords["Repository:1".hashed()]!!.fields.containsKey("starGazers"))
+          assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("stars"))
+          assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
+          assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
+          assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("starGazers"))
 
           var removedFieldsAndRecords = store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE))
           // Everything is stale
@@ -214,11 +214,11 @@ class StaleFieldsTest {
           )
           assertEquals(
               setOf(
-                  CacheKey("Repository:0".hashed()),
-                  CacheKey("Repository:1".hashed()),
-                  CacheKey("User:0".hashed()),
-                  CacheKey("User:1".hashed()),
-                  CacheKey("User:2".hashed()),
+                  CacheKey("Repository:0"),
+                  CacheKey("Repository:1"),
+                  CacheKey("User:0"),
+                  CacheKey("User:1"),
+                  CacheKey("User:2"),
                   CacheKey("QUERY_ROOT"),
               ), removedFieldsAndRecords.removedRecords
           )
@@ -242,10 +242,10 @@ class StaleFieldsTest {
               removedFieldsAndRecords.removedRecords
           )
           allRecords = store.accessCache { it.allRecords() }
-          assertTrue(allRecords["Repository:0".hashed()]!!.fields.containsKey("stars"))
-          assertTrue(allRecords["Repository:0".hashed()]!!.fields.containsKey("starGazers"))
-          assertTrue(allRecords["Repository:1".hashed()]!!.fields.containsKey("stars"))
-          assertTrue(allRecords["Repository:1".hashed()]!!.fields.containsKey("starGazers"))
+          assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("stars"))
+          assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
+          assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
+          assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("starGazers"))
         }
   }
 

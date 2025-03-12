@@ -1,6 +1,7 @@
 package com.apollographql.cache.normalized.sql
 
 import com.apollographql.cache.normalized.api.CacheHeaders
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.withDates
@@ -23,7 +24,7 @@ class TrimTest {
     val largeString = "".padStart(1024, '?')
 
     val oldRecord = Record(
-        key = "old",
+        key = CacheKey("old"),
         fields = mapOf("key" to "value"),
         mutationId = null,
         metadata = emptyMap()
@@ -32,7 +33,7 @@ class TrimTest {
 
     val newRecords = 0.until(2 * 1024).map {
       Record(
-          key = "new$it",
+          key = CacheKey("new$it"),
           fields = mapOf("key" to largeString),
           mutationId = null,
           metadata = emptyMap()
@@ -40,13 +41,13 @@ class TrimTest {
     }
     cache.merge(newRecords, CacheHeaders.NONE, recordMerger = DefaultRecordMerger)
 
-    assertEquals(9596928, dbFile.length())
+    assertEquals(9646080, dbFile.length())
 
     // Trim the cache by 10%
-    val trimmedCache = TrimmableNormalizedCacheFactory(dbUrl, 9596928, 0.1f).create()
+    val trimmedCache = TrimmableNormalizedCacheFactory(dbUrl, 9646080, 0.1f).create()
 
-    assertEquals(8548352, dbFile.length())
+    assertEquals(8552448, dbFile.length())
     // The oldest key must have been removed
-    assertNull(trimmedCache.loadRecord("old", CacheHeaders.NONE))
+    assertNull(trimmedCache.loadRecord(CacheKey("old"), CacheHeaders.NONE))
   }
 }

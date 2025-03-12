@@ -2,6 +2,7 @@ package test
 
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.CacheHeaders
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.memory.MemoryCache
@@ -14,7 +15,7 @@ class MemoryCacheTest {
   @Test
   fun testDoesNotExpireBeforeMillis() = runTest {
     val record = Record(
-        key = "key",
+        key = CacheKey("key"),
         fields = mapOf(
             "field" to "value"
         )

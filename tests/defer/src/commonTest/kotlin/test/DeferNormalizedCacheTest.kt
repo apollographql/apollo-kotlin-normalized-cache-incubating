@@ -15,9 +15,9 @@ import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheHeaders
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
-import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.optimisticUpdates
 import com.apollographql.cache.normalized.store
@@ -453,8 +453,8 @@ class DeferNormalizedCacheTest {
     val cacheExceptionResponse = actual.last()
     assertIs<ApolloNetworkException>(networkExceptionResponse.exception)
     assertIs<CacheMissException>(cacheExceptionResponse.exception)
-    val hashedKey = ("computers.0".hashed() + ".screen").hashed()
-    assertEquals("Object '$hashedKey' has no field named 'isColor'", cacheExceptionResponse.exception!!.message)
+    val key = CacheKey((CacheKey("computers.0").key + ".screen")).key
+    assertEquals("Object '$key' has no field named 'isColor'", cacheExceptionResponse.exception!!.message)
   }
 
   @Test
@@ -541,7 +541,7 @@ class DeferNormalizedCacheTest {
     val multipartBody = mockServer.enqueueMultipart("application/json")
     multipartBody.enqueuePart(jsonList[0].encodeUtf8(), false)
     val recordFields = apolloClient.query(SimpleDeferQuery()).fetchPolicy(FetchPolicy.NetworkOnly).toFlow().map {
-      apolloClient.apolloStore.accessCache { it.loadRecord("computers.0".hashed(), CacheHeaders.NONE)!!.fields }.also {
+      apolloClient.apolloStore.accessCache { it.loadRecord(CacheKey("computers.0"), CacheHeaders.NONE)!!.fields }.also {
         multipartBody.enqueuePart(jsonList[1].encodeUtf8(), true)
       }
     }.toList()
