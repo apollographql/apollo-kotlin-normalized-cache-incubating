@@ -11,9 +11,9 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.fetchPolicy
-import com.apollographql.cache.normalized.internal.hashed
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeStaleFields
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
@@ -59,8 +59,8 @@ class StaleFieldsTest {
           // Repository.stars has a max age of 60 seconds, so they should be removed / User has a max age of 90 seconds, so Repository.starGazers should be kept
           assertEquals(
               setOf(
-                  "Repository:0".hashed() + ".stars",
-                  "Repository:1".hashed() + ".stars",
+                  CacheKey("Repository:0").fieldKey("stars"),
+                  CacheKey("Repository:1").fieldKey("stars"),
               ), removedFieldsAndRecords.removedFields
           )
           assertEquals(
@@ -81,10 +81,10 @@ class StaleFieldsTest {
           // Repository.stars and Repository.starGazers should be removed
           assertEquals(
               setOf(
-                  "Repository:0".hashed() + ".stars",
-                  "Repository:0".hashed() + ".starGazers",
-                  "Repository:1".hashed() + ".stars",
-                  "Repository:1".hashed() + ".starGazers",
+                  CacheKey("Repository:0").fieldKey("stars"),
+                  CacheKey("Repository:0").fieldKey("starGazers"),
+                  CacheKey("Repository:1").fieldKey("stars"),
+                  CacheKey("Repository:1").fieldKey("starGazers"),
               ), removedFieldsAndRecords.removedFields
           )
           assertEquals(
@@ -127,8 +127,8 @@ class StaleFieldsTest {
           // Project.velocity has a max age of 60 seconds, so they should be removed / Project.isUrgent has a max age of 90 seconds, so they should be kept
           assertEquals(
               setOf(
-                  "projects.0".hashed() + ".velocity",
-                  "projects.1".hashed() + ".velocity",
+                  CacheKey("projects.0").fieldKey("velocity"),
+                  CacheKey("projects.1").fieldKey("velocity"),
               ), removedFieldsAndRecords.removedFields
           )
           assertEquals(
@@ -149,10 +149,10 @@ class StaleFieldsTest {
           // Project.velocity and Project.isUrgent should be removed, their records being empty they should be removed
           assertEquals(
               setOf(
-                  "projects.0".hashed() + ".velocity",
-                  "projects.0".hashed() + ".isUrgent",
-                  "projects.1".hashed() + ".velocity",
-                  "projects.1".hashed() + ".isUrgent",
+                  CacheKey("projects.0").fieldKey("velocity"),
+                  CacheKey("projects.0").fieldKey("isUrgent"),
+                  CacheKey("projects.1").fieldKey("velocity"),
+                  CacheKey("projects.1").fieldKey("isUrgent"),
               ), removedFieldsAndRecords.removedFields
           )
           assertEquals(
@@ -192,24 +192,24 @@ class StaleFieldsTest {
           // Everything is stale
           assertEquals(
               setOf(
-                  "Repository:0".hashed() + ".__typename",
-                  "Repository:0".hashed() + ".id",
-                  "Repository:0".hashed() + ".stars",
-                  "Repository:0".hashed() + ".starGazers",
-                  "User:0".hashed() + ".__typename",
-                  "User:0".hashed() + ".id",
-                  "User:0".hashed() + ".name",
-                  "Repository:1".hashed() + ".__typename",
-                  "Repository:1".hashed() + ".id",
-                  "Repository:1".hashed() + ".stars",
-                  "Repository:1".hashed() + ".starGazers",
-                  "User:2".hashed() + ".__typename",
-                  "User:2".hashed() + ".id",
-                  "User:2".hashed() + ".name",
-                  "QUERY_ROOT.repositories({\"first\":15})",
-                  "User:1".hashed() + ".__typename",
-                  "User:1".hashed() + ".id",
-                  "User:1".hashed() + ".name"
+                  CacheKey("Repository:0").fieldKey("__typename"),
+                  CacheKey("Repository:0").fieldKey("id"),
+                  CacheKey("Repository:0").fieldKey("stars"),
+                  CacheKey("Repository:0").fieldKey("starGazers"),
+                  CacheKey("User:0").fieldKey("__typename"),
+                  CacheKey("User:0").fieldKey("id"),
+                  CacheKey("User:0").fieldKey("name"),
+                  CacheKey("Repository:1").fieldKey("__typename"),
+                  CacheKey("Repository:1").fieldKey("id"),
+                  CacheKey("Repository:1").fieldKey("stars"),
+                  CacheKey("Repository:1").fieldKey("starGazers"),
+                  CacheKey("User:2").fieldKey("__typename"),
+                  CacheKey("User:2").fieldKey("id"),
+                  CacheKey("User:2").fieldKey("name"),
+                  CacheKey("QUERY_ROOT").fieldKey("repositories({\"first\":15})"),
+                  CacheKey("User:1").fieldKey("__typename"),
+                  CacheKey("User:1").fieldKey("id"),
+                  CacheKey("User:1").fieldKey("name"),
               ), removedFieldsAndRecords.removedFields
           )
           assertEquals(

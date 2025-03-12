@@ -1,5 +1,6 @@
 package com.apollographql.cache.normalized.api
 
+import com.apollographql.apollo.annotations.ApolloInternal
 import com.apollographql.cache.normalized.internal.hashed
 import kotlin.jvm.JvmInline
 import kotlin.jvm.JvmStatic
@@ -85,4 +86,9 @@ value class CacheKey private constructor(
       return ROOT_CACHE_KEY
     }
   }
+}
+
+@ApolloInternal
+fun CacheKey.fieldKey(fieldName: String): String {
+  return "$key.$fieldName"
 }

@@ -214,7 +214,7 @@ internal class Normalizer(
         )?.key
 
         if (key == null) {
-          key = path.hashed()
+          key = CacheKey(path).key
         }
         if (embeddedFields.contains(field.name)) {
           buildFields(value, key, field.selections, field.type.rawType())
