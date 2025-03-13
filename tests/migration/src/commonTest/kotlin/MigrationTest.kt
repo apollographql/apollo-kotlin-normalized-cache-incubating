@@ -9,6 +9,7 @@ import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
+import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordValue
 import com.apollographql.cache.normalized.fetchPolicy
@@ -140,6 +141,9 @@ class MigrationTest {
     val store = ApolloStore(SqlNormalizedCacheFactory(name = "modern.db")).also { it.clearAll() }
     store.migrateFrom(legacyStore)
 
+    println(NormalizedCache.prettifyDump(store.dump()))
+
+
     // Read the data back
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
@@ -169,7 +173,7 @@ private fun LegacyNormalizedCache.allRecords(): List<LegacyRecord> {
 }
 
 private fun LegacyRecord.toRecord(): Record = Record(
-    key = key,
+    key = CacheKey(key),
     fields = fields.mapValues { (_, value) -> value.toRecordValue() },
     mutationId = mutationId
 )

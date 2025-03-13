@@ -17,11 +17,11 @@ class SqlNormalizedCache internal constructor(
     private val recordDatabase: RecordDatabase,
 ) : NormalizedCache {
 
-  override fun loadRecord(key: String, cacheHeaders: CacheHeaders): Record? {
+  override fun loadRecord(key: CacheKey, cacheHeaders: CacheHeaders): Record? {
     return loadRecords(keys = listOf(key), cacheHeaders = cacheHeaders).firstOrNull()
   }
 
-  override fun loadRecords(keys: Collection<String>, cacheHeaders: CacheHeaders): Collection<Record> {
+  override fun loadRecords(keys: Collection<CacheKey>, cacheHeaders: CacheHeaders): Collection<Record> {
     if (cacheHeaders.hasHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY)) {
       return emptyList()
     }
@@ -48,13 +48,6 @@ class SqlNormalizedCache internal constructor(
     }
   }
 
-  override fun remove(pattern: String): Int {
-    return recordDatabase.transaction {
-      recordDatabase.deleteRecordsMatching(pattern)
-      recordDatabase.changes().toInt()
-    }
-  }
-
   override fun merge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     return merge(records = listOf(record), cacheHeaders = cacheHeaders, recordMerger = recordMerger)
   }
@@ -72,7 +65,7 @@ class SqlNormalizedCache internal constructor(
     }
   }
 
-  override fun dump(): Map<KClass<*>, Map<String, Record>> {
+  override fun dump(): Map<KClass<*>, Map<CacheKey, Record>> {
     return mapOf(this::class to recordDatabase.selectAllRecords().associateBy { it.key })
   }
 
@@ -99,7 +92,7 @@ class SqlNormalizedCache internal constructor(
   }
 
   /**
-   * Update records.
+   * Updates records.
    *
    * As an optimization, the [records] fields are directly upserted into the db when possible. This is possible when using
    * the [DefaultRecordMerger], and [ApolloCacheHeaders.ERRORS_REPLACE_CACHED_VALUES] is set to true.
@@ -143,10 +136,12 @@ class SqlNormalizedCache internal constructor(
    * Loads a list of records, making sure to not query more than 999 at a time
    * to help with the SQLite limitations
    */
-  private fun selectRecords(keys: Collection<String>): List<Record> {
-    return keys.chunked(999).flatMap { chunkedKeys ->
-      recordDatabase.selectRecords(chunkedKeys)
-    }
+  private fun selectRecords(keys: Collection<CacheKey>): List<Record> {
+    return keys
+        .map { it.key }
+        .chunked(999).flatMap { chunkedKeys ->
+          recordDatabase.selectRecords(chunkedKeys)
+        }
   }
 
   override fun trim(maxSizeBytes: Long, trimFactor: Float): Long {

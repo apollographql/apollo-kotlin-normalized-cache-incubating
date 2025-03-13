@@ -206,7 +206,7 @@ class ReachableCacheKeysTest {
                   CacheKey("Repository:500"),
                   CacheKey("Repository:7"),
               ),
-              store.accessCache { it.allRecords() }.keys.map { CacheKey(it) }.toSet()
+              store.accessCache { it.allRecords() }.keys.toSet()
           )
 
           // Remove unreachable records, should remove Repositories 5, 6, and 500
@@ -223,7 +223,7 @@ class ReachableCacheKeysTest {
                   CacheKey("Repository:2"),
                   CacheKey("Repository:1"),
               ),
-              store.accessCache { it.allRecords() }.keys.map { CacheKey(it) }.toSet()
+              store.accessCache { it.allRecords() }.keys.toSet()
           )
           assertEquals(
               setOf(

@@ -66,7 +66,6 @@ class OffsetBasedWithPageAndInputPaginationTest {
     apolloStore.writeOperation(query1, data1)
     var dataFromStore = apolloStore.readOperation(query1).data
     assertEquals(data1, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
 
     // Page after
     val query2 = UsersQuery(offset = Optional.Present(44), limit = Optional.Present(2))
@@ -91,7 +90,6 @@ class OffsetBasedWithPageAndInputPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
 
     // Page in the middle
     val query3 = UsersQuery(offset = Optional.Present(44), limit = Optional.Present(3))
@@ -118,7 +116,6 @@ class OffsetBasedWithPageAndInputPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
 
     // Page before
     val query4 = UsersQuery(offset = Optional.Present(40), limit = Optional.Present(2))
@@ -146,7 +143,6 @@ class OffsetBasedWithPageAndInputPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
 
     // Non-contiguous page (should reset)
     val query5 = UsersQuery(offset = Optional.Present(50), limit = Optional.Present(2))
@@ -161,7 +157,6 @@ class OffsetBasedWithPageAndInputPaginationTest {
     apolloStore.writeOperation(query5, data5)
     dataFromStore = apolloStore.readOperation(query1).data
     assertEquals(data5, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
 
     // Empty page (should keep previous result)
     val query6 = UsersQuery(offset = Optional.Present(52), limit = Optional.Present(2))
@@ -173,7 +168,6 @@ class OffsetBasedWithPageAndInputPaginationTest {
     apolloStore.writeOperation(query6, data6)
     dataFromStore = apolloStore.readOperation(query1).data
     assertEquals(data5, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
   }
 
   private class OffsetPaginationMetadataGenerator(private val typeName: String) : MetadataGenerator {

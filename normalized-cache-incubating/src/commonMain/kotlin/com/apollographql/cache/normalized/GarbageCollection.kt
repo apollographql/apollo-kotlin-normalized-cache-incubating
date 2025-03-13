@@ -11,16 +11,17 @@ import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordValue
 import com.apollographql.cache.normalized.api.expirationDate
+import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.api.receivedDate
 import kotlin.time.Duration
 
 @ApolloInternal
-fun Map<String, Record>.getReachableCacheKeys(): Set<CacheKey> {
-  fun Map<String, Record>.getReachableCacheKeys(roots: List<CacheKey>, reachableCacheKeys: MutableSet<CacheKey>) {
-    val records = roots.mapNotNull { this[it.key] }
+fun Map<CacheKey, Record>.getReachableCacheKeys(): Set<CacheKey> {
+  fun Map<CacheKey, Record>.getReachableCacheKeys(roots: List<CacheKey>, reachableCacheKeys: MutableSet<CacheKey>) {
+    val records = roots.mapNotNull { this[it] }
     val cacheKeysToCheck = mutableListOf<CacheKey>()
     for (record in records) {
-      reachableCacheKeys.add(CacheKey(record.key))
+      reachableCacheKeys.add(record.key)
       cacheKeysToCheck.addAll(record.referencedFields() - reachableCacheKeys)
     }
     if (cacheKeysToCheck.isNotEmpty()) {
@@ -34,7 +35,7 @@ fun Map<String, Record>.getReachableCacheKeys(): Set<CacheKey> {
 }
 
 @ApolloInternal
-fun NormalizedCache.allRecords(): Map<String, Record> {
+fun NormalizedCache.allRecords(): Map<CacheKey, Record> {
   return dump().values.fold(emptyMap()) { acc, map -> acc + map }
 }
 
@@ -49,8 +50,8 @@ fun NormalizedCache.removeUnreachableRecords(): Set<CacheKey> {
   return removeUnreachableRecords(allRecords)
 }
 
-private fun NormalizedCache.removeUnreachableRecords(allRecords: Map<String, Record>): Set<CacheKey> {
-  val unreachableCacheKeys = allRecords.keys.map { CacheKey(it) } - allRecords.getReachableCacheKeys()
+private fun NormalizedCache.removeUnreachableRecords(allRecords: Map<CacheKey, Record>): Set<CacheKey> {
+  val unreachableCacheKeys = allRecords.keys - allRecords.getReachableCacheKeys()
   remove(unreachableCacheKeys, cascade = false)
   return unreachableCacheKeys.toSet()
 }
@@ -89,11 +90,11 @@ fun NormalizedCache.removeStaleFields(
 }
 
 private fun NormalizedCache.removeStaleFields(
-    allRecords: MutableMap<String, Record>,
+    allRecords: MutableMap<CacheKey, Record>,
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration,
 ): RemovedFieldsAndRecords {
-  val recordsToUpdate = mutableMapOf<String, Record>()
+  val recordsToUpdate = mutableMapOf<CacheKey, Record>()
   val removedFields = mutableSetOf<String>()
   for (record in allRecords.values.toList()) {
     var recordCopy = record
@@ -115,7 +116,7 @@ private fun NormalizedCache.removeStaleFields(
         if (staleDuration >= maxStale.inWholeSeconds) {
           recordCopy -= field.key
           recordsToUpdate[record.key] = recordCopy
-          removedFields.add(record.key + "." + field.key)
+          removedFields.add(record.key.fieldKey((field.key)))
           if (recordCopy.isEmptyRecord()) {
             allRecords.remove(record.key)
           } else {
@@ -133,7 +134,7 @@ private fun NormalizedCache.removeStaleFields(
         if (staleDuration >= maxStale.inWholeSeconds) {
           recordCopy -= field.key
           recordsToUpdate[record.key] = recordCopy
-          removedFields.add(record.key + "." + field.key)
+          removedFields.add(record.key.fieldKey(field.key))
           if (recordCopy.isEmptyRecord()) {
             allRecords.remove(record.key)
           } else {
@@ -144,7 +145,7 @@ private fun NormalizedCache.removeStaleFields(
     }
   }
   if (recordsToUpdate.isNotEmpty()) {
-    remove(recordsToUpdate.keys.map { CacheKey(it) }, cascade = false)
+    remove(recordsToUpdate.keys, cascade = false)
     val emptyRecords = recordsToUpdate.values.filter { it.isEmptyRecord() }.toSet()
     val nonEmptyRecords = recordsToUpdate.values - emptyRecords
     if (nonEmptyRecords.isNotEmpty()) {
@@ -152,7 +153,7 @@ private fun NormalizedCache.removeStaleFields(
     }
     return RemovedFieldsAndRecords(
         removedFields = removedFields,
-        removedRecords = emptyRecords.map { CacheKey(it.key) }.toSet()
+        removedRecords = emptyRecords.map { it.key }.toSet()
     )
   }
   return RemovedFieldsAndRecords(removedFields = emptySet(), removedRecords = emptySet())
@@ -182,12 +183,12 @@ fun ApolloStore.removeStaleFields(
  * @return the fields and records that were removed.
  */
 fun NormalizedCache.removeDanglingReferences(): RemovedFieldsAndRecords {
-  val allRecords: MutableMap<String, Record> = allRecords().toMutableMap()
+  val allRecords: MutableMap<CacheKey, Record> = allRecords().toMutableMap()
   return removeDanglingReferences(allRecords)
 }
 
-private fun NormalizedCache.removeDanglingReferences(allRecords: MutableMap<String, Record>): RemovedFieldsAndRecords {
-  val recordsToUpdate = mutableMapOf<String, Record>()
+private fun NormalizedCache.removeDanglingReferences(allRecords: MutableMap<CacheKey, Record>): RemovedFieldsAndRecords {
+  val recordsToUpdate = mutableMapOf<CacheKey, Record>()
   val allRemovedFields = mutableSetOf<String>()
   do {
     val removedFields = mutableSetOf<String>()
@@ -197,7 +198,7 @@ private fun NormalizedCache.removeDanglingReferences(allRecords: MutableMap<Stri
         if (field.value.isDanglingReference(allRecords)) {
           recordCopy -= field.key
           recordsToUpdate[record.key] = recordCopy
-          removedFields.add(record.key + "." + field.key)
+          removedFields.add(record.key.fieldKey(field.key))
           if (recordCopy.isEmptyRecord()) {
             allRecords.remove(record.key)
           } else {
@@ -209,7 +210,7 @@ private fun NormalizedCache.removeDanglingReferences(allRecords: MutableMap<Stri
     allRemovedFields.addAll(removedFields)
   } while (removedFields.isNotEmpty())
   if (recordsToUpdate.isNotEmpty()) {
-    remove(recordsToUpdate.keys.map { CacheKey(it) }, cascade = false)
+    remove(recordsToUpdate.keys, cascade = false)
     val emptyRecords = recordsToUpdate.values.filter { it.isEmptyRecord() }.toSet()
     val nonEmptyRecords = recordsToUpdate.values - emptyRecords
     if (nonEmptyRecords.isNotEmpty()) {
@@ -217,7 +218,7 @@ private fun NormalizedCache.removeDanglingReferences(allRecords: MutableMap<Stri
     }
     return RemovedFieldsAndRecords(
         removedFields = allRemovedFields,
-        removedRecords = emptyRecords.map { CacheKey(it.key) }.toSet()
+        removedRecords = emptyRecords.map { it.key }.toSet()
     )
   }
   return RemovedFieldsAndRecords(removedFields = emptySet(), removedRecords = emptySet())
@@ -233,9 +234,9 @@ fun ApolloStore.removeDanglingReferences(): RemovedFieldsAndRecords {
   }
 }
 
-private fun RecordValue.isDanglingReference(allRecords: Map<String, Record>): Boolean {
+private fun RecordValue.isDanglingReference(allRecords: Map<CacheKey, Record>): Boolean {
   return when (this) {
-    is CacheKey -> allRecords[this.key] == null
+    is CacheKey -> allRecords[this] == null
     is List<*> -> any { it.isDanglingReference(allRecords) }
     is Map<*, *> -> values.any { it.isDanglingReference(allRecords) }
     else -> false
@@ -244,7 +245,7 @@ private fun RecordValue.isDanglingReference(allRecords: Map<String, Record>): Bo
 
 private fun Record.isEmptyRecord() = fields.isEmpty() || fields.size == 1 && fields.keys.first() == "__typename"
 
-private fun RecordValue.guessType(allRecords: Map<String, Record>): String {
+private fun RecordValue.guessType(allRecords: Map<CacheKey, Record>): String {
   return when (this) {
     is List<*> -> {
       val first = firstOrNull() ?: return ""
@@ -252,7 +253,7 @@ private fun RecordValue.guessType(allRecords: Map<String, Record>): String {
     }
 
     is CacheKey -> {
-      allRecords[key]?.get("__typename") as? String ?: ""
+      allRecords[this]?.get("__typename") as? String ?: ""
     }
 
     else -> {

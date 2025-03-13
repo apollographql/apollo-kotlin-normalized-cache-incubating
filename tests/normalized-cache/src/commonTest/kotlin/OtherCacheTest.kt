@@ -6,6 +6,7 @@ import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
 import com.apollographql.cache.normalized.fetchPolicy
@@ -72,7 +73,7 @@ class OtherCacheTest {
 
     // Some details are not present in the master query, we should get a cache miss
     val e = apolloClient.query(CharacterDetailsQuery("1002")).fetchPolicy(FetchPolicy.CacheOnly).execute().exception as CacheMissException
-    assertTrue(e.message!!.contains("Object 'Character:1002' has no field named '__typename'"))
+    assertTrue(e.message!!.contains("Object '${CacheKey("Character:1002").key}' has no field named '__typename'"))
   }
 
 

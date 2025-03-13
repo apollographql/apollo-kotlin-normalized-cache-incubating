@@ -106,20 +106,6 @@ class StoreTest {
   }
 
   @Test
-  @Throws(Exception::class)
-  fun directAccess() = runTest(before = { setUp() }) {
-    // put everything in the cache
-    storeAllFriends()
-
-    store.accessCache {
-      it.remove("Character:10%")
-    }
-    assertFriendIsNotCached("1000")
-    assertFriendIsNotCached("1002")
-    assertFriendIsNotCached("1003")
-  }
-
-  @Test
   fun testNewBuilderNewStore() = runTest(before = { setUp() }) {
     storeAllFriends()
     assertFriendIsCached("1000", "Luke Skywalker")

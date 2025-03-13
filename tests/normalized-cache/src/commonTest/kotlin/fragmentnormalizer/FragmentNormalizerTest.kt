@@ -99,6 +99,6 @@ class FragmentNormalizerTest {
         cacheKeyGenerator = IdCacheKeyGenerator(),
     )
 
-    assertContains(records.keys, "1.author")
+    assertContains(records.keys, CacheKey("1.author"))
   }
 }

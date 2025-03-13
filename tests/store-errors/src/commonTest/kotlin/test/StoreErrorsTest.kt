@@ -12,6 +12,7 @@ import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.withErrors
 import com.apollographql.cache.normalized.errorsReplaceCachedValues
@@ -706,17 +707,17 @@ class StoreErrorsTest {
         query,
         listOf(Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName")).build()),
     )
-    val normalized: Map<String, Record> = memoryStore.normalize(
+    val normalized: Map<CacheKey, Record> = memoryStore.normalize(
         executable = query,
         dataWithErrors = dataWithErrors,
         customScalarAdapters = CustomScalarAdapters.Empty,
     )
-    assertEquals("User", normalized["User:1"]!!["__typename"])
-    assertEquals("1", normalized["User:1"]!!["id"])
-    assertEquals("John", normalized["User:1"]!!["firstName"])
-    assertEquals("Smith", normalized["User:1"]!!["lastName"])
+    assertEquals("User", normalized[CacheKey("User:1")]!!["__typename"])
+    assertEquals("1", normalized[CacheKey("User:1")]!!["id"])
+    assertEquals("John", normalized[CacheKey("User:1")]!!["firstName"])
+    assertEquals("Smith", normalized[CacheKey("User:1")]!!["lastName"])
     assertErrorsEquals(Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName"))
-        .build(), normalized["User:1"]!!["nickName"] as Error
+        .build(), normalized[CacheKey("User:1")]!!["nickName"] as Error
     )
   }
 

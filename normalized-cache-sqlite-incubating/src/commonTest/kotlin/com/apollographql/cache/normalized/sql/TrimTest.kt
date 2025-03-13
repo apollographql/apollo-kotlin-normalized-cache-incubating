@@ -1,6 +1,7 @@
 package com.apollographql.cache.normalized.sql
 
 import com.apollographql.cache.normalized.api.CacheHeaders
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.withDates
@@ -16,7 +17,7 @@ class TrimTest {
     val largeString = "".padStart(1024, '?')
 
     val oldRecord = Record(
-        key = "old",
+        key = CacheKey("old"),
         fields = mapOf("key" to "value"),
         mutationId = null,
         metadata = emptyMap()
@@ -25,7 +26,7 @@ class TrimTest {
 
     val newRecords = 0.until(2 * 1024).map {
       Record(
-          key = "new$it",
+          key = CacheKey("new$it"),
           fields = mapOf("key" to largeString),
           mutationId = null,
           metadata = emptyMap()
@@ -41,6 +42,6 @@ class TrimTest {
 
     assertEquals(7667712, sizeAfterTrim)
     // The oldest key must have been removed
-    assertNull(cache.loadRecord("old", CacheHeaders.NONE))
+    assertNull(cache.loadRecord(CacheKey("old"), CacheHeaders.NONE))
   }
 }

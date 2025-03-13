@@ -24,7 +24,7 @@ import kotlin.jvm.JvmSuppressWildcards
  */
 internal class CacheBatchReader(
     private val cache: ReadOnlyNormalizedCache,
-    private val rootKey: String,
+    private val rootKey: CacheKey,
     private val variables: Executable.Variables,
     private val cacheResolver: CacheResolver,
     private val cacheHeaders: CacheHeaders,
@@ -38,7 +38,7 @@ internal class CacheBatchReader(
    * @param path: the path where this pending reference needs to be inserted
    */
   class PendingReference(
-      val key: String,
+      val key: CacheKey,
       val path: List<Any>,
       val fieldPath: List<CompiledField>,
       val selections: List<CompiledSelection>,
@@ -111,16 +111,16 @@ internal class CacheBatchReader(
       copy.forEach { pendingReference ->
         var record = records[pendingReference.key]
         if (record == null) {
-          if (pendingReference.key == CacheKey.rootKey().key) {
+          if (pendingReference.key == CacheKey.rootKey()) {
             // This happens the very first time we read the cache
             record = Record(pendingReference.key, emptyMap())
           } else {
             if (returnPartialResponses) {
               data[pendingReference.path] =
-                cacheMissError(CacheMissException(key = pendingReference.key, fieldName = null, stale = false), path = pendingReference.path)
+                cacheMissError(CacheMissException(key = pendingReference.key.key, fieldName = null, stale = false), path = pendingReference.path)
               return@forEach
             } else {
-              throw CacheMissException(pendingReference.key)
+              throw CacheMissException(pendingReference.key.key)
             }
           }
         }
@@ -194,7 +194,7 @@ internal class CacheBatchReader(
       is CacheKey -> {
         pendingReferences.add(
             PendingReference(
-                key = key,
+                key = this,
                 selections = selections,
                 parentType = parentType,
                 path = path,
@@ -224,7 +224,7 @@ internal class CacheBatchReader(
                     field = it,
                     variables = variables,
                     parent = this,
-                    parentKey = "",
+                    parentKey = CacheKey("", isHashed = true),
                     parentType = parentType,
                     cacheHeaders = cacheHeaders,
                     fieldKeyGenerator = fieldKeyGenerator,

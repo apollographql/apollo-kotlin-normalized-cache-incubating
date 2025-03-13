@@ -107,7 +107,7 @@ class SqlNormalizedCacheTest {
         cacheHeaders = CacheHeaders.NONE,
         recordMerger = DefaultRecordMerger,
     )
-    cache.remove(cacheKey = CacheKey(STANDARD_KEY), cascade = false)
+    cache.remove(cacheKey = STANDARD_KEY, cascade = false)
     val record = cache.loadRecord(STANDARD_KEY, CacheHeaders.NONE)
     assertNull(record)
   }
@@ -150,7 +150,7 @@ class SqlNormalizedCacheTest {
     )
     val record = cache.loadRecord(STANDARD_KEY, CacheHeaders.NONE)
     assertNotNull(record)
-    assertEquals(expected = setOf("$STANDARD_KEY.fieldKey", "$STANDARD_KEY.newFieldKey"), actual = changedKeys)
+    assertEquals(expected = setOf("${STANDARD_KEY.key}.fieldKey", "${STANDARD_KEY.key}.newFieldKey"), actual = changedKeys)
     assertEquals(expected = "valueUpdated", actual = record.fields["fieldKey"])
     assertEquals(expected = true, actual = record.fields["newFieldKey"])
   }
@@ -173,26 +173,6 @@ class SqlNormalizedCacheTest {
     assertNotNull(record)
     assertEquals(expected = "valueUpdated", actual = record.fields["fieldKey"])
     assertEquals(expected = true, actual = record.fields["newFieldKey"])
-  }
-
-  @Test
-  fun testPatternRemove() {
-    createRecord("specialKey1")
-    createRecord("specialKey2")
-    createRecord("regularKey1")
-
-    cache.remove("specialKey%")
-    assertNull(cache.loadRecord("specialKey1", CacheHeaders.NONE))
-    assertNull(cache.loadRecord("specialKey1", CacheHeaders.NONE))
-    assertNotNull(cache.loadRecord("regularKey1", CacheHeaders.NONE))
-  }
-
-  @Test
-  fun testPatternRemoveWithEscape() {
-    createRecord("%1")
-
-    cache.remove("\\%%")
-    assertNull(cache.loadRecord("%1", CacheHeaders.NONE))
   }
 
   @Test
@@ -228,7 +208,7 @@ class SqlNormalizedCacheTest {
     // Creating a self-referencing record
     cache.merge(
         record = Record(
-            key = "selfRefKey",
+            key = CacheKey("selfRefKey"),
             fields = mapOf(
                 "field1" to "value1",
                 "selfRef" to CacheKey("selfRefKey"),
@@ -241,7 +221,7 @@ class SqlNormalizedCacheTest {
     val result = cache.remove(cacheKey = CacheKey("selfRefKey"), cascade = true)
 
     assertTrue(result)
-    val record = cache.loadRecord("selfRefKey", CacheHeaders.NONE)
+    val record = cache.loadRecord(CacheKey("selfRefKey"), CacheHeaders.NONE)
     assertNull(record)
   }
 
@@ -250,7 +230,7 @@ class SqlNormalizedCacheTest {
     // Creating two records that reference each other
     cache.merge(
         record = Record(
-            key = "key1",
+            key = CacheKey("key1"),
             fields = mapOf(
                 "field1" to "value1",
                 "refToKey2" to CacheKey("key2"),
@@ -262,7 +242,7 @@ class SqlNormalizedCacheTest {
 
     cache.merge(
         record = Record(
-            key = "key2",
+            key = CacheKey("key2"),
             fields = mapOf(
                 "field1" to "value2",
                 "refToKey1" to CacheKey("key1"),
@@ -275,8 +255,8 @@ class SqlNormalizedCacheTest {
     val result = cache.remove(cacheKey = CacheKey("key1"), cascade = true)
 
     assertTrue(result)
-    assertNull(cache.loadRecord("key1", CacheHeaders.NONE))
-    assertNull(cache.loadRecord("key2", CacheHeaders.NONE))
+    assertNull(cache.loadRecord(CacheKey("key1"), CacheHeaders.NONE))
+    assertNull(cache.loadRecord(CacheKey("key2"), CacheHeaders.NONE))
   }
 
   private val BadDriver = object : SqlDriver {
@@ -319,7 +299,7 @@ class SqlNormalizedCacheTest {
     }
   }
 
-  private fun createRecord(key: String) {
+  private fun createRecord(key: CacheKey) {
     cache.merge(
         record = Record(
             key = key,
@@ -334,7 +314,7 @@ class SqlNormalizedCacheTest {
   }
 
   companion object {
-    const val STANDARD_KEY = "key"
-    const val QUERY_ROOT_KEY = "QUERY_ROOT"
+    val STANDARD_KEY = CacheKey("key")
+    val QUERY_ROOT_KEY = CacheKey.rootKey()
   }
 }

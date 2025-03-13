@@ -246,7 +246,7 @@ interface ApolloStore {
       dataWithErrors: DataWithErrors,
       rootKey: String = CacheKey.rootKey().key,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
-  ): Map<String, Record>
+  ): Map<CacheKey, Record>
 
   /**
    * Publishes a set of keys that have changed. This will notify subscribers of [changedKeys].
@@ -273,7 +273,7 @@ interface ApolloStore {
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    */
-  fun dump(): Map<KClass<*>, Map<String, Record>>
+  fun dump(): Map<KClass<*>, Map<CacheKey, Record>>
 
   /**
    * Releases resources associated with this store.
@@ -312,11 +312,13 @@ internal interface ApolloStoreInterceptor : ApolloInterceptor
 internal fun ApolloStore.cacheDumpProvider(): () -> Map<String, Map<String, Pair<Int, Map<String, Any?>>>> {
   return {
     dump().map { (cacheClass, cacheRecords) ->
-      cacheClass.normalizedCacheName() to cacheRecords.mapValues { (_, record) ->
-        record.size to record.fields.mapValues { (_, value) ->
-          value.toExternal()
-        }
-      }
+      cacheClass.normalizedCacheName() to cacheRecords
+          .mapKeys { (key, _) -> key.key }
+          .mapValues { (_, record) ->
+            record.size to record.fields.mapValues { (_, value) ->
+              value.toExternal()
+            }
+          }
     }.toMap()
   }
 }

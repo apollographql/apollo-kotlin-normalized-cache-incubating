@@ -5,6 +5,7 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.expirationDate
 import com.apollographql.cache.normalized.api.receivedDate
@@ -54,7 +55,7 @@ internal class RecordDatabase(private val driver: SqlDriver) {
               }
         }.filterValues { it.isNotEmpty() }
       Record(
-          key = key,
+          key = CacheKey(key, isHashed = true),
           fields = fields,
           metadata = metadata,
       )
@@ -63,7 +64,7 @@ internal class RecordDatabase(private val driver: SqlDriver) {
   fun insertOrUpdateRecord(record: Record) {
     for ((field, value) in record.fields) {
       insertOrUpdateField(
-          record = record.key,
+          record = record.key.key,
           field = field,
           value = value,
           metadata = record.metadata[field],

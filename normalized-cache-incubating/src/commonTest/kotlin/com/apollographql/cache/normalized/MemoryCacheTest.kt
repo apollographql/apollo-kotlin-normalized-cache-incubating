@@ -46,14 +46,14 @@ class MemoryCacheTest {
     val records = listOf(testRecord1, testRecord2, testRecord3)
     lruCache.merge(records, CacheHeaders.NONE, DefaultRecordMerger)
 
-    val readRecords = lruCache.loadRecords(listOf("key1", "key2", "key3"), CacheHeaders.NONE)
+    val readRecords = lruCache.loadRecords(listOf(CacheKey("key1"), CacheKey("key2"), CacheKey("key3")), CacheHeaders.NONE)
     assertTrue(readRecords.containsAll(records))
   }
 
   @Test
   fun testLoad_recordNotPresent() {
     val lruCache = createCache()
-    val record = lruCache.loadRecord("key1", CacheHeaders.NONE)
+    val record = lruCache.loadRecord(CacheKey("key1"), CacheHeaders.NONE)
     assertNull(record)
   }
 
@@ -65,7 +65,7 @@ class MemoryCacheTest {
 
     val lruCache = createCache(
         // all records won't fit as there is timestamp that stored with each record
-        maxSizeBytes = 600
+        maxSizeBytes = 342
     )
 
     val records = listOf(testRecord1, testRecord2, testRecord3)
@@ -151,7 +151,7 @@ class MemoryCacheTest {
   fun testDualCache_recordNotPresent() {
     val secondaryCache = createCache()
     val primaryCache = createCache(nextCache = secondaryCache)
-    assertNull(primaryCache.loadRecord("key", CacheHeaders.NONE))
+    assertNull(primaryCache.loadRecord(CacheKey("key"), CacheHeaders.NONE))
   }
 
 
@@ -223,7 +223,7 @@ class MemoryCacheTest {
     val lruCache = createCache()
 
     val record1 = Record(
-        key = "id_1",
+        key = CacheKey("id_1"),
         fields = mapOf(
             "a" to "stringValueA",
             "b" to "stringValueB"
@@ -231,7 +231,7 @@ class MemoryCacheTest {
     )
 
     val record2 = Record(
-        key = "id_2",
+        key = CacheKey("id_2"),
         fields = mapOf(
             "a" to CacheKey("id_1"),
         )
@@ -240,7 +240,7 @@ class MemoryCacheTest {
     val records = listOf(record1, record2)
     lruCache.merge(records, CacheHeaders.NONE, DefaultRecordMerger)
 
-    assertTrue(lruCache.remove(CacheKey(record2.key), cascade = false))
+    assertTrue(lruCache.remove(record2.key, cascade = false))
     assertNotNull(lruCache.loadRecord(record1.key, CacheHeaders.NONE))
   }
 
@@ -249,7 +249,7 @@ class MemoryCacheTest {
     val lruCache = createCache()
 
     val record1 = Record(
-        key = "id_1",
+        key = CacheKey("id_1"),
         fields = mapOf(
             "a" to "stringValueA",
             "b" to "stringValueB"
@@ -257,7 +257,7 @@ class MemoryCacheTest {
     )
 
     val record2 = Record(
-        key = "id_2",
+        key = CacheKey("id_2"),
         fields = mapOf(
             "a" to CacheKey("id_1"),
         )
@@ -266,7 +266,7 @@ class MemoryCacheTest {
     val records = listOf(record1, record2)
     lruCache.merge(records, CacheHeaders.NONE, DefaultRecordMerger)
 
-    assertTrue(lruCache.remove(CacheKey(record2.key), cascade = true))
+    assertTrue(lruCache.remove(record2.key, cascade = true))
     assertNull(lruCache.loadRecord(record1.key, CacheHeaders.NONE))
   }
 
@@ -286,7 +286,7 @@ class MemoryCacheTest {
 
   private fun createTestRecord(id: String): Record {
     return Record(
-        key = "key$id",
+        key = CacheKey("key$id"),
         fields = mapOf(
             "field1" to "stringValueA$id",
             "field2" to "stringValueB$id"

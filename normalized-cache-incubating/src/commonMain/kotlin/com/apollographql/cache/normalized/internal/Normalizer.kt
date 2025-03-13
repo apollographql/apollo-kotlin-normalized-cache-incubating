@@ -41,13 +41,13 @@ internal class Normalizer(
     private val fieldKeyGenerator: FieldKeyGenerator,
     private val embeddedFieldsProvider: EmbeddedFieldsProvider,
 ) {
-  private val records = mutableMapOf<String, Record>()
+  private val records = mutableMapOf<CacheKey, Record>()
 
   fun normalize(
       map: DataWithErrors,
       selections: List<CompiledSelection>,
       parentType: CompiledNamedType,
-  ): Map<String, Record> {
+  ): Map<CacheKey, Record> {
     buildRecord(map, rootKey, selections, parentType)
 
     return records
@@ -136,14 +136,15 @@ internal class Normalizer(
     val fields = buildFields(obj, key, selections, parentType)
     val fieldValues = fields.mapValues { it.value.fieldValue }
     val metadata = fields.mapValues { it.value.metadata }.filterValues { it.isNotEmpty() }
+    val cacheKey = CacheKey(key, isHashed = true)
     val record = Record(
-        key = key,
+        key = cacheKey,
         fields = fieldValues,
         mutationId = null,
         metadata = metadata,
     )
 
-    val existingRecord = records[key]
+    val existingRecord = records[cacheKey]
 
     val mergedRecord = if (existingRecord != null) {
       /**
@@ -153,9 +154,9 @@ internal class Normalizer(
     } else {
       record
     }
-    records[key] = mergedRecord
+    records[cacheKey] = mergedRecord
 
-    return CacheKey(key)
+    return cacheKey
   }
 
 
@@ -209,7 +210,7 @@ internal class Normalizer(
         )?.key
 
         if (key == null) {
-          key = path
+          key = CacheKey(path).key
         }
         if (embeddedFields.contains(field.name)) {
           buildFields(value, key, field.selections, field.type.rawType())
@@ -272,7 +273,7 @@ fun <D : Executable.Data> D.normalized(
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
     embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
-): Map<String, Record> {
+): Map<CacheKey, Record> {
   val dataWithErrors = this.withErrors(executable, null, customScalarAdapters)
   return dataWithErrors.normalized(executable, rootKey, customScalarAdapters, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider)
 }
@@ -288,8 +289,14 @@ fun <D : Executable.Data> DataWithErrors.normalized(
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
     embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
-): Map<String, Record> {
+): Map<CacheKey, Record> {
   val variables = executable.variables(customScalarAdapters, withDefaultValues = true)
   return Normalizer(variables, rootKey, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider)
       .normalize(this, executable.rootField().selections, executable.rootField().type.rawType())
+}
+
+
+@OptIn(ExperimentalStdlibApi::class)
+fun String.hashed(): String {
+  return hashCode().toHexString()
 }

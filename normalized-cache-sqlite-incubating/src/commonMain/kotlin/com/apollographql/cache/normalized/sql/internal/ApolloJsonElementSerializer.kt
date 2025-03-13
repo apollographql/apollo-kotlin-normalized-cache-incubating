@@ -174,7 +174,7 @@ internal object ApolloJsonElementSerializer {
       BOOLEAN_TRUE -> true
       BOOLEAN_FALSE -> false
       CACHE_KEY -> {
-        CacheKey(readString())
+        CacheKey(readString(), isHashed = true)
       }
 
       LIST -> {

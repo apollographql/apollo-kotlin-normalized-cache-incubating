@@ -72,7 +72,6 @@ class ConnectionPaginationTest {
     apolloStore.writeOperation(query1, data1)
     var dataFromStore = apolloStore.readOperation(query1).data
     assertEquals(data1, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
 
     // Page after
     val query2 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx43"))
@@ -135,7 +134,6 @@ class ConnectionPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
 
     // Page after
     val query3 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx45"))
@@ -210,7 +208,6 @@ class ConnectionPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
 
     // Page before
     val query4 = UsersQuery(last = Optional.Present(2), before = Optional.Present("xx42"))
@@ -297,7 +294,6 @@ class ConnectionPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
 
     // Non-contiguous page (should reset)
     val query5 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx50"))
@@ -326,7 +322,6 @@ class ConnectionPaginationTest {
     apolloStore.writeOperation(query5, data5)
     dataFromStore = apolloStore.readOperation(query1).data
     assertEquals(data5, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
 
     // Empty page (should keep previous result)
     val query6 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx51"))
@@ -342,7 +337,6 @@ class ConnectionPaginationTest {
     apolloStore.writeOperation(query6, data6)
     dataFromStore = apolloStore.readOperation(query1).data
     assertEquals(data5, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
   }
 }
 

@@ -1,13 +1,33 @@
 package com.apollographql.cache.normalized.api
 
+import com.apollographql.apollo.annotations.ApolloInternal
+import com.apollographql.cache.normalized.internal.hashed
+import kotlin.jvm.JvmInline
 import kotlin.jvm.JvmStatic
 
 /**
  * A [CacheKey] identifies an object in the cache.
- *
- * @param key The key of the object in the cache. The key must be globally unique.
  */
-class CacheKey(val key: String) {
+@JvmInline
+value class CacheKey private constructor(
+    /**
+     * The hashed key of the object in the cache.
+     */
+    val key: String,
+) {
+  /**
+   * Builds a [CacheKey] from a key.
+   *
+   * @param key The key of the object in the cache. The key must be globally unique.
+   * @param isHashed If true, the key is already hashed. If false, the key will be hashed.
+   */
+  constructor(key: String, isHashed: Boolean = false) : this(
+      if (isHashed || key == rootKey().key) {
+        key
+      } else {
+        key.hashed()
+      }
+  )
 
   /**
    * Builds a [CacheKey] from a typename and a list of Strings.
@@ -21,7 +41,8 @@ class CacheKey(val key: String) {
         values.forEach {
           append(it)
         }
-      }
+      },
+      isHashed = false,
   )
 
   /**
@@ -30,11 +51,6 @@ class CacheKey(val key: String) {
    * This can be used for the common case where [CacheKey] use [typename] as a namespace and [values] as a path.
    */
   constructor(typename: String, vararg values: String) : this(typename, values.toList())
-
-  override fun hashCode() = key.hashCode()
-  override fun equals(other: Any?): Boolean {
-    return key == (other as? CacheKey)?.key
-  }
 
   override fun toString() = "CacheKey($key)"
 
@@ -70,4 +86,9 @@ class CacheKey(val key: String) {
       return ROOT_CACHE_KEY
     }
   }
+}
+
+@ApolloInternal
+fun CacheKey.fieldKey(fieldName: String): String {
+  return "$key.$fieldName"
 }
