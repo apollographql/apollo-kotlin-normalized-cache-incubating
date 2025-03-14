@@ -1,5 +1,5 @@
 type Query {
-  users(first: Int = 10, after: String = null, last: Int = null, before: String = null): UserConnection!
+  users(first: Int = 10, after: String = null, last: Int = null, before: String = null): UserConnection
 }
 
 type UserConnection {
