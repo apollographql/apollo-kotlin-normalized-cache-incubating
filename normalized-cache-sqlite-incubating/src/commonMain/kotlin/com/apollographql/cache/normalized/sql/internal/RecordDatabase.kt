@@ -37,26 +37,30 @@ internal class RecordDatabase(private val driver: SqlDriver) {
 
   private fun Map<String, List<Field_>>.toRecords(): List<Record> =
     mapValues { (key, fieldList) ->
-      val fields: Map<String, ApolloJsonElement> =
-        fieldList.associate { field -> field.field_ to ApolloJsonElementSerializer.deserialize(field.value_) }
+      val fieldValues: Map<String, ApolloJsonElement> = fieldList.associate { field ->
+        field.field_ to ApolloJsonElementSerializer.deserialize(field.value_)
+      }
 
       @Suppress("UNCHECKED_CAST")
-      val metadata: Map<String, Map<String, ApolloJsonElement>> =
-        fieldList.associate { field ->
-          field.field_ to (ApolloJsonElementSerializer.deserialize(field.metadata) as Map<String, ApolloJsonElement>?).orEmpty() +
-              buildMap {
-                // Dates are stored separately in their own columns
-                if (field.received_date != null) {
-                  put(ApolloCacheHeaders.RECEIVED_DATE, field.received_date)
-                }
-                if (field.expiration_date != null) {
-                  put(ApolloCacheHeaders.EXPIRATION_DATE, field.expiration_date)
-                }
-              }
-        }.filterValues { it.isNotEmpty() }
+      val metadata: Map<String, Map<String, ApolloJsonElement>> = fieldList.associate { field ->
+        val deserializedMetadata = ApolloJsonElementSerializer.deserialize(field.metadata) as Map<String, ApolloJsonElement>?
+        field.field_ to LinkedHashMap<String, ApolloJsonElement>((deserializedMetadata?.size ?: 0) + 2).also {
+          if (deserializedMetadata != null) {
+            it.putAll(deserializedMetadata)
+          }
+
+          // Dates are stored separately in their own columns
+          if (field.received_date != null) {
+            it.put(ApolloCacheHeaders.RECEIVED_DATE, field.received_date)
+          }
+          if (field.expiration_date != null) {
+            it.put(ApolloCacheHeaders.EXPIRATION_DATE, field.expiration_date)
+          }
+        }
+      }.filterValues { it.isNotEmpty() }
       Record(
           key = CacheKey(key, isHashed = true),
-          fields = fields,
+          fields = fieldValues,
           metadata = metadata,
       )
     }.values.toList()
