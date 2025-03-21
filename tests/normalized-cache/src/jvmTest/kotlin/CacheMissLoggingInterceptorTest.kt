@@ -54,8 +54,8 @@ class CacheMissLoggingInterceptorTest {
 
     assertEquals(
         listOf(
-            "Object 'QUERY_ROOT' has no field named 'hero'",
-            "Object '${CacheKey("hero").key}' has no field named 'appearsIn'"
+            "Object '${CacheKey("QUERY_ROOT").keyToString()}' has no field named 'hero'",
+            "Object '${CacheKey("hero").keyToString()}' has no field named 'appearsIn'"
         ),
         recordedLogs
     )

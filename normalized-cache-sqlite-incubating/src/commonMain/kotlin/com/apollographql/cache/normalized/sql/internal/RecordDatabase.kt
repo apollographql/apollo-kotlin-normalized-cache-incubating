@@ -12,6 +12,8 @@ import com.apollographql.cache.normalized.api.receivedDate
 import com.apollographql.cache.normalized.sql.internal.fields.Field_
 import com.apollographql.cache.normalized.sql.internal.fields.FieldsDatabase
 import com.apollographql.cache.normalized.sql.internal.fields.FieldsQueries
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 
 internal class RecordDatabase(private val driver: SqlDriver) {
   private val fieldsQueries: FieldsQueries = FieldsDatabase(driver).fieldsQueries
@@ -25,17 +27,19 @@ internal class RecordDatabase(private val driver: SqlDriver) {
   /**
    * @param keys the keys of the records to select, size must be <= 999
    */
-  fun selectRecords(keys: Collection<String>): List<Record> {
-    val fieldsByRecordKey: Map<String, List<Field_>> = fieldsQueries.selectRecords(keys).executeAsList().groupBy { it.record }
+  fun selectRecords(keys: Collection<ByteArray>): List<Record> {
+    val fieldsByRecordKey: Map<ByteString, List<Field_>> =
+      fieldsQueries.selectRecords(keys).executeAsList().groupBy { it.record.toByteString() }
     return fieldsByRecordKey.toRecords()
   }
 
   fun selectAllRecords(): List<Record> {
-    val fieldsByRecordKey: Map<String, List<Field_>> = fieldsQueries.selectAllRecords().executeAsList().groupBy { it.record }
+    val fieldsByRecordKey: Map<ByteString, List<Field_>> =
+      fieldsQueries.selectAllRecords().executeAsList().groupBy { it.record.toByteString() }
     return fieldsByRecordKey.toRecords()
   }
 
-  private fun Map<String, List<Field_>>.toRecords(): List<Record> =
+  private fun Map<ByteString, List<Field_>>.toRecords(): List<Record> =
     mapValues { (key, fieldList) ->
       val fieldValues: Map<String, ApolloJsonElement> = fieldList.associate { field ->
         field.field_ to ApolloJsonElementSerializer.deserialize(field.value_)
@@ -59,7 +63,7 @@ internal class RecordDatabase(private val driver: SqlDriver) {
         }
       }.filterValues { it.isNotEmpty() }
       Record(
-          key = CacheKey(key, isHashed = true),
+          key = CacheKey(key),
           fields = fieldValues,
           metadata = metadata,
       )
@@ -68,7 +72,7 @@ internal class RecordDatabase(private val driver: SqlDriver) {
   fun insertOrUpdateRecord(record: Record) {
     for ((field, value) in record.fields) {
       insertOrUpdateField(
-          record = record.key.key,
+          record = record.key.key.toByteArray(),
           field = field,
           value = value,
           metadata = record.metadata[field],
@@ -79,7 +83,7 @@ internal class RecordDatabase(private val driver: SqlDriver) {
   }
 
   private fun insertOrUpdateField(
-      record: String,
+      record: ByteArray,
       field: String,
       value: ApolloJsonElement,
       metadata: Map<String, ApolloJsonElement>?,
@@ -106,12 +110,8 @@ internal class RecordDatabase(private val driver: SqlDriver) {
   /**
    * @param keys the keys of the records to delete, size must be <= 999
    */
-  fun deleteRecords(keys: Collection<String>) {
+  fun deleteRecords(keys: Collection<ByteArray>) {
     fieldsQueries.deleteRecords(keys)
-  }
-
-  fun deleteRecordsMatching(pattern: String) {
-    fieldsQueries.deleteRecordsMatching(pattern)
   }
 
   fun deleteAllRecords() {

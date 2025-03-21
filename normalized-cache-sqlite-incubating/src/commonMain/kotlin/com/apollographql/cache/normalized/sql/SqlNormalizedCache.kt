@@ -11,6 +11,7 @@ import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.api.RecordMergerContext
 import com.apollographql.cache.normalized.api.withDates
 import com.apollographql.cache.normalized.sql.internal.RecordDatabase
+import okio.ByteString
 import kotlin.reflect.KClass
 
 class SqlNormalizedCache internal constructor(
@@ -69,9 +70,13 @@ class SqlNormalizedCache internal constructor(
     return mapOf(this::class to recordDatabase.selectAllRecords().associateBy { it.key })
   }
 
-  private fun getReferencedKeysRecursively(keys: Collection<String>, visited: MutableSet<String> = mutableSetOf()): Set<String> {
+  private fun getReferencedKeysRecursively(
+      keys: Collection<ByteString>,
+      visited: MutableSet<ByteString> = mutableSetOf(),
+  ): Set<ByteString> {
     if (keys.isEmpty()) return emptySet()
-    val referencedKeys = recordDatabase.selectRecords(keys - visited).flatMap { it.referencedFields() }.map { it.key }.toSet()
+    val referencedKeys =
+      recordDatabase.selectRecords((keys - visited).map { it.toByteArray() }).flatMap { it.referencedFields() }.map { it.key }.toSet()
     visited += keys
     return referencedKeys + getReferencedKeysRecursively(referencedKeys, visited)
   }
@@ -79,14 +84,14 @@ class SqlNormalizedCache internal constructor(
   /**
    * Assumes an enclosing transaction
    */
-  private fun internalDeleteRecords(keys: Collection<String>, cascade: Boolean): Int {
+  private fun internalDeleteRecords(keys: Collection<ByteString>, cascade: Boolean): Int {
     val referencedKeys = if (cascade) {
       getReferencedKeysRecursively(keys)
     } else {
       emptySet()
     }
     return (keys + referencedKeys).chunked(999).sumOf { chunkedKeys ->
-      recordDatabase.deleteRecords(chunkedKeys)
+      recordDatabase.deleteRecords(chunkedKeys.map { it.toByteArray() })
       recordDatabase.changes().toInt()
     }
   }
@@ -138,7 +143,7 @@ class SqlNormalizedCache internal constructor(
    */
   private fun selectRecords(keys: Collection<CacheKey>): List<Record> {
     return keys
-        .map { it.key }
+        .map { it.key.toByteArray() }
         .chunked(999).flatMap { chunkedKeys ->
           recordDatabase.selectRecords(chunkedKeys)
         }

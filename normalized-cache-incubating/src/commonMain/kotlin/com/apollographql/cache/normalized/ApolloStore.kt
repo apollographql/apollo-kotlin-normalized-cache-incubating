@@ -244,7 +244,7 @@ interface ApolloStore {
   fun <D : Executable.Data> normalize(
       executable: Executable<D>,
       dataWithErrors: DataWithErrors,
-      rootKey: String = CacheKey.rootKey().key,
+      rootKey: CacheKey = CacheKey.rootKey(),
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
   ): Map<CacheKey, Record>
 
@@ -313,7 +313,7 @@ internal fun ApolloStore.cacheDumpProvider(): () -> Map<String, Map<String, Pair
   return {
     dump().map { (cacheClass, cacheRecords) ->
       cacheClass.normalizedCacheName() to cacheRecords
-          .mapKeys { (key, _) -> key.key }
+          .mapKeys { (key, _) -> key.keyToString() }
           .mapValues { (_, record) ->
             record.size to record.fields.mapValues { (_, value) ->
               value.toExternal()

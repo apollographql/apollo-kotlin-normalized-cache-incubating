@@ -7,6 +7,7 @@ import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.api.append
 import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.fetchPolicy
@@ -60,35 +61,35 @@ class GarbageCollectTest {
           val garbageCollectResult = store.garbageCollect(maxAgeProvider)
           assertEquals(
               setOf(
-                  CacheKey(CacheKey("metaProjects.0.0").fieldKey("type")).fieldKey("owners"),
-                  CacheKey(CacheKey("metaProjects.0.1").fieldKey("type")).fieldKey("owners"),
-                  CacheKey(CacheKey("metaProjects.1.0").fieldKey("type")).fieldKey("owners"),
+                  CacheKey("metaProjects").append("0", "0", "type").fieldKey("owners"),
+                  CacheKey("metaProjects").append("0", "1", "type").fieldKey("owners"),
+                  CacheKey("metaProjects").append("1", "0", "type").fieldKey("owners"),
               ),
               garbageCollectResult.removedStaleFields.removedFields
           )
           assertEquals(
               setOf(
-                  CacheKey(CacheKey("metaProjects.0.0").fieldKey("type")),
-                  CacheKey(CacheKey("metaProjects.0.1").fieldKey("type")),
-                  CacheKey(CacheKey("metaProjects.1.0").fieldKey("type")),
+                  CacheKey("metaProjects").append("0", "0", "type"),
+                  CacheKey("metaProjects").append("0", "1", "type"),
+                  CacheKey("metaProjects").append("1", "0", "type"),
               ),
               garbageCollectResult.removedStaleFields.removedRecords
           )
 
           assertEquals(
               setOf(
-                  CacheKey("metaProjects.0.0").fieldKey("type"),
-                  CacheKey("metaProjects.0.1").fieldKey("type"),
-                  CacheKey("metaProjects.1.0").fieldKey("type"),
+                  CacheKey("metaProjects").append("0", "0").fieldKey("type"),
+                  CacheKey("metaProjects").append("0", "1").fieldKey("type"),
+                  CacheKey("metaProjects").append("1", "0").fieldKey("type"),
                   CacheKey("QUERY_ROOT").fieldKey("metaProjects"),
               ),
               garbageCollectResult.removedDanglingReferences.removedFields
           )
           assertEquals(
               setOf(
-                  CacheKey("metaProjects.0.0"),
-                  CacheKey("metaProjects.0.1"),
-                  CacheKey("metaProjects.1.0"),
+                  CacheKey("metaProjects").append("0", "0"),
+                  CacheKey("metaProjects").append("0", "1"),
+                  CacheKey("metaProjects").append("1", "0"),
                   CacheKey("QUERY_ROOT"),
               ),
               garbageCollectResult.removedDanglingReferences.removedRecords

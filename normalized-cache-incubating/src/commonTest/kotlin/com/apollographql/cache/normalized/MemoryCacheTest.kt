@@ -65,7 +65,7 @@ class MemoryCacheTest {
 
     val lruCache = createCache(
         // all records won't fit as there is timestamp that stored with each record
-        maxSizeBytes = 342
+        maxSizeBytes = 600
     )
 
     val records = listOf(testRecord1, testRecord2, testRecord3)
@@ -85,7 +85,7 @@ class MemoryCacheTest {
     val testRecord3 = createTestRecord("3")
 
     val lruCache = createCache(
-        maxSizeBytes = 800
+        maxSizeBytes = 2000
     )
 
     val records = listOf(testRecord1, testRecord2, testRecord3)

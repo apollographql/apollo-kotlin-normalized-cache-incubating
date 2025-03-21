@@ -6,6 +6,7 @@ import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.append
 import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
@@ -98,24 +99,24 @@ class DanglingReferencesTest {
           val removedFieldsAndRecords = store.removeDanglingReferences()
           assertEquals(
               setOf(
-                  CacheKey(CacheKey("metaProjects.0.0").fieldKey("type")).fieldKey("owners"),
-                  CacheKey("metaProjects.0.0").fieldKey("type"),
+                  CacheKey("metaProjects").append("0", "0", "type").fieldKey("owners"),
+                  CacheKey("metaProjects").append("0", "0").fieldKey("type"),
                   CacheKey("QUERY_ROOT").fieldKey("metaProjects"),
               ),
               removedFieldsAndRecords.removedFields
           )
           assertEquals(
               setOf(
-                  CacheKey(CacheKey("metaProjects.0.0").fieldKey("type")),
-                  CacheKey("metaProjects.0.0"),
+                  CacheKey("metaProjects").append("0", "0", "type"),
+                  CacheKey("metaProjects").append("0", "0"),
                   CacheKey("QUERY_ROOT"),
               ),
               removedFieldsAndRecords.removedRecords
           )
           val allRecords = store.accessCache { it.allRecords() }
           assertFalse(allRecords.containsKey(CacheKey("QUERY_ROOT")))
-          assertFalse(allRecords.containsKey(CacheKey("metaProjects.0.0")))
-          assertFalse(allRecords.containsKey(CacheKey(CacheKey("metaProjects.0.0").fieldKey("type"))))
+          assertFalse(allRecords.containsKey(CacheKey("metaProjects").append("0", "0")))
+          assertFalse(allRecords.containsKey(CacheKey("metaProjects").append("0", "0", "type")))
         }
   }
 

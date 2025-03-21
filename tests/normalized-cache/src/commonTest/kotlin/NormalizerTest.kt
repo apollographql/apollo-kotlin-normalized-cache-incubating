@@ -8,7 +8,7 @@ import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
-import com.apollographql.cache.normalized.api.fieldKey
+import com.apollographql.cache.normalized.api.append
 import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import httpcache.AllPlanetsQuery
@@ -106,13 +106,13 @@ class NormalizerTest {
     assertEquals(heroRecord!!["name"], "R2-D2")
     assertEquals(
         listOf(
-            CacheKey(CacheKey(TEST_FIELD_KEY_JEDI).fieldKey("friends.0")),
-            CacheKey(CacheKey(TEST_FIELD_KEY_JEDI).fieldKey("friends.1")),
-            CacheKey(CacheKey(TEST_FIELD_KEY_JEDI).fieldKey("friends.2")),
+            CacheKey(TEST_FIELD_KEY_JEDI).append("friends", "0"),
+            CacheKey(TEST_FIELD_KEY_JEDI).append("friends", "1"),
+            CacheKey(TEST_FIELD_KEY_JEDI).append("friends", "2"),
         ),
         heroRecord["friends"]
     )
-    val luke = records.get(CacheKey(CacheKey(TEST_FIELD_KEY_JEDI).fieldKey("friends.0")))
+    val luke = records.get(CacheKey(TEST_FIELD_KEY_JEDI).append("friends", "0"))
     assertEquals(luke!!["name"], "Luke Skywalker")
   }
 
@@ -148,13 +148,13 @@ class NormalizerTest {
     assertEquals(heroRecord!!["name"], "R2-D2")
     assertEquals(
         listOf(
-            CacheKey("${CacheKey("Character:2001").key}.friends.0"),
-            CacheKey("${CacheKey("Character:2001").key}.friends.1"),
-            CacheKey("${CacheKey("Character:2001").key}.friends.2")
+            CacheKey("Character:2001").append("friends", "0"),
+            CacheKey("Character:2001").append("friends", "1"),
+            CacheKey("Character:2001").append("friends", "2")
         ),
         heroRecord["friends"]
     )
-    val luke = records.get(CacheKey("${CacheKey("Character:2001").key}.friends.0"))
+    val luke = records.get(CacheKey("Character:2001").append("friends", "0"))
     assertEquals(luke!!["name"], "Luke Skywalker")
   }
 
@@ -207,7 +207,7 @@ class NormalizerTest {
   @Throws(Exception::class)
   fun testHeroParentTypeDependentFieldDroid() {
     val records = records(HeroParentTypeDependentFieldQuery(Episode.JEDI), "HeroParentTypeDependentFieldDroidResponse.json")
-    val lukeRecord = records.get(CacheKey(CacheKey(TEST_FIELD_KEY_JEDI).fieldKey("friends.0")))
+    val lukeRecord = records.get(CacheKey(TEST_FIELD_KEY_JEDI).append("friends", "0"))
     assertEquals(lukeRecord!!["name"], "Luke Skywalker")
     assertEquals(lukeRecord["height({\"unit\":\"METER\"})"], 1.72)
 
@@ -215,21 +215,21 @@ class NormalizerTest {
     val friends = records[CacheKey(TEST_FIELD_KEY_JEDI)]!!["friends"]
 
     assertIs<List<Any>>(friends)
-    assertEquals(friends[0], CacheKey(CacheKey(TEST_FIELD_KEY_JEDI).fieldKey("friends.0")))
-    assertEquals(friends[1], CacheKey(CacheKey(TEST_FIELD_KEY_JEDI).fieldKey("friends.1")))
-    assertEquals(friends[2], CacheKey(CacheKey(TEST_FIELD_KEY_JEDI).fieldKey("friends.2")))
+    assertEquals(friends[0], CacheKey(TEST_FIELD_KEY_JEDI).append("friends", "0"))
+    assertEquals(friends[1], CacheKey(TEST_FIELD_KEY_JEDI).append("friends", "1"))
+    assertEquals(friends[2], CacheKey(TEST_FIELD_KEY_JEDI).append("friends", "2"))
   }
 
   @Test
   fun list_of_objects_with_null_object() {
     val records = records(AllPlanetsQuery(), "AllPlanetsListOfObjectWithNullObject.json")
-    val fieldKey = CacheKey("allPlanets({\"first\":300})").key
+    val fieldKey = CacheKey("allPlanets({\"first\":300})")
 
-    var record: Record? = records[CacheKey("$fieldKey.planets.0")]
+    var record: Record? = records[fieldKey.append("planets", "0")]
     assertTrue(record?.get("filmConnection") == null)
-    record = records.get(CacheKey(CacheKey("$fieldKey.planets.0").fieldKey("filmConnection")))
+    record = records.get(fieldKey.append("planets", "0", "filmConnection"))
     assertTrue(record == null)
-    record = records.get(CacheKey(CacheKey("$fieldKey.planets.1").fieldKey("filmConnection")))
+    record = records.get(fieldKey.append("planets", "1", "filmConnection"))
     assertTrue(record != null)
   }
 
@@ -239,7 +239,7 @@ class NormalizerTest {
   fun testHeroParentTypeDependentFieldHuman() {
     val records = records(HeroParentTypeDependentFieldQuery(Episode.EMPIRE), "HeroParentTypeDependentFieldHumanResponse.json")
 
-    val lukeRecord = records.get(CacheKey(CacheKey(TEST_FIELD_KEY_EMPIRE).fieldKey("friends.0")))
+    val lukeRecord = records.get(CacheKey(TEST_FIELD_KEY_EMPIRE).append("friends", "0"))
     assertEquals(lukeRecord!!["name"], "Han Solo")
     assertEquals(lukeRecord["height({\"unit\":\"FOOT\"})"], 5.905512)
   }

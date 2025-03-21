@@ -11,6 +11,7 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.api.append
 import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.fetchPolicy
@@ -132,10 +133,10 @@ class StaleFieldsTest {
               .execute()
 
           var allRecords = store.accessCache { it.allRecords() }
-          assertTrue(allRecords[CacheKey("projects.0")]!!.fields.containsKey("velocity"))
-          assertTrue(allRecords[CacheKey("projects.0")]!!.fields.containsKey("isUrgent"))
-          assertTrue(allRecords[CacheKey("projects.1")]!!.fields.containsKey("velocity"))
-          assertTrue(allRecords[CacheKey("projects.1")]!!.fields.containsKey("isUrgent"))
+          assertTrue(allRecords[CacheKey("projects").append("0")]!!.fields.containsKey("velocity"))
+          assertTrue(allRecords[CacheKey("projects").append("0")]!!.fields.containsKey("isUrgent"))
+          assertTrue(allRecords[CacheKey("projects").append("1")]!!.fields.containsKey("velocity"))
+          assertTrue(allRecords[CacheKey("projects").append("1")]!!.fields.containsKey("isUrgent"))
 
           val maxAgeProvider = SchemaCoordinatesMaxAgeProvider(
               Cache.maxAges,
@@ -145,18 +146,18 @@ class StaleFieldsTest {
           // Project.velocity has a max age of 60 seconds, so they should be removed / Project.isUrgent has a max age of 90 seconds, so they should be kept
           assertEquals(
               setOf(
-                  CacheKey("projects.0").fieldKey("velocity"),
-                  CacheKey("projects.1").fieldKey("velocity"),
+                  CacheKey("projects").append("0").fieldKey("velocity"),
+                  CacheKey("projects").append("1").fieldKey("velocity"),
               ), removedFieldsAndRecords.removedFields
           )
           assertEquals(
               emptySet(), removedFieldsAndRecords.removedRecords
           )
           allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords[CacheKey("projects.0")]!!.fields.containsKey("velocity"))
-          assertTrue(allRecords[CacheKey("projects.0")]!!.fields.containsKey("isUrgent"))
-          assertFalse(allRecords[CacheKey("projects.1")]!!.fields.containsKey("velocity"))
-          assertTrue(allRecords[CacheKey("projects.1")]!!.fields.containsKey("isUrgent"))
+          assertFalse(allRecords[CacheKey("projects").append("0")]!!.fields.containsKey("velocity"))
+          assertTrue(allRecords[CacheKey("projects").append("0")]!!.fields.containsKey("isUrgent"))
+          assertFalse(allRecords[CacheKey("projects").append("1")]!!.fields.containsKey("velocity"))
+          assertTrue(allRecords[CacheKey("projects").append("1")]!!.fields.containsKey("isUrgent"))
 
           mockServer.enqueueString(PROJECT_LIST_RESPONSE)
           apolloClient.query(ProjectListQuery())
@@ -167,21 +168,21 @@ class StaleFieldsTest {
           // Project.velocity and Project.isUrgent should be removed, their records being empty they should be removed
           assertEquals(
               setOf(
-                  CacheKey("projects.0").fieldKey("velocity"),
-                  CacheKey("projects.0").fieldKey("isUrgent"),
-                  CacheKey("projects.1").fieldKey("velocity"),
-                  CacheKey("projects.1").fieldKey("isUrgent"),
+                  CacheKey("projects").append("0").fieldKey("velocity"),
+                  CacheKey("projects").append("0").fieldKey("isUrgent"),
+                  CacheKey("projects").append("1").fieldKey("velocity"),
+                  CacheKey("projects").append("1").fieldKey("isUrgent"),
               ), removedFieldsAndRecords.removedFields
           )
           assertEquals(
               setOf(
-                  CacheKey("projects.0"),
-                  CacheKey("projects.1"),
+                  CacheKey("projects").append("0"),
+                  CacheKey("projects").append("1"),
               ), removedFieldsAndRecords.removedRecords
           )
           allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords.containsKey(CacheKey("projects.0")))
-          assertFalse(allRecords.containsKey(CacheKey("projects.1")))
+          assertFalse(allRecords.containsKey(CacheKey("projects").append("0")))
+          assertFalse(allRecords.containsKey(CacheKey("projects").append("1")))
         }
   }
 

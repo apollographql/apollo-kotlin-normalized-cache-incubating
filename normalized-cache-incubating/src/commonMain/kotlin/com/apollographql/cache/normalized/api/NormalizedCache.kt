@@ -129,7 +129,7 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
                 indent(level + 1)
                 append(when (key) {
                   is KClass<*> -> key.simpleName
-                  is CacheKey -> key.key
+                  is CacheKey -> key.keyToString()
                   else -> key
                 }
                 )

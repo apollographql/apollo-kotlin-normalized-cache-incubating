@@ -32,7 +32,7 @@ class RecordWeigherTest {
         )
     )
 
-    assertTrue(record.sizeInBytes <= 284)
+    assertTrue(record.sizeInBytes <= 377)
     assertTrue(record.sizeInBytes >= 258) // JS takes less space, maybe for strings?
   }
 }

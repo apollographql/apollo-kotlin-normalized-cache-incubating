@@ -40,7 +40,7 @@ class MemoryCache(
   }
 
   private val lruCache = LruCache<CacheKey, Record>(maxSize = maxSizeBytes, expireAfterMillis = expireAfterMillis) { key, record ->
-    key.key.length + record.sizeInBytes
+    key.key.size + record.sizeInBytes
   }
 
   val size: Int

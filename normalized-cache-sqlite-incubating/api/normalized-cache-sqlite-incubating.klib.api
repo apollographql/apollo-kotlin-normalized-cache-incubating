@@ -19,7 +19,7 @@ abstract interface com.apollographql.cache.normalized.sql.internal.fields/Fields
 }
 
 final class com.apollographql.cache.normalized.sql.internal.fields/Field_ { // com.apollographql.cache.normalized.sql.internal.fields/Field_|null[0]
-    constructor <init>(kotlin/String, kotlin/String, kotlin/ByteArray?, kotlin/ByteArray?, kotlin/Long?, kotlin/Long?) // com.apollographql.cache.normalized.sql.internal.fields/Field_.<init>|<init>(kotlin.String;kotlin.String;kotlin.ByteArray?;kotlin.ByteArray?;kotlin.Long?;kotlin.Long?){}[0]
+    constructor <init>(kotlin/ByteArray, kotlin/String, kotlin/ByteArray?, kotlin/ByteArray?, kotlin/Long?, kotlin/Long?) // com.apollographql.cache.normalized.sql.internal.fields/Field_.<init>|<init>(kotlin.ByteArray;kotlin.String;kotlin.ByteArray?;kotlin.ByteArray?;kotlin.Long?;kotlin.Long?){}[0]
 
     final val expiration_date // com.apollographql.cache.normalized.sql.internal.fields/Field_.expiration_date|{}expiration_date[0]
         final fun <get-expiration_date>(): kotlin/Long? // com.apollographql.cache.normalized.sql.internal.fields/Field_.expiration_date.<get-expiration_date>|<get-expiration_date>(){}[0]
@@ -30,17 +30,17 @@ final class com.apollographql.cache.normalized.sql.internal.fields/Field_ { // c
     final val received_date // com.apollographql.cache.normalized.sql.internal.fields/Field_.received_date|{}received_date[0]
         final fun <get-received_date>(): kotlin/Long? // com.apollographql.cache.normalized.sql.internal.fields/Field_.received_date.<get-received_date>|<get-received_date>(){}[0]
     final val record // com.apollographql.cache.normalized.sql.internal.fields/Field_.record|{}record[0]
-        final fun <get-record>(): kotlin/String // com.apollographql.cache.normalized.sql.internal.fields/Field_.record.<get-record>|<get-record>(){}[0]
+        final fun <get-record>(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.fields/Field_.record.<get-record>|<get-record>(){}[0]
     final val value_ // com.apollographql.cache.normalized.sql.internal.fields/Field_.value_|{}value_[0]
         final fun <get-value_>(): kotlin/ByteArray? // com.apollographql.cache.normalized.sql.internal.fields/Field_.value_.<get-value_>|<get-value_>(){}[0]
 
-    final fun component1(): kotlin/String // com.apollographql.cache.normalized.sql.internal.fields/Field_.component1|component1(){}[0]
+    final fun component1(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.fields/Field_.component1|component1(){}[0]
     final fun component2(): kotlin/String // com.apollographql.cache.normalized.sql.internal.fields/Field_.component2|component2(){}[0]
     final fun component3(): kotlin/ByteArray? // com.apollographql.cache.normalized.sql.internal.fields/Field_.component3|component3(){}[0]
     final fun component4(): kotlin/ByteArray? // com.apollographql.cache.normalized.sql.internal.fields/Field_.component4|component4(){}[0]
     final fun component5(): kotlin/Long? // com.apollographql.cache.normalized.sql.internal.fields/Field_.component5|component5(){}[0]
     final fun component6(): kotlin/Long? // com.apollographql.cache.normalized.sql.internal.fields/Field_.component6|component6(){}[0]
-    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/ByteArray? = ..., kotlin/ByteArray? = ..., kotlin/Long? = ..., kotlin/Long? = ...): com.apollographql.cache.normalized.sql.internal.fields/Field_ // com.apollographql.cache.normalized.sql.internal.fields/Field_.copy|copy(kotlin.String;kotlin.String;kotlin.ByteArray?;kotlin.ByteArray?;kotlin.Long?;kotlin.Long?){}[0]
+    final fun copy(kotlin/ByteArray = ..., kotlin/String = ..., kotlin/ByteArray? = ..., kotlin/ByteArray? = ..., kotlin/Long? = ..., kotlin/Long? = ...): com.apollographql.cache.normalized.sql.internal.fields/Field_ // com.apollographql.cache.normalized.sql.internal.fields/Field_.copy|copy(kotlin.ByteArray;kotlin.String;kotlin.ByteArray?;kotlin.ByteArray?;kotlin.Long?;kotlin.Long?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // com.apollographql.cache.normalized.sql.internal.fields/Field_.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.apollographql.cache.normalized.sql.internal.fields/Field_.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // com.apollographql.cache.normalized.sql.internal.fields/Field_.toString|toString(){}[0]
@@ -49,16 +49,15 @@ final class com.apollographql.cache.normalized.sql.internal.fields/Field_ { // c
 final class com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries : app.cash.sqldelight/TransacterImpl { // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries|null[0]
     constructor <init>(app.cash.sqldelight.db/SqlDriver) // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.<init>|<init>(app.cash.sqldelight.db.SqlDriver){}[0]
 
-    final fun <#A1: kotlin/Any> selectAllRecords(kotlin/Function6<kotlin/String, kotlin/String, kotlin/ByteArray?, kotlin/ByteArray?, kotlin/Long?, kotlin/Long?, #A1>): app.cash.sqldelight/Query<#A1> // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.selectAllRecords|selectAllRecords(kotlin.Function6<kotlin.String,kotlin.String,kotlin.ByteArray?,kotlin.ByteArray?,kotlin.Long?,kotlin.Long?,0:0>){0§<kotlin.Any>}[0]
-    final fun <#A1: kotlin/Any> selectRecords(kotlin.collections/Collection<kotlin/String>, kotlin/Function6<kotlin/String, kotlin/String, kotlin/ByteArray?, kotlin/ByteArray?, kotlin/Long?, kotlin/Long?, #A1>): app.cash.sqldelight/Query<#A1> // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.selectRecords|selectRecords(kotlin.collections.Collection<kotlin.String>;kotlin.Function6<kotlin.String,kotlin.String,kotlin.ByteArray?,kotlin.ByteArray?,kotlin.Long?,kotlin.Long?,0:0>){0§<kotlin.Any>}[0]
+    final fun <#A1: kotlin/Any> selectAllRecords(kotlin/Function6<kotlin/ByteArray, kotlin/String, kotlin/ByteArray?, kotlin/ByteArray?, kotlin/Long?, kotlin/Long?, #A1>): app.cash.sqldelight/Query<#A1> // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.selectAllRecords|selectAllRecords(kotlin.Function6<kotlin.ByteArray,kotlin.String,kotlin.ByteArray?,kotlin.ByteArray?,kotlin.Long?,kotlin.Long?,0:0>){0§<kotlin.Any>}[0]
+    final fun <#A1: kotlin/Any> selectRecords(kotlin.collections/Collection<kotlin/ByteArray>, kotlin/Function6<kotlin/ByteArray, kotlin/String, kotlin/ByteArray?, kotlin/ByteArray?, kotlin/Long?, kotlin/Long?, #A1>): app.cash.sqldelight/Query<#A1> // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.selectRecords|selectRecords(kotlin.collections.Collection<kotlin.ByteArray>;kotlin.Function6<kotlin.ByteArray,kotlin.String,kotlin.ByteArray?,kotlin.ByteArray?,kotlin.Long?,kotlin.Long?,0:0>){0§<kotlin.Any>}[0]
     final fun changes(): app.cash.sqldelight/ExecutableQuery<kotlin/Long> // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.changes|changes(){}[0]
     final fun count(): app.cash.sqldelight/Query<kotlin/Long> // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.count|count(){}[0]
     final fun deleteAllRecords() // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.deleteAllRecords|deleteAllRecords(){}[0]
-    final fun deleteRecords(kotlin.collections/Collection<kotlin/String>) // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.deleteRecords|deleteRecords(kotlin.collections.Collection<kotlin.String>){}[0]
-    final fun deleteRecordsMatching(kotlin/String) // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.deleteRecordsMatching|deleteRecordsMatching(kotlin.String){}[0]
-    final fun insertOrUpdateField(kotlin/String, kotlin/String, kotlin/ByteArray?, kotlin/ByteArray?, kotlin/Long?, kotlin/Long?) // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.insertOrUpdateField|insertOrUpdateField(kotlin.String;kotlin.String;kotlin.ByteArray?;kotlin.ByteArray?;kotlin.Long?;kotlin.Long?){}[0]
+    final fun deleteRecords(kotlin.collections/Collection<kotlin/ByteArray>) // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.deleteRecords|deleteRecords(kotlin.collections.Collection<kotlin.ByteArray>){}[0]
+    final fun insertOrUpdateField(kotlin/ByteArray, kotlin/String, kotlin/ByteArray?, kotlin/ByteArray?, kotlin/Long?, kotlin/Long?) // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.insertOrUpdateField|insertOrUpdateField(kotlin.ByteArray;kotlin.String;kotlin.ByteArray?;kotlin.ByteArray?;kotlin.Long?;kotlin.Long?){}[0]
     final fun selectAllRecords(): app.cash.sqldelight/Query<com.apollographql.cache.normalized.sql.internal.fields/Field_> // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.selectAllRecords|selectAllRecords(){}[0]
-    final fun selectRecords(kotlin.collections/Collection<kotlin/String>): app.cash.sqldelight/Query<com.apollographql.cache.normalized.sql.internal.fields/Field_> // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.selectRecords|selectRecords(kotlin.collections.Collection<kotlin.String>){}[0]
+    final fun selectRecords(kotlin.collections/Collection<kotlin/ByteArray>): app.cash.sqldelight/Query<com.apollographql.cache.normalized.sql.internal.fields/Field_> // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.selectRecords|selectRecords(kotlin.collections.Collection<kotlin.ByteArray>){}[0]
     final fun trimByReceivedDate(kotlin/Long) // com.apollographql.cache.normalized.sql.internal.fields/FieldsQueries.trimByReceivedDate|trimByReceivedDate(kotlin.Long){}[0]
 }
 

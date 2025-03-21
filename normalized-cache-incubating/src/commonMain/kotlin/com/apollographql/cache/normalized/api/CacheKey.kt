@@ -1,7 +1,10 @@
 package com.apollographql.cache.normalized.api
 
 import com.apollographql.apollo.annotations.ApolloInternal
-import com.apollographql.cache.normalized.internal.hashed
+import com.apollographql.cache.normalized.api.CacheKey.Companion.HASH_SIZE_BYTES
+import okio.Buffer
+import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import kotlin.jvm.JvmInline
 import kotlin.jvm.JvmStatic
 
@@ -9,25 +12,18 @@ import kotlin.jvm.JvmStatic
  * A [CacheKey] identifies an object in the cache.
  */
 @JvmInline
-value class CacheKey private constructor(
+value class CacheKey(
     /**
      * The hashed key of the object in the cache.
      */
-    val key: String,
+    val key: ByteString,
 ) {
   /**
    * Builds a [CacheKey] from a key.
    *
    * @param key The key of the object in the cache. The key must be globally unique.
-   * @param isHashed If true, the key is already hashed. If false, the key will be hashed.
    */
-  constructor(key: String, isHashed: Boolean = false) : this(
-      if (isHashed || key == rootKey().key) {
-        key
-      } else {
-        key.hashed()
-      }
-  )
+  constructor(key: String) : this(key.hashed())
 
   /**
    * Builds a [CacheKey] from a typename and a list of Strings.
@@ -41,8 +37,7 @@ value class CacheKey private constructor(
         values.forEach {
           append(it)
         }
-      },
-      isHashed = false,
+      }
   )
 
   /**
@@ -52,10 +47,14 @@ value class CacheKey private constructor(
    */
   constructor(typename: String, vararg values: String) : this(typename, values.toList())
 
-  override fun toString() = "CacheKey($key)"
+  fun keyToString(): String {
+    return key.hex()
+  }
+
+  override fun toString() = "CacheKey(${keyToString()})"
 
   fun serialize(): String {
-    return "$SERIALIZATION_TEMPLATE{$key}"
+    return "$SERIALIZATION_TEMPLATE{${keyToString()}}"
   }
 
   companion object {
@@ -85,10 +84,34 @@ value class CacheKey private constructor(
     fun rootKey(): CacheKey {
       return ROOT_CACHE_KEY
     }
+
+    @ApolloInternal
+    const val HASH_SIZE_BYTES = 10
   }
+}
+
+fun CacheKey.isRootKey(): Boolean {
+  return this == CacheKey.rootKey()
 }
 
 @ApolloInternal
 fun CacheKey.fieldKey(fieldName: String): String {
-  return "$key.$fieldName"
+  return "${keyToString()}.$fieldName"
+}
+
+private fun String.hashed(): ByteString {
+  return encodeUtf8().hashed()
+}
+
+private fun ByteString.hashed(): ByteString {
+  return sha256().substring(endIndex = HASH_SIZE_BYTES)
+}
+
+@ApolloInternal
+fun CacheKey.append(vararg keys: String): CacheKey {
+  var cacheKey: CacheKey = this
+  for (key in keys) {
+    cacheKey = CacheKey(Buffer().write(cacheKey.key).write(key.encodeUtf8()).readByteString().hashed())
+  }
+  return cacheKey
 }

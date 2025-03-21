@@ -19,6 +19,7 @@ import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.api.append
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
@@ -124,7 +125,7 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object '${CacheKey("User:1").key}' has no field named 'nickName' in the cache")
+                  Error.Builder("Object '${CacheKey("User:1").keyToString()}' has no field named 'nickName' in the cache")
                       .path(listOf("me", "nickName"))
                       .build()
               ),
@@ -344,7 +345,8 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object '${CacheKey("User:3").key}' not found in the cache").path(listOf("me", "projects", 0, "lead"))
+                  Error.Builder("Object '${CacheKey("User:3").keyToString()}' not found in the cache")
+                      .path(listOf("me", "projects", 0, "lead"))
                       .build()
               ),
               cacheResult.errors
@@ -382,8 +384,10 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object '${CacheKey("User:2").key}' not found in the cache").path(listOf("me", "bestFriend")).build(),
-                  Error.Builder("Object '${CacheKey("User:3").key}' not found in the cache").path(listOf("me", "projects", 0, "lead"))
+                  Error.Builder("Object '${CacheKey("User:2").keyToString()}' not found in the cache").path(listOf("me", "bestFriend"))
+                      .build(),
+                  Error.Builder("Object '${CacheKey("User:3").keyToString()}' not found in the cache")
+                      .path(listOf("me", "projects", 0, "lead"))
                       .build(),
               ),
               cacheResult2.errors
@@ -398,10 +402,13 @@ class CachePartialResultTest {
           assertNull(cacheResult3.data)
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object '${CacheKey("User:2").key}' not found in the cache").path(listOf("me", "bestFriend")).build(),
-                  Error.Builder("Object '${CacheKey("User:3").key}' not found in the cache").path(listOf("me", "projects", 0, "lead"))
+                  Error.Builder("Object '${CacheKey("User:2").keyToString()}' not found in the cache").path(listOf("me", "bestFriend"))
                       .build(),
-                  Error.Builder("Object '${CacheKey("User:4").key}' not found in the cache").path(listOf("me", "projects", 0, "users", 0))
+                  Error.Builder("Object '${CacheKey("User:3").keyToString()}' not found in the cache")
+                      .path(listOf("me", "projects", 0, "lead"))
+                      .build(),
+                  Error.Builder("Object '${CacheKey("User:4").keyToString()}' not found in the cache")
+                      .path(listOf("me", "projects", 0, "users", 0))
                       .build()
               ),
               cacheResult3.errors
@@ -546,7 +553,7 @@ class CachePartialResultTest {
           assertNull(cacheMissResult.data)
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object '${CacheKey("User:1").key}' has no field named 'category' in the cache")
+                  Error.Builder("Object '${CacheKey("User:1").keyToString()}' has no field named 'category' in the cache")
                       .path(listOf("user", "category"))
                       .build()
               ),
@@ -675,7 +682,8 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Object '${CacheKey("User:2").key}' not found in the cache").path(listOf("me", "mainProject", "lead0"))
+                  Error.Builder("Object '${CacheKey("User:2").keyToString()}' not found in the cache")
+                      .path(listOf("me", "mainProject", "lead0"))
                       .build()
               ),
               cacheMissResult.errors
@@ -740,7 +748,7 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Field 'nickName' on object '${CacheKey("User:1").key}' is stale in the cache")
+                  Error.Builder("Field 'nickName' on object '${CacheKey("User:1").keyToString()}' is stale in the cache")
                       .path(listOf("me", "nickName"))
                       .build()
               ),
@@ -806,7 +814,10 @@ class CachePartialResultTest {
           )
           assertErrorsEquals(
               listOf(
-                  Error.Builder("Field 'salary' on object '${CacheKey("${CacheKey("User:1").key}.employeeInfo").key}' is stale in the cache")
+                  Error.Builder("Field 'salary' on object '${
+                    CacheKey("User:1").append("employeeInfo").keyToString()
+                  }' is stale in the cache"
+                  )
                       .path(listOf("me", "employeeInfo", "salary")).build()
               ),
               cacheMissResult.errors

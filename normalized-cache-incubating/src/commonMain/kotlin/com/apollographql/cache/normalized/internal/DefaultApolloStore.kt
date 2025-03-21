@@ -105,7 +105,7 @@ internal class DefaultApolloStore(
   override fun <D : Executable.Data> normalize(
       executable: Executable<D>,
       dataWithErrors: DataWithErrors,
-      rootKey: String,
+      rootKey: CacheKey,
       customScalarAdapters: CustomScalarAdapters,
   ): Map<CacheKey, Record> {
     return dataWithErrors.normalized(
@@ -239,7 +239,7 @@ internal class DefaultApolloStore(
     val records = normalize(
         executable = fragment,
         dataWithErrors = dataWithErrors,
-        rootKey = cacheKey.key,
+        rootKey = cacheKey,
         customScalarAdapters = customScalarAdapters,
     ).values
     return cache.merge(records, cacheHeaders, recordMerger)
@@ -281,7 +281,7 @@ internal class DefaultApolloStore(
     val records = normalize(
         executable = fragment,
         dataWithErrors = dataWithErrors,
-        rootKey = cacheKey.key,
+        rootKey = cacheKey,
         customScalarAdapters = customScalarAdapters,
     ).values.map { record ->
       Record(

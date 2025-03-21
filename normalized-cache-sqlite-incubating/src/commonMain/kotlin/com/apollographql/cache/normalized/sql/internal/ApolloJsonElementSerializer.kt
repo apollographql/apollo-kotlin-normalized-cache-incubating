@@ -1,8 +1,8 @@
 package com.apollographql.cache.normalized.sql.internal
 
-import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Error.Builder
+import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.apollo.api.json.JsonNumber
 import com.apollographql.cache.normalized.api.CacheKey
 import okio.Buffer
@@ -107,7 +107,7 @@ internal object ApolloJsonElementSerializer {
 
       is CacheKey -> {
         buffer.writeByte(CACHE_KEY)
-        buffer.writeString(value.key)
+        buffer.write(value.key)
       }
 
       is List<*> -> {
@@ -174,7 +174,7 @@ internal object ApolloJsonElementSerializer {
       BOOLEAN_TRUE -> true
       BOOLEAN_FALSE -> false
       CACHE_KEY -> {
-        CacheKey(readString(), isHashed = true)
+        CacheKey(readByteString(CacheKey.HASH_SIZE_BYTES.toLong()))
       }
 
       LIST -> {

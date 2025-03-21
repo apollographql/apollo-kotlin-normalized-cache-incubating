@@ -135,7 +135,7 @@ object DefaultCacheResolver : CacheResolver {
   override fun resolveField(context: ResolverContext): Any? {
     val fieldKey = context.getFieldKey()
     if (!context.parent.containsKey(fieldKey)) {
-      throw CacheMissException(context.parentKey.key, fieldKey)
+      throw CacheMissException(context.parentKey.keyToString(), fieldKey)
     }
 
     return context.parent[fieldKey]
@@ -190,7 +190,7 @@ class CacheControlCacheResolver(
         val maxStale = context.cacheHeaders.headerValue(ApolloCacheHeaders.MAX_STALE)?.toLongOrNull() ?: 0L
         if (staleDuration >= maxStale) {
           throw CacheMissException(
-              key = context.parentKey.key,
+              key = context.parentKey.keyToString(),
               fieldName = context.getFieldKey(),
               stale = true
           )
@@ -206,7 +206,7 @@ class CacheControlCacheResolver(
         val maxStale = context.cacheHeaders.headerValue(ApolloCacheHeaders.MAX_STALE)?.toLongOrNull() ?: 0L
         if (staleDuration >= maxStale) {
           throw CacheMissException(
-              key = context.parentKey.key,
+              key = context.parentKey.keyToString(),
               fieldName = context.getFieldKey(),
               stale = true
           )

@@ -117,10 +117,10 @@ internal class CacheBatchReader(
           } else {
             if (returnPartialResponses) {
               data[pendingReference.path] =
-                cacheMissError(CacheMissException(key = pendingReference.key.key, fieldName = null, stale = false), path = pendingReference.path)
+                cacheMissError(CacheMissException(key = pendingReference.key.keyToString(), fieldName = null, stale = false), path = pendingReference.path)
               return@forEach
             } else {
-              throw CacheMissException(pendingReference.key.key)
+              throw CacheMissException(pendingReference.key.keyToString())
             }
           }
         }
@@ -224,7 +224,7 @@ internal class CacheBatchReader(
                     field = it,
                     variables = variables,
                     parent = this,
-                    parentKey = CacheKey("", isHashed = true),
+                    parentKey = CacheKey(""),
                     parentType = parentType,
                     cacheHeaders = cacheHeaders,
                     fieldKeyGenerator = fieldKeyGenerator,

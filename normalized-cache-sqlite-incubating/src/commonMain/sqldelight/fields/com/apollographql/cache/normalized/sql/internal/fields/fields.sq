@@ -1,5 +1,5 @@
 CREATE TABLE field (
-  record TEXT NOT NULL,
+  record BLOB NOT NULL,
   field TEXT NOT NULL,
   value BLOB,
   metadata BLOB,
@@ -20,9 +20,6 @@ INSERT INTO field (record, field, value, metadata, received_date, expiration_dat
 
 deleteRecords:
 DELETE FROM field WHERE record IN ?;
-
-deleteRecordsMatching:
-DELETE FROM field WHERE record LIKE ? ESCAPE '\';
 
 deleteAllRecords:
 DELETE FROM field;

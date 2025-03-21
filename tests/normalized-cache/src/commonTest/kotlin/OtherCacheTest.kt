@@ -73,7 +73,7 @@ class OtherCacheTest {
 
     // Some details are not present in the master query, we should get a cache miss
     val e = apolloClient.query(CharacterDetailsQuery("1002")).fetchPolicy(FetchPolicy.CacheOnly).execute().exception as CacheMissException
-    assertTrue(e.message!!.contains("Object '${CacheKey("Character:1002").key}' has no field named '__typename'"))
+    assertTrue(e.message!!.contains("Object '${CacheKey("Character:1002").keyToString()}' has no field named '__typename'"))
   }
 
 
@@ -83,7 +83,7 @@ class OtherCacheTest {
         .fetchPolicy(FetchPolicy.CacheOnly)
         .execute()
         .exception!!
-    assertTrue(e.message!!.contains("Object 'QUERY_ROOT' has no field named 'hero"))
+    assertTrue(e.message!!.contains("Object '${CacheKey("QUERY_ROOT").keyToString()}' has no field named 'hero"))
   }
 
   @Test

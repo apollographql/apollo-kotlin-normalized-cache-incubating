@@ -26,6 +26,7 @@ import com.apollographql.cache.normalized.CacheFirstInterceptor
 import com.apollographql.cache.normalized.CacheOnlyInterceptor
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.isFromCache
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
@@ -603,7 +604,7 @@ class FetchPolicyTest {
           )
         }
     )
-    store.publish(setOf("${CacheKey.rootKey().key}.hero"))
+    store.publish(setOf(CacheKey.rootKey().fieldKey("hero")))
 
     /**
      * This time the watcher should do a network request

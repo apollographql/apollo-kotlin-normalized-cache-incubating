@@ -13,6 +13,7 @@ import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
+import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.sql.internal.RecordDatabase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -150,7 +151,7 @@ class SqlNormalizedCacheTest {
     )
     val record = cache.loadRecord(STANDARD_KEY, CacheHeaders.NONE)
     assertNotNull(record)
-    assertEquals(expected = setOf("${STANDARD_KEY.key}.fieldKey", "${STANDARD_KEY.key}.newFieldKey"), actual = changedKeys)
+    assertEquals(expected = setOf(STANDARD_KEY.fieldKey("fieldKey"), STANDARD_KEY.fieldKey("newFieldKey")), actual = changedKeys)
     assertEquals(expected = "valueUpdated", actual = record.fields["fieldKey"])
     assertEquals(expected = true, actual = record.fields["newFieldKey"])
   }
