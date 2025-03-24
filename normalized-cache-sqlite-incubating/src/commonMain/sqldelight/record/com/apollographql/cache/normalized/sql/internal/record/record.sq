@@ -1,0 +1,31 @@
+CREATE TABLE record (
+  key TEXT NOT NULL,
+  record BLOB NOT NULL,
+  update_date INTEGER NOT NULL,
+  PRIMARY KEY (key) ON CONFLICT REPLACE
+)
+WITHOUT ROWID;
+
+selectRecords:
+SELECT key, record FROM record WHERE key IN ?;
+
+selectAllRecords:
+SELECT key, record FROM record;
+
+insertOrUpdateRecord:
+INSERT INTO record (key, record, update_date) VALUES (?, ?, ?);
+
+deleteRecords:
+DELETE FROM record WHERE key IN ?;
+
+deleteAllRecords:
+DELETE FROM record;
+
+count:
+SELECT count(*) FROM record;
+
+trimByUpdateDate:
+DELETE FROM record WHERE key IN (SELECT key FROM record ORDER BY update_date LIMIT ?);
+
+changes:
+SELECT changes();

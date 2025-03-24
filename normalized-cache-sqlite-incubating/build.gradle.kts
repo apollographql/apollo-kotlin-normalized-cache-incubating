@@ -30,10 +30,10 @@ android {
 }
 
 sqldelight {
-  databases.create("FieldsDatabase") {
-    packageName.set("com.apollographql.cache.normalized.sql.internal.fields")
-    schemaOutputDirectory.set(file("sqldelight/fields/schema"))
-    srcDirs.setFrom("src/commonMain/sqldelight/fields/")
+  databases.create("SqlRecordDatabase") {
+    packageName.set("com.apollographql.cache.normalized.sql.internal.record")
+    schemaOutputDirectory.set(file("sqldelight/record/schema"))
+    srcDirs.setFrom("src/commonMain/sqldelight/record/")
   }
 }
 

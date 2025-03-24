@@ -4,7 +4,7 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import com.apollographql.apollo.exception.apolloExceptionHandler
-import com.apollographql.cache.normalized.sql.internal.fields.FieldsDatabase
+import com.apollographql.cache.normalized.sql.internal.record.SqlRecordDatabase
 
 internal fun createRecordDatabase(driver: SqlDriver): RecordDatabase {
   maybeCreateOrMigrateSchema(driver, getSchema())
@@ -30,7 +30,7 @@ internal fun createRecordDatabase(driver: SqlDriver): RecordDatabase {
      */
   }
 
-  val expectedTableName = "field"
+  val expectedTableName = "record"
   check(tableNames.isEmpty() || tableNames.contains(expectedTableName)) {
     "Apollo: Cannot find the '$expectedTableName' table (found '$tableNames' instead)"
   }
@@ -38,4 +38,4 @@ internal fun createRecordDatabase(driver: SqlDriver): RecordDatabase {
   return RecordDatabase(driver)
 }
 
-internal fun getSchema(): SqlSchema<QueryResult.Value<Unit>> = FieldsDatabase.Schema
+internal fun getSchema(): SqlSchema<QueryResult.Value<Unit>> = SqlRecordDatabase.Schema

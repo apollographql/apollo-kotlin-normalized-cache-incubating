@@ -4,14 +4,12 @@ import com.apollographql.apollo.exception.apolloExceptionHandler
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
-import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.api.RecordMergerContext
 import com.apollographql.cache.normalized.api.withDates
 import com.apollographql.cache.normalized.sql.internal.RecordDatabase
-import okio.ByteString
 import kotlin.reflect.KClass
 
 class SqlNormalizedCache internal constructor(
@@ -71,12 +69,12 @@ class SqlNormalizedCache internal constructor(
   }
 
   private fun getReferencedKeysRecursively(
-      keys: Collection<ByteString>,
-      visited: MutableSet<ByteString> = mutableSetOf(),
-  ): Set<ByteString> {
+      keys: Collection<String>,
+      visited: MutableSet<String> = mutableSetOf(),
+  ): Set<String> {
     if (keys.isEmpty()) return emptySet()
     val referencedKeys =
-      recordDatabase.selectRecords((keys - visited).map { it.toByteArray() }).flatMap { it.referencedFields() }.map { it.key }.toSet()
+      recordDatabase.selectRecords(keys - visited).flatMap { it.referencedFields() }.map { it.key }.toSet()
     visited += keys
     return referencedKeys + getReferencedKeysRecursively(referencedKeys, visited)
   }
@@ -84,56 +82,40 @@ class SqlNormalizedCache internal constructor(
   /**
    * Assumes an enclosing transaction
    */
-  private fun internalDeleteRecords(keys: Collection<ByteString>, cascade: Boolean): Int {
+  private fun internalDeleteRecords(keys: Collection<String>, cascade: Boolean): Int {
     val referencedKeys = if (cascade) {
       getReferencedKeysRecursively(keys)
     } else {
       emptySet()
     }
     return (keys + referencedKeys).chunked(999).sumOf { chunkedKeys ->
-      recordDatabase.deleteRecords(chunkedKeys.map { it.toByteArray() })
+      recordDatabase.deleteRecords(chunkedKeys)
       recordDatabase.changes().toInt()
     }
   }
 
   /**
    * Updates records.
-   *
-   * As an optimization, the [records] fields are directly upserted into the db when possible. This is possible when using
-   * the [DefaultRecordMerger], and [ApolloCacheHeaders.ERRORS_REPLACE_CACHED_VALUES] is set to true.
-   * Otherwise, the [records] must be merged programmatically using the given [recordMerger], requiring to load the existing records from
-   * the db first.
+   * The [records] are merged using the given [recordMerger], requiring to load the existing records from the db first.
    */
   private fun internalUpdateRecords(records: Collection<Record>, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     val receivedDate = cacheHeaders.headerValue(ApolloCacheHeaders.RECEIVED_DATE)
     val expirationDate = cacheHeaders.headerValue(ApolloCacheHeaders.EXPIRATION_DATE)
-    val errorsReplaceCachedValues = cacheHeaders.headerValue(ApolloCacheHeaders.ERRORS_REPLACE_CACHED_VALUES) == "true"
-    return if (recordMerger is DefaultRecordMerger && errorsReplaceCachedValues) {
-      recordDatabase.transaction {
-        for (record in records) {
-          recordDatabase.insertOrUpdateRecord(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
-        }
-      }
+    return recordDatabase.transaction {
+      val existingRecords = selectRecords(records.map { it.key }).associateBy { it.key }
       records.flatMap { record ->
-        record.fieldKeys()
-      }.toSet()
-    } else {
-      recordDatabase.transaction {
-        val existingRecords = selectRecords(records.map { it.key }).associateBy { it.key }
-        records.flatMap { record ->
-          val existingRecord = existingRecords[record.key]
-          if (existingRecord == null) {
-            recordDatabase.insertOrUpdateRecord(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
-            record.fieldKeys()
-          } else {
-            val (mergedRecord, changedKeys) = recordMerger.merge(RecordMergerContext(existing = existingRecord, incoming = record.withDates(receivedDate = receivedDate, expirationDate = expirationDate), cacheHeaders = cacheHeaders))
-            if (mergedRecord.isNotEmpty()) {
-              recordDatabase.insertOrUpdateRecord(mergedRecord)
-            }
-            changedKeys
+        val existingRecord = existingRecords[record.key]
+        if (existingRecord == null) {
+          recordDatabase.insertOrUpdateRecord(record.withDates(receivedDate = receivedDate, expirationDate = expirationDate))
+          record.fieldKeys()
+        } else {
+          val (mergedRecord, changedKeys) = recordMerger.merge(RecordMergerContext(existing = existingRecord, incoming = record.withDates(receivedDate = receivedDate, expirationDate = expirationDate), cacheHeaders = cacheHeaders))
+          if (mergedRecord.isNotEmpty()) {
+            recordDatabase.insertOrUpdateRecord(mergedRecord)
           }
-        }.toSet()
-      }
+          changedKeys
+        }
+      }.toSet()
     }
   }
 
@@ -143,7 +125,7 @@ class SqlNormalizedCache internal constructor(
    */
   private fun selectRecords(keys: Collection<CacheKey>): List<Record> {
     return keys
-        .map { it.key.toByteArray() }
+        .map { it.key }
         .chunked(999).flatMap { chunkedKeys ->
           recordDatabase.selectRecords(chunkedKeys)
         }
@@ -153,7 +135,7 @@ class SqlNormalizedCache internal constructor(
     val size = recordDatabase.databaseSize()
     return if (size >= maxSizeBytes) {
       val count = recordDatabase.count().executeAsOne()
-      recordDatabase.trimByReceivedDate((count * trimFactor).toLong())
+      recordDatabase.trimByUpdateDate((count * trimFactor).toLong())
       recordDatabase.vacuum()
       recordDatabase.databaseSize()
     } else {

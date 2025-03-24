@@ -464,10 +464,9 @@ final value class com.apollographql.cache.normalized.api/CacheKey { // com.apoll
     constructor <init>(kotlin/String) // com.apollographql.cache.normalized.api/CacheKey.<init>|<init>(kotlin.String){}[0]
     constructor <init>(kotlin/String, kotlin.collections/List<kotlin/String>) // com.apollographql.cache.normalized.api/CacheKey.<init>|<init>(kotlin.String;kotlin.collections.List<kotlin.String>){}[0]
     constructor <init>(kotlin/String, kotlin/Array<out kotlin/String>...) // com.apollographql.cache.normalized.api/CacheKey.<init>|<init>(kotlin.String;kotlin.Array<out|kotlin.String>...){}[0]
-    constructor <init>(okio/ByteString) // com.apollographql.cache.normalized.api/CacheKey.<init>|<init>(okio.ByteString){}[0]
 
     final val key // com.apollographql.cache.normalized.api/CacheKey.key|{}key[0]
-        final fun <get-key>(): okio/ByteString // com.apollographql.cache.normalized.api/CacheKey.key.<get-key>|<get-key>(){}[0]
+        final fun <get-key>(): kotlin/String // com.apollographql.cache.normalized.api/CacheKey.key.<get-key>|<get-key>(){}[0]
 
     final fun equals(kotlin/Any?): kotlin/Boolean // com.apollographql.cache.normalized.api/CacheKey.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.apollographql.cache.normalized.api/CacheKey.hashCode|hashCode(){}[0]
@@ -476,9 +475,6 @@ final value class com.apollographql.cache.normalized.api/CacheKey { // com.apoll
     final fun toString(): kotlin/String // com.apollographql.cache.normalized.api/CacheKey.toString|toString(){}[0]
 
     final object Companion { // com.apollographql.cache.normalized.api/CacheKey.Companion|null[0]
-        final const val HASH_SIZE_BYTES // com.apollographql.cache.normalized.api/CacheKey.Companion.HASH_SIZE_BYTES|{}HASH_SIZE_BYTES[0]
-            final fun <get-HASH_SIZE_BYTES>(): kotlin/Int // com.apollographql.cache.normalized.api/CacheKey.Companion.HASH_SIZE_BYTES.<get-HASH_SIZE_BYTES>|<get-HASH_SIZE_BYTES>(){}[0]
-
         final fun canDeserialize(kotlin/String): kotlin/Boolean // com.apollographql.cache.normalized.api/CacheKey.Companion.canDeserialize|canDeserialize(kotlin.String){}[0]
         final fun deserialize(kotlin/String): com.apollographql.cache.normalized.api/CacheKey // com.apollographql.cache.normalized.api/CacheKey.Companion.deserialize|deserialize(kotlin.String){}[0]
         final fun rootKey(): com.apollographql.cache.normalized.api/CacheKey // com.apollographql.cache.normalized.api/CacheKey.Companion.rootKey|rootKey(){}[0]

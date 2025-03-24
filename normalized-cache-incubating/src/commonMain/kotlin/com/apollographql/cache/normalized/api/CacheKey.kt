@@ -1,10 +1,6 @@
 package com.apollographql.cache.normalized.api
 
 import com.apollographql.apollo.annotations.ApolloInternal
-import com.apollographql.cache.normalized.api.CacheKey.Companion.HASH_SIZE_BYTES
-import okio.Buffer
-import okio.ByteString
-import okio.ByteString.Companion.encodeUtf8
 import kotlin.jvm.JvmInline
 import kotlin.jvm.JvmStatic
 
@@ -14,17 +10,10 @@ import kotlin.jvm.JvmStatic
 @JvmInline
 value class CacheKey(
     /**
-     * The hashed key of the object in the cache.
+     * The key of the object in the cache.
      */
-    val key: ByteString,
+    val key: String,
 ) {
-  /**
-   * Builds a [CacheKey] from a key.
-   *
-   * @param key The key of the object in the cache. The key must be globally unique.
-   */
-  constructor(key: String) : this(key.hashed())
-
   /**
    * Builds a [CacheKey] from a typename and a list of Strings.
    *
@@ -48,7 +37,7 @@ value class CacheKey(
   constructor(typename: String, vararg values: String) : this(typename, values.toList())
 
   fun keyToString(): String {
-    return key.hex()
+    return key
   }
 
   override fun toString() = "CacheKey(${keyToString()})"
@@ -84,9 +73,6 @@ value class CacheKey(
     fun rootKey(): CacheKey {
       return ROOT_CACHE_KEY
     }
-
-    @ApolloInternal
-    const val HASH_SIZE_BYTES = 10
   }
 }
 
@@ -99,19 +85,11 @@ fun CacheKey.fieldKey(fieldName: String): String {
   return "${keyToString()}.$fieldName"
 }
 
-private fun String.hashed(): ByteString {
-  return encodeUtf8().hashed()
-}
-
-private fun ByteString.hashed(): ByteString {
-  return sha256().substring(endIndex = HASH_SIZE_BYTES)
-}
-
 @ApolloInternal
 fun CacheKey.append(vararg keys: String): CacheKey {
   var cacheKey: CacheKey = this
   for (key in keys) {
-    cacheKey = CacheKey(Buffer().write(cacheKey.key).write(key.encodeUtf8()).readByteString().hashed())
+    cacheKey = CacheKey("${cacheKey.key}.$key")
   }
   return cacheKey
 }

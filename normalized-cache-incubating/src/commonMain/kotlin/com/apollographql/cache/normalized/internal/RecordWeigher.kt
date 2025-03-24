@@ -27,7 +27,7 @@ internal object RecordWeigher {
 
   @JvmStatic
   fun calculateBytes(record: Record): Int {
-    var size = SIZE_OF_RECORD_OVERHEAD + record.key.key.size
+    var size = SIZE_OF_RECORD_OVERHEAD + record.key.key.length
     for ((key, value) in record.fields) {
       size += key.length + weighField(value)
     }
@@ -56,7 +56,7 @@ internal object RecordWeigher {
       }
 
       is CacheKey -> {
-        SIZE_OF_CACHE_KEY_OVERHEAD + field.key.size
+        SIZE_OF_CACHE_KEY_OVERHEAD + field.key.length
       }
 
       is Error -> {

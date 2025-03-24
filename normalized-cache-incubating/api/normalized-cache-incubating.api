@@ -5,18 +5,18 @@ public abstract interface class com/apollographql/cache/normalized/ApolloStore {
 	public abstract fun dispose ()V
 	public abstract fun dump ()Ljava/util/Map;
 	public abstract fun getChangedKeys ()Lkotlinx/coroutines/flow/SharedFlow;
-	public abstract fun normalize-niOPdRo (Lcom/apollographql/apollo/api/Executable;Ljava/util/Map;Lokio/ByteString;Lcom/apollographql/apollo/api/CustomScalarAdapters;)Ljava/util/Map;
+	public abstract fun normalize-niOPdRo (Lcom/apollographql/apollo/api/Executable;Ljava/util/Map;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;)Ljava/util/Map;
 	public abstract fun publish (Ljava/util/Set;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun readFragment-dEpVOtE (Lcom/apollographql/apollo/api/Fragment;Lokio/ByteString;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/ApolloStore$ReadResult;
+	public abstract fun readFragment-dEpVOtE (Lcom/apollographql/apollo/api/Fragment;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/ApolloStore$ReadResult;
 	public abstract fun readOperation (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/apollo/api/ApolloResponse;
 	public abstract fun remove (Ljava/util/List;Z)I
-	public abstract fun remove-eNSUWrY (Lokio/ByteString;Z)Z
+	public abstract fun remove-eNSUWrY (Ljava/lang/String;Z)Z
 	public abstract fun rollbackOptimisticUpdates (Ljava/util/UUID;)Ljava/util/Set;
-	public abstract fun writeFragment-1qdIjGk (Lcom/apollographql/apollo/api/Fragment;Lokio/ByteString;Lcom/apollographql/apollo/api/Fragment$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Set;
+	public abstract fun writeFragment-1qdIjGk (Lcom/apollographql/apollo/api/Fragment;Ljava/lang/String;Lcom/apollographql/apollo/api/Fragment$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Set;
 	public abstract fun writeOperation (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/List;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Set;
 	public abstract fun writeOperation (Lcom/apollographql/apollo/api/Operation;Ljava/util/Map;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Set;
 	public abstract fun writeOptimisticUpdates (Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/UUID;Lcom/apollographql/apollo/api/CustomScalarAdapters;)Ljava/util/Set;
-	public abstract fun writeOptimisticUpdates-1qdIjGk (Lcom/apollographql/apollo/api/Fragment;Lokio/ByteString;Lcom/apollographql/apollo/api/Fragment$Data;Ljava/util/UUID;Lcom/apollographql/apollo/api/CustomScalarAdapters;)Ljava/util/Set;
+	public abstract fun writeOptimisticUpdates-1qdIjGk (Lcom/apollographql/apollo/api/Fragment;Ljava/lang/String;Lcom/apollographql/apollo/api/Fragment$Data;Ljava/util/UUID;Lcom/apollographql/apollo/api/CustomScalarAdapters;)Ljava/util/Set;
 }
 
 public final class com/apollographql/cache/normalized/ApolloStore$Companion {
@@ -24,16 +24,16 @@ public final class com/apollographql/cache/normalized/ApolloStore$Companion {
 }
 
 public final class com/apollographql/cache/normalized/ApolloStore$DefaultImpls {
-	public static synthetic fun normalize-niOPdRo$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Executable;Ljava/util/Map;Lokio/ByteString;Lcom/apollographql/apollo/api/CustomScalarAdapters;ILjava/lang/Object;)Ljava/util/Map;
-	public static synthetic fun readFragment-dEpVOtE$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Fragment;Lokio/ByteString;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Lcom/apollographql/cache/normalized/ApolloStore$ReadResult;
+	public static synthetic fun normalize-niOPdRo$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Executable;Ljava/util/Map;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;ILjava/lang/Object;)Ljava/util/Map;
+	public static synthetic fun readFragment-dEpVOtE$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Fragment;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Lcom/apollographql/cache/normalized/ApolloStore$ReadResult;
 	public static synthetic fun readOperation$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Lcom/apollographql/apollo/api/ApolloResponse;
 	public static synthetic fun remove$default (Lcom/apollographql/cache/normalized/ApolloStore;Ljava/util/List;ZILjava/lang/Object;)I
-	public static synthetic fun remove-eNSUWrY$default (Lcom/apollographql/cache/normalized/ApolloStore;Lokio/ByteString;ZILjava/lang/Object;)Z
-	public static synthetic fun writeFragment-1qdIjGk$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Fragment;Lokio/ByteString;Lcom/apollographql/apollo/api/Fragment$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Ljava/util/Set;
+	public static synthetic fun remove-eNSUWrY$default (Lcom/apollographql/cache/normalized/ApolloStore;Ljava/lang/String;ZILjava/lang/Object;)Z
+	public static synthetic fun writeFragment-1qdIjGk$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Fragment;Ljava/lang/String;Lcom/apollographql/apollo/api/Fragment$Data;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Ljava/util/Set;
 	public static synthetic fun writeOperation$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/List;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Ljava/util/Set;
 	public static synthetic fun writeOperation$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Operation;Ljava/util/Map;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Ljava/util/Set;
 	public static synthetic fun writeOptimisticUpdates$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Ljava/util/UUID;Lcom/apollographql/apollo/api/CustomScalarAdapters;ILjava/lang/Object;)Ljava/util/Set;
-	public static synthetic fun writeOptimisticUpdates-1qdIjGk$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Fragment;Lokio/ByteString;Lcom/apollographql/apollo/api/Fragment$Data;Ljava/util/UUID;Lcom/apollographql/apollo/api/CustomScalarAdapters;ILjava/lang/Object;)Ljava/util/Set;
+	public static synthetic fun writeOptimisticUpdates-1qdIjGk$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Fragment;Ljava/lang/String;Lcom/apollographql/apollo/api/Fragment$Data;Ljava/util/UUID;Lcom/apollographql/apollo/api/CustomScalarAdapters;ILjava/lang/Object;)Ljava/util/Set;
 }
 
 public final class com/apollographql/cache/normalized/ApolloStore$ReadResult {
@@ -227,36 +227,34 @@ public final class com/apollographql/cache/normalized/api/CacheHeaders$Companion
 
 public final class com/apollographql/cache/normalized/api/CacheKey {
 	public static final field Companion Lcom/apollographql/cache/normalized/api/CacheKey$Companion;
-	public static final field HASH_SIZE_BYTES I
-	public static final synthetic fun box-impl (Lokio/ByteString;)Lcom/apollographql/cache/normalized/api/CacheKey;
+	public static final synthetic fun box-impl (Ljava/lang/String;)Lcom/apollographql/cache/normalized/api/CacheKey;
 	public static final fun canDeserialize (Ljava/lang/String;)Z
-	public static fun constructor-impl (Ljava/lang/String;)Lokio/ByteString;
-	public static fun constructor-impl (Ljava/lang/String;Ljava/util/List;)Lokio/ByteString;
-	public static fun constructor-impl (Ljava/lang/String;[Ljava/lang/String;)Lokio/ByteString;
-	public static fun constructor-impl (Lokio/ByteString;)Lokio/ByteString;
-	public static final fun deserialize-gE2UBb4 (Ljava/lang/String;)Lokio/ByteString;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public static fun constructor-impl (Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
+	public static fun constructor-impl (Ljava/lang/String;[Ljava/lang/String;)Ljava/lang/String;
+	public static final fun deserialize-gE2UBb4 (Ljava/lang/String;)Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
-	public static fun equals-impl (Lokio/ByteString;Ljava/lang/Object;)Z
-	public static final fun equals-impl0 (Lokio/ByteString;Lokio/ByteString;)Z
-	public final fun getKey ()Lokio/ByteString;
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getKey ()Ljava/lang/String;
 	public fun hashCode ()I
-	public static fun hashCode-impl (Lokio/ByteString;)I
-	public static final fun keyToString-impl (Lokio/ByteString;)Ljava/lang/String;
-	public static final fun rootKey-mqw0cJ0 ()Lokio/ByteString;
-	public static final fun serialize-impl (Lokio/ByteString;)Ljava/lang/String;
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public static final fun keyToString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun rootKey-mqw0cJ0 ()Ljava/lang/String;
+	public static final fun serialize-impl (Ljava/lang/String;)Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
-	public static fun toString-impl (Lokio/ByteString;)Ljava/lang/String;
-	public final synthetic fun unbox-impl ()Lokio/ByteString;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
 }
 
 public final class com/apollographql/cache/normalized/api/CacheKey$Companion {
 	public final fun canDeserialize (Ljava/lang/String;)Z
-	public final fun deserialize-gE2UBb4 (Ljava/lang/String;)Lokio/ByteString;
-	public final fun rootKey-mqw0cJ0 ()Lokio/ByteString;
+	public final fun deserialize-gE2UBb4 (Ljava/lang/String;)Ljava/lang/String;
+	public final fun rootKey-mqw0cJ0 ()Ljava/lang/String;
 }
 
 public abstract interface class com/apollographql/cache/normalized/api/CacheKeyGenerator {
-	public abstract fun cacheKeyForObject-z2_y8R0 (Ljava/util/Map;Lcom/apollographql/cache/normalized/api/CacheKeyGeneratorContext;)Lokio/ByteString;
+	public abstract fun cacheKeyForObject-z2_y8R0 (Ljava/util/Map;Lcom/apollographql/cache/normalized/api/CacheKeyGeneratorContext;)Ljava/lang/String;
 }
 
 public final class com/apollographql/cache/normalized/api/CacheKeyGeneratorContext {
@@ -266,14 +264,14 @@ public final class com/apollographql/cache/normalized/api/CacheKeyGeneratorConte
 }
 
 public final class com/apollographql/cache/normalized/api/CacheKeyKt {
-	public static final fun append-eNSUWrY (Lokio/ByteString;[Ljava/lang/String;)Lokio/ByteString;
-	public static final fun fieldKey-eNSUWrY (Lokio/ByteString;Ljava/lang/String;)Ljava/lang/String;
-	public static final fun isRootKey-pWl1Des (Lokio/ByteString;)Z
+	public static final fun append-eNSUWrY (Ljava/lang/String;[Ljava/lang/String;)Ljava/lang/String;
+	public static final fun fieldKey-eNSUWrY (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun isRootKey-pWl1Des (Ljava/lang/String;)Z
 }
 
 public abstract class com/apollographql/cache/normalized/api/CacheKeyResolver : com/apollographql/cache/normalized/api/CacheResolver {
 	public fun <init> ()V
-	public abstract fun cacheKeyForField-fLoEQYY (Lcom/apollographql/cache/normalized/api/ResolverContext;)Lokio/ByteString;
+	public abstract fun cacheKeyForField-fLoEQYY (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/lang/String;
 	public fun listOfCacheKeysForField (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/util/List;
 	public final fun resolveField (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/lang/Object;
 }
@@ -401,14 +399,14 @@ public final class com/apollographql/cache/normalized/api/IdCacheKeyGenerator : 
 	public fun <init> ()V
 	public fun <init> ([Ljava/lang/String;)V
 	public synthetic fun <init> ([Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun cacheKeyForObject-z2_y8R0 (Ljava/util/Map;Lcom/apollographql/cache/normalized/api/CacheKeyGeneratorContext;)Lokio/ByteString;
+	public fun cacheKeyForObject-z2_y8R0 (Ljava/util/Map;Lcom/apollographql/cache/normalized/api/CacheKeyGeneratorContext;)Ljava/lang/String;
 }
 
 public final class com/apollographql/cache/normalized/api/IdCacheKeyResolver : com/apollographql/cache/normalized/api/CacheKeyResolver {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/List;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun cacheKeyForField-fLoEQYY (Lcom/apollographql/cache/normalized/api/ResolverContext;)Lokio/ByteString;
+	public fun cacheKeyForField-fLoEQYY (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/lang/String;
 	public fun listOfCacheKeysForField (Lcom/apollographql/cache/normalized/api/ResolverContext;)Ljava/util/List;
 }
 
@@ -462,7 +460,7 @@ public abstract interface class com/apollographql/cache/normalized/api/Normalize
 	public abstract fun merge (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/RecordMerger;)Ljava/util/Set;
 	public static fun prettifyDump (Ljava/util/Map;)Ljava/lang/String;
 	public abstract fun remove (Ljava/util/Collection;Z)I
-	public abstract fun remove-eNSUWrY (Lokio/ByteString;Z)Z
+	public abstract fun remove-eNSUWrY (Ljava/lang/String;Z)Z
 	public abstract fun trim (JF)J
 }
 
@@ -482,14 +480,14 @@ public abstract class com/apollographql/cache/normalized/api/NormalizedCacheFact
 
 public abstract interface class com/apollographql/cache/normalized/api/ReadOnlyNormalizedCache {
 	public abstract fun dump ()Ljava/util/Map;
-	public abstract fun loadRecord-eNSUWrY (Lokio/ByteString;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/api/Record;
+	public abstract fun loadRecord-eNSUWrY (Ljava/lang/String;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/api/Record;
 	public abstract fun loadRecords (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Collection;
 }
 
 public final class com/apollographql/cache/normalized/api/Record : java/util/Map, kotlin/jvm/internal/markers/KMappedMarker {
 	public static final field Companion Lcom/apollographql/cache/normalized/api/Record$Companion;
-	public synthetic fun <init> (Lokio/ByteString;Ljava/util/Map;Ljava/util/UUID;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Lokio/ByteString;Ljava/util/Map;Ljava/util/UUID;Ljava/util/Map;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;Ljava/util/Map;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public synthetic fun compute (Ljava/lang/Object;Ljava/util/function/BiFunction;)Ljava/lang/Object;
 	public fun compute (Ljava/lang/String;Ljava/util/function/BiFunction;)Ljava/lang/Object;
@@ -506,7 +504,7 @@ public final class com/apollographql/cache/normalized/api/Record : java/util/Map
 	public fun get (Ljava/lang/String;)Ljava/lang/Object;
 	public fun getEntries ()Ljava/util/Set;
 	public final fun getFields ()Ljava/util/Map;
-	public final fun getKey-mqw0cJ0 ()Lokio/ByteString;
+	public final fun getKey-mqw0cJ0 ()Ljava/lang/String;
 	public fun getKeys ()Ljava/util/Set;
 	public final fun getMetadata ()Ljava/util/Map;
 	public final fun getMutationId ()Ljava/util/UUID;
@@ -561,12 +559,12 @@ public final class com/apollographql/cache/normalized/api/RecordMergerKt {
 }
 
 public final class com/apollographql/cache/normalized/api/ResolverContext {
-	public synthetic fun <init> (Lcom/apollographql/apollo/api/CompiledField;Lcom/apollographql/apollo/api/Executable$Variables;Ljava/util/Map;Lokio/ByteString;Ljava/lang/String;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/apollographql/apollo/api/CompiledField;Lcom/apollographql/apollo/api/Executable$Variables;Ljava/util/Map;Ljava/lang/String;Ljava/lang/String;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getCacheHeaders ()Lcom/apollographql/cache/normalized/api/CacheHeaders;
 	public final fun getField ()Lcom/apollographql/apollo/api/CompiledField;
 	public final fun getFieldKeyGenerator ()Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;
 	public final fun getParent ()Ljava/util/Map;
-	public final fun getParentKey-mqw0cJ0 ()Lokio/ByteString;
+	public final fun getParentKey-mqw0cJ0 ()Ljava/lang/String;
 	public final fun getParentType ()Ljava/lang/String;
 	public final fun getPath ()Ljava/util/List;
 	public final fun getVariables ()Lcom/apollographql/apollo/api/Executable$Variables;
@@ -579,14 +577,14 @@ public final class com/apollographql/cache/normalized/api/SchemaCoordinatesMaxAg
 
 public final class com/apollographql/cache/normalized/api/TypePolicyCacheKeyGenerator : com/apollographql/cache/normalized/api/CacheKeyGenerator {
 	public static final field INSTANCE Lcom/apollographql/cache/normalized/api/TypePolicyCacheKeyGenerator;
-	public fun cacheKeyForObject-z2_y8R0 (Ljava/util/Map;Lcom/apollographql/cache/normalized/api/CacheKeyGeneratorContext;)Lokio/ByteString;
+	public fun cacheKeyForObject-z2_y8R0 (Ljava/util/Map;Lcom/apollographql/cache/normalized/api/CacheKeyGeneratorContext;)Ljava/lang/String;
 }
 
 public final class com/apollographql/cache/normalized/internal/NormalizerKt {
-	public static final fun normalized-MplSeLY (Lcom/apollographql/apollo/api/Executable$Data;Lcom/apollographql/apollo/api/Executable;Lokio/ByteString;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Ljava/util/Map;
-	public static final fun normalized-MplSeLY (Ljava/util/Map;Lcom/apollographql/apollo/api/Executable;Lokio/ByteString;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Ljava/util/Map;
-	public static synthetic fun normalized-MplSeLY$default (Lcom/apollographql/apollo/api/Executable$Data;Lcom/apollographql/apollo/api/Executable;Lokio/ByteString;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ILjava/lang/Object;)Ljava/util/Map;
-	public static synthetic fun normalized-MplSeLY$default (Ljava/util/Map;Lcom/apollographql/apollo/api/Executable;Lokio/ByteString;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ILjava/lang/Object;)Ljava/util/Map;
+	public static final fun normalized-MplSeLY (Lcom/apollographql/apollo/api/Executable$Data;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Ljava/util/Map;
+	public static final fun normalized-MplSeLY (Ljava/util/Map;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Ljava/util/Map;
+	public static synthetic fun normalized-MplSeLY$default (Lcom/apollographql/apollo/api/Executable$Data;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ILjava/lang/Object;)Ljava/util/Map;
+	public static synthetic fun normalized-MplSeLY$default (Ljava/util/Map;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ILjava/lang/Object;)Ljava/util/Map;
 }
 
 public final class com/apollographql/cache/normalized/memory/MemoryCache : com/apollographql/cache/normalized/api/NormalizedCache {
@@ -596,12 +594,12 @@ public final class com/apollographql/cache/normalized/memory/MemoryCache : com/a
 	public fun clearAll ()V
 	public fun dump ()Ljava/util/Map;
 	public final fun getSize ()I
-	public fun loadRecord-eNSUWrY (Lokio/ByteString;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/api/Record;
+	public fun loadRecord-eNSUWrY (Ljava/lang/String;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/api/Record;
 	public fun loadRecords (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Collection;
 	public fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/RecordMerger;)Ljava/util/Set;
 	public fun merge (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/RecordMerger;)Ljava/util/Set;
 	public fun remove (Ljava/util/Collection;Z)I
-	public fun remove-eNSUWrY (Lokio/ByteString;Z)Z
+	public fun remove-eNSUWrY (Ljava/lang/String;Z)Z
 	public fun trim (JF)J
 }
 
