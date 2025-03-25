@@ -114,7 +114,11 @@ internal class Normalizer(
           path = base?.append(fieldKey) ?: CacheKey(fieldKey),
           embeddedFields = embeddedFieldsProvider.getEmbeddedFields(EmbeddedFieldsContext(parentType)),
       )
-      val metadata = metadataGenerator.metadataForObject(entry.value, MetadataGeneratorContext(field = mergedField, variables))
+      val metadata = if (entry.value is Error) {
+        emptyMap()
+      } else {
+        metadataGenerator.metadataForObject(entry.value, MetadataGeneratorContext(field = mergedField, variables))
+      }
       fieldKey to FieldInfo(value, metadata)
     }.toMap()
 
@@ -157,7 +161,6 @@ internal class Normalizer(
 
     return cacheKey
   }
-
 
   /**
    * Replace all objects in [value] with [CacheKey] and if [value] is an object itself, returns it as a [CacheKey]

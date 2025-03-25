@@ -187,7 +187,6 @@ private fun CompiledSelection.fieldSelection(responseName: String): CompiledFiel
   }
 }
 
-
 @Suppress("UNCHECKED_CAST")
 internal fun Any?.hasErrors(): Boolean {
   val queue = ArrayDeque<Any?>()

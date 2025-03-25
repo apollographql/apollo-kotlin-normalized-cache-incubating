@@ -1,5 +1,6 @@
 package pagination
 
+import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
@@ -338,5 +339,41 @@ class ConnectionPaginationTest {
     dataFromStore = apolloStore.readOperation(query1).data
     assertEquals(data5, dataFromStore)
   }
-}
 
+  @Test
+  fun errorMemoryCache() {
+    errorTest(MemoryCacheFactory())
+  }
+
+  @Test
+  fun errorSqlCache() {
+    errorTest(SqlNormalizedCacheFactory())
+  }
+
+  @Test
+  fun errorChainedCache() {
+    errorTest(MemoryCacheFactory().chain(SqlNormalizedCacheFactory()))
+  }
+
+  private fun errorTest(cacheFactory: NormalizedCacheFactory) = runTest {
+    val apolloStore = ApolloStore(
+        normalizedCacheFactory = cacheFactory,
+        cacheKeyGenerator = TypePolicyCacheKeyGenerator,
+        metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
+        cacheResolver = FieldPolicyCacheResolver,
+        recordMerger = ConnectionRecordMerger
+    )
+    apolloStore.clearAll()
+    val query = UsersQuery(first = Optional.Present(2))
+    apolloStore.writeOperation(
+        operation = query,
+        data = UsersQuery.Data { users = null },
+        errors = listOf(Error.Builder("An error occurred.").path(listOf("users")).build())
+    )
+    val responseFromStore = apolloStore.readOperation(query)
+    assertEquals(UsersQuery.Data { users = null }, responseFromStore.data)
+    assertEquals(1, responseFromStore.errors?.size)
+    assertEquals("An error occurred.", responseFromStore.errors?.firstOrNull()?.message)
+    assertEquals(listOf("users"), responseFromStore.errors?.firstOrNull()?.path)
+  }
+}
