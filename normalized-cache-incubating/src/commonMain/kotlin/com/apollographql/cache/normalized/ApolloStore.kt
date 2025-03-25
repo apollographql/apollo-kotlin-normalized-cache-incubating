@@ -26,6 +26,7 @@ import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
+import com.apollographql.cache.normalized.api.RecordValue
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.internal.DefaultApolloStore
 import com.benasher44.uuid.Uuid
@@ -335,7 +336,7 @@ internal fun ApolloStore.cacheDumpProvider(): () -> Map<String, Map<String, Pair
   }
 }
 
-private fun Any?.toExternal(): Any? {
+private fun RecordValue.toExternal(): Any? {
   return when (this) {
     null -> null
     is String -> this
@@ -345,6 +346,7 @@ private fun Any?.toExternal(): Any? {
     is Double -> this
     is JsonNumber -> this
     is CacheKey -> this.serialize()
+    is Error -> this
     is List<*> -> {
       map { it.toExternal() }
     }
