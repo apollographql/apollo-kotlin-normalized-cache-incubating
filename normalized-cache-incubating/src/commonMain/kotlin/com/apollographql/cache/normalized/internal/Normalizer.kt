@@ -167,7 +167,7 @@ internal class Normalizer(
    *
    * This function builds the list of records as a side effect
    *
-   * @param value a json value from the response. Can be any type supported by [com.apollographql.apollo.api.json.JsonWriter]
+   * @param value a json value from the response. Can be [com.apollographql.apollo.api.json.ApolloJsonElement] or [Error]
    * @param field the field currently being normalized
    * @param type_ the type currently being normalized. It can be different from `field.type` for lists.
    * @param embeddedFields the embedded fields of the parent
