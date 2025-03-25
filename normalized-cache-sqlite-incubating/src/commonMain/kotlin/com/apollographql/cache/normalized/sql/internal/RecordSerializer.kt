@@ -4,6 +4,7 @@ import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Error.Builder
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.apollo.api.json.JsonNumber
+import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordValue
@@ -18,7 +19,7 @@ internal object RecordSerializer {
     val buffer = Buffer()
     buffer.writeMap(record.fields)
     buffer._writeInt(record.metadata.size)
-    for ((k, v) in record.metadata) {
+    for ((k, v) in record.metadata.mapKeys { (k, _) -> knownMetadataKeys[k] ?: k }) {
       buffer.writeString(k)
       buffer.writeMap(v)
     }
@@ -35,7 +36,7 @@ internal object RecordSerializer {
         val v = buffer.readMap()
         put(k, v)
       }
-    }
+    }.mapKeys { (k, _) -> knownMetadataKeysInverted[k] ?: k }
     return Record(
         key = CacheKey(key),
         fields = fields,
@@ -318,4 +319,11 @@ internal object RecordSerializer {
   private const val MAP_EMPTY = 19
   private const val CACHE_KEY = 20
   private const val ERROR = 21
+
+  // Encode certain known metadata keys as single byte strings to save space
+  private val knownMetadataKeys = mapOf(
+      ApolloCacheHeaders.RECEIVED_DATE to "0",
+      ApolloCacheHeaders.EXPIRATION_DATE to "1",
+  )
+  private val knownMetadataKeysInverted = knownMetadataKeys.entries.associate { (k, v) -> v to k }
 }
