@@ -9,7 +9,6 @@ import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
-import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordValue
 import com.apollographql.cache.normalized.fetchPolicy
@@ -140,9 +139,6 @@ class MigrationTest {
     // Create a modern store and migrate the legacy data
     val store = ApolloStore(SqlNormalizedCacheFactory(name = "modern.db")).also { it.clearAll() }
     store.migrateFrom(legacyStore)
-
-    println(NormalizedCache.prettifyDump(store.dump()))
-
 
     // Read the data back
     ApolloClient.Builder()
