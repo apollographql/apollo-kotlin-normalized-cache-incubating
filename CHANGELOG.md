@@ -1,7 +1,10 @@
 # Next version (unreleased)
 
 - Storage binary format is changed to be a bit more compact
-- Add ApolloStore.trim() to remove old data from the cache
+- Add `ApolloStore.trim()` to remove old data from the cache
+- `CacheKey` is used in more APIs instead of `String`, for consistency.
+- `ApolloCacheHeaders.EVICT_AFTER_READ` is removed. `ApolloStore.remove()` can be used instead.
+- `NormalizedCache.remove(pattern: String)` is removed. Please open an issues if you need this feature back.
 
 # Version 0.0.7
 _2025-03-03_
