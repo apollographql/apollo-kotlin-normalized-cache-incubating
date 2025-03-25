@@ -35,6 +35,14 @@ internal fun createRecordDatabase(driver: SqlDriver): RecordDatabase {
     "Apollo: Cannot find the '$expectedTableName' table (found '$tableNames' instead)"
   }
 
+  try {
+    // Increase the memory cache to 8 MiB
+    // https://www.sqlite.org/pragma.html#pragma_cache_size
+    driver.executeQuery(null, "PRAGMA cache_size = -8192;", { QueryResult.Unit }, 0)
+  } catch (_: Exception) {
+    // Not supported on all platforms, ignore
+  }
+
   return RecordDatabase(driver)
 }
 
