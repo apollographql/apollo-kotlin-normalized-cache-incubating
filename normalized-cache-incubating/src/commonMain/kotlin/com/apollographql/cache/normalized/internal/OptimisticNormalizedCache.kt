@@ -46,6 +46,10 @@ internal class OptimisticNormalizedCache(private val wrapped: NormalizedCache) :
     return wrapped.remove(cacheKeys, cascade) + internalRemove(cacheKeys, cascade)
   }
 
+  override fun trim(maxSizeBytes: Long, trimFactor: Float): Long {
+    return wrapped.trim(maxSizeBytes, trimFactor)
+  }
+
   private fun internalRemove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
     var total = 0
     val referencedCacheKeys = mutableSetOf<CacheKey>()

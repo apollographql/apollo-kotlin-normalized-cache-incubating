@@ -72,15 +72,13 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
 
   /**
    * Trims the cache if its size exceeds [maxSizeBytes]. The amount of data to remove is determined by [trimFactor].
-   * The oldest data is removed according to [ApolloCacheHeaders.RECEIVED_DATE].
+   * The oldest records are removed according to their update date.
    *
    * Optional operation.
    *
    * @param maxSizeBytes the size of the cache in bytes above which the cache should be trimmed.
    * @param trimFactor the factor of the cache size to trim.
    * @return the cache size in bytes after trimming or -1 if the operation is not supported.
-   *
-   * @see com.apollographql.cache.normalized.storeReceiveDate
    */
   fun trim(maxSizeBytes: Long, trimFactor: Float = 0.1f): Long {
     return -1

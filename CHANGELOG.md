@@ -1,6 +1,7 @@
 # Next version (unreleased)
 
-PUT_CHANGELOG_HERE
+- Storage binary format is changed to be a bit more compact
+- Add ApolloStore.trim() to remove old data from the cache
 
 # Version 0.0.7
 _2025-03-03_

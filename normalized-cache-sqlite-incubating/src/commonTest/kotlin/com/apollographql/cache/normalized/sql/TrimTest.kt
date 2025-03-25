@@ -1,5 +1,6 @@
 package com.apollographql.cache.normalized.sql
 
+import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
@@ -12,7 +13,7 @@ import kotlin.test.assertNull
 class TrimTest {
   @Test
   fun trimTest() {
-    val cache = SqlNormalizedCacheFactory().create().also { it.clearAll() }
+    val apolloStore = ApolloStore(SqlNormalizedCacheFactory()).also { it.clearAll() }
 
     val largeString = "".padStart(1024, '?')
 
@@ -21,8 +22,8 @@ class TrimTest {
         fields = mapOf("key" to "value"),
         mutationId = null,
         metadata = emptyMap()
-    ).withDates(receivedDate = "0", expirationDate = null)
-    cache.merge(oldRecord, CacheHeaders.NONE, recordMerger = DefaultRecordMerger)
+    )
+    apolloStore.accessCache { it.merge(oldRecord, CacheHeaders.NONE, recordMerger = DefaultRecordMerger) }
 
     val newRecords = 0.until(2 * 1024).map {
       Record(
@@ -32,16 +33,16 @@ class TrimTest {
           metadata = emptyMap()
       ).withDates(receivedDate = it.toString(), expirationDate = null)
     }
-    cache.merge(newRecords, CacheHeaders.NONE, recordMerger = DefaultRecordMerger)
+    apolloStore.accessCache { it.merge(newRecords, CacheHeaders.NONE, recordMerger = DefaultRecordMerger) }
 
-    val sizeBeforeTrim = cache.trim(-1)
+    val sizeBeforeTrim = apolloStore.trim(-1)
     assertEquals(8515584, sizeBeforeTrim)
 
     // Trim the cache by 10%
-    val sizeAfterTrim = cache.trim(8515584, 0.1f)
+    val sizeAfterTrim = apolloStore.trim(8515584, 0.1f)
 
     assertEquals(7667712, sizeAfterTrim)
     // The oldest key must have been removed
-    assertNull(cache.loadRecord(CacheKey("old"), CacheHeaders.NONE))
+    assertNull(apolloStore.accessCache { it.loadRecord(CacheKey("old"), CacheHeaders.NONE) })
   }
 }

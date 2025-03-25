@@ -95,6 +95,7 @@ abstract interface com.apollographql.cache.normalized/ApolloStore { // com.apoll
     abstract fun remove(com.apollographql.cache.normalized.api/CacheKey, kotlin/Boolean = ...): kotlin/Boolean // com.apollographql.cache.normalized/ApolloStore.remove|remove(com.apollographql.cache.normalized.api.CacheKey;kotlin.Boolean){}[0]
     abstract fun remove(kotlin.collections/List<com.apollographql.cache.normalized.api/CacheKey>, kotlin/Boolean = ...): kotlin/Int // com.apollographql.cache.normalized/ApolloStore.remove|remove(kotlin.collections.List<com.apollographql.cache.normalized.api.CacheKey>;kotlin.Boolean){}[0]
     abstract fun rollbackOptimisticUpdates(com.benasher44.uuid/Uuid): kotlin.collections/Set<kotlin/String> // com.apollographql.cache.normalized/ApolloStore.rollbackOptimisticUpdates|rollbackOptimisticUpdates(com.benasher44.uuid.Uuid){}[0]
+    abstract fun trim(kotlin/Long, kotlin/Float = ...): kotlin/Long // com.apollographql.cache.normalized/ApolloStore.trim|trim(kotlin.Long;kotlin.Float){}[0]
     abstract suspend fun publish(kotlin.collections/Set<kotlin/String>) // com.apollographql.cache.normalized/ApolloStore.publish|publish(kotlin.collections.Set<kotlin.String>){}[0]
 
     final class <#A1: com.apollographql.apollo.api/Executable.Data> ReadResult { // com.apollographql.cache.normalized/ApolloStore.ReadResult|null[0]

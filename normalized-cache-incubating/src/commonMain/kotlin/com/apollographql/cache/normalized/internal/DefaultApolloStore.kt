@@ -303,6 +303,10 @@ internal class DefaultApolloStore(
     return cache.merge(record, cacheHeaders, recordMerger)
   }
 
+  override fun trim(maxSizeBytes: Long, trimFactor: Float): Long {
+    return cache.trim(maxSizeBytes, trimFactor)
+  }
+
   override fun dump(): Map<KClass<*>, Map<CacheKey, Record>> {
     return cache.dump()
   }

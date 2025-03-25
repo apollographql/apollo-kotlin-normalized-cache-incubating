@@ -239,6 +239,18 @@ interface ApolloStore {
   fun remove(cacheKeys: List<CacheKey>, cascade: Boolean = true): Int
 
   /**
+   * Trims the store if its size exceeds [maxSizeBytes]. The amount of data to remove is determined by [trimFactor].
+   * The oldest records are removed according to their update date.
+   *
+   * This may not be supported by all cache implementations (currently this is implemented by the SQL cache).
+   *
+   * @param maxSizeBytes the size of the cache in bytes above which the cache should be trimmed.
+   * @param trimFactor the factor of the cache size to trim.
+   * @return the cache size in bytes after trimming or -1 if the operation is not supported.
+   */
+  fun trim(maxSizeBytes: Long, trimFactor: Float = 0.1f): Long
+
+  /**
    * Normalizes executable data to a map of [Record] keyed by [Record.key].
    */
   fun <D : Executable.Data> normalize(
