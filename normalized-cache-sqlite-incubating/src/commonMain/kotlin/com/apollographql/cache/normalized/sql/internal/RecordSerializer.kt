@@ -148,7 +148,7 @@ internal object RecordSerializer {
     when (value) {
       is String -> {
         if (value.isEmpty()) {
-          writeByte(EMPTY_STRING)
+          writeByte(STRING_EMPTY)
         } else {
           writeByte(STRING)
           writeString(value)
@@ -188,7 +188,7 @@ internal object RecordSerializer {
 
       is List<*> -> {
         if (value.isEmpty()) {
-          writeByte(EMPTY_LIST)
+          writeByte(LIST_EMPTY)
         } else {
           writeByte(LIST)
           _writeInt(value.size)
@@ -233,7 +233,7 @@ internal object RecordSerializer {
   private fun Buffer.readAny(): RecordValue {
     return when (val what = readByte().toInt()) {
       STRING -> readString()
-      EMPTY_STRING -> ""
+      STRING_EMPTY -> ""
       INT_0 -> 0
       INT_BYTE -> readByte().toInt()
       INT_SHORT -> readShort().toInt()
@@ -258,7 +258,7 @@ internal object RecordSerializer {
         }
       }
 
-      EMPTY_LIST -> emptyList<RecordValue>()
+      LIST_EMPTY -> emptyList<RecordValue>()
 
       MAP -> {
         readMap()
@@ -298,7 +298,7 @@ internal object RecordSerializer {
 
   private const val NULL = 0
   private const val STRING = 1
-  private const val EMPTY_STRING = 2
+  private const val STRING_EMPTY = 2
   private const val INT_0 = 3
   private const val INT_BYTE = 4
   private const val INT_SHORT = 5
@@ -313,7 +313,7 @@ internal object RecordSerializer {
   private const val DOUBLE = 14
   private const val JSON_NUMBER = 15
   private const val LIST = 16
-  private const val EMPTY_LIST = 17
+  private const val LIST_EMPTY = 17
   private const val MAP = 18
   private const val MAP_EMPTY = 19
   private const val CACHE_KEY = 20
