@@ -85,7 +85,7 @@ class MemoryCacheTest {
     val testRecord3 = createTestRecord("3")
 
     val lruCache = createCache(
-        maxSizeBytes = 2000
+        maxSizeBytes = 800
     )
 
     val records = listOf(testRecord1, testRecord2, testRecord3)
