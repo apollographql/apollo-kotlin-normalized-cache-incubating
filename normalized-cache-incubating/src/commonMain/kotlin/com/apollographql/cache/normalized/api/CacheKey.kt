@@ -35,7 +35,7 @@ value class CacheKey(
    */
   constructor(typename: String, vararg values: String) : this(typename, values.toList())
 
-  fun keyToString(): String {
+  internal fun keyToString(): String {
     return key
   }
 

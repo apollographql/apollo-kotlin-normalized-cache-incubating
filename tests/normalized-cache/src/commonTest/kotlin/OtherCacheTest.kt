@@ -12,6 +12,7 @@ import com.apollographql.cache.normalized.api.IdCacheKeyResolver
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.keyToString
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import normalizer.CharacterDetailsQuery

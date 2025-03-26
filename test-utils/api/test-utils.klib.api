@@ -8,3 +8,4 @@
 // Library unique name: <com.apollographql.cache:test-utils>
 final fun (com.apollographql.cache.normalized.api/CacheKey).com.apollographql.cache.normalized.testing/append(kotlin/Array<out kotlin/String>...): com.apollographql.cache.normalized.api/CacheKey // com.apollographql.cache.normalized.testing/append|append@com.apollographql.cache.normalized.api.CacheKey(kotlin.Array<out|kotlin.String>...){}[0]
 final fun (com.apollographql.cache.normalized.api/CacheKey).com.apollographql.cache.normalized.testing/fieldKey(kotlin/String): kotlin/String // com.apollographql.cache.normalized.testing/fieldKey|fieldKey@com.apollographql.cache.normalized.api.CacheKey(kotlin.String){}[0]
+final fun (com.apollographql.cache.normalized.api/CacheKey).com.apollographql.cache.normalized.testing/keyToString(): kotlin/String // com.apollographql.cache.normalized.testing/keyToString|keyToString@com.apollographql.cache.normalized.api.CacheKey(){}[0]

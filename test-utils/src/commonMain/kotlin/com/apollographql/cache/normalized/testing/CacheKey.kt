@@ -13,3 +13,7 @@ fun CacheKey.append(vararg keys: String): CacheKey {
   }
   return cacheKey
 }
+
+fun CacheKey.keyToString(): String {
+  return key
+}

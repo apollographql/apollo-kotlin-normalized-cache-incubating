@@ -471,7 +471,6 @@ final value class com.apollographql.cache.normalized.api/CacheKey { // com.apoll
 
     final fun equals(kotlin/Any?): kotlin/Boolean // com.apollographql.cache.normalized.api/CacheKey.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.apollographql.cache.normalized.api/CacheKey.hashCode|hashCode(){}[0]
-    final fun keyToString(): kotlin/String // com.apollographql.cache.normalized.api/CacheKey.keyToString|keyToString(){}[0]
     final fun serialize(): kotlin/String // com.apollographql.cache.normalized.api/CacheKey.serialize|serialize(){}[0]
     final fun toString(): kotlin/String // com.apollographql.cache.normalized.api/CacheKey.toString|toString(){}[0]
 

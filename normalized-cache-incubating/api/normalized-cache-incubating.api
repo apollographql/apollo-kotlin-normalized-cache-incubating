@@ -241,7 +241,6 @@ public final class com/apollographql/cache/normalized/api/CacheKey {
 	public final fun getKey ()Ljava/lang/String;
 	public fun hashCode ()I
 	public static fun hashCode-impl (Ljava/lang/String;)I
-	public static final fun keyToString-impl (Ljava/lang/String;)Ljava/lang/String;
 	public static final fun rootKey-mqw0cJ0 ()Ljava/lang/String;
 	public static final fun serialize-impl (Ljava/lang/String;)Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;

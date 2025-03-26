@@ -22,6 +22,7 @@ import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.optimisticUpdates
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.append
+import com.apollographql.cache.normalized.testing.keyToString
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.assertNoRequest
 import com.apollographql.mockserver.awaitRequest
