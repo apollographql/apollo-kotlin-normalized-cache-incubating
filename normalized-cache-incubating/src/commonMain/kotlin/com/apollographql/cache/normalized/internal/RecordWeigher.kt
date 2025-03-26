@@ -5,7 +5,6 @@ import com.apollographql.apollo.api.json.JsonNumber
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordValue
-import okio.internal.commonAsUtf8ToByteArray
 import kotlin.jvm.JvmStatic
 
 internal object RecordWeigher {
@@ -36,14 +35,18 @@ internal object RecordWeigher {
   }
 
   private fun weighField(field: RecordValue): Int {
+    /*
+     * Note: for Strings we use the character length where we should use the UTF-8 size,
+     * but this is a good enough estimation for the weight, and avoids a bit of overhead.
+     */
     return when (field) {
       null -> SIZE_OF_NULL
-      is String -> field.commonAsUtf8ToByteArray().size
+      is String -> field.length
       is Boolean -> SIZE_OF_BOOLEAN
       is Int -> SIZE_OF_INT
       is Long -> SIZE_OF_LONG // Might happen with LongDataAdapter
       is Double -> SIZE_OF_DOUBLE
-      is JsonNumber -> field.value.commonAsUtf8ToByteArray().size + SIZE_OF_LONG
+      is JsonNumber -> field.value.length + SIZE_OF_LONG
       /**
        * Custom scalars with a json object representation are stored directly in the record
        */
@@ -61,7 +64,7 @@ internal object RecordWeigher {
 
       is Error -> {
         SIZE_OF_ERROR_OVERHEAD +
-            field.message.commonAsUtf8ToByteArray().size +
+            field.message.length +
             (field.locations?.size ?: 0) * SIZE_OF_INT * 2 +
             weighField(field.path) +
             weighField(field.extensions) +
