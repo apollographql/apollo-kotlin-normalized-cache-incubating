@@ -16,12 +16,12 @@ import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
-import com.apollographql.cache.normalized.api.append
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.optimisticUpdates
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.append
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.assertNoRequest
 import com.apollographql.mockserver.awaitRequest

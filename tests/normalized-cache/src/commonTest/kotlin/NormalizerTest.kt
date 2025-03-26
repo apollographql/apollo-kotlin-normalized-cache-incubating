@@ -8,9 +8,9 @@ import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
-import com.apollographql.cache.normalized.api.append
 import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
+import com.apollographql.cache.normalized.testing.append
 import httpcache.AllPlanetsQuery
 import normalizer.EpisodeHeroNameQuery
 import normalizer.HeroAndFriendsNamesQuery

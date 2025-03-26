@@ -19,7 +19,6 @@ import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
-import com.apollographql.cache.normalized.api.append
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
@@ -28,6 +27,7 @@ import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storeReceivedDate
+import com.apollographql.cache.normalized.testing.append
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import kotlinx.coroutines.flow.Flow

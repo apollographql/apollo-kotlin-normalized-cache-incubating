@@ -266,8 +266,6 @@ public final class com/apollographql/cache/normalized/api/CacheKeyGeneratorConte
 }
 
 public final class com/apollographql/cache/normalized/api/CacheKeyKt {
-	public static final fun append-eNSUWrY (Ljava/lang/String;[Ljava/lang/String;)Ljava/lang/String;
-	public static final fun fieldKey-eNSUWrY (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 	public static final fun isRootKey-pWl1Des (Ljava/lang/String;)Z
 }
 

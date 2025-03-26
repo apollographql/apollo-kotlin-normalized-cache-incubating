@@ -1,6 +1,5 @@
 package com.apollographql.cache.normalized.api
 
-import com.apollographql.apollo.annotations.ApolloInternal
 import kotlin.jvm.JvmInline
 import kotlin.jvm.JvmStatic
 
@@ -80,13 +79,11 @@ fun CacheKey.isRootKey(): Boolean {
   return this == CacheKey.rootKey()
 }
 
-@ApolloInternal
-fun CacheKey.fieldKey(fieldName: String): String {
+internal fun CacheKey.fieldKey(fieldName: String): String {
   return "${keyToString()}.$fieldName"
 }
 
-@ApolloInternal
-fun CacheKey.append(vararg keys: String): CacheKey {
+internal fun CacheKey.append(vararg keys: String): CacheKey {
   var cacheKey: CacheKey = this
   for (key in keys) {
     cacheKey = CacheKey("${cacheKey.key}.$key")

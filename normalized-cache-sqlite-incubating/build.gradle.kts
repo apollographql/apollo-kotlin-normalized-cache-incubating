@@ -87,6 +87,7 @@ kotlin {
       dependencies {
         implementation(libs.kotlin.test)
         implementation(libs.apollo.testing.support)
+        implementation(project(":test-utils"))
       }
     }
   }

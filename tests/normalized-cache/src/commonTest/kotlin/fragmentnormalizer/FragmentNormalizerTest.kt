@@ -5,11 +5,11 @@ import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
-import com.apollographql.cache.normalized.api.append
 import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
+import com.apollographql.cache.normalized.testing.append
 import fragmentnormalizer.fragment.ConversationFragment
 import fragmentnormalizer.fragment.ConversationFragmentImpl
 import kotlin.test.Test

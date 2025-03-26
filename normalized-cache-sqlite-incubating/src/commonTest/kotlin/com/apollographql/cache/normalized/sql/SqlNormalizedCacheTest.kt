@@ -13,8 +13,8 @@ import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
-import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.sql.internal.RecordDatabase
+import com.apollographql.cache.normalized.testing.fieldKey
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

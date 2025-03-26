@@ -11,14 +11,14 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
-import com.apollographql.cache.normalized.api.append
-import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeStaleFields
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.append
+import com.apollographql.cache.normalized.testing.fieldKey
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import okio.use

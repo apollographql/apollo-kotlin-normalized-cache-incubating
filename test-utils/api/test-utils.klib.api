@@ -1,0 +1,10 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, macosArm64, macosX64, tvosArm64, tvosSimulatorArm64, tvosX64, wasmJs, watchosArm32, watchosArm64, watchosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <com.apollographql.cache:test-utils>
+final fun (com.apollographql.cache.normalized.api/CacheKey).com.apollographql.cache.normalized.testing/append(kotlin/Array<out kotlin/String>...): com.apollographql.cache.normalized.api/CacheKey // com.apollographql.cache.normalized.testing/append|append@com.apollographql.cache.normalized.api.CacheKey(kotlin.Array<out|kotlin.String>...){}[0]
+final fun (com.apollographql.cache.normalized.api/CacheKey).com.apollographql.cache.normalized.testing/fieldKey(kotlin/String): kotlin/String // com.apollographql.cache.normalized.testing/fieldKey|fieldKey@com.apollographql.cache.normalized.api.CacheKey(kotlin.String){}[0]

@@ -26,12 +26,12 @@ import com.apollographql.cache.normalized.CacheFirstInterceptor
 import com.apollographql.cache.normalized.CacheOnlyInterceptor
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheKey
-import com.apollographql.cache.normalized.api.fieldKey
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.isFromCache
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.refetchPolicyInterceptor
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.fieldKey
 import com.apollographql.cache.normalized.watch
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.awaitRequest
