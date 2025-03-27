@@ -471,12 +471,9 @@ final value class com.apollographql.cache.normalized.api/CacheKey { // com.apoll
 
     final fun equals(kotlin/Any?): kotlin/Boolean // com.apollographql.cache.normalized.api/CacheKey.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // com.apollographql.cache.normalized.api/CacheKey.hashCode|hashCode(){}[0]
-    final fun serialize(): kotlin/String // com.apollographql.cache.normalized.api/CacheKey.serialize|serialize(){}[0]
     final fun toString(): kotlin/String // com.apollographql.cache.normalized.api/CacheKey.toString|toString(){}[0]
 
     final object Companion { // com.apollographql.cache.normalized.api/CacheKey.Companion|null[0]
-        final fun canDeserialize(kotlin/String): kotlin/Boolean // com.apollographql.cache.normalized.api/CacheKey.Companion.canDeserialize|canDeserialize(kotlin.String){}[0]
-        final fun deserialize(kotlin/String): com.apollographql.cache.normalized.api/CacheKey // com.apollographql.cache.normalized.api/CacheKey.Companion.deserialize|deserialize(kotlin.String){}[0]
         final fun rootKey(): com.apollographql.cache.normalized.api/CacheKey // com.apollographql.cache.normalized.api/CacheKey.Companion.rootKey|rootKey(){}[0]
     }
 }

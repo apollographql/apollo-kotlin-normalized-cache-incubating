@@ -230,11 +230,9 @@ public final class com/apollographql/cache/normalized/api/CacheHeaders$Companion
 public final class com/apollographql/cache/normalized/api/CacheKey {
 	public static final field Companion Lcom/apollographql/cache/normalized/api/CacheKey$Companion;
 	public static final synthetic fun box-impl (Ljava/lang/String;)Lcom/apollographql/cache/normalized/api/CacheKey;
-	public static final fun canDeserialize (Ljava/lang/String;)Z
 	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
 	public static fun constructor-impl (Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
 	public static fun constructor-impl (Ljava/lang/String;[Ljava/lang/String;)Ljava/lang/String;
-	public static final fun deserialize-gE2UBb4 (Ljava/lang/String;)Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
 	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
 	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
@@ -242,15 +240,12 @@ public final class com/apollographql/cache/normalized/api/CacheKey {
 	public fun hashCode ()I
 	public static fun hashCode-impl (Ljava/lang/String;)I
 	public static final fun rootKey-mqw0cJ0 ()Ljava/lang/String;
-	public static final fun serialize-impl (Ljava/lang/String;)Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
 	public final synthetic fun unbox-impl ()Ljava/lang/String;
 }
 
 public final class com/apollographql/cache/normalized/api/CacheKey$Companion {
-	public final fun canDeserialize (Ljava/lang/String;)Z
-	public final fun deserialize-gE2UBb4 (Ljava/lang/String;)Ljava/lang/String;
 	public final fun rootKey-mqw0cJ0 ()Ljava/lang/String;
 }
 

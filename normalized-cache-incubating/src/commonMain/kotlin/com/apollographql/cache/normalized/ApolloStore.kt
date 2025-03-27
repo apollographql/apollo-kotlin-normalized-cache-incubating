@@ -345,8 +345,8 @@ private fun RecordValue.toExternal(): Any? {
     is Long -> this
     is Double -> this
     is JsonNumber -> this
-    is CacheKey -> this.serialize()
-    is Error -> this
+    is CacheKey -> "ApolloCacheReference{${this.keyToString()}}"
+    is Error -> "ApolloCacheError{${this.message}}"
     is List<*> -> {
       map { it.toExternal() }
     }
