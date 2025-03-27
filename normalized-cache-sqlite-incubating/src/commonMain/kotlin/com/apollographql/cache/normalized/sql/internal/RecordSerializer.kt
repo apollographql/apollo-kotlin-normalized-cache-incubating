@@ -56,8 +56,8 @@ internal object RecordSerializer {
 
   private fun Buffer._writeInt(value: Int) {
     when (value) {
-      0 -> {
-        writeByte(INT_0)
+      in 0..<FIRST -> {
+        writeByte(value)
       }
 
       in Byte.MIN_VALUE..Byte.MAX_VALUE -> {
@@ -78,11 +78,12 @@ internal object RecordSerializer {
   }
 
   private fun Buffer._readInt(): Int {
-    return when (val what = readByte().toInt()) {
-      INT_0 -> 0
-      INT_BYTE -> readByte().toInt()
-      INT_SHORT -> readShort().toInt()
-      INT_INT -> readInt()
+    val what = readByte().toInt() and 0xFF
+    return when {
+      what < FIRST -> what
+      what == INT_BYTE -> readByte().toInt()
+      what == INT_SHORT -> readShort().toInt()
+      what == INT_INT -> readInt()
       else -> error("Trying to read unsupported Int type: $what")
     }
   }
@@ -112,17 +113,6 @@ internal object RecordSerializer {
         writeByte(LONG_LONG)
         writeLong(value.toLong())
       }
-    }
-  }
-
-  private fun Buffer._readLong(): Long {
-    return when (val what = readByte().toInt()) {
-      LONG_0 -> 0L
-      LONG_BYTE -> readByte().toLong()
-      LONG_SHORT -> readShort().toLong()
-      LONG_INT -> readInt().toLong()
-      LONG_LONG -> readLong()
-      else -> error("Trying to read unsupported Long type: $what")
     }
   }
 
@@ -232,93 +222,98 @@ internal object RecordSerializer {
   }
 
   private fun Buffer.readAny(): RecordValue {
-    return when (val what = readByte().toInt()) {
-      STRING -> readString()
-      STRING_EMPTY -> ""
-      INT_0 -> 0
-      INT_BYTE -> readByte().toInt()
-      INT_SHORT -> readShort().toInt()
-      INT_INT -> readInt()
-      LONG_0 -> 0L
-      LONG_BYTE -> readByte().toLong()
-      LONG_SHORT -> readShort().toLong()
-      LONG_INT -> readInt().toLong()
-      LONG_LONG -> readLong()
-      DOUBLE -> Double.fromBits(readLong())
-      JSON_NUMBER -> JsonNumber(readString())
-      BOOLEAN_TRUE -> true
-      BOOLEAN_FALSE -> false
-      CACHE_KEY -> {
-        CacheKey(readString())
-      }
-
-      LIST -> {
-        val size = _readInt()
-        0.until(size).map {
-          readAny()
-        }
-      }
-
-      LIST_EMPTY -> emptyList<RecordValue>()
-
-      MAP -> {
-        readMap()
-      }
-
-      MAP_EMPTY -> emptyMap<String, RecordValue>()
-
-      NULL -> null
-
-      ERROR -> {
-        val message = readString()
-        val locations = 0.until(_readInt()).map {
-          Error.Location(_readInt(), _readInt())
-        }
-        val path = 0.until(_readInt()).map {
-          readAny()!!
+    val what = readByte().toInt() and 0xFF
+    return if (what < FIRST) {
+      what
+    } else {
+      when (what) {
+        STRING -> readString()
+        STRING_EMPTY -> ""
+        INT_BYTE -> readByte().toInt()
+        INT_SHORT -> readShort().toInt()
+        INT_INT -> readInt()
+        LONG_0 -> 0L
+        LONG_BYTE -> readByte().toLong()
+        LONG_SHORT -> readShort().toLong()
+        LONG_INT -> readInt().toLong()
+        LONG_LONG -> readLong()
+        DOUBLE -> Double.fromBits(readLong())
+        JSON_NUMBER -> JsonNumber(readString())
+        BOOLEAN_TRUE -> true
+        BOOLEAN_FALSE -> false
+        CACHE_KEY -> {
+          CacheKey(readString())
         }
 
-        @Suppress("UNCHECKED_CAST")
-        val extensions = readAny() as Map<String, Any?>?
-        Builder(message = message)
-            .path(path)
-            .apply {
-              for ((key, value) in extensions.orEmpty()) {
-                putExtension(key, value)
+        LIST -> {
+          val size = _readInt()
+          0.until(size).map {
+            readAny()
+          }
+        }
+
+        LIST_EMPTY -> emptyList<RecordValue>()
+
+        MAP -> {
+          readMap()
+        }
+
+        MAP_EMPTY -> emptyMap<String, RecordValue>()
+
+        NULL -> null
+
+        ERROR -> {
+          val message = readString()
+          val locations = 0.until(_readInt()).map {
+            Error.Location(_readInt(), _readInt())
+          }
+          val path = 0.until(_readInt()).map {
+            readAny()!!
+          }
+
+          @Suppress("UNCHECKED_CAST")
+          val extensions = readAny() as Map<String, Any?>?
+          Builder(message = message)
+              .path(path)
+              .apply {
+                for ((key, value) in extensions.orEmpty()) {
+                  putExtension(key, value)
+                }
+                if (locations.isNotEmpty()) {
+                  locations(locations)
+                }
               }
-              if (locations.isNotEmpty()) {
-                locations(locations)
-              }
-            }
-            .build()
-      }
+              .build()
+        }
 
-      else -> error("Trying to read unsupported Record type: $what")
+        else -> error("Trying to read unsupported Record type: $what")
+      }
     }
   }
 
-  private const val NULL = 0
-  private const val STRING = 1
-  private const val STRING_EMPTY = 2
-  private const val INT_0 = 3
-  private const val INT_BYTE = 4
-  private const val INT_SHORT = 5
-  private const val INT_INT = 6
-  private const val LONG_0 = 7
-  private const val LONG_BYTE = 8
-  private const val LONG_SHORT = 9
-  private const val LONG_INT = 10
-  private const val LONG_LONG = 11
-  private const val BOOLEAN_TRUE = 12
-  private const val BOOLEAN_FALSE = 13
-  private const val DOUBLE = 14
-  private const val JSON_NUMBER = 15
-  private const val LIST = 16
-  private const val LIST_EMPTY = 17
-  private const val MAP = 18
-  private const val MAP_EMPTY = 19
-  private const val CACHE_KEY = 20
-  private const val ERROR = 21
+  private const val FIRST = 255 - 32
+
+  private const val NULL = FIRST
+  private const val STRING = FIRST + 1
+  private const val STRING_EMPTY = FIRST + 2
+  private const val INT_BYTE = FIRST + 3
+  private const val INT_SHORT = FIRST + 4
+  private const val INT_INT = FIRST + 5
+  private const val LONG_0 = FIRST + 6
+  private const val LONG_BYTE = FIRST + 7
+  private const val LONG_SHORT = FIRST + 8
+  private const val LONG_INT = FIRST + 9
+  private const val LONG_LONG = FIRST + 10
+  private const val BOOLEAN_TRUE = FIRST + 11
+  private const val BOOLEAN_FALSE = FIRST + 12
+  private const val DOUBLE = FIRST + 13
+  private const val JSON_NUMBER = FIRST + 14
+  private const val LIST = FIRST + 15
+  private const val LIST_EMPTY = FIRST + 16
+  private const val MAP = FIRST + 17
+  private const val MAP_EMPTY = FIRST + 18
+  private const val CACHE_KEY = FIRST + 19
+  private const val ERROR = FIRST + 20
 
   // Encode certain known metadata keys as single byte strings to save space
   private val knownMetadataKeys = mapOf(
