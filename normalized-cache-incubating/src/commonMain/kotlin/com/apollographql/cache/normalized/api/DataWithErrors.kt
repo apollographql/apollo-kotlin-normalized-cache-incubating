@@ -186,18 +186,3 @@ private fun CompiledSelection.fieldSelection(responseName: String): CompiledFiel
         .build()
   }
 }
-
-@Suppress("UNCHECKED_CAST")
-internal fun Any?.hasErrors(): Boolean {
-  val queue = ArrayDeque<Any?>()
-  queue.add(this)
-  while (queue.isNotEmpty()) {
-    val current = queue.removeFirst()
-    when (current) {
-      is Error -> return true
-      is Map<*, *> -> queue.addAll(current.values)
-      is List<*> -> queue.addAll(current)
-    }
-  }
-  return false
-}

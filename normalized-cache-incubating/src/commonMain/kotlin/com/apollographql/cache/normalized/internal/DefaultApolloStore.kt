@@ -25,7 +25,6 @@ import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
-import com.apollographql.cache.normalized.api.hasErrors
 import com.apollographql.cache.normalized.api.propagateErrors
 import com.apollographql.cache.normalized.api.withErrors
 import com.apollographql.cache.normalized.cacheHeaders
@@ -141,7 +140,7 @@ internal class DefaultApolloStore(
 
     @Suppress("UNCHECKED_CAST")
     val dataWithNulls: Map<String, ApolloJsonElement>? =
-      if (dataWithErrors.hasErrors()) {
+      if (batchReaderData.hasErrors) {
         propagateErrors(dataWithErrors, operation.rootField(), errors)
       } else {
         dataWithErrors
