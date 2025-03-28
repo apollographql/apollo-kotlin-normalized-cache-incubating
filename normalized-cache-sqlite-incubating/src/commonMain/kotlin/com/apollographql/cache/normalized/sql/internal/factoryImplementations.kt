@@ -14,3 +14,6 @@ internal expect fun createDriver(name: String?, baseDir: String?, schema: SqlSch
  * Others like JVM don't do this automatically. This is when [maybeCreateOrMigrateSchema] is needed
  */
 internal expect fun maybeCreateOrMigrateSchema(driver: SqlDriver, schema: SqlSchema<QueryResult.Value<Unit>>)
+
+// See https://www.sqlite.org/limits.html#:~:text=Maximum%20Number%20Of%20Host%20Parameters
+internal expect val parametersMax: Int

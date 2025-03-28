@@ -52,3 +52,5 @@ internal actual fun maybeCreateOrMigrateSchema(driver: SqlDriver, schema: SqlSch
     driver.execute(null, "PRAGMA $versionPragma=$newVersion", 0)
   }
 }
+
+internal actual val parametersMax: Int = 999

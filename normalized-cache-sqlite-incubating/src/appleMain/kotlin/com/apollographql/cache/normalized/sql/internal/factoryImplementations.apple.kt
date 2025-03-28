@@ -29,3 +29,5 @@ internal actual fun createDriver(name: String?, baseDir: String?, schema: SqlSch
 internal actual fun maybeCreateOrMigrateSchema(driver: SqlDriver, schema: SqlSchema<QueryResult.Value<Unit>>) {
   // no op
 }
+
+internal actual val parametersMax: Int = 999

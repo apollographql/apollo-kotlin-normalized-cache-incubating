@@ -10,6 +10,7 @@ import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.api.RecordMergerContext
 import com.apollographql.cache.normalized.api.withDates
 import com.apollographql.cache.normalized.sql.internal.RecordDatabase
+import com.apollographql.cache.normalized.sql.internal.parametersMax
 import kotlin.reflect.KClass
 
 class SqlNormalizedCache internal constructor(
@@ -88,7 +89,7 @@ class SqlNormalizedCache internal constructor(
     } else {
       emptySet()
     }
-    return (keys + referencedKeys).chunked(999).sumOf { chunkedKeys ->
+    return (keys + referencedKeys).chunked(parametersMax).sumOf { chunkedKeys ->
       recordDatabase.deleteRecords(chunkedKeys)
       recordDatabase.changes().toInt()
     }
@@ -126,7 +127,7 @@ class SqlNormalizedCache internal constructor(
   private fun selectRecords(keys: Collection<CacheKey>): List<Record> {
     return keys
         .map { it.key }
-        .chunked(999).flatMap { chunkedKeys ->
+        .chunked(parametersMax).flatMap { chunkedKeys ->
           recordDatabase.selectRecords(chunkedKeys)
         }
   }
