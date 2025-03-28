@@ -10,5 +10,4 @@ com.apollographql.cache.normalized.internal
 com.apollographql.cache.normalized.memory
 module:normalized-cache-sqlite-incubating
 com.apollographql.cache.normalized.sql
-com.apollographql.cache.normalized.sql.internal.blob
-com.apollographql.cache.normalized.sql.internal.blob2
+com.apollographql.cache.normalized.sql.internal.record
