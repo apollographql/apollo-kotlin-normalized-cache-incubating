@@ -24,7 +24,7 @@ import kotlin.jvm.JvmSuppressWildcards
  */
 internal class CacheBatchReader(
     private val cache: ReadOnlyNormalizedCache,
-    private val rootKey: String,
+    private val rootKey: CacheKey,
     private val variables: Executable.Variables,
     private val cacheResolver: CacheResolver,
     private val cacheHeaders: CacheHeaders,
@@ -38,7 +38,7 @@ internal class CacheBatchReader(
    * @param path: the path where this pending reference needs to be inserted
    */
   class PendingReference(
-      val key: String,
+      val key: CacheKey,
       val path: List<Any>,
       val fieldPath: List<CompiledField>,
       val selections: List<CompiledSelection>,
@@ -56,6 +56,11 @@ internal class CacheBatchReader(
    * True if at least one of the resolved fields is stale
    */
   private var isStale = false
+
+  /**
+   * True if at least one of the resolved fields is an Error, or if a cache miss happened
+   */
+  private var hasErrors = false
 
   private val pendingReferences = mutableListOf<PendingReference>()
 
@@ -104,23 +109,29 @@ internal class CacheBatchReader(
     )
 
     while (pendingReferences.isNotEmpty()) {
-      val records = cache.loadRecords(pendingReferences.map { it.key }, cacheHeaders).associateBy { it.key }
-
+      val records: Map<CacheKey, Record> = cache.loadRecords(pendingReferences.map { it.key }, cacheHeaders)
+          .also {
+            if (!hasErrors) {
+              hasErrors = it.any { it.values.any { it.hasErrors() } }
+            }
+          }
+          .associateBy { it.key }
       val copy = pendingReferences.toList()
       pendingReferences.clear()
       copy.forEach { pendingReference ->
         var record = records[pendingReference.key]
         if (record == null) {
-          if (pendingReference.key == CacheKey.rootKey().key) {
+          if (pendingReference.key == CacheKey.rootKey()) {
             // This happens the very first time we read the cache
             record = Record(pendingReference.key, emptyMap())
           } else {
             if (returnPartialResponses) {
               data[pendingReference.path] =
-                cacheMissError(CacheMissException(key = pendingReference.key, fieldName = null, stale = false), path = pendingReference.path)
+                cacheMissError(CacheMissException(key = pendingReference.key.keyToString(), fieldName = null, stale = false), path = pendingReference.path)
+              hasErrors = true
               return@forEach
             } else {
-              throw CacheMissException(pendingReference.key)
+              throw CacheMissException(pendingReference.key.keyToString())
             }
           }
         }
@@ -149,6 +160,7 @@ internal class CacheBatchReader(
           } catch (e: CacheMissException) {
             if (e.stale) isStale = true
             if (returnPartialResponses) {
+              hasErrors = true
               cacheMissError(e, pendingReference.path + it.responseName)
             } else {
               throw e
@@ -163,7 +175,11 @@ internal class CacheBatchReader(
       }
     }
 
-    return CacheBatchReaderData(data, CacheHeaders.Builder().apply { if (isStale) addHeader(ApolloCacheHeaders.STALE, "true") }.build())
+    return CacheBatchReaderData(
+        data = data,
+        cacheHeaders = CacheHeaders.Builder().apply { if (isStale) addHeader(ApolloCacheHeaders.STALE, "true") }.build(),
+        hasErrors = hasErrors,
+    )
   }
 
   private fun Any?.unwrap(): Any? {
@@ -194,7 +210,7 @@ internal class CacheBatchReader(
       is CacheKey -> {
         pendingReferences.add(
             PendingReference(
-                key = key,
+                key = this,
                 selections = selections,
                 parentType = parentType,
                 path = path,
@@ -224,7 +240,7 @@ internal class CacheBatchReader(
                     field = it,
                     variables = variables,
                     parent = this,
-                    parentKey = "",
+                    parentKey = CacheKey(""),
                     parentType = parentType,
                     cacheHeaders = cacheHeaders,
                     fieldKeyGenerator = fieldKeyGenerator,
@@ -234,6 +250,7 @@ internal class CacheBatchReader(
           } catch (e: CacheMissException) {
             if (e.stale) isStale = true
             if (returnPartialResponses) {
+              hasErrors = true
               cacheMissError(e, path + it.responseName)
             } else {
               throw e
@@ -248,6 +265,7 @@ internal class CacheBatchReader(
   internal class CacheBatchReaderData(
       private val data: Map<List<Any>, Any>,
       val cacheHeaders: CacheHeaders,
+      val hasErrors: Boolean,
   ) {
     @Suppress("UNCHECKED_CAST")
     internal fun toMap(withErrors: Boolean = true): DataWithErrors {
@@ -303,5 +321,21 @@ internal class CacheBatchReader(
         .path(path = path)
         .cacheMissException(exception)
         .build()
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  internal fun Any?.hasErrors(): Boolean {
+    val queue = ArrayDeque<Any?>()
+    queue.add(this)
+    while (queue.isNotEmpty()) {
+      val current = queue.removeFirst()
+      when (current) {
+        is Error -> return true
+        is List<*> -> queue.addAll(current)
+        // Embedded fields can be represented as Maps
+        is Map<*, *> -> queue.addAll(current.values)
+      }
+    }
+    return false
   }
 }

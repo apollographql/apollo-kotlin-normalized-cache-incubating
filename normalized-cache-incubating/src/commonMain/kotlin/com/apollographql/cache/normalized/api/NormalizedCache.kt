@@ -71,23 +71,22 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
   fun remove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int
 
   /**
-   * Remove records whose key matches a given pattern from this cache and all chained caches
+   * Trims the cache if its size exceeds [maxSizeBytes]. The amount of data to remove is determined by [trimFactor].
+   * The oldest records are removed according to their update date.
    *
-   * @param pattern a pattern to filter the cache keys. 'pattern' is interpreted as in the LIKE operator of Sqlite.
-   * - '%' matches any sequence of zero or more characters
-   * - '_' matches any single character
-   * - The matching is case-insensitive
-   * - '\' is used as escape
-   * See https://sqlite.org/lang_expr.html for more details
+   * Optional operation.
    *
-   * @return the number of records deleted accross all caches
+   * @param maxSizeBytes the size of the cache in bytes above which the cache should be trimmed.
+   * @param trimFactor the factor of the cache size to trim.
+   * @return the cache size in bytes after trimming or -1 if the operation is not supported.
    */
-  fun remove(pattern: String): Int
-
+  fun trim(maxSizeBytes: Long, trimFactor: Float = 0.1f): Long {
+    return -1
+  }
 
   companion object {
     @JvmStatic
-    fun prettifyDump(dump: Map<@JvmSuppressWildcards KClass<*>, Map<String, Record>>): String = dump.prettifyDump()
+    fun prettifyDump(dump: Map<@JvmSuppressWildcards KClass<*>, Map<CacheKey, Record>>): String = dump.prettifyDump()
 
     private fun Any?.prettifyDump(level: Int = 0): String {
       return buildString {
@@ -128,6 +127,7 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
                 indent(level + 1)
                 append(when (key) {
                   is KClass<*> -> key.simpleName
+                  is CacheKey -> key.keyToString()
                   else -> key
                 }
                 )

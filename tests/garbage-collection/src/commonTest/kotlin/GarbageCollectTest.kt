@@ -13,6 +13,8 @@ import com.apollographql.cache.normalized.garbageCollect
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.append
+import com.apollographql.cache.normalized.testing.fieldKey
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import okio.use
@@ -23,9 +25,17 @@ import kotlin.time.Duration.Companion.seconds
 
 class GarbageCollectTest {
   @Test
-  fun garbageCollect() = runTest {
+  fun garbageCollectMemory() = garbageCollect(ApolloStore(MemoryCacheFactory()))
+
+  @Test
+  fun garbageCollectSql() = garbageCollect(ApolloStore(SqlNormalizedCacheFactory()))
+
+  @Test
+  fun garbageCollectChained() = garbageCollect(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+
+  private fun garbageCollect(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = apolloStore.also { it.clearAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
@@ -51,35 +61,35 @@ class GarbageCollectTest {
           val garbageCollectResult = store.garbageCollect(maxAgeProvider)
           assertEquals(
               setOf(
-                  "metaProjects.0.0.type.owners",
-                  "metaProjects.0.1.type.owners",
-                  "metaProjects.1.0.type.owners",
+                  CacheKey("metaProjects").append("0", "0", "type").fieldKey("owners"),
+                  CacheKey("metaProjects").append("0", "1", "type").fieldKey("owners"),
+                  CacheKey("metaProjects").append("1", "0", "type").fieldKey("owners"),
               ),
               garbageCollectResult.removedStaleFields.removedFields
           )
           assertEquals(
               setOf(
-                  CacheKey("metaProjects.0.0.type"),
-                  CacheKey("metaProjects.0.1.type"),
-                  CacheKey("metaProjects.1.0.type"),
+                  CacheKey("metaProjects").append("0", "0", "type"),
+                  CacheKey("metaProjects").append("0", "1", "type"),
+                  CacheKey("metaProjects").append("1", "0", "type"),
               ),
               garbageCollectResult.removedStaleFields.removedRecords
           )
 
           assertEquals(
               setOf(
-                  "metaProjects.0.0.type",
-                  "metaProjects.0.1.type",
-                  "metaProjects.1.0.type",
-                  "QUERY_ROOT.metaProjects",
+                  CacheKey("metaProjects").append("0", "0").fieldKey("type"),
+                  CacheKey("metaProjects").append("0", "1").fieldKey("type"),
+                  CacheKey("metaProjects").append("1", "0").fieldKey("type"),
+                  CacheKey("QUERY_ROOT").fieldKey("metaProjects"),
               ),
               garbageCollectResult.removedDanglingReferences.removedFields
           )
           assertEquals(
               setOf(
-                  CacheKey("metaProjects.0.0"),
-                  CacheKey("metaProjects.0.1"),
-                  CacheKey("metaProjects.1.0"),
+                  CacheKey("metaProjects").append("0", "0"),
+                  CacheKey("metaProjects").append("0", "1"),
+                  CacheKey("metaProjects").append("1", "0"),
                   CacheKey("QUERY_ROOT"),
               ),
               garbageCollectResult.removedDanglingReferences.removedRecords

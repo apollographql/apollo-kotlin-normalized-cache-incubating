@@ -27,6 +27,8 @@ import com.apollographql.cache.normalized.api.MetadataGenerator
 import com.apollographql.cache.normalized.api.MetadataGeneratorContext
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
+import com.apollographql.cache.normalized.api.append
+import com.apollographql.cache.normalized.api.isRootKey
 import com.apollographql.cache.normalized.api.withErrors
 
 /**
@@ -35,19 +37,19 @@ import com.apollographql.cache.normalized.api.withErrors
  */
 internal class Normalizer(
     private val variables: Executable.Variables,
-    private val rootKey: String,
+    private val rootKey: CacheKey,
     private val cacheKeyGenerator: CacheKeyGenerator,
     private val metadataGenerator: MetadataGenerator,
     private val fieldKeyGenerator: FieldKeyGenerator,
     private val embeddedFieldsProvider: EmbeddedFieldsProvider,
 ) {
-  private val records = mutableMapOf<String, Record>()
+  private val records = mutableMapOf<CacheKey, Record>()
 
   fun normalize(
       map: DataWithErrors,
       selections: List<CompiledSelection>,
       parentType: CompiledNamedType,
-  ): Map<String, Record> {
+  ): Map<CacheKey, Record> {
     buildRecord(map, rootKey, selections, parentType)
 
     return records
@@ -68,7 +70,7 @@ internal class Normalizer(
    */
   private fun buildFields(
       obj: DataWithErrors,
-      key: String,
+      key: CacheKey,
       selections: List<CompiledSelection>,
       parentType: CompiledNamedType,
   ): Map<String, FieldInfo> {
@@ -99,7 +101,7 @@ internal class Normalizer(
 
       val fieldKey = fieldKeyGenerator.getFieldKey(FieldKeyContext(parentType.name, mergedField, variables))
 
-      val base = if (key == CacheKey.rootKey().key) {
+      val base = if (key.isRootKey()) {
         // If we're at the root level, skip `QUERY_ROOT` altogether to save a few bytes
         null
       } else {
@@ -109,7 +111,7 @@ internal class Normalizer(
           value = entry.value,
           field = mergedField,
           type_ = mergedField.type,
-          path = base.append(fieldKey),
+          path = base?.append(fieldKey) ?: CacheKey(fieldKey),
           embeddedFields = embeddedFieldsProvider.getEmbeddedFields(EmbeddedFieldsContext(parentType)),
       )
       val metadata = if (entry.value is Error) {
@@ -124,30 +126,28 @@ internal class Normalizer(
   }
 
   /**
-   *
-   *
    * @param obj the json node representing the object
-   * @param key the key for this record
+   * @param cacheKey the key for this record
    * @param selections the selections queried on this object
    * @return the CacheKey if this object has a CacheKey or the new Map if the object was embedded
    */
   private fun buildRecord(
       obj: DataWithErrors,
-      key: String,
+      cacheKey: CacheKey,
       selections: List<CompiledSelection>,
       parentType: CompiledNamedType,
   ): CacheKey {
-    val fields = buildFields(obj, key, selections, parentType)
+    val fields = buildFields(obj, cacheKey, selections, parentType)
     val fieldValues = fields.mapValues { it.value.fieldValue }
     val metadata = fields.mapValues { it.value.metadata }.filterValues { it.isNotEmpty() }
     val record = Record(
-        key = key,
+        key = cacheKey,
         fields = fieldValues,
         mutationId = null,
         metadata = metadata,
     )
 
-    val existingRecord = records[key]
+    val existingRecord = records[cacheKey]
 
     val mergedRecord = if (existingRecord != null) {
       /**
@@ -157,11 +157,10 @@ internal class Normalizer(
     } else {
       record
     }
-    records[key] = mergedRecord
+    records[cacheKey] = mergedRecord
 
-    return CacheKey(key)
+    return cacheKey
   }
-
 
   /**
    * Replace all objects in [value] with [CacheKey] and if [value] is an object itself, returns it as a [CacheKey]
@@ -177,7 +176,7 @@ internal class Normalizer(
       value: Any?,
       field: CompiledField,
       type_: CompiledType,
-      path: String,
+      path: CacheKey,
       embeddedFields: List<String>,
   ): Any? {
     /**
@@ -210,7 +209,7 @@ internal class Normalizer(
         var key = cacheKeyGenerator.cacheKeyForObject(
             value as Map<String, Any?>,
             CacheKeyGeneratorContext(field, variables),
-        )?.key
+        )
 
         if (key == null) {
           key = path
@@ -260,9 +259,6 @@ internal class Normalizer(
     collectFields(selections, parentType, typename, state)
     return state.fields
   }
-
-  // The receiver can be null for the root query to save some space in the cache by not storing QUERY_ROOT all over the place
-  private fun String?.append(next: String): String = if (this == null) next else "$this.$next"
 }
 
 /**
@@ -270,13 +266,13 @@ internal class Normalizer(
  */
 fun <D : Executable.Data> D.normalized(
     executable: Executable<D>,
-    rootKey: String = CacheKey.rootKey().key,
+    rootKey: CacheKey = CacheKey.rootKey(),
     customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
     cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
     embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
-): Map<String, Record> {
+): Map<CacheKey, Record> {
   val dataWithErrors = this.withErrors(executable, null, customScalarAdapters)
   return dataWithErrors.normalized(executable, rootKey, customScalarAdapters, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider)
 }
@@ -286,13 +282,13 @@ fun <D : Executable.Data> D.normalized(
  */
 fun <D : Executable.Data> DataWithErrors.normalized(
     executable: Executable<D>,
-    rootKey: String = CacheKey.rootKey().key,
+    rootKey: CacheKey = CacheKey.rootKey(),
     customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
     cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
     embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
-): Map<String, Record> {
+): Map<CacheKey, Record> {
   val variables = executable.variables(customScalarAdapters, withDefaultValues = true)
   return Normalizer(variables, rootKey, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider)
       .normalize(this, executable.rootField().selections, executable.rootField().type.rawType())

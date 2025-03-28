@@ -1,6 +1,7 @@
 package com.apollographql.cache.normalized
 
 import com.apollographql.cache.normalized.api.CacheHeaders
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMergerContext
@@ -11,7 +12,7 @@ class DefaultRecordMergerTest {
   @Test
   fun mergeMetaData() {
     val existing = Record(
-        key = "key",
+        key = CacheKey("key"),
         fields = mapOf(
             "field1" to "value1",
             "field2" to "value2"
@@ -30,7 +31,7 @@ class DefaultRecordMergerTest {
     )
 
     val incoming = Record(
-        key = "key",
+        key = CacheKey("key"),
         fields = mapOf(
             "field1" to "value1.incoming",
             "field3" to "value3",
@@ -51,7 +52,7 @@ class DefaultRecordMergerTest {
     val mergedRecord = DefaultRecordMerger.merge(RecordMergerContext(existing, incoming, CacheHeaders.NONE)).first
 
     val expected = Record(
-        key = "key",
+        key = CacheKey("key"),
         fields = mapOf(
             "field1" to "value1.incoming",
             "field2" to "value2",

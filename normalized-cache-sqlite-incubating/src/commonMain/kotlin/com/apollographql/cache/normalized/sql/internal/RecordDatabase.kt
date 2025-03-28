@@ -1,52 +1,69 @@
 package com.apollographql.cache.normalized.sql.internal
 
+import app.cash.sqldelight.Query
+import app.cash.sqldelight.db.QueryResult
+import app.cash.sqldelight.db.SqlDriver
+import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.cache.normalized.api.Record
+import com.apollographql.cache.normalized.sql.internal.record.RecordQueries
+import com.apollographql.cache.normalized.sql.internal.record.SqlRecordDatabase
 
-/**
- * A database that can store [Record]
- *
- * All calls are synchronous, the calling code is expected to handle threading.
- *
- */
-internal interface RecordDatabase {
-  /**
-   * @return the [Record] of null if there is no record for the given id
-   */
-  fun select(key: String): Record?
+internal class RecordDatabase(private val driver: SqlDriver) {
+  private val recordQueries: RecordQueries = SqlRecordDatabase(driver).recordQueries
 
-  /**
-   * @return the list of records for the given ids
-   * This is an optimization to avoid doing too many queries.
-   *
-   * @param ids the ids to get the record for. [ids.size] must be less than 999
-   * @return the [Record] for the ids. If some [Record]s are missing, the returned list size might be
-   * less that [ids]
-   */
-  fun select(keys: Collection<String>): List<Record>
-
-  fun selectAll(): List<Record>
+  fun <T> transaction(body: () -> T): T {
+    return recordQueries.transactionWithResult {
+      body()
+    }
+  }
 
   /**
-   * executes code in a transaction
+   * @param keys the keys of the records to select, size must be <= 999
    */
-  fun <T> transaction(
-      noEnclosing: Boolean = false,
-      body: () -> T,
-  ): T
+  fun selectRecords(keys: Collection<String>): List<Record> {
+    return recordQueries.selectRecords(keys).executeAsList().map { RecordSerializer.deserialize(it.key, it.record) }
+  }
 
-  fun delete(key: String)
+  fun selectAllRecords(): List<Record> {
+    return recordQueries.selectAllRecords().executeAsList().map { RecordSerializer.deserialize(it.key, it.record) }
+  }
 
-  fun delete(keys: Collection<String>)
+  fun insertOrUpdateRecord(record: Record) {
+    recordQueries.insertOrUpdateRecord(key = record.key.key, record = RecordSerializer.serialize(record), update_date = currentTimeMillis())
+  }
 
-  fun deleteMatching(pattern: String)
-
-  fun deleteAll()
 
   /**
-   * Returns the number of rows affected by the last query
+   * @param keys the keys of the records to delete, size must be <= 999
    */
-  fun changes(): Long
+  fun deleteRecords(keys: Collection<String>) {
+    recordQueries.deleteRecords(keys)
+  }
 
-  fun insert(record: Record)
-  fun update(record: Record)
+  fun deleteAllRecords() {
+    recordQueries.deleteAllRecords()
+  }
+
+  fun databaseSize(): Long {
+    return driver.executeQuery(null, "SELECT page_count * page_size FROM pragma_page_count(), pragma_page_size();", {
+      it.next()
+      QueryResult.Value(it.getLong(0)!!)
+    }, 0).value
+  }
+
+  fun count(): Query<Long> {
+    return recordQueries.count()
+  }
+
+  fun trimByUpdateDate(limit: Long) {
+    recordQueries.trimByUpdateDate(limit)
+  }
+
+  fun vacuum() {
+    driver.execute(null, "VACUUM", 0)
+  }
+
+  fun changes(): Long {
+    return recordQueries.changes().executeAsOne()
+  }
 }

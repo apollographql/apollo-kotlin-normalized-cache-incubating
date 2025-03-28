@@ -11,8 +11,11 @@ import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeDanglingReferences
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.append
+import com.apollographql.cache.normalized.testing.fieldKey
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
+import kotlinx.coroutines.test.TestResult
 import okio.use
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,9 +24,19 @@ import kotlin.test.assertTrue
 
 class DanglingReferencesTest {
   @Test
-  fun simple() = runTest {
+  fun simpleMemory() = simple(ApolloStore(MemoryCacheFactory()))
+
+  @Test
+  fun simpleSql() = simple(ApolloStore(SqlNormalizedCacheFactory()))
+
+  @Test
+  fun simpleChained(): TestResult {
+    return simple(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+  }
+
+  private fun simple(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = apolloStore.also { it.clearAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
@@ -35,13 +48,13 @@ class DanglingReferencesTest {
               .execute()
 
           var allRecords = store.accessCache { it.allRecords() }
-          assertTrue(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
+          assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
 
           // Remove User 1, now Repository 0.starGazers is a dangling reference
           store.remove(CacheKey("User:1"), cascade = false)
           val removedFieldsAndRecords = store.removeDanglingReferences()
           assertEquals(
-              setOf("Repository:0.starGazers"),
+              setOf(CacheKey("Repository:0").fieldKey("starGazers")),
               removedFieldsAndRecords.removedFields
           )
           assertEquals(
@@ -49,14 +62,22 @@ class DanglingReferencesTest {
               removedFieldsAndRecords.removedRecords
           )
           allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords["Repository:0"]!!.fields.containsKey("starGazers"))
+          assertFalse(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
         }
   }
 
   @Test
-  fun multiple() = runTest {
+  fun multipleMemory() = multiple(ApolloStore(MemoryCacheFactory()))
+
+  @Test
+  fun multipleSql() = multiple(ApolloStore(SqlNormalizedCacheFactory()))
+
+  @Test
+  fun multipleChained() = multiple(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+
+  private fun multiple(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = apolloStore.also { it.clearAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
@@ -78,24 +99,24 @@ class DanglingReferencesTest {
           val removedFieldsAndRecords = store.removeDanglingReferences()
           assertEquals(
               setOf(
-                  "metaProjects.0.0.type.owners",
-                  "metaProjects.0.0.type",
-                  "QUERY_ROOT.metaProjects",
+                  CacheKey("metaProjects").append("0", "0", "type").fieldKey("owners"),
+                  CacheKey("metaProjects").append("0", "0").fieldKey("type"),
+                  CacheKey("QUERY_ROOT").fieldKey("metaProjects"),
               ),
               removedFieldsAndRecords.removedFields
           )
           assertEquals(
               setOf(
-                  CacheKey("metaProjects.0.0.type"),
-                  CacheKey("metaProjects.0.0"),
+                  CacheKey("metaProjects").append("0", "0", "type"),
+                  CacheKey("metaProjects").append("0", "0"),
                   CacheKey("QUERY_ROOT"),
               ),
               removedFieldsAndRecords.removedRecords
           )
           val allRecords = store.accessCache { it.allRecords() }
-          assertFalse(allRecords.containsKey("QUERY_ROOT"))
-          assertFalse(allRecords.containsKey("metaProjects.0.0"))
-          assertFalse(allRecords.containsKey("metaProjects.0.0.type"))
+          assertFalse(allRecords.containsKey(CacheKey("QUERY_ROOT")))
+          assertFalse(allRecords.containsKey(CacheKey("metaProjects").append("0", "0")))
+          assertFalse(allRecords.containsKey(CacheKey("metaProjects").append("0", "0", "type")))
         }
   }
 

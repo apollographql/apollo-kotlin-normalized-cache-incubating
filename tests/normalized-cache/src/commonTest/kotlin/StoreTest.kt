@@ -112,11 +112,9 @@ class StoreTest {
     storeAllFriends()
 
     store.accessCache {
-      it.remove("Character:10%")
+      it.remove(CacheKey("Character:1000"), false)
     }
     assertFriendIsNotCached("1000")
-    assertFriendIsNotCached("1002")
-    assertFriendIsNotCached("1003")
   }
 
   @Test

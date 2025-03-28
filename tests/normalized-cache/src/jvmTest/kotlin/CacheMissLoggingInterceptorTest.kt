@@ -3,10 +3,12 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.logCacheMisses
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
+import com.apollographql.cache.normalized.testing.keyToString
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import normalizer.HeroAppearsInQuery
@@ -53,8 +55,8 @@ class CacheMissLoggingInterceptorTest {
 
     assertEquals(
         listOf(
-            "Object 'QUERY_ROOT' has no field named 'hero'",
-            "Object 'hero' has no field named 'appearsIn'"
+            "Object '${CacheKey("QUERY_ROOT").keyToString()}' has no field named 'hero'",
+            "Object '${CacheKey("hero").keyToString()}' has no field named 'appearsIn'"
         ),
         recordedLogs
     )

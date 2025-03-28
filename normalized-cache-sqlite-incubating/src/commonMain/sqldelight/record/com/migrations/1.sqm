@@ -1,0 +1,10 @@
+-- Version 1 is either the record schema (do nothing) or the legacy json schema (drop and create)
+DROP TABLE IF EXISTS records;
+
+CREATE TABLE IF NOT EXISTS record (
+  key TEXT NOT NULL,
+  record BLOB NOT NULL,
+  update_date INTEGER NOT NULL,
+  PRIMARY KEY (key) ON CONFLICT REPLACE
+)
+WITHOUT ROWID;

@@ -11,14 +11,14 @@ import kotlin.math.max
 import kotlin.reflect.KClass
 
 internal class OptimisticNormalizedCache(private val wrapped: NormalizedCache) : NormalizedCache {
-  private val recordJournals = ConcurrentMap<String, RecordJournal>()
+  private val recordJournals = ConcurrentMap<CacheKey, RecordJournal>()
 
-  override fun loadRecord(key: String, cacheHeaders: CacheHeaders): Record? {
+  override fun loadRecord(key: CacheKey, cacheHeaders: CacheHeaders): Record? {
     val nonOptimisticRecord = wrapped.loadRecord(key, cacheHeaders)
     return nonOptimisticRecord.mergeJournalRecord(key)
   }
 
-  override fun loadRecords(keys: Collection<String>, cacheHeaders: CacheHeaders): Collection<Record> {
+  override fun loadRecords(keys: Collection<CacheKey>, cacheHeaders: CacheHeaders): Collection<Record> {
     val nonOptimisticRecords = wrapped.loadRecords(keys, cacheHeaders).associateBy { it.key }
     return keys.mapNotNull { key ->
       nonOptimisticRecords[key].mergeJournalRecord(key)
@@ -46,16 +46,20 @@ internal class OptimisticNormalizedCache(private val wrapped: NormalizedCache) :
     return wrapped.remove(cacheKeys, cascade) + internalRemove(cacheKeys, cascade)
   }
 
+  override fun trim(maxSizeBytes: Long, trimFactor: Float): Long {
+    return wrapped.trim(maxSizeBytes, trimFactor)
+  }
+
   private fun internalRemove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
     var total = 0
     val referencedCacheKeys = mutableSetOf<CacheKey>()
     for (cacheKey in cacheKeys) {
-      val removedRecordJournal = recordJournals.remove(cacheKey.key)
+      val removedRecordJournal = recordJournals.remove(cacheKey)
       if (removedRecordJournal != null) {
         total++
         if (cascade) {
           for (cacheReference in removedRecordJournal.current.referencedFields()) {
-            referencedCacheKeys += CacheKey(cacheReference.key)
+            referencedCacheKeys += cacheReference
           }
         }
       }
@@ -64,21 +68,6 @@ internal class OptimisticNormalizedCache(private val wrapped: NormalizedCache) :
       total += internalRemove(referencedCacheKeys, cascade)
     }
     return total
-  }
-
-  override fun remove(pattern: String): Int {
-    var removed = wrapped.remove(pattern)
-
-    val regex = patternToRegex(pattern)
-    val keys = HashSet(recordJournals.keys) // local copy to avoid concurrent modification
-    keys.forEach { key ->
-      if (regex.matches(key)) {
-        recordJournals.remove(key)
-        removed++
-      }
-    }
-
-    return removed
   }
 
   fun addOptimisticUpdates(recordSet: Collection<Record>): Set<String> {
@@ -111,11 +100,11 @@ internal class OptimisticNormalizedCache(private val wrapped: NormalizedCache) :
     return changedCacheKeys
   }
 
-  override fun dump(): Map<KClass<*>, Map<String, Record>> {
+  override fun dump(): Map<KClass<*>, Map<CacheKey, Record>> {
     return mapOf(this::class to recordJournals.mapValues { (_, journal) -> journal.current }) + wrapped.dump()
   }
 
-  private fun Record?.mergeJournalRecord(key: String): Record? {
+  private fun Record?.mergeJournalRecord(key: CacheKey): Record? {
     val journal = recordJournals[key]
     return if (journal != null) {
       this?.mergeWith(journal.current)?.first ?: journal.current

@@ -346,7 +346,6 @@ class ConnectionPaginationTest {
     assertChainedCachesAreEqual(apolloStore)
   }
 
-
   @Test
   fun errorMemoryCache() {
     errorTest(MemoryCacheFactory())

@@ -19,14 +19,21 @@ import okio.use
 import test.fragment.RepositoryFragment
 import test.fragment.RepositoryFragmentImpl
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
 class ReachableCacheKeysTest {
   @Test
-  fun getReachableCacheKeys() = runTest {
+  fun getReachableCacheKeysMemory() = getReachableCacheKeys(ApolloStore(MemoryCacheFactory()))
+
+  @Test
+  fun getReachableCacheKeysSql() = getReachableCacheKeys(ApolloStore(SqlNormalizedCacheFactory()))
+
+  @Test
+  fun getReachableCacheKeysChained() = getReachableCacheKeys(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+
+  private fun getReachableCacheKeys(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = apolloStore.also { it.clearAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
@@ -127,8 +134,8 @@ class ReachableCacheKeysTest {
 
           apolloClient.query(query).fetchPolicy(FetchPolicy.NetworkOnly).execute()
           var reachableCacheKeys = store.accessCache { it.allRecords().getReachableCacheKeys() }
-          assertContentEquals(
-              listOf(
+          assertEquals(
+              setOf(
                   CacheKey("QUERY_ROOT"),
                   CacheKey("Repository:8"),
                   CacheKey("Repository:7"),
@@ -148,8 +155,8 @@ class ReachableCacheKeysTest {
           // Remove User 43, now Repositories 5 and 6 should not be reachable / 7 should still be reachable
           store.remove(CacheKey("User:43"), cascade = false)
           reachableCacheKeys = store.accessCache { it.allRecords().getReachableCacheKeys() }
-          assertContentEquals(
-              listOf(
+          assertEquals(
+              setOf(
                   CacheKey("QUERY_ROOT"),
                   CacheKey("Repository:8"),
                   CacheKey("Repository:7"),
@@ -170,8 +177,8 @@ class ReachableCacheKeysTest {
               RepositoryFragment(id = "500", __typename = "Repository", starGazers = emptyList()),
           )
           reachableCacheKeys = store.accessCache { it.allRecords().getReachableCacheKeys() }
-          assertContentEquals(
-              listOf(
+          assertEquals(
+              setOf(
                   CacheKey("QUERY_ROOT"),
                   CacheKey("Repository:8"),
                   CacheKey("Repository:7"),
@@ -199,7 +206,7 @@ class ReachableCacheKeysTest {
                   CacheKey("Repository:500"),
                   CacheKey("Repository:7"),
               ),
-              store.accessCache { it.allRecords() }.keys.map { CacheKey(it) }.toSet()
+              store.accessCache { it.allRecords() }.keys.toSet()
           )
 
           // Remove unreachable records, should remove Repositories 5, 6, and 500
@@ -216,7 +223,7 @@ class ReachableCacheKeysTest {
                   CacheKey("Repository:2"),
                   CacheKey("Repository:1"),
               ),
-              store.accessCache { it.allRecords() }.keys.map { CacheKey(it) }.toSet()
+              store.accessCache { it.allRecords() }.keys.toSet()
           )
           assertEquals(
               setOf(

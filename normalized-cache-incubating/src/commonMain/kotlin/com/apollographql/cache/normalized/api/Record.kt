@@ -10,7 +10,7 @@ import com.benasher44.uuid.Uuid
  * a field is a GraphQL Object a [CacheKey] will be stored instead.
  */
 class Record(
-    val key: String,
+    val key: CacheKey,
     val fields: Map<String, RecordValue>,
     val mutationId: Uuid? = null,
 
@@ -39,7 +39,7 @@ class Record(
    * A field key incorporates any GraphQL arguments in addition to the field name.
    */
   fun fieldKeys(): Set<String> {
-    return fields.keys.map { "$key.$it" }.toSet()
+    return fields.keys.map { key.fieldKey(it) }.toSet()
   }
 
   /**
@@ -71,7 +71,7 @@ class Record(
         record1.fields[it] != record2.fields[it]
       }
 
-      return changed.map { "${record1.key}.$it" }.toSet()
+      return changed.map { record1.key.fieldKey(it) }.toSet()
     }
   }
 }

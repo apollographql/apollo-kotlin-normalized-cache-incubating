@@ -14,9 +14,7 @@ object ApolloCacheHeaders {
    */
   const val MEMORY_CACHE_ONLY = "memory-cache-only"
 
-  /**
-   * Records from this request should be evicted after being read.
-   */
+  @Deprecated(level = DeprecationLevel.ERROR, message = "This header has no effect and will be removed in a future release. Use ApolloStore.remove() instead.")
   const val EVICT_AFTER_READ = "evict-after-read"
 
   /**

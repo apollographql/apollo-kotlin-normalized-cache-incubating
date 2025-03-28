@@ -62,28 +62,21 @@ class ThreadTests {
       return delegate.remove(cacheKeys, cascade)
     }
 
-    override fun remove(pattern: String): Int {
-      check(currentThreadId() != mainThreadId) {
-        "Cache access on main thread"
-      }
-      return delegate.remove(pattern)
-    }
-
-    override fun loadRecord(key: String, cacheHeaders: CacheHeaders): Record? {
+    override fun loadRecord(key: CacheKey, cacheHeaders: CacheHeaders): Record? {
       check(currentThreadId() != mainThreadId) {
         "Cache access on main thread"
       }
       return delegate.loadRecord(key, cacheHeaders)
     }
 
-    override fun loadRecords(keys: Collection<String>, cacheHeaders: CacheHeaders): Collection<Record> {
+    override fun loadRecords(keys: Collection<CacheKey>, cacheHeaders: CacheHeaders): Collection<Record> {
       check(currentThreadId() != mainThreadId) {
         "Cache access on main thread"
       }
       return delegate.loadRecords(keys, cacheHeaders)
     }
 
-    override fun dump(): Map<KClass<*>, Map<String, Record>> {
+    override fun dump(): Map<KClass<*>, Map<CacheKey, Record>> {
       check(currentThreadId() != mainThreadId) {
         "Cache access on main thread"
       }

@@ -31,6 +31,7 @@ kotlin {
         implementation(libs.apollo.mockserver)
         implementation(libs.kotlin.test)
         implementation(libs.turbine)
+        implementation("com.apollographql.cache:test-utils")
       }
     }
 

@@ -31,6 +31,7 @@ import com.apollographql.cache.normalized.isFromCache
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.refetchPolicyInterceptor
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.fieldKey
 import com.apollographql.cache.normalized.watch
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.awaitRequest
@@ -603,7 +604,7 @@ class FetchPolicyTest {
           )
         }
     )
-    store.publish(setOf("${CacheKey.rootKey().key}.hero"))
+    store.publish(setOf(CacheKey.rootKey().fieldKey("hero")))
 
     /**
      * This time the watcher should do a network request

@@ -26,6 +26,7 @@ import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
+import com.apollographql.cache.normalized.api.RecordValue
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.internal.DefaultApolloStore
 import com.benasher44.uuid.Uuid
@@ -239,14 +240,26 @@ interface ApolloStore {
   fun remove(cacheKeys: List<CacheKey>, cascade: Boolean = true): Int
 
   /**
+   * Trims the store if its size exceeds [maxSizeBytes]. The amount of data to remove is determined by [trimFactor].
+   * The oldest records are removed according to their update date.
+   *
+   * This may not be supported by all cache implementations (currently this is implemented by the SQL cache).
+   *
+   * @param maxSizeBytes the size of the cache in bytes above which the cache should be trimmed.
+   * @param trimFactor the factor of the cache size to trim.
+   * @return the cache size in bytes after trimming or -1 if the operation is not supported.
+   */
+  fun trim(maxSizeBytes: Long, trimFactor: Float = 0.1f): Long
+
+  /**
    * Normalizes executable data to a map of [Record] keyed by [Record.key].
    */
   fun <D : Executable.Data> normalize(
       executable: Executable<D>,
       dataWithErrors: DataWithErrors,
-      rootKey: String = CacheKey.rootKey().key,
+      rootKey: CacheKey = CacheKey.rootKey(),
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
-  ): Map<String, Record>
+  ): Map<CacheKey, Record>
 
   /**
    * Publishes a set of keys that have changed. This will notify subscribers of [changedKeys].
@@ -273,7 +286,7 @@ interface ApolloStore {
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    */
-  fun dump(): Map<KClass<*>, Map<String, Record>>
+  fun dump(): Map<KClass<*>, Map<CacheKey, Record>>
 
   /**
    * Releases resources associated with this store.
@@ -312,16 +325,18 @@ internal interface ApolloStoreInterceptor : ApolloInterceptor
 internal fun ApolloStore.cacheDumpProvider(): () -> Map<String, Map<String, Pair<Int, Map<String, Any?>>>> {
   return {
     dump().map { (cacheClass, cacheRecords) ->
-      cacheClass.normalizedCacheName() to cacheRecords.mapValues { (_, record) ->
-        record.size to record.fields.mapValues { (_, value) ->
-          value.toExternal()
-        }
-      }
+      cacheClass.normalizedCacheName() to cacheRecords
+          .mapKeys { (key, _) -> key.keyToString() }
+          .mapValues { (_, record) ->
+            record.size to record.fields.mapValues { (_, value) ->
+              value.toExternal()
+            }
+          }
     }.toMap()
   }
 }
 
-private fun Any?.toExternal(): Any? {
+private fun RecordValue.toExternal(): Any? {
   return when (this) {
     null -> null
     is String -> this
@@ -330,7 +345,8 @@ private fun Any?.toExternal(): Any? {
     is Long -> this
     is Double -> this
     is JsonNumber -> this
-    is CacheKey -> this.serialize()
+    is CacheKey -> "ApolloCacheReference{${this.keyToString()}}"
+    is Error -> "ApolloCacheError{${this.message}}"
     is List<*> -> {
       map { it.toExternal() }
     }

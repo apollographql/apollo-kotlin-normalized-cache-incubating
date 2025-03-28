@@ -29,17 +29,11 @@ android {
   testOptions.targetSdk = 30
 }
 
-
-configure<app.cash.sqldelight.gradle.SqlDelightExtension> {
-  databases.create("BlobDatabase") {
-    packageName.set("com.apollographql.cache.normalized.sql.internal.blob")
-    schemaOutputDirectory.set(file("sqldelight/blob/schema"))
-    srcDirs.setFrom("src/commonMain/sqldelight/blob/")
-  }
-  databases.create("Blob2Database") {
-    packageName.set("com.apollographql.cache.normalized.sql.internal.blob2")
-    schemaOutputDirectory.set(file("sqldelight/blob2/schema"))
-    srcDirs.setFrom("src/commonMain/sqldelight/blob2/")
+sqldelight {
+  databases.create("SqlRecordDatabase") {
+    packageName.set("com.apollographql.cache.normalized.sql.internal.record")
+    schemaOutputDirectory.set(file("sqldelight/record/schema"))
+    srcDirs.setFrom("src/commonMain/sqldelight/record/")
   }
 }
 
@@ -93,6 +87,7 @@ kotlin {
       dependencies {
         implementation(libs.kotlin.test)
         implementation(libs.apollo.testing.support)
+        implementation(project(":test-utils"))
       }
     }
   }

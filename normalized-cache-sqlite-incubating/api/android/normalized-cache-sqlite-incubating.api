@@ -12,13 +12,13 @@ public final class com/apollographql/cache/normalized/sql/ApolloInitializer$Comp
 public final class com/apollographql/cache/normalized/sql/SqlNormalizedCache : com/apollographql/cache/normalized/api/NormalizedCache {
 	public fun clearAll ()V
 	public fun dump ()Ljava/util/Map;
-	public fun loadRecord (Ljava/lang/String;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/api/Record;
+	public fun loadRecord-eNSUWrY (Ljava/lang/String;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Lcom/apollographql/cache/normalized/api/Record;
 	public fun loadRecords (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Collection;
 	public fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/RecordMerger;)Ljava/util/Set;
 	public fun merge (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/RecordMerger;)Ljava/util/Set;
-	public fun remove (Lcom/apollographql/cache/normalized/api/CacheKey;Z)Z
-	public fun remove (Ljava/lang/String;)I
 	public fun remove (Ljava/util/Collection;Z)I
+	public fun remove-eNSUWrY (Ljava/lang/String;Z)Z
+	public fun trim (JF)J
 }
 
 public final class com/apollographql/cache/normalized/sql/SqlNormalizedCacheFactory_androidKt {
@@ -38,113 +38,68 @@ public final class com/apollographql/cache/normalized/sql/VersionKt {
 	public static final field VERSION Ljava/lang/String;
 }
 
-public abstract interface class com/apollographql/cache/normalized/sql/internal/blob/BlobDatabase : app/cash/sqldelight/Transacter {
-	public static final field Companion Lcom/apollographql/cache/normalized/sql/internal/blob/BlobDatabase$Companion;
-	public abstract fun getBlobQueries ()Lcom/apollographql/cache/normalized/sql/internal/blob/BlobQueries;
-}
-
-public final class com/apollographql/cache/normalized/sql/internal/blob/BlobDatabase$Companion {
-	public final fun getSchema ()Lapp/cash/sqldelight/db/SqlSchema;
-	public final fun invoke (Lapp/cash/sqldelight/db/SqlDriver;)Lcom/apollographql/cache/normalized/sql/internal/blob/BlobDatabase;
-}
-
-public final class com/apollographql/cache/normalized/sql/internal/blob/BlobQueries : app/cash/sqldelight/TransacterImpl {
-	public fun <init> (Lapp/cash/sqldelight/db/SqlDriver;)V
-	public final fun changes ()Lapp/cash/sqldelight/ExecutableQuery;
-	public final fun delete (Ljava/lang/String;)V
-	public final fun deleteAll ()V
-	public final fun deleteRecords (Ljava/util/Collection;)V
-	public final fun deleteRecordsWithKeyMatching (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun insert (Ljava/lang/String;[B)V
-	public final fun recordForKey (Ljava/lang/String;)Lapp/cash/sqldelight/Query;
-	public final fun recordForKey (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)Lapp/cash/sqldelight/Query;
-	public final fun recordsForKeys (Ljava/util/Collection;)Lapp/cash/sqldelight/Query;
-	public final fun recordsForKeys (Ljava/util/Collection;Lkotlin/jvm/functions/Function2;)Lapp/cash/sqldelight/Query;
-	public final fun selectRecords ()Lapp/cash/sqldelight/Query;
-	public final fun selectRecords (Lkotlin/jvm/functions/Function2;)Lapp/cash/sqldelight/Query;
-	public final fun update ([BLjava/lang/String;)V
-}
-
-public final class com/apollographql/cache/normalized/sql/internal/blob/Blobs {
-	public fun <init> (Ljava/lang/String;[B)V
+public final class com/apollographql/cache/normalized/sql/internal/record/Record {
+	public fun <init> (Ljava/lang/String;[BJ)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()[B
-	public final fun copy (Ljava/lang/String;[B)Lcom/apollographql/cache/normalized/sql/internal/blob/Blobs;
-	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/blob/Blobs;Ljava/lang/String;[BILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/blob/Blobs;
+	public final fun component3 ()J
+	public final fun copy (Ljava/lang/String;[BJ)Lcom/apollographql/cache/normalized/sql/internal/record/Record;
+	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/record/Record;Ljava/lang/String;[BJILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/record/Record;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBlob ()[B
 	public final fun getKey ()Ljava/lang/String;
+	public final fun getRecord ()[B
+	public final fun getUpdate_date ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract interface class com/apollographql/cache/normalized/sql/internal/blob2/Blob2Database : app/cash/sqldelight/Transacter {
-	public static final field Companion Lcom/apollographql/cache/normalized/sql/internal/blob2/Blob2Database$Companion;
-	public abstract fun getBlob2Queries ()Lcom/apollographql/cache/normalized/sql/internal/blob2/Blob2Queries;
-}
-
-public final class com/apollographql/cache/normalized/sql/internal/blob2/Blob2Database$Companion {
-	public final fun getSchema ()Lapp/cash/sqldelight/db/SqlSchema;
-	public final fun invoke (Lapp/cash/sqldelight/db/SqlDriver;)Lcom/apollographql/cache/normalized/sql/internal/blob2/Blob2Database;
-}
-
-public final class com/apollographql/cache/normalized/sql/internal/blob2/Blob2Queries : app/cash/sqldelight/TransacterImpl {
+public final class com/apollographql/cache/normalized/sql/internal/record/RecordQueries : app/cash/sqldelight/TransacterImpl {
 	public fun <init> (Lapp/cash/sqldelight/db/SqlDriver;)V
 	public final fun changes ()Lapp/cash/sqldelight/ExecutableQuery;
 	public final fun count ()Lapp/cash/sqldelight/Query;
-	public final fun delete (Ljava/lang/String;)V
-	public final fun deleteAll ()V
+	public final fun deleteAllRecords ()V
 	public final fun deleteRecords (Ljava/util/Collection;)V
-	public final fun deleteRecordsWithKeyMatching (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun insert (Ljava/lang/String;[BLjava/lang/Long;)V
-	public final fun recordForKey (Ljava/lang/String;)Lapp/cash/sqldelight/Query;
-	public final fun recordForKey (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)Lapp/cash/sqldelight/Query;
-	public final fun recordsForKeys (Ljava/util/Collection;)Lapp/cash/sqldelight/Query;
-	public final fun recordsForKeys (Ljava/util/Collection;Lkotlin/jvm/functions/Function2;)Lapp/cash/sqldelight/Query;
-	public final fun selectRecords ()Lapp/cash/sqldelight/Query;
-	public final fun selectRecords (Lkotlin/jvm/functions/Function3;)Lapp/cash/sqldelight/Query;
-	public final fun trim (J)V
-	public final fun update ([BLjava/lang/Long;Ljava/lang/String;)V
+	public final fun insertOrUpdateRecord (Ljava/lang/String;[BJ)V
+	public final fun selectAllRecords ()Lapp/cash/sqldelight/Query;
+	public final fun selectAllRecords (Lkotlin/jvm/functions/Function2;)Lapp/cash/sqldelight/Query;
+	public final fun selectRecords (Ljava/util/Collection;)Lapp/cash/sqldelight/Query;
+	public final fun selectRecords (Ljava/util/Collection;Lkotlin/jvm/functions/Function2;)Lapp/cash/sqldelight/Query;
+	public final fun trimByUpdateDate (J)V
 }
 
-public final class com/apollographql/cache/normalized/sql/internal/blob2/Blobs {
-	public fun <init> (Ljava/lang/String;[BLjava/lang/Long;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()[B
-	public final fun component3 ()Ljava/lang/Long;
-	public final fun copy (Ljava/lang/String;[BLjava/lang/Long;)Lcom/apollographql/cache/normalized/sql/internal/blob2/Blobs;
-	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/blob2/Blobs;Ljava/lang/String;[BLjava/lang/Long;ILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/blob2/Blobs;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBlob ()[B
-	public final fun getDate ()Ljava/lang/Long;
-	public final fun getKey ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/apollographql/cache/normalized/sql/internal/blob2/RecordForKey {
+public final class com/apollographql/cache/normalized/sql/internal/record/SelectAllRecords {
 	public fun <init> (Ljava/lang/String;[B)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()[B
-	public final fun copy (Ljava/lang/String;[B)Lcom/apollographql/cache/normalized/sql/internal/blob2/RecordForKey;
-	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/blob2/RecordForKey;Ljava/lang/String;[BILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/blob2/RecordForKey;
+	public final fun copy (Ljava/lang/String;[B)Lcom/apollographql/cache/normalized/sql/internal/record/SelectAllRecords;
+	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/record/SelectAllRecords;Ljava/lang/String;[BILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/record/SelectAllRecords;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBlob ()[B
 	public final fun getKey ()Ljava/lang/String;
+	public final fun getRecord ()[B
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/apollographql/cache/normalized/sql/internal/blob2/RecordsForKeys {
+public final class com/apollographql/cache/normalized/sql/internal/record/SelectRecords {
 	public fun <init> (Ljava/lang/String;[B)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()[B
-	public final fun copy (Ljava/lang/String;[B)Lcom/apollographql/cache/normalized/sql/internal/blob2/RecordsForKeys;
-	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/blob2/RecordsForKeys;Ljava/lang/String;[BILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/blob2/RecordsForKeys;
+	public final fun copy (Ljava/lang/String;[B)Lcom/apollographql/cache/normalized/sql/internal/record/SelectRecords;
+	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/record/SelectRecords;Ljava/lang/String;[BILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/record/SelectRecords;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBlob ()[B
 	public final fun getKey ()Ljava/lang/String;
+	public final fun getRecord ()[B
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/apollographql/cache/normalized/sql/internal/record/SqlRecordDatabase : app/cash/sqldelight/Transacter {
+	public static final field Companion Lcom/apollographql/cache/normalized/sql/internal/record/SqlRecordDatabase$Companion;
+	public abstract fun getRecordQueries ()Lcom/apollographql/cache/normalized/sql/internal/record/RecordQueries;
+}
+
+public final class com/apollographql/cache/normalized/sql/internal/record/SqlRecordDatabase$Companion {
+	public final fun getSchema ()Lapp/cash/sqldelight/db/SqlSchema;
+	public final fun invoke (Lapp/cash/sqldelight/db/SqlDriver;)Lcom/apollographql/cache/normalized/sql/internal/record/SqlRecordDatabase;
 }
 

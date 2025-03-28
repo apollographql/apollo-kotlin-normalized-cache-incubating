@@ -9,6 +9,7 @@ import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
+import com.apollographql.cache.normalized.testing.append
 import fragmentnormalizer.fragment.ConversationFragment
 import fragmentnormalizer.fragment.ConversationFragmentImpl
 import kotlin.test.Test
@@ -95,10 +96,10 @@ class FragmentNormalizerTest {
 
     val records = fragment.normalized(
         ConversationFragmentImpl(),
-        rootKey = "1",
+        rootKey = CacheKey("1"),
         cacheKeyGenerator = IdCacheKeyGenerator(),
     )
 
-    assertContains(records.keys, "1.author")
+    assertContains(records.keys, CacheKey("1").append("author"))
   }
 }

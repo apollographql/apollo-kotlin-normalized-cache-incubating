@@ -100,7 +100,7 @@ class ResolverContext(
     /**
      * The key of the parent. Mainly used for debugging
      */
-    val parentKey: String,
+    val parentKey: CacheKey,
 
     /**
      * The type of the parent
@@ -135,7 +135,7 @@ object DefaultCacheResolver : CacheResolver {
   override fun resolveField(context: ResolverContext): Any? {
     val fieldKey = context.getFieldKey()
     if (!context.parent.containsKey(fieldKey)) {
-      throw CacheMissException(context.parentKey, fieldKey)
+      throw CacheMissException(context.parentKey.keyToString(), fieldKey)
     }
 
     return context.parent[fieldKey]
@@ -190,7 +190,7 @@ class CacheControlCacheResolver(
         val maxStale = context.cacheHeaders.headerValue(ApolloCacheHeaders.MAX_STALE)?.toLongOrNull() ?: 0L
         if (staleDuration >= maxStale) {
           throw CacheMissException(
-              key = context.parentKey,
+              key = context.parentKey.keyToString(),
               fieldName = context.getFieldKey(),
               stale = true
           )
@@ -206,7 +206,7 @@ class CacheControlCacheResolver(
         val maxStale = context.cacheHeaders.headerValue(ApolloCacheHeaders.MAX_STALE)?.toLongOrNull() ?: 0L
         if (staleDuration >= maxStale) {
           throw CacheMissException(
-              key = context.parentKey,
+              key = context.parentKey.keyToString(),
               fieldName = context.getFieldKey(),
               stale = true
           )

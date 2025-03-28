@@ -4,6 +4,7 @@ import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.FieldRecordMerger
 import com.apollographql.cache.normalized.api.MetadataGenerator
@@ -233,12 +234,12 @@ internal fun assertChainedCachesAreEqual(apolloStore: ApolloStore) {
   }
   if (dump.size < 2) return
   val caches = dump.values.toList()
-  val cache1: Map<String, Record> = caches[0]
-  val cache2: Map<String, Record> = caches[1]
+  val cache1: Map<CacheKey, Record> = caches[0]
+  val cache2: Map<CacheKey, Record> = caches[1]
   for (key in cache1.keys) {
     val record1 = cache1[key]!!
     val record2 = cache2[key]!!
-    assertEquals(record1.key, record2.key)
+    assertEquals(record1.key.key, record2.key.key)
     assertEquals(record1.fields, record2.fields)
     assertEquals(record1.metadata, record2.metadata)
   }

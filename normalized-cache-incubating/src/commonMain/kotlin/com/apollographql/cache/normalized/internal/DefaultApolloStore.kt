@@ -104,9 +104,9 @@ internal class DefaultApolloStore(
   override fun <D : Executable.Data> normalize(
       executable: Executable<D>,
       dataWithErrors: DataWithErrors,
-      rootKey: String,
+      rootKey: CacheKey,
       customScalarAdapters: CustomScalarAdapters,
-  ): Map<String, Record> {
+  ): Map<CacheKey, Record> {
     return dataWithErrors.normalized(
         executable = executable,
         rootKey = rootKey,
@@ -129,7 +129,7 @@ internal class DefaultApolloStore(
         cacheHeaders = cacheHeaders,
         cacheResolver = cacheResolver,
         variables = variables,
-        rootKey = CacheKey.rootKey().key,
+        rootKey = CacheKey.rootKey(),
         rootSelections = operation.rootField().selections,
         rootField = operation.rootField(),
         fieldKeyGenerator = fieldKeyGenerator,
@@ -140,7 +140,11 @@ internal class DefaultApolloStore(
 
     @Suppress("UNCHECKED_CAST")
     val dataWithNulls: Map<String, ApolloJsonElement>? =
-      propagateErrors(dataWithErrors, operation.rootField(), errors) as Map<String, ApolloJsonElement>?
+      if (batchReaderData.hasErrors) {
+        propagateErrors(dataWithErrors, operation.rootField(), errors)
+      } else {
+        dataWithErrors
+      } as Map<String, ApolloJsonElement>?
     val falseVariablesCustomScalarAdapter =
       customScalarAdapters.newBuilder()
           .falseVariables(variables.valueMap.filter { it.value == false }.keys)
@@ -181,7 +185,7 @@ internal class DefaultApolloStore(
         cacheHeaders = cacheHeaders,
         cacheResolver = cacheResolver,
         variables = variables,
-        rootKey = cacheKey.key,
+        rootKey = cacheKey,
         rootSelections = fragment.rootField().selections,
         rootField = fragment.rootField(),
         fieldKeyGenerator = fieldKeyGenerator,
@@ -234,7 +238,7 @@ internal class DefaultApolloStore(
     val records = normalize(
         executable = fragment,
         dataWithErrors = dataWithErrors,
-        rootKey = cacheKey.key,
+        rootKey = cacheKey,
         customScalarAdapters = customScalarAdapters,
     ).values
     return cache.merge(records, cacheHeaders, recordMerger)
@@ -276,7 +280,7 @@ internal class DefaultApolloStore(
     val records = normalize(
         executable = fragment,
         dataWithErrors = dataWithErrors,
-        rootKey = cacheKey.key,
+        rootKey = cacheKey,
         customScalarAdapters = customScalarAdapters,
     ).values.map { record ->
       Record(
@@ -298,7 +302,11 @@ internal class DefaultApolloStore(
     return cache.merge(record, cacheHeaders, recordMerger)
   }
 
-  override fun dump(): Map<KClass<*>, Map<String, Record>> {
+  override fun trim(maxSizeBytes: Long, trimFactor: Float): Long {
+    return cache.trim(maxSizeBytes, trimFactor)
+  }
+
+  override fun dump(): Map<KClass<*>, Map<CacheKey, Record>> {
     return cache.dump()
   }
 
