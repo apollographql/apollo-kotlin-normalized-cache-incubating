@@ -25,8 +25,8 @@ final class com.apollographql.cache.normalized.sql.internal.record/Record { // c
         final fun <get-key>(): kotlin/String // com.apollographql.cache.normalized.sql.internal.record/Record.key.<get-key>|<get-key>(){}[0]
     final val record // com.apollographql.cache.normalized.sql.internal.record/Record.record|{}record[0]
         final fun <get-record>(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.record/Record.record.<get-record>|<get-record>(){}[0]
-    final val update_date // com.apollographql.cache.normalized.sql.internal.record/Record.update_date|{}update_date[0]
-        final fun <get-update_date>(): kotlin/Long // com.apollographql.cache.normalized.sql.internal.record/Record.update_date.<get-update_date>|<get-update_date>(){}[0]
+    final val updated_date // com.apollographql.cache.normalized.sql.internal.record/Record.updated_date|{}updated_date[0]
+        final fun <get-updated_date>(): kotlin/Long // com.apollographql.cache.normalized.sql.internal.record/Record.updated_date.<get-updated_date>|<get-updated_date>(){}[0]
 
     final fun component1(): kotlin/String // com.apollographql.cache.normalized.sql.internal.record/Record.component1|component1(){}[0]
     final fun component2(): kotlin/ByteArray // com.apollographql.cache.normalized.sql.internal.record/Record.component2|component2(){}[0]
@@ -49,7 +49,7 @@ final class com.apollographql.cache.normalized.sql.internal.record/RecordQueries
     final fun insertOrUpdateRecord(kotlin/String, kotlin/ByteArray, kotlin/Long) // com.apollographql.cache.normalized.sql.internal.record/RecordQueries.insertOrUpdateRecord|insertOrUpdateRecord(kotlin.String;kotlin.ByteArray;kotlin.Long){}[0]
     final fun selectAllRecords(): app.cash.sqldelight/Query<com.apollographql.cache.normalized.sql.internal.record/SelectAllRecords> // com.apollographql.cache.normalized.sql.internal.record/RecordQueries.selectAllRecords|selectAllRecords(){}[0]
     final fun selectRecords(kotlin.collections/Collection<kotlin/String>): app.cash.sqldelight/Query<com.apollographql.cache.normalized.sql.internal.record/SelectRecords> // com.apollographql.cache.normalized.sql.internal.record/RecordQueries.selectRecords|selectRecords(kotlin.collections.Collection<kotlin.String>){}[0]
-    final fun trimByUpdateDate(kotlin/Long) // com.apollographql.cache.normalized.sql.internal.record/RecordQueries.trimByUpdateDate|trimByUpdateDate(kotlin.Long){}[0]
+    final fun trimByUpdatedDate(kotlin/Long) // com.apollographql.cache.normalized.sql.internal.record/RecordQueries.trimByUpdatedDate|trimByUpdatedDate(kotlin.Long){}[0]
 }
 
 final class com.apollographql.cache.normalized.sql.internal.record/SelectAllRecords { // com.apollographql.cache.normalized.sql.internal.record/SelectAllRecords|null[0]

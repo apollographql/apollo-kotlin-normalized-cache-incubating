@@ -241,7 +241,7 @@ interface ApolloStore {
 
   /**
    * Trims the store if its size exceeds [maxSizeBytes]. The amount of data to remove is determined by [trimFactor].
-   * The oldest records are removed according to their update date.
+   * The oldest records are removed according to their updated date.
    *
    * This may not be supported by all cache implementations (currently this is implemented by the SQL cache).
    *

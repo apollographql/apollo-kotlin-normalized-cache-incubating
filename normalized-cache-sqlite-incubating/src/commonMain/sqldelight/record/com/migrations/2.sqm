@@ -1,0 +1,10 @@
+-- Version 2 is the 'blobs' schema - drop it and create the 'record' schema
+DROP TABLE IF EXISTS blobs;
+
+CREATE TABLE IF NOT EXISTS record (
+  key TEXT NOT NULL,
+  record BLOB NOT NULL,
+  updated_date INTEGER NOT NULL,
+  PRIMARY KEY (key) ON CONFLICT REPLACE
+)
+WITHOUT ROWID;
