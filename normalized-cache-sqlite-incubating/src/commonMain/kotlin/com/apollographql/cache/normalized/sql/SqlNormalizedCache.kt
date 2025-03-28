@@ -135,7 +135,7 @@ class SqlNormalizedCache internal constructor(
     val size = recordDatabase.databaseSize()
     return if (size >= maxSizeBytes) {
       val count = recordDatabase.count().executeAsOne()
-      recordDatabase.trimByUpdateDate((count * trimFactor).toLong())
+      recordDatabase.trimByUpdatedDate((count * trimFactor).toLong())
       recordDatabase.vacuum()
       recordDatabase.databaseSize()
     } else {

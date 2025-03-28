@@ -29,7 +29,7 @@ internal class RecordDatabase(private val driver: SqlDriver) {
   }
 
   fun insertOrUpdateRecord(record: Record) {
-    recordQueries.insertOrUpdateRecord(key = record.key.key, record = RecordSerializer.serialize(record), update_date = currentTimeMillis())
+    recordQueries.insertOrUpdateRecord(key = record.key.key, record = RecordSerializer.serialize(record), updated_date = currentTimeMillis())
   }
 
 
@@ -55,8 +55,8 @@ internal class RecordDatabase(private val driver: SqlDriver) {
     return recordQueries.count()
   }
 
-  fun trimByUpdateDate(limit: Long) {
-    recordQueries.trimByUpdateDate(limit)
+  fun trimByUpdatedDate(limit: Long) {
+    recordQueries.trimByUpdatedDate(limit)
   }
 
   fun vacuum() {
