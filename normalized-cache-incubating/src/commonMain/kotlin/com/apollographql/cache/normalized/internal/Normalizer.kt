@@ -18,18 +18,23 @@ import com.apollographql.cache.normalized.api.CacheKeyGeneratorContext
 import com.apollographql.cache.normalized.api.DataWithErrors
 import com.apollographql.cache.normalized.api.DefaultEmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
+import com.apollographql.cache.normalized.api.DefaultMaxAgeProvider
 import com.apollographql.cache.normalized.api.EmbeddedFieldsContext
 import com.apollographql.cache.normalized.api.EmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.EmptyMetadataGenerator
 import com.apollographql.cache.normalized.api.FieldKeyContext
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
+import com.apollographql.cache.normalized.api.MaxAgeContext
+import com.apollographql.cache.normalized.api.MaxAgeProvider
 import com.apollographql.cache.normalized.api.MetadataGenerator
 import com.apollographql.cache.normalized.api.MetadataGeneratorContext
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.api.append
 import com.apollographql.cache.normalized.api.isRootKey
+import com.apollographql.cache.normalized.api.toMaxAgeField
 import com.apollographql.cache.normalized.api.withErrors
+import kotlin.time.Duration
 
 /**
  * A [Normalizer] takes a [Map]<String, Any?> and turns them into a flat list of [Record]
@@ -42,6 +47,7 @@ internal class Normalizer(
     private val metadataGenerator: MetadataGenerator,
     private val fieldKeyGenerator: FieldKeyGenerator,
     private val embeddedFieldsProvider: EmbeddedFieldsProvider,
+    private val maxAgeProvider: MaxAgeProvider,
 ) {
   private val records = mutableMapOf<CacheKey, Record>()
 
@@ -49,8 +55,9 @@ internal class Normalizer(
       map: DataWithErrors,
       selections: List<CompiledSelection>,
       parentType: CompiledNamedType,
+      fieldPath: List<CompiledField>,
   ): Map<CacheKey, Record> {
-    buildRecord(map, rootKey, selections, parentType)
+    buildRecord(map, rootKey, selections, parentType, fieldPath)
 
     return records
   }
@@ -61,8 +68,6 @@ internal class Normalizer(
   )
 
   /**
-   *
-   *
    * @param obj the json node representing the object
    * @param key the key for this record
    * @param selections the selections queried on this object
@@ -73,6 +78,7 @@ internal class Normalizer(
       key: CacheKey,
       selections: List<CompiledSelection>,
       parentType: CompiledNamedType,
+      fieldPath: List<CompiledField>,
   ): Map<String, FieldInfo> {
 
     val typename = obj["__typename"] as? String
@@ -107,13 +113,20 @@ internal class Normalizer(
       } else {
         key
       }
+      val newFieldPath = fieldPath + mergedField
       val value = replaceObjects(
           value = entry.value,
-          field = mergedField,
+          fieldPath = newFieldPath,
           type_ = mergedField.type,
           path = base?.append(fieldKey) ?: CacheKey(fieldKey),
           embeddedFields = embeddedFieldsProvider.getEmbeddedFields(EmbeddedFieldsContext(parentType)),
       )
+      val maxAge = maxAgeProvider.getMaxAge(MaxAgeContext(newFieldPath.map { it.toMaxAgeField() }))
+      if (maxAge == Duration.ZERO) {
+        // This field should not be stored, do not include it in the record.
+        return@mapNotNull null
+      }
+
       val metadata = if (entry.value is Error) {
         emptyMap()
       } else {
@@ -136,8 +149,9 @@ internal class Normalizer(
       cacheKey: CacheKey,
       selections: List<CompiledSelection>,
       parentType: CompiledNamedType,
+      fieldPath: List<CompiledField>,
   ): CacheKey {
-    val fields = buildFields(obj, cacheKey, selections, parentType)
+    val fields = buildFields(obj, cacheKey, selections, parentType, fieldPath)
     val fieldValues = fields.mapValues { it.value.fieldValue }
     val metadata = fields.mapValues { it.value.metadata }.filterValues { it.isNotEmpty() }
     val record = Record(
@@ -168,17 +182,18 @@ internal class Normalizer(
    * This function builds the list of records as a side effect
    *
    * @param value a json value from the response. Can be [com.apollographql.apollo.api.json.ApolloJsonElement] or [Error]
-   * @param field the field currently being normalized
+   * @param fieldPath the path to the field currently being normalized
    * @param type_ the type currently being normalized. It can be different from `field.type` for lists.
    * @param embeddedFields the embedded fields of the parent
    */
   private fun replaceObjects(
       value: Any?,
-      field: CompiledField,
+      fieldPath: List<CompiledField>,
       type_: CompiledType,
       path: CacheKey,
       embeddedFields: List<String>,
   ): Any? {
+    val field = fieldPath.last()
     /**
      * Remove the NotNull decoration if needed
      */
@@ -199,7 +214,7 @@ internal class Normalizer(
       type is CompiledListType -> {
         check(value is List<*>)
         value.mapIndexed { index, item ->
-          replaceObjects(item, field, type.ofType, path.append(index.toString()), embeddedFields)
+          replaceObjects(item, fieldPath, type.ofType, path.append(index.toString()), embeddedFields)
         }
       }
       // Check for [isComposite] as we don't want to build a record for json scalars
@@ -215,10 +230,10 @@ internal class Normalizer(
           key = path
         }
         if (embeddedFields.contains(field.name)) {
-          buildFields(value, key, field.selections, field.type.rawType())
+          buildFields(value, key, field.selections, field.type.rawType(), fieldPath)
               .mapValues { it.value.fieldValue }
         } else {
-          buildRecord(value, key, field.selections, field.type.rawType())
+          buildRecord(value, key, field.selections, field.type.rawType(), fieldPath)
         }
       }
 
@@ -272,9 +287,10 @@ fun <D : Executable.Data> D.normalized(
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
     embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
+    maxAgeProvider: MaxAgeProvider = DefaultMaxAgeProvider,
 ): Map<CacheKey, Record> {
   val dataWithErrors = this.withErrors(executable, null, customScalarAdapters)
-  return dataWithErrors.normalized(executable, rootKey, customScalarAdapters, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider)
+  return dataWithErrors.normalized(executable, rootKey, customScalarAdapters, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider, maxAgeProvider)
 }
 
 /**
@@ -288,8 +304,9 @@ fun <D : Executable.Data> DataWithErrors.normalized(
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
     embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
+    maxAgeProvider: MaxAgeProvider = DefaultMaxAgeProvider,
 ): Map<CacheKey, Record> {
   val variables = executable.variables(customScalarAdapters, withDefaultValues = true)
-  return Normalizer(variables, rootKey, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider)
-      .normalize(this, executable.rootField().selections, executable.rootField().type.rawType())
+  return Normalizer(variables, rootKey, cacheKeyGenerator, metadataGenerator, fieldKeyGenerator, embeddedFieldsProvider, maxAgeProvider)
+      .normalize(this, executable.rootField().selections, executable.rootField().type.rawType(), listOf(executable.rootField()))
 }

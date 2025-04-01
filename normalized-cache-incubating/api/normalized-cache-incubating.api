@@ -45,8 +45,8 @@ public final class com/apollographql/cache/normalized/ApolloStore$ReadResult {
 }
 
 public final class com/apollographql/cache/normalized/ApolloStoreKt {
-	public static final fun ApolloStore (Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Lcom/apollographql/cache/normalized/ApolloStore;
-	public static synthetic fun ApolloStore$default (Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ILjava/lang/Object;)Lcom/apollographql/cache/normalized/ApolloStore;
+	public static final fun ApolloStore (Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;)Lcom/apollographql/cache/normalized/ApolloStore;
+	public static synthetic fun ApolloStore$default (Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;ILjava/lang/Object;)Lcom/apollographql/cache/normalized/ApolloStore;
 }
 
 public final class com/apollographql/cache/normalized/CacheInfo : com/apollographql/apollo/api/ExecutionContext$Element {
@@ -148,8 +148,9 @@ public final class com/apollographql/cache/normalized/NormalizedCache {
 	public static final fun configureApolloClientBuilder2 (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;)Lcom/apollographql/apollo/ApolloClient$Builder;
 	public static final fun configureApolloClientBuilder2 (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;)Lcom/apollographql/apollo/ApolloClient$Builder;
 	public static final fun configureApolloClientBuilder2 (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Lcom/apollographql/apollo/ApolloClient$Builder;
-	public static final fun configureApolloClientBuilder2 (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Z)Lcom/apollographql/apollo/ApolloClient$Builder;
-	public static synthetic fun configureApolloClientBuilder2$default (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ZILjava/lang/Object;)Lcom/apollographql/apollo/ApolloClient$Builder;
+	public static final fun configureApolloClientBuilder2 (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;)Lcom/apollographql/apollo/ApolloClient$Builder;
+	public static final fun configureApolloClientBuilder2 (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;Z)Lcom/apollographql/apollo/ApolloClient$Builder;
+	public static synthetic fun configureApolloClientBuilder2$default (Lcom/apollographql/apollo/ApolloClient$Builder;Lcom/apollographql/cache/normalized/api/NormalizedCacheFactory;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/CacheResolver;Lcom/apollographql/cache/normalized/api/RecordMerger;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;ZILjava/lang/Object;)Lcom/apollographql/apollo/ApolloClient$Builder;
 	public static final fun doNotStore (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
 	public static final fun errorsReplaceCachedValues (Lcom/apollographql/apollo/api/MutableExecutionOptions;Z)Ljava/lang/Object;
 	public static final fun fetchFromCache (Lcom/apollographql/apollo/api/ApolloRequest$Builder;Z)Lcom/apollographql/apollo/api/ApolloRequest$Builder;
@@ -425,14 +426,24 @@ public final class com/apollographql/cache/normalized/api/MaxAgeContext {
 }
 
 public final class com/apollographql/cache/normalized/api/MaxAgeContext$Field {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;Lcom/apollographql/cache/normalized/api/MaxAgeContext$Type;)V
 	public final fun getName ()Ljava/lang/String;
-	public final fun getType ()Ljava/lang/String;
-	public final fun isTypeComposite ()Z
+	public final fun getType ()Lcom/apollographql/cache/normalized/api/MaxAgeContext$Type;
+}
+
+public final class com/apollographql/cache/normalized/api/MaxAgeContext$Type {
+	public fun <init> (Ljava/lang/String;ZLjava/util/List;)V
+	public final fun getImplements ()Ljava/util/List;
+	public final fun getName ()Ljava/lang/String;
+	public final fun isComposite ()Z
 }
 
 public abstract interface class com/apollographql/cache/normalized/api/MaxAgeProvider {
 	public abstract fun getMaxAge-5sfh64U (Lcom/apollographql/cache/normalized/api/MaxAgeContext;)J
+}
+
+public final class com/apollographql/cache/normalized/api/MaxAgeProviderKt {
+	public static final fun getDefaultMaxAgeProvider ()Lcom/apollographql/cache/normalized/api/MaxAgeProvider;
 }
 
 public abstract interface class com/apollographql/cache/normalized/api/MetadataGenerator {
@@ -575,10 +586,10 @@ public final class com/apollographql/cache/normalized/api/TypePolicyCacheKeyGene
 }
 
 public final class com/apollographql/cache/normalized/internal/NormalizerKt {
-	public static final fun normalized-MplSeLY (Lcom/apollographql/apollo/api/Executable$Data;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Ljava/util/Map;
-	public static final fun normalized-MplSeLY (Ljava/util/Map;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;)Ljava/util/Map;
-	public static synthetic fun normalized-MplSeLY$default (Lcom/apollographql/apollo/api/Executable$Data;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ILjava/lang/Object;)Ljava/util/Map;
-	public static synthetic fun normalized-MplSeLY$default (Ljava/util/Map;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;ILjava/lang/Object;)Ljava/util/Map;
+	public static final fun normalized-7h_XKoo (Lcom/apollographql/apollo/api/Executable$Data;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;)Ljava/util/Map;
+	public static final fun normalized-7h_XKoo (Ljava/util/Map;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;)Ljava/util/Map;
+	public static synthetic fun normalized-7h_XKoo$default (Lcom/apollographql/apollo/api/Executable$Data;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;ILjava/lang/Object;)Ljava/util/Map;
+	public static synthetic fun normalized-7h_XKoo$default (Ljava/util/Map;Lcom/apollographql/apollo/api/Executable;Ljava/lang/String;Lcom/apollographql/apollo/api/CustomScalarAdapters;Lcom/apollographql/cache/normalized/api/CacheKeyGenerator;Lcom/apollographql/cache/normalized/api/MetadataGenerator;Lcom/apollographql/cache/normalized/api/FieldKeyGenerator;Lcom/apollographql/cache/normalized/api/EmbeddedFieldsProvider;Lcom/apollographql/cache/normalized/api/MaxAgeProvider;ILjava/lang/Object;)Ljava/util/Map;
 }
 
 public final class com/apollographql/cache/normalized/memory/MemoryCache : com/apollographql/cache/normalized/api/NormalizedCache {

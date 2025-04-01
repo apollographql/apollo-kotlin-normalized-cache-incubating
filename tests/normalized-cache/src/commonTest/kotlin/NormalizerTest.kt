@@ -4,8 +4,11 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.toApolloResponse
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.api.DefaultMaxAgeProvider
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
+import com.apollographql.cache.normalized.api.MaxAgeContext
+import com.apollographql.cache.normalized.api.MaxAgeProvider
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.internal.normalized
@@ -13,6 +16,7 @@ import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.testing.append
 import httpcache.AllPlanetsQuery
 import normalizer.EpisodeHeroNameQuery
+import normalizer.HeroAndFriendsConnectionQuery
 import normalizer.HeroAndFriendsNamesQuery
 import normalizer.HeroAndFriendsNamesWithIDForParentOnlyQuery
 import normalizer.HeroAndFriendsNamesWithIDsQuery
@@ -27,6 +31,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlin.time.Duration
 
 /**
  * Tests for the normalization without an instance of [com.apollographql.apollo.ApolloClient]
@@ -244,10 +249,33 @@ class NormalizerTest {
     assertEquals(lukeRecord["height({\"unit\":\"FOOT\"})"], 5.905512)
   }
 
+  @Test
+  fun testDoNotStore() {
+    val maxAgeProvider = object : MaxAgeProvider {
+      override fun getMaxAge(maxAgeContext: MaxAgeContext): Duration {
+        val field = maxAgeContext.fieldPath.last()
+        val parentField = maxAgeContext.fieldPath.getOrNull(maxAgeContext.fieldPath.lastIndex - 1)
+        // Don't store fields of type FriendsConnection nor fields inside FriendsConnection
+        if (field.type.name == "FriendsConnection" || parentField?.type?.name == "FriendsConnection") {
+          return Duration.ZERO
+        }
+        return Duration.INFINITE
+      }
+    }
+    val records =
+      records(HeroAndFriendsConnectionQuery(Episode.EMPIRE), "HeroAndFriendsConnectionResponse.json", maxAgeProvider = maxAgeProvider)
+    assertTrue(records[CacheKey("hero({\"episode\":\"EMPIRE\"})")]!!["friendsConnection"] == null)
+    assertTrue(records[CacheKey("hero({\"episode\":\"EMPIRE\"})").append("friendsConnection")]!!.isEmpty())
+  }
+
   companion object {
-    internal fun <D : Operation.Data> records(operation: Operation<D>, name: String): Map<CacheKey, Record> {
+    internal fun <D : Operation.Data> records(
+        operation: Operation<D>,
+        name: String,
+        maxAgeProvider: MaxAgeProvider = DefaultMaxAgeProvider,
+    ): Map<CacheKey, Record> {
       val response = testFixtureToJsonReader(name).toApolloResponse(operation)
-      return response.data!!.normalized(operation, cacheKeyGenerator = IdCacheKeyGenerator())
+      return response.data!!.normalized(operation, cacheKeyGenerator = IdCacheKeyGenerator(), maxAgeProvider = maxAgeProvider)
     }
 
     private const val TEST_FIELD_KEY_JEDI = "hero({\"episode\":\"JEDI\"})"

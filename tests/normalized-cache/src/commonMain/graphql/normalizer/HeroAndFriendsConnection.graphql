@@ -1,0 +1,14 @@
+query HeroAndFriendsConnection($episode: Episode) {
+  hero(episode: $episode) {
+    name
+    birthDate
+    friendsConnection {
+      totalCount
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+}

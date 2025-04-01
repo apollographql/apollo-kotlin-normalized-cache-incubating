@@ -107,8 +107,22 @@ private fun NormalizedCache.removeStaleFields(
         val maxAge = maxAgeProvider.getMaxAge(
             MaxAgeContext(
                 listOf(
-                    MaxAgeContext.Field(name = "", type = record["__typename"] as? String ?: "", isTypeComposite = true),
-                    MaxAgeContext.Field(name = field.key, type = field.value.guessType(allRecords), isTypeComposite = field.value is CacheKey),
+                    MaxAgeContext.Field(
+                        name = "",
+                        type = MaxAgeContext.Type(
+                            name = record["__typename"] as? String ?: "",
+                            isComposite = true,
+                            implements = emptyList(),
+                        )
+                    ),
+                    MaxAgeContext.Field(
+                        name = field.key,
+                        type = MaxAgeContext.Type(
+                            name = field.value.guessType(allRecords),
+                            isComposite = field.value is CacheKey,
+                            implements = emptyList(),
+                        ),
+                    )
                 )
             )
         ).inWholeSeconds
