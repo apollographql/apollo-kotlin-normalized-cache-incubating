@@ -15,3 +15,5 @@ extend type User
 extend type SensitiveObject @cacheControl(maxAge: 0)
 
 extend interface SensitiveInterface @cacheControl(maxAge: 0)
+
+extend type SignInResponse @cacheControlField(name: "token", maxAge: 0)

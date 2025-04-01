@@ -24,3 +24,21 @@ type Project implements SensitiveInterface {
   name: String!
   topSecret: Boolean
 }
+
+type Mutation {
+  auth: Auth
+}
+
+type Auth {
+  signIn(input: SignInInput): SignInResponse
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+type SignInResponse {
+  token: String
+  userData: User
+}

@@ -11,3 +11,21 @@ query GetUser {
     }
   }
 }
+
+mutation SignIn($email: String!, $password: String!) {
+  auth {
+    signIn(input: { email: $email, password: $password }) {
+      token
+      userData {
+        id
+        ...userData
+      }
+    }
+  }
+}
+
+fragment userData on User {
+  id
+  name
+  email
+}
