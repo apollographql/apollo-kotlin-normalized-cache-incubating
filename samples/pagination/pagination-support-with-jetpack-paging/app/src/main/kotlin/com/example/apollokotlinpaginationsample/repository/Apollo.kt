@@ -14,8 +14,6 @@ import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
 import com.apollographql.cache.normalized.api.ConnectionRecordMerger
-import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
-import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
@@ -52,9 +50,7 @@ val apolloClient: ApolloClient by lazy {
         .store(
             ApolloStore(
                 normalizedCacheFactory = memoryThenSqlCache,
-                cacheKeyGenerator = TypePolicyCacheKeyGenerator,
                 metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
-                cacheResolver = FieldPolicyCacheResolver,
                 recordMerger = ConnectionRecordMerger
             )
         )
@@ -91,7 +87,8 @@ class RepositoryRemoteMediator : RemoteMediator<String, RepositoryListQuery.Edge
             }
         }
 
-        val loadSize = if (loadType == LoadType.REFRESH) state.config.initialLoadSize else state.config.pageSize
+        val loadSize =
+            if (loadType == LoadType.REFRESH) state.config.initialLoadSize else state.config.pageSize
         val response = apolloClient.query(
             RepositoryListQuery(
                 after = Optional.presentIfNotNull(lastItemCursor),
@@ -101,9 +98,11 @@ class RepositoryRemoteMediator : RemoteMediator<String, RepositoryListQuery.Edge
             .fetchPolicy(FetchPolicy.NetworkOnly)
             .execute()
         if (response.data != null) {
-            return MediatorResult.Success(endOfPaginationReached = response.data!!.organization.repositories.edges.size < loadSize)
+            return MediatorResult.Success(endOfPaginationReached = response.data!!.organization!!.repositories.edges!!.size < loadSize)
         }
-        return MediatorResult.Error(response.exception ?: ApolloGraphQLException(response.errors!!.first()))
+        return MediatorResult.Error(
+            response.exception ?: ApolloGraphQLException(response.errors!!.first())
+        )
     }
 }
 
@@ -169,7 +168,13 @@ class RepositoryPagingSource(
     }
 
     override fun getRefreshKey(state: PagingState<String, RepositoryListQuery.Edge>): String? {
-        return state.anchorPosition?.let { state.closestItemToPosition((it - state.config.initialLoadSize / 2).coerceAtLeast(0)) }?.cursor
+        return state.anchorPosition?.let {
+            state.closestItemToPosition(
+                (it - state.config.initialLoadSize / 2).coerceAtLeast(
+                    0
+                )
+            )
+        }?.cursor
     }
 
     override val keyReuseSupported = true

@@ -27,10 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.watch
-import com.apollographql.apollo.exception.CacheMissException
 import com.example.apollokotlinpaginationsample.R
 import com.example.apollokotlinpaginationsample.graphql.RepositoryListQuery
 import com.example.apollokotlinpaginationsample.graphql.fragment.RepositoryFields
@@ -84,11 +84,11 @@ private fun RefreshBanner() {
 @Composable
 private fun RepositoryList(response: ApolloResponse<RepositoryListQuery.Data>) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(response.data!!.organization.repositories.edges.map { it!!.node.repositoryFields }) {
+        items(response.data!!.organization!!.repositories.edges!!.map { it!!.node!!.repositoryFields }) {
             RepositoryItem(it)
         }
         item {
-            if (response.data!!.organization.repositories.pageInfo.hasNextPage) {
+            if (response.data!!.organization!!.repositories.pageInfo.hasNextPage) {
                 LoadingItem()
                 LaunchedEffect(Unit) {
                     fetchAndMergeNextPage()

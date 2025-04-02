@@ -40,9 +40,7 @@ val apolloClient: ApolloClient by lazy {
         .store(
             ApolloStore(
                 normalizedCacheFactory = memoryThenSqlCache,
-                cacheKeyGenerator = TypePolicyCacheKeyGenerator,
                 metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
-                cacheResolver = FieldPolicyCacheResolver,
                 recordMerger = ConnectionRecordMerger
             )
         )
@@ -56,6 +54,6 @@ suspend fun fetchAndMergeNextPage() {
     val cacheResponse = apolloClient.query(listQuery).fetchPolicy(FetchPolicy.CacheOnly).execute()
 
     // 2. Fetch the next page from the network and store it in the cache
-    val after = cacheResponse.data!!.organization.repositories.pageInfo.endCursor
+    val after = cacheResponse.data!!.organization!!.repositories.pageInfo.endCursor
     apolloClient.query(RepositoryListQuery(after = Optional.presentIfNotNull(after))).fetchPolicy(FetchPolicy.NetworkOnly).execute()
 }
