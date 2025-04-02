@@ -84,11 +84,11 @@ private fun RefreshBanner() {
 @Composable
 private fun RepositoryList(response: ApolloResponse<RepositoryListQuery.Data>) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(response.data!!.organization.repositories.edges.map { it!!.node.repositoryFields }) {
+        items(response.data!!.organization!!.repositories.edges!!.map { it!!.node!!.repositoryFields }) {
             RepositoryItem(it)
         }
         item {
-            if (response.data!!.organization.repositories.pageInfo.hasNextPage) {
+            if (response.data!!.organization!!.repositories.pageInfo.hasNextPage) {
                 LoadingItem()
                 LaunchedEffect(Unit) {
                     fetchAndMergeNextPage()
