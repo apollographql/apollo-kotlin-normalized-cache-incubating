@@ -50,7 +50,8 @@ class MainActivity : ComponentActivity() {
             },
         ).flow
         setContent {
-            val repositoryPagingItems: LazyPagingItems<RepositoryListQuery.Edge> = repositoryPagingData.collectAsLazyPagingItems()
+            val repositoryPagingItems: LazyPagingItems<RepositoryListQuery.Edge> =
+                repositoryPagingData.collectAsLazyPagingItems()
             MaterialTheme {
                 Column(modifier = Modifier.fillMaxSize()) {
                     RefreshBanner(repositoryPagingItems)
@@ -80,10 +81,10 @@ private fun RepositoryList(repositoryPagingItems: LazyPagingItems<RepositoryList
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(
             count = repositoryPagingItems.itemCount,
-            key = repositoryPagingItems.itemKey { it.node.id },
+            key = repositoryPagingItems.itemKey { it.node!!.id },
         ) { index ->
             val edge: RepositoryListQuery.Edge = repositoryPagingItems[index]!!
-            RepositoryItem(edge.node.repositoryFields)
+            RepositoryItem(edge.node!!.repositoryFields)
         }
 
         if (repositoryPagingItems.loadState.append == LoadState.Loading) {
@@ -100,7 +101,10 @@ private fun RepositoryItem(repositoryFields: RepositoryFields) {
         headlineContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(modifier = Modifier.weight(1F), text = repositoryFields.name)
-                Text(text = repositoryFields.stargazers.totalCount.toString(), style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = repositoryFields.stargazers.totalCount.toString(),
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Icon(
                     painter = painterResource(R.drawable.ic_star_black_16dp),
                     contentDescription = null
