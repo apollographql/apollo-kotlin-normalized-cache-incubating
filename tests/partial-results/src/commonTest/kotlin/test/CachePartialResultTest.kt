@@ -4,7 +4,6 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Error
-import com.apollographql.apollo.api.Error.Location
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
@@ -28,6 +27,7 @@ import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storeReceivedDate
 import com.apollographql.cache.normalized.testing.append
+import com.apollographql.cache.normalized.testing.assertErrorsEquals
 import com.apollographql.cache.normalized.testing.keyToString
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
@@ -36,7 +36,6 @@ import okio.use
 import test.cache.Cache
 import test.fragment.UserFields
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.time.Duration
@@ -837,27 +836,3 @@ val PartialCacheOnlyInterceptor = object : ApolloInterceptor {
     )
   }
 }
-
-/**
- * Helps using assertEquals.
- */
-private data class ComparableError(
-    val message: String,
-    val locations: List<Location>?,
-    val path: List<Any>?,
-)
-
-private fun assertErrorsEquals(expected: Iterable<Error>?, actual: Iterable<Error>?) =
-  assertContentEquals(expected?.map {
-    ComparableError(
-        message = it.message,
-        locations = it.locations,
-        path = it.path,
-    )
-  }, actual?.map {
-    ComparableError(
-        message = it.message,
-        locations = it.locations,
-        path = it.path,
-    )
-  })

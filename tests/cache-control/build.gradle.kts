@@ -25,6 +25,7 @@ kotlin {
         implementation(libs.apollo.mockserver)
         implementation(libs.kotlin.test)
         implementation(libs.turbine)
+        implementation("com.apollographql.cache:test-utils")
       }
     }
 
@@ -45,6 +46,15 @@ apollo {
   service("declarative") {
     packageName.set("declarative")
     srcDir("src/commonMain/graphql/declarative")
+
+    plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin") {
+      argument("packageName", packageName.get())
+    }
+  }
+
+  service("doNotStore") {
+    packageName.set("donotstore")
+    srcDir("src/commonMain/graphql/doNotStore")
 
     plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin") {
       argument("packageName", packageName.get())

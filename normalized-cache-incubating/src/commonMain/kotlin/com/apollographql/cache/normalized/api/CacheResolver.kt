@@ -3,7 +3,6 @@ package com.apollographql.cache.normalized.api
 import com.apollographql.apollo.api.CompiledField
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.MutableExecutionOptions
-import com.apollographql.apollo.api.isComposite
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.cache.normalized.api.CacheResolver.ResolvedValue
@@ -11,7 +10,6 @@ import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.storeExpirationDate
 import com.apollographql.cache.normalized.storeReceivedDate
 import kotlin.jvm.JvmSuppressWildcards
-import kotlin.time.Duration
 
 /**
  * Controls how fields are resolved from the cache.
@@ -169,7 +167,7 @@ class CacheControlCacheResolver(
   constructor(
       delegateResolver: CacheResolver = FieldPolicyCacheResolver,
   ) : this(
-      maxAgeProvider = GlobalMaxAgeProvider(Duration.INFINITE),
+      maxAgeProvider = DefaultMaxAgeProvider,
       delegateResolver = delegateResolver,
   )
 
@@ -183,7 +181,7 @@ class CacheControlCacheResolver(
         val currentDate = currentTimeMillis() / 1000
         val age = currentDate - receivedDate
         val fieldPath = context.path.map {
-          MaxAgeContext.Field(name = it.name, type = it.type.rawType().name, isTypeComposite = it.type.rawType().isComposite())
+          it.toMaxAgeField()
         }
         val maxAge = maxAgeProvider.getMaxAge(MaxAgeContext(fieldPath)).inWholeSeconds
         val staleDuration = age - maxAge
@@ -228,7 +226,7 @@ class CacheControlCacheResolver(
 }
 
 /**
- * A cache resolver that uses `@fieldPolicy` annotations to resolve fields and delegates to [DefaultCacheResolver] otherwise
+ * A cache resolver that uses `@fieldPolicy` directives to resolve fields and delegates to [DefaultCacheResolver] otherwise
  */
 object FieldPolicyCacheResolver : CacheResolver {
   override fun resolveField(context: ResolverContext): Any? {

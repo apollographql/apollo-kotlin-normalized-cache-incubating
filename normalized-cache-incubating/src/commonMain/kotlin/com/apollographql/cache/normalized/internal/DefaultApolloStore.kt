@@ -20,6 +20,7 @@ import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.DataWithErrors
 import com.apollographql.cache.normalized.api.EmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
+import com.apollographql.cache.normalized.api.MaxAgeProvider
 import com.apollographql.cache.normalized.api.MetadataGenerator
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
@@ -44,6 +45,7 @@ internal class DefaultApolloStore(
     private val cacheResolver: CacheResolver,
     private val recordMerger: RecordMerger,
     private val embeddedFieldsProvider: EmbeddedFieldsProvider,
+    private val maxAgeProvider: MaxAgeProvider,
 ) : ApolloStore {
   private val changedKeysEvents = MutableSharedFlow<Set<String>>(
       /**
@@ -115,6 +117,7 @@ internal class DefaultApolloStore(
         metadataGenerator = metadataGenerator,
         fieldKeyGenerator = fieldKeyGenerator,
         embeddedFieldsProvider = embeddedFieldsProvider,
+        maxAgeProvider = maxAgeProvider,
     )
   }
 

@@ -27,11 +27,13 @@ import com.apollographql.cache.normalized.api.CacheKeyGenerator
 import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.DefaultEmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.DefaultFieldKeyGenerator
+import com.apollographql.cache.normalized.api.DefaultMaxAgeProvider
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.EmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.EmptyMetadataGenerator
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
+import com.apollographql.cache.normalized.api.MaxAgeProvider
 import com.apollographql.cache.normalized.api.MetadataGenerator
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.RecordMerger
@@ -70,6 +72,7 @@ fun ApolloClient.Builder.normalizedCache(
     recordMerger: RecordMerger = DefaultRecordMerger,
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
     embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
+    maxAgeProvider: MaxAgeProvider = DefaultMaxAgeProvider,
     writeToCacheAsynchronously: Boolean = false,
 ): ApolloClient.Builder {
   return store(
@@ -80,7 +83,8 @@ fun ApolloClient.Builder.normalizedCache(
           cacheResolver = cacheResolver,
           recordMerger = recordMerger,
           fieldKeyGenerator = fieldKeyGenerator,
-          embeddedFieldsProvider = embeddedFieldsProvider
+          embeddedFieldsProvider = embeddedFieldsProvider,
+          maxAgeProvider = maxAgeProvider,
       ), writeToCacheAsynchronously
   )
 }

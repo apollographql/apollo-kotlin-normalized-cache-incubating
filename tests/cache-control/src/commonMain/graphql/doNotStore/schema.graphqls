@@ -1,0 +1,44 @@
+type Query {
+  user: User
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  sensitiveScalar: String
+  sensitiveObject: SensitiveObject
+  project: Project
+}
+
+type SensitiveObject{
+  password: String
+}
+
+interface SensitiveInterface {
+  topSecret: Boolean
+}
+
+type Project implements SensitiveInterface {
+  id: ID!
+  name: String!
+  topSecret: Boolean
+}
+
+type Mutation {
+  auth: Auth
+}
+
+type Auth {
+  signIn(input: SignInInput): SignInResponse
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+type SignInResponse {
+  token: String
+  userData: User
+}

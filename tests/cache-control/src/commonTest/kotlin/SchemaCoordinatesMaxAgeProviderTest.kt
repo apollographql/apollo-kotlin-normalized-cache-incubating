@@ -1,6 +1,8 @@
 package test
 
 import com.apollographql.apollo.api.CompiledField
+import com.apollographql.apollo.api.InterfaceType
+import com.apollographql.apollo.api.ObjectType
 import com.apollographql.apollo.api.isComposite
 import com.apollographql.cache.normalized.api.MaxAge
 import com.apollographql.cache.normalized.api.MaxAgeContext
@@ -151,5 +153,36 @@ private fun CompiledField.field(name: String): CompiledField =
 fun CompiledField.path(vararg path: String): List<MaxAgeContext.Field> =
   path.fold(listOf(this)) { acc, name -> acc + acc.last().field(name) }
       .map {
-        MaxAgeContext.Field(name = it.name, type = it.type.rawType().name, isTypeComposite = it.type.rawType().isComposite())
+        it.toMaxAgeField()
       }
+
+private fun CompiledField.toMaxAgeField(): MaxAgeContext.Field {
+  val type = type.rawType()
+  val implements: List<MaxAgeContext.Type> = when (type) {
+    is ObjectType -> {
+      type.implements.map { it.toMaxAgeType() }
+    }
+
+    is InterfaceType -> {
+      type.implements.map { it.toMaxAgeType() }
+    }
+
+    else -> {
+      emptyList()
+    }
+  }
+  return MaxAgeContext.Field(
+      name = name,
+      type = MaxAgeContext.Type(
+          name = type.name,
+          isComposite = type.isComposite(),
+          implements = implements,
+      )
+  )
+}
+
+private fun InterfaceType.toMaxAgeType(): MaxAgeContext.Type = MaxAgeContext.Type(
+    name = name,
+    isComposite = true,
+    implements = implements.map { it.toMaxAgeType() },
+)

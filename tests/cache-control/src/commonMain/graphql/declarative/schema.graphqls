@@ -13,6 +13,7 @@ type Query {
   cachedBook: Book @cacheControl(maxAge: 60)
   reader: Reader @cacheControl(maxAge: 40)
   currentUserId: String
+  project: Project
 }
 
 type User @cacheControl(maxAge: 10) {
@@ -65,4 +66,9 @@ type Book {
 
 type Reader {
   book: Book @cacheControl(inheritMaxAge: true)
+}
+
+type Project implements Node {
+  id: ID!
+  name: String!
 }

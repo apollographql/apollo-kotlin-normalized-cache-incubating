@@ -110,3 +110,10 @@ query GetNodes {
     id
   }
 }
+
+query GetProject {
+  project {
+    id
+    name
+  }
+}

@@ -1,5 +1,9 @@
 package com.apollographql.cache.normalized.api
 
+import com.apollographql.apollo.api.CompiledField
+import com.apollographql.apollo.api.InterfaceType
+import com.apollographql.apollo.api.ObjectType
+import com.apollographql.apollo.api.isComposite
 import kotlin.time.Duration
 
 interface MaxAgeProvider {
@@ -18,8 +22,13 @@ class MaxAgeContext(
 ) {
   class Field(
       val name: String,
-      val type: String,
-      val isTypeComposite: Boolean,
+      val type: Type,
+  )
+
+  class Type(
+      val name: String,
+      val isComposite: Boolean,
+      val implements: List<Type>,
   )
 }
 
@@ -29,6 +38,8 @@ class MaxAgeContext(
 class GlobalMaxAgeProvider(private val maxAge: Duration) : MaxAgeProvider {
   override fun getMaxAge(maxAgeContext: MaxAgeContext): Duration = maxAge
 }
+
+val DefaultMaxAgeProvider: MaxAgeProvider = GlobalMaxAgeProvider(Duration.INFINITE)
 
 sealed interface MaxAge {
   class Duration(val duration: kotlin.time.Duration) : MaxAge
@@ -60,9 +71,13 @@ class SchemaCoordinatesMaxAgeProvider(
     }
 
     val fieldName = maxAgeContext.fieldPath.last().name
-    val fieldParentTypeName = maxAgeContext.fieldPath[maxAgeContext.fieldPath.lastIndex - 1].type
-    val fieldCoordinates = "$fieldParentTypeName.$fieldName"
-    val computedFieldMaxAge = when (val fieldMaxAge = maxAges[fieldCoordinates]) {
+    val fieldParentType = maxAgeContext.fieldPath[maxAgeContext.fieldPath.lastIndex - 1].type
+    val fieldParentTypeNames = (listOf(fieldParentType) + fieldParentType.allImplements()).map { it.name }
+    val fieldMaxAge = fieldParentTypeNames.firstNotNullOfOrNull { typeName ->
+      val fieldCoordinates = "$typeName.$fieldName"
+      maxAges[fieldCoordinates]
+    }
+    val computedFieldMaxAge = when (fieldMaxAge) {
       is MaxAge.Duration -> {
         fieldMaxAge.duration
       }
@@ -87,8 +102,9 @@ class SchemaCoordinatesMaxAgeProvider(
 
   private fun getTypeMaxAge(maxAgeContext: MaxAgeContext): Duration {
     val field = maxAgeContext.fieldPath.last()
-    val fieldTypeName = field.type
-    return when (val typeMaxAge = maxAges[fieldTypeName]) {
+    val fieldTypeNames = (listOf(field.type) + field.type.allImplements()).map { it.name }
+    val typeMaxAge = fieldTypeNames.firstNotNullOfOrNull { maxAges[it] }
+    return when (typeMaxAge) {
       is MaxAge.Duration -> {
         typeMaxAge.duration
       }
@@ -110,10 +126,57 @@ class SchemaCoordinatesMaxAgeProvider(
   private fun getFallbackMaxAge(maxAgeContext: MaxAgeContext): Duration {
     val field = maxAgeContext.fieldPath.last()
     val isRootField = maxAgeContext.fieldPath.size == 2
-    return if (isRootField || field.isTypeComposite) {
+    return if (isRootField || field.type.isComposite) {
       defaultMaxAge
     } else {
       getParentMaxAge(maxAgeContext)
     }
   }
 }
+
+/**
+ * Returns all the implemented types.
+ * We go breadth first so they are returned in the order they are defined in the schema.
+ */
+private fun MaxAgeContext.Type.allImplements(): List<MaxAgeContext.Type> {
+  val allImplements = mutableListOf<MaxAgeContext.Type>()
+  val queue = ArrayDeque<MaxAgeContext.Type>()
+  queue.addAll(implements)
+  while (queue.isNotEmpty()) {
+    val current = queue.removeFirst()
+    allImplements.add(current)
+    queue.addAll(current.implements)
+  }
+  return allImplements.distinct()
+}
+
+internal fun CompiledField.toMaxAgeField(): MaxAgeContext.Field {
+  val type = type.rawType()
+  val implements: List<MaxAgeContext.Type> = when (type) {
+    is ObjectType -> {
+      type.implements.map { it.toMaxAgeType() }
+    }
+
+    is InterfaceType -> {
+      type.implements.map { it.toMaxAgeType() }
+    }
+
+    else -> {
+      emptyList()
+    }
+  }
+  return MaxAgeContext.Field(
+      name = name,
+      type = MaxAgeContext.Type(
+          name = type.name,
+          isComposite = type.isComposite(),
+          implements = implements,
+      )
+  )
+}
+
+private fun InterfaceType.toMaxAgeType(): MaxAgeContext.Type = MaxAgeContext.Type(
+    name = name,
+    isComposite = true,
+    implements = implements.map { it.toMaxAgeType() },
+)

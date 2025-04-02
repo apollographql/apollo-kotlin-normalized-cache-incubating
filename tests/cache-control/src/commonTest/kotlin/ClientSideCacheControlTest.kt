@@ -245,6 +245,16 @@ class ClientSideCacheControlTest {
     mergeUserQueryResults(client, 1)
     val userEmailResponse = client.query(GetUserEmailQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute()
     assertTrue(userEmailResponse.data?.user?.email == "john@doe.com")
+
+    // Store records 10 second ago, less that max age for Node: should not cache miss
+    mergeProjectQueryResults(client, 10)
+    val projectResponse = client.query(declarative.GetProjectQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    assertTrue(projectResponse.data?.project?.name == "Stardust")
+
+    // Store records 32 second ago, less than max age for Node: should cache miss
+    mergeProjectQueryResults(client, 32)
+    e = client.query(declarative.GetProjectQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute().exception as CacheMissException
+    assertTrue(e.stale)
   }
 
   private fun mergeUserQueryResults(client: ApolloClient, secondsAgo: Int) {
@@ -254,6 +264,15 @@ class ClientSideCacheControlTest {
       it.merge(records, receivedDate(currentTimeSeconds() - secondsAgo), DefaultRecordMerger)
     }
   }
+
+  private fun mergeProjectQueryResults(client: ApolloClient, secondsAgo: Int) {
+    val data = declarative.GetProjectQuery.Data(declarative.GetProjectQuery.Project("42", "Stardust"))
+    val records = data.normalized(declarative.GetProjectQuery()).values
+    client.apolloStore.accessCache {
+      it.merge(records, receivedDate(currentTimeSeconds() - secondsAgo), DefaultRecordMerger)
+    }
+  }
+
 }
 
 fun currentTimeSeconds() = currentTimeMillis() / 1000
