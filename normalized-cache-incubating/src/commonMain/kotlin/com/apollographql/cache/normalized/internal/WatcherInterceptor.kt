@@ -39,7 +39,8 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
     @Suppress("UNCHECKED_CAST")
     var watchedKeys: Set<String>? =
       watchContext.data?.let { data ->
-        val dataWithErrors = (data as D).withErrors(request.operation, null, customScalarAdapters)
+        val dataWithErrors =
+          (data as D).withErrors(executable = request.operation, errors = null, customScalarAdapters = customScalarAdapters)
         store.normalize(
             executable = request.operation,
             dataWithErrors = dataWithErrors,

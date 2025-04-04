@@ -2,6 +2,7 @@
 
 - Records are now rooted per operation type (QUERY_ROOT, MUTATION_ROOT, SUBSCRIPTION_ROOT) (#109)
 - `ApolloClient.apolloStore` is deprecated in favor of `ApolloClient.store` for consistency.
+- Individual `ApolloStore` methods no longer accept a `CustomScalarAdapters`. Instead it can be passed to the `ApolloStore` constructor.
 
 # Version 0.0.8
 _2025-03-28_

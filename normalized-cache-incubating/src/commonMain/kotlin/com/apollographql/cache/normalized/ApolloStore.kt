@@ -73,7 +73,6 @@ interface ApolloStore {
    */
   fun <D : Operation.Data> readOperation(
       operation: Operation<D>,
-      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
   ): ApolloResponse<D>
 
@@ -93,7 +92,6 @@ interface ApolloStore {
   fun <D : Fragment.Data> readFragment(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
-      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
   ): ReadResult<D>
 
@@ -113,7 +111,6 @@ interface ApolloStore {
       operation: Operation<D>,
       data: D,
       errors: List<Error>? = null,
-      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
   ): Set<String>
 
@@ -131,7 +128,6 @@ interface ApolloStore {
   fun <D : Operation.Data> writeOperation(
       operation: Operation<D>,
       dataWithErrors: DataWithErrors,
-      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
   ): Set<String>
 
@@ -151,7 +147,6 @@ interface ApolloStore {
       fragment: Fragment<D>,
       cacheKey: CacheKey,
       data: D,
-      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
   ): Set<String>
 
@@ -171,7 +166,6 @@ interface ApolloStore {
       operation: Operation<D>,
       data: D,
       mutationId: Uuid,
-      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
   ): Set<String>
 
   /**
@@ -192,7 +186,6 @@ interface ApolloStore {
       cacheKey: CacheKey,
       data: D,
       mutationId: Uuid,
-      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
   ): Set<String>
 
   /**
@@ -260,7 +253,6 @@ interface ApolloStore {
       executable: Executable<D>,
       dataWithErrors: DataWithErrors,
       rootKey: CacheKey = CacheKey.QUERY_ROOT,
-      customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
   ): Map<CacheKey, Record>
 
   /**
@@ -303,6 +295,7 @@ interface ApolloStore {
 
 fun ApolloStore(
     normalizedCacheFactory: NormalizedCacheFactory,
+    customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
     cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
     cacheResolver: CacheResolver = FieldPolicyCacheResolver,
@@ -312,6 +305,7 @@ fun ApolloStore(
     maxAgeProvider: MaxAgeProvider = DefaultMaxAgeProvider,
 ): ApolloStore = DefaultApolloStore(
     normalizedCacheFactory = normalizedCacheFactory,
+    customScalarAdapters = customScalarAdapters,
     cacheKeyGenerator = cacheKeyGenerator,
     metadataGenerator = metadataGenerator,
     cacheResolver = cacheResolver,

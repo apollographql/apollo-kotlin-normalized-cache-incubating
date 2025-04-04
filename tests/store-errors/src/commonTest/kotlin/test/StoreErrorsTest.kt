@@ -3,7 +3,6 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
-import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.interceptor.ApolloInterceptor
@@ -708,7 +707,6 @@ class StoreErrorsTest {
     val normalized: Map<CacheKey, Record> = memoryStore.normalize(
         executable = query,
         dataWithErrors = dataWithErrors,
-        customScalarAdapters = CustomScalarAdapters.Empty,
     )
     assertEquals("User", normalized[CacheKey("User:1")]!!["__typename"])
     assertEquals("1", normalized[CacheKey("User:1")]!!["id"])
