@@ -14,6 +14,7 @@ import com.apollographql.cache.normalized.api.IdCacheKeyResolver
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.isFromCache
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
+import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import normalizer.CharacterNameByIdQuery
@@ -197,12 +198,10 @@ class StoreTest {
     val customScalarAdapters = CustomScalarAdapters.Builder()
         .add(Color.type, StringAdapter)
         .build()
-    store =
-      ApolloStore(MemoryCacheFactory(), customScalarAdapters = customScalarAdapters, cacheKeyGenerator = IdCacheKeyGenerator(), cacheResolver = IdCacheKeyResolver())
     apolloClient = ApolloClient.Builder()
         .networkTransport(QueueTestNetworkTransport())
         .customScalarAdapters(customScalarAdapters)
-        .store(store)
+        .normalizedCache(MemoryCacheFactory(), customScalarAdapters = customScalarAdapters, cacheKeyGenerator = IdCacheKeyGenerator(), cacheResolver = IdCacheKeyResolver())
         .build()
 
     val query = ColorQuery()

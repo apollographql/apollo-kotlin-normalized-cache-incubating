@@ -7,6 +7,7 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.CacheDumpProviderContext
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.ExecutionContext
 import com.apollographql.apollo.api.ExecutionOptions
 import com.apollographql.apollo.api.MutableExecutionOptions
@@ -66,6 +67,7 @@ import kotlin.time.Duration
 @JvmName("configureApolloClientBuilder2")
 fun ApolloClient.Builder.normalizedCache(
     normalizedCacheFactory: NormalizedCacheFactory,
+    customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
     cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
     cacheResolver: CacheResolver = FieldPolicyCacheResolver,
@@ -78,6 +80,7 @@ fun ApolloClient.Builder.normalizedCache(
   return store(
       ApolloStore(
           normalizedCacheFactory = normalizedCacheFactory,
+          customScalarAdapters = customScalarAdapters,
           cacheKeyGenerator = cacheKeyGenerator,
           metadataGenerator = metadataGenerator,
           cacheResolver = cacheResolver,
