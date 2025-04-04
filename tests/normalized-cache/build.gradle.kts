@@ -62,6 +62,7 @@ apollo {
     mapScalarToKotlinString("Instant")
     sealedClassesForEnumsMatching.set(listOf("Episode"))
     generateOptionalOperationVariables.set(false)
+    mapScalar("Color", "kotlin.String")
   }
 
   service("circular") {

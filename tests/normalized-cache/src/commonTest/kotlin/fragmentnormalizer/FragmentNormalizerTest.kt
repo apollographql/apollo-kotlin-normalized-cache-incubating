@@ -1,7 +1,6 @@
 package test.fragmentnormalizer
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
@@ -66,14 +65,12 @@ class FragmentNormalizerTest {
         ConversationFragmentImpl(),
         CacheKey(fragment1.id),
         fragment1Read,
-        CustomScalarAdapters.Empty
     )
 
     apolloClient.apolloStore.writeFragment(
         ConversationFragmentImpl(),
         CacheKey(fragment2.id),
         fragment2Read,
-        CustomScalarAdapters.Empty
     )
 
     fragment1 = apolloClient.apolloStore.readFragment(

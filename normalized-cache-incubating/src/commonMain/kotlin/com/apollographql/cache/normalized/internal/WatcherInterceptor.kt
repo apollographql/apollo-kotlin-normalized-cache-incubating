@@ -38,8 +38,9 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
     @Suppress("UNCHECKED_CAST")
     var watchedKeys: Set<String>? =
       watchContext.data?.let { data ->
-        val dataWithErrors = (data as D).withErrors(request.operation, null, customScalarAdapters)
-        store.normalize(request.operation, dataWithErrors, customScalarAdapters = customScalarAdapters).values.dependentKeys()
+        val dataWithErrors =
+          (data as D).withErrors(executable = request.operation, errors = null, customScalarAdapters = customScalarAdapters)
+        store.normalize(request.operation, dataWithErrors).values.dependentKeys()
       }
 
     return (store.changedKeys as SharedFlow<Any>)
@@ -60,7 +61,7 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
                   if (response.data != null) {
                     val dataWithErrors = response.data!!.withErrors(request.operation, response.errors, customScalarAdapters)
                     watchedKeys =
-                      store.normalize(request.operation, dataWithErrors, customScalarAdapters = customScalarAdapters).values.dependentKeys()
+                      store.normalize(request.operation, dataWithErrors).values.dependentKeys()
                   }
                 }
           }
