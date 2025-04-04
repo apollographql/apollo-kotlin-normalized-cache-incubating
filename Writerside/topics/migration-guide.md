@@ -147,3 +147,16 @@ interface CacheResolver {
 ```
 
 `resolveField` can also now return a `ResolvedValue` when metadata should be returned with the resolved value (e.g. staleness).
+
+### CacheKey
+
+For consistency, the `CacheKey` type is now used instead of `String` in more APIs, e.g.:
+
+- `ApolloStore.remove()`
+- `Record.key`
+- `NormalizedCache.loadRecord()`
+
+### Removed APIs
+
+- `ApolloCacheHeaders.EVICT_AFTER_READ` is removed. Manually call `ApolloStore.remove()` when needed instead.
+- `NormalizedCache.remove(pattern: String)` is removed. Please open an issue if you need this feature back.
