@@ -1,6 +1,6 @@
 # Next version (unreleased)
 
-PUT_CHANGELOG_HERE
+- Individual `ApolloStore` methods no longer accept a `CustomScalarAdapters`. Instead it can be passed to the `ApolloStore` constructor.
 
 # Version 0.0.8
 _2025-03-28_

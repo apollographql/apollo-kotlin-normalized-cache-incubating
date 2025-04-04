@@ -24,6 +24,8 @@ type Query {
   json: Json
 
   instant: Instant!
+
+  color: Color!
 }
 
 """
@@ -342,3 +344,5 @@ schema {
 }
 
 scalar Json
+
+scalar Color
