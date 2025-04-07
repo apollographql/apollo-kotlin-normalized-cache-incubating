@@ -5,6 +5,7 @@ import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.api.graphQLErrorOrNull
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.testing.internal.runTest
@@ -821,6 +822,47 @@ class CachePartialResultTest {
                       .path(listOf("me", "employeeInfo", "salary")).build()
               ),
               cacheMissResult.errors
+          )
+        }
+  }
+
+  @Test
+  fun cacheControlWithCatchToResult() = runTest(before = { setUp() }, after = { tearDown() }) {
+    mockServer.enqueueString(
+        // language=JSON
+        """
+        {
+          "data": {
+            "me": {
+              "__typename": "User",
+              "id": "1",
+              "firstName": "John",
+              "lastName": "Smith",
+              "departmentInfo": {
+                "id": "1",
+                "name": "Engineering"
+              }
+            }
+          }
+        }
+        """
+    )
+    ApolloClient.Builder()
+        .serverUrl(mockServer.url())
+        .normalizedCache(MemoryCacheFactory(), cacheResolver = CacheControlCacheResolver(SchemaCoordinatesMaxAgeProvider(Cache.maxAges, Duration.INFINITE)))
+        .storeReceivedDate(true)
+        .build()
+        .use { apolloClient ->
+          apolloClient.query(MeWithDepartmentInfoQuery())
+              .fetchPolicy(FetchPolicy.NetworkOnly)
+              .execute()
+          val cacheMissResult = apolloClient.query(MeWithDepartmentInfoQuery())
+              .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
+              .execute()
+          assertErrorsEquals(
+              Error.Builder("Field 'name' on object '${CacheKey("User:1").append("departmentInfo").keyToString()}' is stale in the cache")
+                  .path(listOf("me", "departmentInfo", "name")).build(),
+              cacheMissResult.data?.me?.departmentInfo?.name?.graphQLErrorOrNull()
           )
         }
   }

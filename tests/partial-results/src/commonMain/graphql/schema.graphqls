@@ -19,6 +19,7 @@ type User {
   category: Category!
   moreInfo: Json!
   employeeInfo: EmployeeInfo
+  departmentInfo: DepartmentInfo!
 }
 
 type Project {
@@ -33,6 +34,11 @@ type EmployeeInfo {
   id: ID!
   salary: Int
   department: String
+}
+
+type DepartmentInfo {
+  id: ID!
+  name: String
 }
 
 scalar Category
