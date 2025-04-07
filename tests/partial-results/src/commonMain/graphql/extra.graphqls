@@ -26,3 +26,5 @@ extend type EmployeeInfo @semanticNonNullField(name: "salary")
 @semanticNonNullField(name: "department")
 
 extend type EmployeeInfo @cacheControlField(name: "salary", maxAge: 0)
+
+extend type DepartmentInfo @cacheControlField(name: "name", maxAge: 0)

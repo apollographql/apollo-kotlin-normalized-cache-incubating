@@ -129,3 +129,14 @@ query MeWithEmployeeInfoQuery {
     }
   }
 }
+
+query MeWithDepartmentInfoQuery {
+  me {
+    firstName
+    lastName
+    departmentInfo {
+      id
+      name @catch(to: RESULT)
+    }
+  }
+}
