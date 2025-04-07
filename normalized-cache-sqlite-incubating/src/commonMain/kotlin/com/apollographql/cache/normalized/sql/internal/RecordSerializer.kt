@@ -20,7 +20,7 @@ internal object RecordSerializer {
     buffer.writeMap(record.fields)
     buffer._writeInt(record.metadata.size)
     for ((k, v) in record.metadata.mapKeys { (k, _) -> knownMetadataKeys[k] ?: k }) {
-      buffer.writeString(k)
+      buffer.writeString(k.shortenCacheKey())
       buffer.writeMap(v)
     }
     return buffer.readByteArray()
@@ -32,7 +32,7 @@ internal object RecordSerializer {
     val metadataSize = buffer._readInt()
     val metadata = HashMap<String, Map<String, ApolloJsonElement>>(metadataSize).apply {
       repeat(metadataSize) {
-        val k = buffer.readString()
+        val k = buffer.readString().expandCacheKey()
         val v = buffer.readMap()
         put(k, v)
       }
@@ -174,7 +174,7 @@ internal object RecordSerializer {
 
       is CacheKey -> {
         writeByte(CACHE_KEY)
-        writeString(value.key)
+        writeString(value.key.shortenCacheKey())
       }
 
       is List<*> -> {
@@ -242,7 +242,7 @@ internal object RecordSerializer {
         BOOLEAN_TRUE -> true
         BOOLEAN_FALSE -> false
         CACHE_KEY -> {
-          CacheKey(readString())
+          CacheKey(readString().expandCacheKey())
         }
 
         LIST -> {
@@ -321,4 +321,31 @@ internal object RecordSerializer {
       ApolloCacheHeaders.EXPIRATION_DATE to "1",
   )
   private val knownMetadataKeysInverted = knownMetadataKeys.entries.associate { (k, v) -> v to k }
+
+  private val mutationPrefixLong = CacheKey.MUTATION_ROOT.key + "."
+  private val subscriptionPrefixLong = CacheKey.SUBSCRIPTION_ROOT.key + "."
+
+  // Use non printable characters to reduce likelihood of collisions with legitimate cache keys
+  private const val mutationPrefixShort = "\u0001"
+  private const val subscriptionPrefixShort = "\u0002"
+
+  private fun String.shortenCacheKey(): String {
+    return if (startsWith(mutationPrefixLong)) {
+      replaceFirst(mutationPrefixLong, mutationPrefixShort)
+    } else if (startsWith(subscriptionPrefixLong)) {
+      replaceFirst(subscriptionPrefixLong, subscriptionPrefixShort)
+    } else {
+      this
+    }
+  }
+
+  private fun String.expandCacheKey(): String {
+    return if (startsWith(mutationPrefixShort)) {
+      replaceFirst(mutationPrefixShort, mutationPrefixLong)
+    } else if (startsWith(subscriptionPrefixShort)) {
+      replaceFirst(subscriptionPrefixShort, subscriptionPrefixLong)
+    } else {
+      this
+    }
+  }
 }

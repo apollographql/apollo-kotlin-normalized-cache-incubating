@@ -16,6 +16,11 @@ kotlin {
       dependencies {
         implementation(libs.apollo.runtime)
         implementation("com.apollographql.cache:normalized-cache-incubating")
+      }
+    }
+
+    getByName("concurrentMain") {
+      dependencies {
         implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
       }
     }
