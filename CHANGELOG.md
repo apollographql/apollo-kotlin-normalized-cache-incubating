@@ -1,6 +1,6 @@
 # Next version (unreleased)
 
-PUT_CHANGELOG_HERE
+- Records are now rooted per operation type (QUERY_ROOT, MUTATION_ROOT, SUBSCRIPTION_ROOT) (#109)
 
 # Version 0.0.8
 _2025-03-28_
