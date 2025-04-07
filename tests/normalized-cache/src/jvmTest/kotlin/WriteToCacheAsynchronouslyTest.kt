@@ -82,6 +82,6 @@ class WriteToCacheAsynchronouslyTest {
   }
 
   companion object {
-    val QUERY_ROOT_KEY = CacheKey.rootKey()
+    val QUERY_ROOT_KEY = CacheKey.QUERY_ROOT
   }
 }

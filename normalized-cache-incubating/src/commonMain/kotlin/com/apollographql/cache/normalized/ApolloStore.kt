@@ -259,7 +259,7 @@ interface ApolloStore {
   fun <D : Executable.Data> normalize(
       executable: Executable<D>,
       dataWithErrors: DataWithErrors,
-      rootKey: CacheKey = CacheKey.rootKey(),
+      rootKey: CacheKey = CacheKey.QUERY_ROOT,
       customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
   ): Map<CacheKey, Record>
 

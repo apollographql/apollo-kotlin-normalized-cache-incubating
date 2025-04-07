@@ -30,7 +30,7 @@ fun Map<CacheKey, Record>.getReachableCacheKeys(): Set<CacheKey> {
   }
 
   return mutableSetOf<CacheKey>().also { reachableCacheKeys ->
-    getReachableCacheKeys(listOf(CacheKey.rootKey()), reachableCacheKeys)
+    getReachableCacheKeys(listOf(CacheKey.QUERY_ROOT, CacheKey.MUTATION_ROOT, CacheKey.SUBSCRIPTION_ROOT), reachableCacheKeys)
   }
 }
 

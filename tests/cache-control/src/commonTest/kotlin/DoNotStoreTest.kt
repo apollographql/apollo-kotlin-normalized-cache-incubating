@@ -222,11 +222,11 @@ class DoNotStoreTest {
           )
 
           apolloClient.apolloStore.accessCache { cache ->
-            val authRecord = cache.loadRecord(CacheKey("auth"), CacheHeaders.NONE)!!
+            val authRecord = cache.loadRecord(CacheKey.MUTATION_ROOT.append("auth"), CacheHeaders.NONE)!!
             // No password in field key
             assertContentEquals(listOf("signIn"), authRecord.fields.keys)
 
-            val signInRecord = cache.loadRecord(CacheKey("auth").append("signIn"), CacheHeaders.NONE)!!
+            val signInRecord = cache.loadRecord(CacheKey.MUTATION_ROOT.append("auth", "signIn"), CacheHeaders.NONE)!!
             // No token in record
             assertContentEquals(listOf("userData"), signInRecord.fields.keys)
           }

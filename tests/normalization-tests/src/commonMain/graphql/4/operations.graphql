@@ -1,0 +1,15 @@
+mutation CreateUserMutation($name: String!) {
+  createUser(name: $name) {
+    id
+    name
+    projects {
+      id
+      name
+      description
+      owner {
+        id
+        name
+      }
+    }
+  }
+}

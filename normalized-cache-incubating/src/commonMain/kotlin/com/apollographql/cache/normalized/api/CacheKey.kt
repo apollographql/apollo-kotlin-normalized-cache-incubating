@@ -1,7 +1,10 @@
 package com.apollographql.cache.normalized.api
 
+import com.apollographql.apollo.api.Mutation
+import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.api.Query
+import com.apollographql.apollo.api.Subscription
 import kotlin.jvm.JvmInline
-import kotlin.jvm.JvmStatic
 
 /**
  * A [CacheKey] identifies an object in the cache.
@@ -42,17 +45,14 @@ value class CacheKey(
   override fun toString() = "CacheKey(${keyToString()})"
 
   companion object {
-    private val ROOT_CACHE_KEY = CacheKey("QUERY_ROOT")
-
-    @JvmStatic
-    fun rootKey(): CacheKey {
-      return ROOT_CACHE_KEY
-    }
+    val QUERY_ROOT = CacheKey("QUERY_ROOT")
+    val MUTATION_ROOT = CacheKey("MUTATION_ROOT")
+    val SUBSCRIPTION_ROOT = CacheKey("SUBSCRIPTION_ROOT")
   }
 }
 
-fun CacheKey.isRootKey(): Boolean {
-  return this == CacheKey.rootKey()
+internal fun CacheKey.isRootKey(): Boolean {
+  return this == CacheKey.QUERY_ROOT || this == CacheKey.MUTATION_ROOT || this == CacheKey.SUBSCRIPTION_ROOT
 }
 
 internal fun CacheKey.fieldKey(fieldName: String): String {
@@ -65,4 +65,11 @@ internal fun CacheKey.append(vararg keys: String): CacheKey {
     cacheKey = CacheKey("${cacheKey.key}.$key")
   }
   return cacheKey
+}
+
+internal fun Operation<*>.rootKey() = when (this) {
+  is Query -> CacheKey.QUERY_ROOT
+  is Mutation -> CacheKey.MUTATION_ROOT
+  is Subscription -> CacheKey.SUBSCRIPTION_ROOT
+  else -> throw IllegalArgumentException("Unknown operation type: ${this::class}")
 }

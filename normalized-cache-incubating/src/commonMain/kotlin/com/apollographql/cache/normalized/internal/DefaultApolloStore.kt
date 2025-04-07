@@ -27,6 +27,7 @@ import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.api.propagateErrors
+import com.apollographql.cache.normalized.api.rootKey
 import com.apollographql.cache.normalized.api.withErrors
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.cacheInfo
@@ -132,7 +133,7 @@ internal class DefaultApolloStore(
         cacheHeaders = cacheHeaders,
         cacheResolver = cacheResolver,
         variables = variables,
-        rootKey = CacheKey.rootKey(),
+        rootKey = operation.rootKey(),
         rootSelections = operation.rootField().selections,
         rootField = operation.rootField(),
         fieldKeyGenerator = fieldKeyGenerator,
@@ -225,6 +226,7 @@ internal class DefaultApolloStore(
     val records = normalize(
         executable = operation,
         dataWithErrors = dataWithErrors,
+        rootKey = operation.rootKey(),
         customScalarAdapters = customScalarAdapters,
     ).values.toSet()
     return cache.merge(records, cacheHeaders, recordMerger)
@@ -257,6 +259,7 @@ internal class DefaultApolloStore(
     val records = normalize(
         executable = operation,
         dataWithErrors = dataWithErrors,
+        rootKey = operation.rootKey(),
         customScalarAdapters = customScalarAdapters,
     ).values.map { record ->
       Record(

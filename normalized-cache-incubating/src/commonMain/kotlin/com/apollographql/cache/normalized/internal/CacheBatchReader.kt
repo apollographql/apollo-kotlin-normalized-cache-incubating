@@ -15,6 +15,7 @@ import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.ReadOnlyNormalizedCache
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.ResolverContext
+import com.apollographql.cache.normalized.api.isRootKey
 import com.apollographql.cache.normalized.cacheMissException
 import kotlin.jvm.JvmSuppressWildcards
 
@@ -121,7 +122,7 @@ internal class CacheBatchReader(
       copy.forEach { pendingReference ->
         var record = records[pendingReference.key]
         if (record == null) {
-          if (pendingReference.key == CacheKey.rootKey()) {
+          if (pendingReference.key.isRootKey()) {
             // This happens the very first time we read the cache
             record = Record(pendingReference.key, emptyMap())
           } else {

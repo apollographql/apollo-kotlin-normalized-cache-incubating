@@ -316,6 +316,6 @@ class SqlNormalizedCacheTest {
 
   companion object {
     val STANDARD_KEY = CacheKey("key")
-    val QUERY_ROOT_KEY = CacheKey.rootKey()
+    val QUERY_ROOT_KEY = CacheKey.QUERY_ROOT
   }
 }
