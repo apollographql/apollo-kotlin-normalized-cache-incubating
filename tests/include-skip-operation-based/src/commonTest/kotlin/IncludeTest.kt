@@ -4,9 +4,9 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.api.json.MapJsonReader
 import com.apollographql.apollo.api.toApolloResponse
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.internal.normalized
+import com.apollographql.cache.normalized.testing.runTest
 import com.example.GetCatIncludeVariableWithDefaultQuery
 import com.example.SkipFragmentWithDefaultToFalseQuery
 import com.example.type.buildCat

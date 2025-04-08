@@ -2,7 +2,6 @@ package pagination
 
 import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.api.json.ApolloJsonElement
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
@@ -14,6 +13,7 @@ import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
+import com.apollographql.cache.normalized.testing.runTest
 import pagination.offsetBasedWithPage.UsersQuery
 import pagination.offsetBasedWithPage.type.buildUser
 import pagination.offsetBasedWithPage.type.buildUserPage

@@ -8,7 +8,6 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.graphQLErrorOrNull
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheControlCacheResolver
@@ -30,6 +29,7 @@ import com.apollographql.cache.normalized.storeReceivedDate
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.assertErrorsEquals
 import com.apollographql.cache.normalized.testing.keyToString
+import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import kotlinx.coroutines.flow.Flow

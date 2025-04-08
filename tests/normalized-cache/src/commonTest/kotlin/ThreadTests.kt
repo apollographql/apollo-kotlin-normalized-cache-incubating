@@ -3,11 +3,8 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.testing.Platform
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
-import com.apollographql.apollo.testing.currentThreadId
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.apollo.testing.platform
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
@@ -18,6 +15,9 @@ import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCache
 import com.apollographql.cache.normalized.normalizedCache
+import com.apollographql.cache.normalized.testing.Platform
+import com.apollographql.cache.normalized.testing.currentThreadId
+import com.apollographql.cache.normalized.testing.platform
 import kotlinx.coroutines.test.runTest
 import normalizer.HeroNameQuery
 import kotlin.reflect.KClass

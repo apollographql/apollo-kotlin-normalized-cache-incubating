@@ -22,6 +22,7 @@ kotlin {
     getByName("commonTest") {
       dependencies {
         implementation(libs.apollo.testing.support)
+        implementation("com.apollographql.cache:test-utils")
         implementation(libs.kotlin.test)
       }
     }

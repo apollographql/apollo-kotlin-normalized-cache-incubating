@@ -1,11 +1,56 @@
+public final class com/apollographql/cache/normalized/testing/-FileSystemCommon {
+	public static final fun pathToJsonReader (Ljava/lang/String;)Lcom/apollographql/apollo/api/json/JsonReader;
+	public static final fun pathToUtf8 (Ljava/lang/String;)Ljava/lang/String;
+}
+
 public final class com/apollographql/cache/normalized/testing/CacheKeyKt {
 	public static final fun append-eNSUWrY (Ljava/lang/String;[Ljava/lang/String;)Ljava/lang/String;
 	public static final fun fieldKey-eNSUWrY (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 	public static final fun keyToString-pWl1Des (Ljava/lang/String;)Ljava/lang/String;
 }
 
+public final class com/apollographql/cache/normalized/testing/ChannelsKt {
+	public static final fun assertNoElement (Lkotlinx/coroutines/channels/Channel;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun assertNoElement$default (Lkotlinx/coroutines/channels/Channel;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun awaitElement (Lkotlinx/coroutines/channels/Channel;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun awaitElement$default (Lkotlinx/coroutines/channels/Channel;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/apollographql/cache/normalized/testing/CurrentThreadId_jvmCommonKt {
+	public static final fun currentThreadId ()Ljava/lang/String;
+}
+
 public final class com/apollographql/cache/normalized/testing/ErrorsKt {
 	public static final fun assertErrorsEquals (Lcom/apollographql/apollo/api/Error;Lcom/apollographql/apollo/api/Error;)V
 	public static final fun assertErrorsEquals (Ljava/lang/Iterable;Ljava/lang/Iterable;)V
+}
+
+public final class com/apollographql/cache/normalized/testing/Platform : java/lang/Enum {
+	public static final field Js Lcom/apollographql/cache/normalized/testing/Platform;
+	public static final field Jvm Lcom/apollographql/cache/normalized/testing/Platform;
+	public static final field Native Lcom/apollographql/cache/normalized/testing/Platform;
+	public static final field WasmJs Lcom/apollographql/cache/normalized/testing/Platform;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/apollographql/cache/normalized/testing/Platform;
+	public static fun values ()[Lcom/apollographql/cache/normalized/testing/Platform;
+}
+
+public final class com/apollographql/cache/normalized/testing/Platform_jvmCommonKt {
+	public static final fun platform ()Lcom/apollographql/cache/normalized/testing/Platform;
+}
+
+public final class com/apollographql/cache/normalized/testing/ReadFile_concurrentKt {
+	public static final fun getHostFileSystem ()Lokio/FileSystem;
+}
+
+public final class com/apollographql/cache/normalized/testing/ReadFile_jvmKt {
+	public static final fun getTestsPath ()Ljava/lang/String;
+	public static final fun shouldUpdateTestFixtures ()Z
+}
+
+public final class com/apollographql/cache/normalized/testing/RunTestKt {
+	public static final fun runTest (Lkotlin/jvm/functions/Function2;)V
+	public static final fun runTest (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun runTest$default (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 }
 

@@ -24,7 +24,7 @@ kotlin {
     findByName("commonTest")?.apply {
       dependencies {
         implementation(libs.kotlin.test)
-        implementation(libs.apollo.testing.support)
+        implementation("com.apollographql.cache:test-utils")
         implementation(libs.apollo.mockserver)
       }
     }

@@ -28,10 +28,10 @@ kotlin {
     getByName("commonTest") {
       dependencies {
         implementation(libs.apollo.testing.support)
+        implementation("com.apollographql.cache:test-utils")
         implementation(libs.apollo.mockserver)
         implementation(libs.kotlin.test)
         implementation(libs.turbine)
-        implementation("com.apollographql.cache:test-utils")
       }
     }
 

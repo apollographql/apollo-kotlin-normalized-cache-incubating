@@ -14,8 +14,14 @@ kotlin {
   sourceSets {
     getByName("commonMain") {
       dependencies {
+        api(libs.kotlinx.coroutines.test)
         api(project(":normalized-cache-incubating"))
         implementation(libs.kotlin.test)
+      }
+    }
+    getByName("jsMain") {
+      dependencies {
+        api(libs.okio.nodefilesystem)
       }
     }
   }

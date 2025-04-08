@@ -9,7 +9,6 @@ import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestNetworkError
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
@@ -18,6 +17,7 @@ import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.refetchPolicy
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.cache.normalized.watch
 import com.apollographql.mockserver.MockResponse
 import com.apollographql.mockserver.MockServer
