@@ -40,7 +40,6 @@ import kotlin.reflect.KClass
 
 internal class DefaultApolloStore(
     normalizedCacheFactory: NormalizedCacheFactory,
-    private val customScalarAdapters: CustomScalarAdapters,
     private val cacheKeyGenerator: CacheKeyGenerator,
     private val fieldKeyGenerator: FieldKeyGenerator,
     private val metadataGenerator: MetadataGenerator,
@@ -109,6 +108,7 @@ internal class DefaultApolloStore(
       executable: Executable<D>,
       dataWithErrors: DataWithErrors,
       rootKey: CacheKey,
+      customScalarAdapters: CustomScalarAdapters,
   ): Map<CacheKey, Record> {
     return dataWithErrors.normalized(
         executable = executable,
@@ -124,6 +124,7 @@ internal class DefaultApolloStore(
 
   override fun <D : Operation.Data> readOperation(
       operation: Operation<D>,
+      customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
   ): ApolloResponse<D> {
     val variables = operation.variables(customScalarAdapters, true)
@@ -179,6 +180,7 @@ internal class DefaultApolloStore(
   override fun <D : Fragment.Data> readFragment(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
+      customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
   ): ReadResult<D> {
     val variables = fragment.variables(customScalarAdapters, true)
@@ -208,21 +210,24 @@ internal class DefaultApolloStore(
       operation: Operation<D>,
       data: D,
       errors: List<Error>?,
+      customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
   ): Set<String> {
     val dataWithErrors = data.withErrors(operation, errors, customScalarAdapters)
-    return writeOperation(operation, dataWithErrors, cacheHeaders)
+    return writeOperation(operation, dataWithErrors, customScalarAdapters, cacheHeaders)
   }
 
   override fun <D : Operation.Data> writeOperation(
       operation: Operation<D>,
       dataWithErrors: DataWithErrors,
+      customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
   ): Set<String> {
     val records = normalize(
         executable = operation,
         dataWithErrors = dataWithErrors,
         rootKey = operation.rootKey(),
+        customScalarAdapters = customScalarAdapters,
     ).values.toSet()
     return cache.merge(records, cacheHeaders, recordMerger)
   }
@@ -231,6 +236,7 @@ internal class DefaultApolloStore(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
       data: D,
+      customScalarAdapters: CustomScalarAdapters,
       cacheHeaders: CacheHeaders,
   ): Set<String> {
     val dataWithErrors = data.withErrors(fragment, null, customScalarAdapters)
@@ -238,6 +244,7 @@ internal class DefaultApolloStore(
         executable = fragment,
         dataWithErrors = dataWithErrors,
         rootKey = cacheKey,
+        customScalarAdapters = customScalarAdapters,
     ).values
     return cache.merge(records, cacheHeaders, recordMerger)
   }
@@ -246,12 +253,14 @@ internal class DefaultApolloStore(
       operation: Operation<D>,
       data: D,
       mutationId: Uuid,
+      customScalarAdapters: CustomScalarAdapters,
   ): Set<String> {
     val dataWithErrors = data.withErrors(operation, null, customScalarAdapters)
     val records = normalize(
         executable = operation,
         dataWithErrors = dataWithErrors,
         rootKey = operation.rootKey(),
+        customScalarAdapters = customScalarAdapters,
     ).values.map { record ->
       Record(
           key = record.key,
@@ -271,12 +280,14 @@ internal class DefaultApolloStore(
       cacheKey: CacheKey,
       data: D,
       mutationId: Uuid,
+      customScalarAdapters: CustomScalarAdapters,
   ): Set<String> {
     val dataWithErrors = data.withErrors(fragment, null, customScalarAdapters)
     val records = normalize(
         executable = fragment,
         dataWithErrors = dataWithErrors,
         rootKey = cacheKey,
+        customScalarAdapters = customScalarAdapters,
     ).values.map { record ->
       Record(
           key = record.key,

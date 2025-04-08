@@ -3,6 +3,7 @@ package com.apollographql.cache.normalized.internal
 import com.apollographql.apollo.ConcurrencyInfo
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.Mutation
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.Query
@@ -58,6 +59,7 @@ internal class ApolloCacheInterceptor(
   private suspend fun <D : Operation.Data> maybeWriteToCache(
       request: ApolloRequest<D>,
       response: ApolloResponse<D>,
+      customScalarAdapters: CustomScalarAdapters,
       extraKeys: Set<String> = emptySet(),
   ) {
     if (request.doNotStore) {
@@ -78,7 +80,7 @@ internal class ApolloCacheInterceptor(
         if (request.errorsReplaceCachedValues) {
           cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.ERRORS_REPLACE_CACHED_VALUES, "true").build()
         }
-        store.writeOperation(request.operation, response.data!!, response.errors, cacheHeaders)
+        store.writeOperation(request.operation, response.data!!, response.errors, customScalarAdapters, cacheHeaders)
       } else {
         emptySet()
       }
@@ -117,15 +119,22 @@ internal class ApolloCacheInterceptor(
       request: ApolloRequest<D>,
       chain: ApolloInterceptorChain,
   ): Flow<ApolloResponse<D>> {
+    val customScalarAdapters = request.customScalarAdapters
+
     return chain.proceed(request).onEach {
-      maybeWriteToCache(request, it)
+      maybeWriteToCache(request, it, customScalarAdapters)
     }
   }
+
+  val <D : Operation.Data> ApolloRequest<D>.customScalarAdapters: CustomScalarAdapters
+    get() = executionContext[CustomScalarAdapters]!!
 
   /**
    * Mutations always go to the network and support optimistic data
    */
   private fun <D : Mutation.Data> interceptMutation(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
+    val customScalarAdapters = request.customScalarAdapters
+
     return flow {
       val optimisticData = request.optimisticData
       if (optimisticData != null) {
@@ -134,6 +143,7 @@ internal class ApolloCacheInterceptor(
             operation = request.operation,
             data = optimisticData as D,
             mutationId = request.requestUuid,
+            customScalarAdapters = customScalarAdapters,
         ).also { store.publish(it) }
       }
 
@@ -160,7 +170,7 @@ internal class ApolloCacheInterceptor(
           emptySet()
         }
 
-        maybeWriteToCache(request, response, optimisticKeys!!)
+        maybeWriteToCache(request, response, customScalarAdapters, optimisticKeys!!)
         emit(response)
       }
 
@@ -177,19 +187,21 @@ internal class ApolloCacheInterceptor(
   }
 
   private fun <D : Query.Data> interceptQuery(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
+    val customScalarAdapters = request.customScalarAdapters
     val fetchFromCache = request.fetchFromCache
 
     return flow {
       if (fetchFromCache) {
-        emit(readFromCache(request))
+        emit(readFromCache(request, customScalarAdapters))
       } else {
-        emitAll(readFromNetwork(request, chain))
+        emitAll(readFromNetwork(request, chain, customScalarAdapters))
       }
     }
   }
 
   private fun <D : Query.Data> readFromCache(
       request: ApolloRequest<D>,
+      customScalarAdapters: CustomScalarAdapters,
   ): ApolloResponse<D> {
     var cacheHeaders = request.cacheHeaders
     if (request.memoryCacheOnly) {
@@ -198,6 +210,7 @@ internal class ApolloCacheInterceptor(
     val startMillis = currentTimeMillis()
     val response = store.readOperation(
         operation = request.operation,
+        customScalarAdapters = customScalarAdapters,
         cacheHeaders = cacheHeaders,
     )
     return response.newBuilder()
@@ -216,10 +229,11 @@ internal class ApolloCacheInterceptor(
   private fun <D : Operation.Data> readFromNetwork(
       request: ApolloRequest<D>,
       chain: ApolloInterceptorChain,
+      customScalarAdapters: CustomScalarAdapters,
   ): Flow<ApolloResponse<D>> {
     val startMillis = currentTimeMillis()
     return chain.proceed(request).onEach {
-      maybeWriteToCache(request, it)
+      maybeWriteToCache(request, it, customScalarAdapters)
     }.map { networkResponse ->
       networkResponse.newBuilder()
           .cacheInfo(

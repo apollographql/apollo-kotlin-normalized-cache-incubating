@@ -201,7 +201,7 @@ class StoreTest {
     apolloClient = ApolloClient.Builder()
         .networkTransport(QueueTestNetworkTransport())
         .customScalarAdapters(customScalarAdapters)
-        .normalizedCache(MemoryCacheFactory(), customScalarAdapters = customScalarAdapters, cacheKeyGenerator = IdCacheKeyGenerator(), cacheResolver = IdCacheKeyResolver())
+        .normalizedCache(MemoryCacheFactory(), cacheKeyGenerator = IdCacheKeyGenerator(), cacheResolver = IdCacheKeyResolver())
         .build()
 
     val query = ColorQuery()

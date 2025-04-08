@@ -7,7 +7,6 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.CacheDumpProviderContext
 import com.apollographql.apollo.api.ApolloRequest
 import com.apollographql.apollo.api.ApolloResponse
-import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.ExecutionContext
 import com.apollographql.apollo.api.ExecutionOptions
 import com.apollographql.apollo.api.MutableExecutionOptions
@@ -19,7 +18,6 @@ import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import com.apollographql.apollo.interceptor.AutoPersistedQueryInterceptor
 import com.apollographql.apollo.mpp.currentTimeMillis
 import com.apollographql.apollo.network.http.HttpInfo
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
@@ -67,7 +65,6 @@ import kotlin.time.Duration
 @JvmName("configureApolloClientBuilder2")
 fun ApolloClient.Builder.normalizedCache(
     normalizedCacheFactory: NormalizedCacheFactory,
-    customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
     cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
     cacheResolver: CacheResolver = FieldPolicyCacheResolver,
@@ -80,7 +77,6 @@ fun ApolloClient.Builder.normalizedCache(
   return store(
       ApolloStore(
           normalizedCacheFactory = normalizedCacheFactory,
-          customScalarAdapters = customScalarAdapters,
           cacheKeyGenerator = cacheKeyGenerator,
           metadataGenerator = metadataGenerator,
           cacheResolver = cacheResolver,
@@ -96,26 +92,55 @@ fun ApolloClient.Builder.normalizedCache(
 fun ApolloClient.Builder.logCacheMisses(
     log: (String) -> Unit = { println(it) },
 ): ApolloClient.Builder {
-  check(interceptors.none { it is ApolloCacheInterceptor }) {
-    "Apollo: logCacheMisses() must be called before setting up your normalized cache"
-  }
   return addInterceptor(CacheMissLoggingInterceptor(log))
 }
 
+private class DefaultInterceptorChain(
+    private val interceptors: List<ApolloInterceptor>,
+    private val index: Int,
+) : ApolloInterceptorChain {
+
+  override fun <D : Operation.Data> proceed(request: ApolloRequest<D>): Flow<ApolloResponse<D>> {
+    check(index < interceptors.size)
+    return interceptors[index].intercept(
+        request,
+        DefaultInterceptorChain(
+            interceptors = interceptors,
+            index = index + 1,
+        )
+    )
+  }
+}
+
+private fun ApolloInterceptorChain.asInterceptor(): ApolloInterceptor {
+  return object : ApolloInterceptor {
+    override fun <D : Operation.Data> intercept(
+        request: ApolloRequest<D>,
+        chain: ApolloInterceptorChain,
+    ): Flow<ApolloResponse<D>> {
+      return this@asInterceptor.proceed(request)
+    }
+  }
+}
+
+internal class CacheInterceptor(val store: ApolloStore) : ApolloInterceptor {
+  private val delegates = listOf(
+      WatcherInterceptor(store),
+      FetchPolicyRouterInterceptor,
+      ApolloCacheInterceptor(store),
+      StoreExpirationDateInterceptor,
+  )
+
+  override fun <D : Operation.Data> intercept(
+      request: ApolloRequest<D>,
+      chain: ApolloInterceptorChain,
+  ): Flow<ApolloResponse<D>> {
+    return DefaultInterceptorChain(delegates + chain.asInterceptor(), 0).proceed(request)
+  }
+}
+
 fun ApolloClient.Builder.store(store: ApolloStore, writeToCacheAsynchronously: Boolean = false): ApolloClient.Builder {
-  check(interceptors.none { it is AutoPersistedQueryInterceptor }) {
-    "Apollo: the normalized cache must be configured before the auto persisted queries"
-  }
-  // Removing existing interceptors added for configuring an [ApolloStore].
-  // If a builder is reused from an existing client using `newBuilder()` and we try to configure a new `store()` on it, we first need to
-  // remove the old interceptors.
-  val storeInterceptors = interceptors.filterIsInstance<ApolloStoreInterceptor>()
-  storeInterceptors.forEach {
-    removeInterceptor(it)
-  }
-  return addInterceptor(WatcherInterceptor(store))
-      .addInterceptor(FetchPolicyRouterInterceptor)
-      .addInterceptor(ApolloCacheInterceptor(store))
+  return cacheInterceptor(CacheInterceptor(store))
       .writeToCacheAsynchronously(writeToCacheAsynchronously)
       .addExecutionContext(CacheDumpProviderContext(store.cacheDumpProvider()))
 }
@@ -195,14 +220,14 @@ internal fun <D : Query.Data> ApolloCall<D>.watchInternal(data: D?): Flow<Apollo
 }
 
 @Deprecated("Use store instead", ReplaceWith("store"))
-val ApolloClient.apolloStore: ApolloStore
+val ApolloClient.apolloStore: SimpleApolloStore
   get() = store
 
-val ApolloClient.store: ApolloStore
+val ApolloClient.store: SimpleApolloStore
   get() {
-    return interceptors.firstOrNull { it is ApolloCacheInterceptor }?.let {
-      (it as ApolloCacheInterceptor).store
-    } ?: error("no cache configured")
+    return (cacheInterceptor as? CacheInterceptor)?.let {
+      SimpleApolloStore(it.store, customScalarAdapters)
+    } ?: error("No store configured")
   }
 
 
@@ -292,17 +317,11 @@ fun <T> MutableExecutionOptions<T>.errorsReplaceCachedValues(errorsReplaceCached
  */
 fun <T> MutableExecutionOptions<T>.storeExpirationDate(storeExpirationDate: Boolean): T {
   addExecutionContext(StoreExpirationDateContext(storeExpirationDate))
-  if (this is ApolloClient.Builder) {
-    check(interceptors.none { it is StoreExpirationDateInterceptor }) {
-      "Apollo: storeExpirationDate() can only be called once on ApolloClient.Builder()"
-    }
-    addInterceptor(StoreExpirationDateInterceptor())
-  }
   @Suppress("UNCHECKED_CAST")
   return this as T
 }
 
-private class StoreExpirationDateInterceptor : ApolloInterceptor {
+private object StoreExpirationDateInterceptor : ApolloInterceptor {
   override fun <D : Operation.Data> intercept(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
     return chain.proceed(request).map {
       val store = request.executionContext[StoreExpirationDateContext]?.value
@@ -314,13 +333,13 @@ private class StoreExpirationDateInterceptor : ApolloInterceptor {
       val cacheControl = headers.get("cache-control")?.lowercase() ?: return@map it
 
       val c = cacheControl.split(",").map { it.trim() }
-      val maxAge = c.mapNotNull {
+      val maxAge = c.firstNotNullOfOrNull {
         if (it.startsWith("max-age=")) {
           it.substring(8).toIntOrNull()
         } else {
           null
         }
-      }.firstOrNull() ?: return@map it
+      } ?: return@map it
 
       val age = headers.get("age")?.toIntOrNull()
       val expires = if (age != null) {

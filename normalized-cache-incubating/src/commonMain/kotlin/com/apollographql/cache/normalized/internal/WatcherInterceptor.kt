@@ -39,8 +39,11 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
     @Suppress("UNCHECKED_CAST")
     var watchedKeys: Set<String>? =
       watchContext.data?.let { data ->
-        val dataWithErrors =
-          (data as D).withErrors(executable = request.operation, errors = null, customScalarAdapters = customScalarAdapters)
+        val dataWithErrors = (data as D).withErrors(
+            executable = request.operation,
+            errors = null,
+            customScalarAdapters = customScalarAdapters,
+        )
         store.normalize(
             executable = request.operation,
             dataWithErrors = dataWithErrors,
@@ -65,14 +68,17 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
             chain.proceed(request)
                 .onEach { response ->
                   if (response.data != null) {
-                    val dataWithErrors = response.data!!.withErrors(request.operation, response.errors, customScalarAdapters)
-                    watchedKeys =
-                      store.normalize(
-                          executable = request.operation,
-                          dataWithErrors = dataWithErrors,
-                          rootKey = CacheKey.QUERY_ROOT,
-                          customScalarAdapters = customScalarAdapters,
-                      ).values.dependentKeys()
+                    val dataWithErrors = response.data!!.withErrors(
+                        executable = request.operation,
+                        errors = response.errors,
+                        customScalarAdapters = customScalarAdapters,
+                    )
+                    watchedKeys = store.normalize(
+                        executable = request.operation,
+                        dataWithErrors = dataWithErrors,
+                        rootKey = CacheKey.QUERY_ROOT,
+                        customScalarAdapters = customScalarAdapters,
+                    ).values.dependentKeys()
                   }
                 }
           }
