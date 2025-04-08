@@ -1,7 +1,6 @@
 package pagination
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
 import com.apollographql.cache.normalized.api.CacheKeyGeneratorContext
@@ -9,6 +8,7 @@ import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
+import com.apollographql.cache.normalized.testing.runTest
 import embed.GetHeroQuery
 import kotlin.test.Test
 import kotlin.test.assertEquals

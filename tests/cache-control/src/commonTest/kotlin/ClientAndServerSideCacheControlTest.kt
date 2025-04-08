@@ -5,7 +5,6 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.exception.CacheMissException
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheControlCacheResolver
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
@@ -22,6 +21,7 @@ import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.storeExpirationDate
+import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockResponse
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString

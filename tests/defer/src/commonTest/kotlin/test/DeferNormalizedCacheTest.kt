@@ -11,7 +11,6 @@ import com.apollographql.apollo.exception.ApolloHttpException
 import com.apollographql.apollo.exception.ApolloNetworkException
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.network.NetworkTransport
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheHeaders
@@ -21,8 +20,11 @@ import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.optimisticUpdates
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.Platform
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.keyToString
+import com.apollographql.cache.normalized.testing.platform
+import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.assertNoRequest
 import com.apollographql.mockserver.awaitRequest
@@ -532,7 +534,7 @@ class DeferNormalizedCacheTest {
   @Test
   fun intermediatePayloadsAreCached() = runTest(before = { setUp() }, after = { tearDown() }) {
     @Suppress("DEPRECATION")
-    if (com.apollographql.apollo.testing.platform() == com.apollographql.apollo.testing.Platform.Js) {
+    if (platform() == Platform.Js) {
       // TODO For now chunked is not supported on JS - remove this check when it is
       return@runTest
     }

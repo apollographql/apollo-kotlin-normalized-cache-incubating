@@ -8,12 +8,12 @@ import codegen.models.fragment.HeroWithFriendsFragment.Friend.Companion.humanWit
 import codegen.models.fragment.HeroWithFriendsFragmentImpl
 import codegen.models.fragment.HumanWithIdFragmentImpl
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import testFixtureToUtf8

@@ -3,9 +3,9 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.exception.ApolloHttpException
 import com.apollographql.apollo.exception.ApolloNetworkException
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
+import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueError
 import com.apollographql.mockserver.enqueueString

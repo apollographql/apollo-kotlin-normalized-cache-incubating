@@ -18,9 +18,6 @@ import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.exception.JsonEncodingException
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import com.apollographql.apollo.testing.assertNoElement
-import com.apollographql.apollo.testing.awaitElement
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.CacheFirstInterceptor
 import com.apollographql.cache.normalized.CacheOnlyInterceptor
@@ -31,7 +28,9 @@ import com.apollographql.cache.normalized.isFromCache
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.refetchPolicyInterceptor
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.assertNoElement
 import com.apollographql.cache.normalized.testing.fieldKey
+import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.cache.normalized.watch
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.awaitRequest

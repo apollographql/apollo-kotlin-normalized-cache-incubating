@@ -2,7 +2,6 @@ package pagination
 
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Optional
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
 import com.apollographql.cache.normalized.api.ConnectionRecordMerger
@@ -11,6 +10,7 @@ import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
+import com.apollographql.cache.normalized.testing.runTest
 import pagination.connection.UsersQuery
 import pagination.connection.pagination.Pagination
 import pagination.connection.type.buildPageInfo

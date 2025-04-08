@@ -2,9 +2,9 @@ package test
 
 import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.json.jsonReader
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.internal.normalized
+import com.apollographql.cache.normalized.testing.runTest
 import okio.Buffer
 import schema.changes.GetFieldQuery
 import kotlin.test.Test

@@ -4,7 +4,6 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
@@ -16,6 +15,7 @@ import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
+import com.apollographql.cache.normalized.testing.runTest
 import kotlinx.coroutines.flow.toList
 import pagination.cursorBased.UsersQuery
 import pagination.cursorBased.type.buildPageInfo

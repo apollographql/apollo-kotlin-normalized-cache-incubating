@@ -8,11 +8,11 @@ import com.apollographql.apollo.api.json.JsonReader
 import com.apollographql.apollo.api.json.JsonWriter
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
+import com.apollographql.cache.normalized.testing.runTest
 import com.example.GetNumberQuery
 import okio.use
 import kotlin.test.Test

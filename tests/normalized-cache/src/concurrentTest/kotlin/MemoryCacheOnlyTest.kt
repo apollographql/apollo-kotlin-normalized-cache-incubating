@@ -2,7 +2,6 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheKey
@@ -14,6 +13,7 @@ import com.apollographql.cache.normalized.memoryCacheOnly
 import com.apollographql.cache.normalized.sql.SqlNormalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.runTest
 import main.GetUserQuery
 import kotlin.reflect.KClass
 import kotlin.test.Test

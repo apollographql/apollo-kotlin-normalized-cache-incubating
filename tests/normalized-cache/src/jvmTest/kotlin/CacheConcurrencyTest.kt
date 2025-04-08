@@ -3,10 +3,10 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.runTest
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch

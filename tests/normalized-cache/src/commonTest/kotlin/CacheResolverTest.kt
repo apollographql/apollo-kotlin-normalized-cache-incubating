@@ -1,13 +1,13 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.DefaultCacheResolver
 import com.apollographql.cache.normalized.api.ResolverContext
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.runTest
 import normalizer.HeroNameQuery
 import kotlin.test.Test
 import kotlin.test.assertEquals

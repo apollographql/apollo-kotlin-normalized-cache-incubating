@@ -3,7 +3,6 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.mpp.currentTimeMillis
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheControlCacheResolver
@@ -20,6 +19,7 @@ import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
+import com.apollographql.cache.normalized.testing.runTest
 import programmatic.GetCompanyQuery
 import programmatic.GetUserAdminQuery
 import programmatic.GetUserEmailQuery

@@ -4,7 +4,6 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.toApolloResponse
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheKey
@@ -19,6 +18,7 @@ import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import com.example.one.Issue2818Query

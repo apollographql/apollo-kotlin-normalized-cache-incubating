@@ -7,7 +7,6 @@ import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
@@ -26,6 +25,7 @@ import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.assertErrorsEquals
 import com.apollographql.cache.normalized.testing.keyToString
+import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import donotstore.GetUserQuery

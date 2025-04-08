@@ -10,7 +10,6 @@ import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
@@ -20,6 +19,7 @@ import com.apollographql.cache.normalized.doNotStore
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.store
+import com.apollographql.cache.normalized.testing.runTest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import normalizer.HeroNameQuery
