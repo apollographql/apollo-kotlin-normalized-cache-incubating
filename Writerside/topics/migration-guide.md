@@ -102,6 +102,27 @@ store.writeOperation(operation, data)
 store.writeOperation(operation, data).also { store.publish(it) }
 ```
 
+### Passing `CustomScalarAdapters` to `ApolloStore` methods
+
+Previously, if you configured custom scalar adapters on your client, you had to pass them to the `ApolloStore` methods.
+
+Now, `ApolloClient.apolloStore` returns a `SimpleApolloStore`, a wrapper around `ApolloStore` which passes the client's `CustomScalarAdapters` automatically.
+
+```kotlin
+// Before
+client.apolloStore.writeOperation(
+    operation = operation,
+    data = data,
+    customScalarAdapters = client.customScalarAdapters
+)
+
+// After
+client.apolloStore.writeOperation(
+    operation = operation,
+    data = data
+)
+```
+
 ### Other changes
 
 - `readFragment()` now returns a `ReadResult<D>` (it previously returned a `<D>`). This allows for surfacing metadata associated to the returned data, e.g. staleness.
@@ -131,3 +152,16 @@ interface CacheResolver {
 ```
 
 `resolveField` can also now return a `ResolvedValue` when metadata should be returned with the resolved value (e.g. staleness).
+
+### CacheKey
+
+For consistency, the `CacheKey` type is now used instead of `String` in more APIs, e.g.:
+
+- `ApolloStore.remove()`
+- `Record.key`
+- `NormalizedCache.loadRecord()`
+
+### Removed APIs
+
+- `ApolloCacheHeaders.EVICT_AFTER_READ` is removed. Manually call `ApolloStore.remove()` when needed instead.
+- `NormalizedCache.remove(pattern: String)` is removed. Please open an issue if you need this feature back.

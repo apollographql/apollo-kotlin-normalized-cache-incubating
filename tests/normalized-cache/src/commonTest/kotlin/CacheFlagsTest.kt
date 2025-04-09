@@ -6,8 +6,7 @@ import com.apollographql.apollo.api.ApolloResponse
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.exception.CacheMissException
-import com.apollographql.apollo.interceptor.ApolloInterceptor
-import com.apollographql.apollo.interceptor.ApolloInterceptorChain
+import com.apollographql.apollo.network.NetworkTransport
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
 import com.apollographql.cache.normalized.ApolloStore
@@ -20,6 +19,7 @@ import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
+import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import normalizer.HeroNameQuery
@@ -71,20 +71,31 @@ class CacheFlagsTest {
 
 
   @Test
-  fun doNotStoreWhenSetInResponse() = runTest(before = { setUp() }) {
+  fun doNotStoreWhenSetInResponse() = runTest {
     val query = HeroNameQuery()
     val data = HeroNameQuery.Data(HeroNameQuery.Hero("R2-D2"))
-    apolloClient = apolloClient.newBuilder().addInterceptor(object : ApolloInterceptor {
-      override fun <D : Operation.Data> intercept(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
-        return chain.proceed(request).map { response ->
-          response.newBuilder().cacheHeaders(CacheHeaders.Builder().addHeader(ApolloCacheHeaders.DO_NOT_STORE, "").build()).build()
-        }
-      }
-    }).build()
-    apolloClient.enqueueTestResponse(query, data)
+
+    store = ApolloStore(MemoryCacheFactory())
+    val queueTestNetworkTransport = QueueTestNetworkTransport()
+    apolloClient = ApolloClient.Builder()
+        .store(store)
+        .networkTransport(object : NetworkTransport {
+          val delegate = queueTestNetworkTransport
+          override fun <D : Operation.Data> execute(request: ApolloRequest<D>): Flow<ApolloResponse<D>> {
+            return delegate.execute(request).map { response ->
+              // Parse data, errors or anything else and decide whether to store the response or not
+              response.newBuilder().cacheHeaders(CacheHeaders.Builder().addHeader(ApolloCacheHeaders.DO_NOT_STORE, "").build()).build()
+            }
+          }
+
+          override fun dispose() {
+          }
+
+        })
+        .build()
+    queueTestNetworkTransport.enqueue(ApolloResponse.Builder(query, uuid4()).data(data).build())
 
     apolloClient.query(query).fetchPolicy(FetchPolicy.NetworkFirst).execute()
-
     // Since the previous request was not stored, this should fail
     assertIs<CacheMissException>(
         apolloClient.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute().exception

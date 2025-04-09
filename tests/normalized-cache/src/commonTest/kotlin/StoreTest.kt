@@ -1,6 +1,8 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.StringAdapter
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
@@ -12,10 +14,13 @@ import com.apollographql.cache.normalized.api.IdCacheKeyResolver
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.isFromCache
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
+import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import normalizer.CharacterNameByIdQuery
+import normalizer.ColorQuery
 import normalizer.HeroAndFriendsNamesWithIDsQuery
+import normalizer.type.Color
 import normalizer.type.Episode
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -187,4 +192,24 @@ class StoreTest {
             .exception
     )
   }
+
+  @Test
+  fun customScalarAdapters() = runTest {
+    val customScalarAdapters = CustomScalarAdapters.Builder()
+        .add(Color.type, StringAdapter)
+        .build()
+    apolloClient = ApolloClient.Builder()
+        .networkTransport(QueueTestNetworkTransport())
+        .customScalarAdapters(customScalarAdapters)
+        .normalizedCache(MemoryCacheFactory(), cacheKeyGenerator = IdCacheKeyGenerator(), cacheResolver = IdCacheKeyResolver())
+        .build()
+
+    val query = ColorQuery()
+    apolloClient.enqueueTestResponse(query, ColorQuery.Data(color = "red"))
+    val networkResponse = apolloClient.query(query).fetchPolicy(FetchPolicy.NetworkOnly).execute()
+    assertEquals(networkResponse.data?.color, "red")
+    val cacheResponse = apolloClient.query(query).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    assertEquals(cacheResponse.data?.color, "red")
+  }
+
 }

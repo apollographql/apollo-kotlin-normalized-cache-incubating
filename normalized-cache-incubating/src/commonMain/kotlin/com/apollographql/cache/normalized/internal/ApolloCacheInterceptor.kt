@@ -181,7 +181,7 @@ internal class ApolloCacheInterceptor(
           emptySet()
         }
 
-        store.publish(optimisticKeys!!)
+        store.publish(optimisticKeys)
       }
     }
   }

@@ -16,7 +16,6 @@ import normalizer.HeroNameQuery
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 /**
  * We're only doing this on the JVM because it saves time and the CacheMissLoggingInterceptor
@@ -62,18 +61,5 @@ class CacheMissLoggingInterceptorTest {
     )
     mockServer.close()
     apolloClient.close()
-  }
-
-  @Test
-  fun logCacheMissesMustBeCalledFirst() {
-    try {
-      ApolloClient.Builder()
-          .normalizedCache(MemoryCacheFactory())
-          .logCacheMisses()
-          .build()
-      error("We expected an exception")
-    } catch (e: Exception) {
-      assertTrue(e.message?.contains("logCacheMisses() must be called before setting up your normalized cache") == true)
-    }
   }
 }

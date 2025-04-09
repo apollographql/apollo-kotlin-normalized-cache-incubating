@@ -35,7 +35,7 @@ class TrimTest {
     }
     apolloStore.accessCache { it.merge(newRecords, CacheHeaders.NONE, recordMerger = DefaultRecordMerger) }
 
-    val sizeBeforeTrim = apolloStore.trim(-1)
+    val sizeBeforeTrim = apolloStore.trim(-1, 0.1f)
     assertEquals(8515584, sizeBeforeTrim)
 
     // Trim the cache by 10%
