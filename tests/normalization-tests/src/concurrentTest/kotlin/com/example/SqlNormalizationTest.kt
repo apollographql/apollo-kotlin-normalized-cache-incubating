@@ -1,7 +1,6 @@
 package com.example
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.testing.internal.runTest
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
@@ -10,6 +9,7 @@ import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
 import com.apollographql.cache.normalized.testing.append
+import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
 import com.example.four.CreateUserMutation
