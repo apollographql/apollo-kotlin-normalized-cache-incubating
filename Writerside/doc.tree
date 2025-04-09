@@ -3,12 +3,12 @@
 
 <instance-profile
     id="doc"
-    name="apollo-kotlin-normalized-cache-incubating"
+    name="apollo-kotlin-normalized-cache"
     start-page="welcome.md"
 >
 
-  <toc-element toc-title="GitHub" href="https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating" />
-  <toc-element toc-title="Kdoc" href="https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc" />
+  <toc-element toc-title="GitHub" href="https://github.com/apollographql/apollo-kotlin-normalized-cache" />
+  <toc-element toc-title="Kdoc" href="https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc" />
   <toc-element topic="welcome.md" />
   <toc-element topic="migration-guide.md" />
   <toc-element topic="pagination-home.md">

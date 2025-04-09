@@ -9,7 +9,7 @@ A field is considered stale if its **received date** is older than its (client c
 
 See [](cache-control.md) for more information about staleness.
 
-Stale fields can be removed from the cache by calling the [`ApolloStore.removeStaleFields()`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/remove-stale-fields.html) function.
+Stale fields can be removed from the cache by calling the [`ApolloStore.removeStaleFields()`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized/remove-stale-fields.html) function.
 
 If all fields of a record are stale, the record itself is removed.
 
@@ -20,10 +20,11 @@ Note: when a record is removed, any reference to it will become a [dangling refe
 A **dangling reference** is a field whose value is a reference to a cache key that does not exist in the cache.
 
 This can happen when:
-- manually deleting records with [`ApolloStore.remove()`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/-apollo-store/remove.html)
+
+- manually deleting records with [`ApolloStore.remove()`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized/-apollo-store/remove.html)
 - records get deleted because all their fields are [stale](#stale-fields)
 
-Dangling references can be removed from the cache by calling the [`ApolloStore.removeDanglingReferences()`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/remove-dangling-references.html) function.
+Dangling references can be removed from the cache by calling the [`ApolloStore.removeDanglingReferences()`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized/remove-dangling-references.html) function.
 
 If all fields of a record are dangling references, the record itself is removed.
 
@@ -36,12 +37,12 @@ A record is **unreachable** if there exists no chain of references from the root
 
 This can happen when:
 - data that was previously returned by the server is no longer returned by a subsequent query
-- manually adding records with [`ApolloStore.writeFragment()`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/-apollo-store/write-fragment.html)
-- manually deleting records with [`ApolloStore.remove()`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/-apollo-store/remove.html) and `cascade = false`: the deleted record could be the only one referencing others
+- manually adding records with [`ApolloStore.writeFragment()`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized/-apollo-store/write-fragment.html)
+- manually deleting records with [`ApolloStore.remove()`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized/-apollo-store/remove.html) and `cascade = false`: the deleted record could be the only one referencing others
 - references get deleted because they're [stale](#stale-fields)
 
-Unreachable records can be removed from the cache by calling the [`ApolloStore.removeUnreachableRecords()`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/remove-unreachable-records.html) function.
+Unreachable records can be removed from the cache by calling the [`ApolloStore.removeUnreachableRecords()`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized/remove-unreachable-records.html) function.
 
 ## `ApolloStore.garbageCollect()`
 
-The [`ApolloStore.garbageCollect()`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/garbage-collect.html) function is a convenience to remove all stale fields, dangling references, and unreachable records from the cache.
+The [`ApolloStore.garbageCollect()`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized/garbage-collect.html) function is a convenience to remove all stale fields, dangling references, and unreachable records from the cache.

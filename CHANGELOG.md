@@ -1,5 +1,11 @@
 # Next version (unreleased)
 
+- Removing "incubating" from the repository and artifacts name. With a stable API on the horizon, now is a great time to try the library in your projects and give us feedback.
+  The artifacts are now:
+  - `com.apollographql.cache:normalized-cache` for the memory cache
+  - `com.apollographql.cache:normalized-cache-sqlite` for the SQL cache.
+
+  The package names are unchanged.
 - Records are now rooted per operation type (QUERY_ROOT, MUTATION_ROOT, SUBSCRIPTION_ROOT) (#109)
 - `ApolloClient.apolloStore` is deprecated in favor of `ApolloClient.store` for consistency.
 - Individual `ApolloStore` methods no longer accept a `CustomScalarAdapters`. Instead it can be passed to the `ApolloStore` constructor.

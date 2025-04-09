@@ -15,7 +15,7 @@ extend type Query
 @fieldPolicy(forField: "usersPage" paginationArgs: "page")
 ```
 
-> This can also be done programmatically by configuring the `ApolloStore` with a [`FieldKeyGenerator`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-field-key-generator/index.html?query=interface%20FieldKeyGenerator) implementation.
+> This can also be done programmatically by configuring the `ApolloStore` with a [`FieldKeyGenerator`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized.api/-field-key-generator/index.html?query=interface%20FieldKeyGenerator) implementation.
 
 With that in place, after fetching the first page, the cache will look like this:
 
@@ -44,7 +44,7 @@ This is because the field key is now the same for all pages and the default merg
 #### Record merging
 
 To fix this, we need to supply the store with a piece of code that can merge the lists in a sensible way.
-This is done by passing a [`RecordMerger`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-record-merger/index.html?query=interface%20RecordMerger) to the `ApolloStore` constructor:
+This is done by passing a [`RecordMerger`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized.api/-record-merger/index.html?query=interface%20RecordMerger) to the `ApolloStore` constructor:
 
 ```kotlin
 object MyFieldMerger : FieldRecordMerger.FieldMerger {
@@ -99,7 +99,7 @@ Now let's store in the metadata of each `UserConnection` field the values of the
 as well as the values of the first and last cursor in its list.
 This will allow us to insert new pages in the correct position later on.
 
-This is done by passing a [`MetadataGenerator`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-metadata-generator/index.html?query=interface%20MetadataGenerator) to the `ApolloStore` constructor:
+This is done by passing a [`MetadataGenerator`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized.api/-metadata-generator/index.html?query=interface%20MetadataGenerator) to the `ApolloStore` constructor:
 
 ```kotlin
 class ConnectionMetadataGenerator : MetadataGenerator {
@@ -144,8 +144,7 @@ extend type Query @typePolicy(embeddedFields: "usersConnection")
 extend type UserConnection @typePolicy(embeddedFields: "edges")
 ```
 
-
-> This can also be done programmatically by configuring the `ApolloStore` with an [`EmbeddedFieldsProvider`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized.api/-embedded-fields-provider/index.html?query=interface%20EmbeddedFieldsProvider) implementation.
+> This can also be done programmatically by configuring the `ApolloStore` with an [`EmbeddedFieldsProvider`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized.api/-embedded-fields-provider/index.html?query=interface%20EmbeddedFieldsProvider) implementation.
 
 Now that we have the metadata and embedded fields in place, we can implement the `RecordMerger` (simplified for brevity):
 
@@ -188,4 +187,4 @@ object ConnectionFieldMerger : FieldRecordMerger.FieldMerger {
 }
 ```
 
-A full implementation of `ConnectionFieldMerger` can be found [here](https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/blob/main/normalized-cache-incubating/src/commonMain/kotlin/com/apollographql/cache/normalized/api/RecordMerger.kt#L136).
+A full implementation of `ConnectionFieldMerger` can be found [here](https://github.com/apollographql/apollo-kotlin-normalized-cache/blob/main/normalized-cache/src/commonMain/kotlin/com/apollographql/cache/normalized/api/RecordMerger.kt#L136).

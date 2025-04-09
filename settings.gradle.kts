@@ -5,8 +5,8 @@ pluginManagement {
 apply(from = "gradle/repositories.gradle.kts")
 
 include(
-    "normalized-cache-incubating",
-    "normalized-cache-sqlite-incubating",
+    "normalized-cache",
+    "normalized-cache-sqlite",
     "normalized-cache-apollo-compiler-plugin",
     "test-utils",
 )

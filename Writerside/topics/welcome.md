@@ -1,10 +1,10 @@
 # Welcome
 
-This repository serves as a place to experiment with [Apollo Kotlin](https://github.com/apollographql/apollo-kotlin)'s normalized cache without impacting the main stable repository.
+This repository hosts [Apollo Kotlin](https://github.com/apollographql/apollo-kotlin)'s new normalized cache, aiming to replace the main repository version.
 
 ## Use in your project
 
-> The incubating version of the normalized cache is not stable and is subject to change. It is recommended to experiment with it in
+> This version is not yet stable and is subject to change. It is recommended to experiment with it in
 > non-critical projects/modules, or behind a feature flag.
 >
 > In particular,
@@ -19,10 +19,10 @@ Add the dependencies to your project.
 // build.gradle.kts
 dependencies {
   // For the memory cache
-  implementation("com.apollographql.cache:normalized-cache-incubating:%latest_version%")
-  
-  // For the SQLite cache
-  implementation("com.apollographql.cache:normalized-cache-sqlite-incubating:%latest_version%")
+  implementation("com.apollographql.cache:normalized-cache:%latest_version%")
+
+  // For the SQL cache
+  implementation("com.apollographql.cache:normalized-cache-sqlite:%latest_version%")
 }
 ```
 

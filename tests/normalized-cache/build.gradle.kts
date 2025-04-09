@@ -15,13 +15,13 @@ kotlin {
     getByName("commonMain") {
       dependencies {
         implementation(libs.apollo.runtime)
-        implementation("com.apollographql.cache:normalized-cache-incubating")
+        implementation("com.apollographql.cache:normalized-cache")
       }
     }
 
     getByName("concurrentMain") {
       dependencies {
-        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
+        implementation("com.apollographql.cache:normalized-cache-sqlite")
       }
     }
 
