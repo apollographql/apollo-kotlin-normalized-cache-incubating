@@ -4,7 +4,7 @@ pluginManagement {
   includeBuild("../build-logic")
 }
 
-rootProject.name = "apollo-kotlin-normalized-cache-incubating-tests"
+rootProject.name = "apollo-kotlin-normalized-cache-tests"
 
 apply(from = "../gradle/repositories.gradle.kts")
 

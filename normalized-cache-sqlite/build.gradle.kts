@@ -46,7 +46,7 @@ kotlin {
     getByName("commonMain") {
       dependencies {
         api(libs.apollo.api)
-        api(project(":normalized-cache-incubating"))
+        api(project(":normalized-cache"))
         api(libs.sqldelight.runtime)
       }
     }

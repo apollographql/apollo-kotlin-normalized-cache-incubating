@@ -19,12 +19,12 @@ dependencies {
   implementation("com.apollographql.apollo:apollo-normalized-cache-sqlite") // SQLite cache
   
   // With
-  implementation("com.apollographql.cache:normalized-cache-incubating:%latest_version%") // Memory cache
-  implementation("com.apollographql.cache:normalized-cache-sqlite-incubating:%latest_version%") // SQLite cache
+  implementation("com.apollographql.cache:normalized-cache:%latest_version%") // Memory cache
+  implementation("com.apollographql.cache:normalized-cache-sqlite:%latest_version%") // SQLite cache
 }
 ```
 
-Note: the `com.apollographql.apollo:apollo-normalized-cache-api` artifact no longer exists, the code it contained has been merged into `com.apollographql.cache:normalized-cache-incubating`.
+Note: the `com.apollographql.apollo:apollo-normalized-cache-api` artifact no longer exists, the code it contained has been merged into `com.apollographql.cache:normalized-cache`.
 
 Then update your imports:
 
@@ -57,7 +57,7 @@ When this library opens an existing database and finds the old schema, it will *
 {style="warning"}
 
 If your application relies on the data stored in the cache, you can manually transfer all the records from the an old database to a new one.
-See an example on how to do that [here](https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/blob/main/tests/migration/src/commonTest/kotlin/MigrationTest.kt#L157).
+See an example on how to do that [here](https://github.com/apollographql/apollo-kotlin-normalized-cache/blob/main/tests/migration/src/commonTest/kotlin/MigrationTest.kt#L157).
 
 Make sure you thoroughly test migration scenarios before deploying to production.
 
@@ -85,7 +85,7 @@ By default, errors will not replace existing data in the cache. You can change t
 
 > The built-in fetch policies treat any missing or error field as a full cache miss (same behavior as previous versions).
 >
-> You can implement your own fetch policy interceptor to handle partial cache reads, as shown in [this example](https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/blob/main/tests/partial-results/src/commonTest/kotlin/test/CachePartialResultTest.kt#L809).
+> You can implement your own fetch policy interceptor to handle partial cache reads, as shown in [this example](https://github.com/apollographql/apollo-kotlin-normalized-cache/blob/main/tests/partial-results/src/commonTest/kotlin/test/CachePartialResultTest.kt#L809).
 
 ### Publishing changes to watchers
 

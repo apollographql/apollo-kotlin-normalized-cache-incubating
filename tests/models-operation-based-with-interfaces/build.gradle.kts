@@ -17,7 +17,7 @@ kotlin {
     getByName("commonMain") {
       dependencies {
         implementation(libs.apollo.runtime)
-        implementation("com.apollographql.cache:normalized-cache-incubating")
+        implementation("com.apollographql.cache:normalized-cache")
       }
     }
 

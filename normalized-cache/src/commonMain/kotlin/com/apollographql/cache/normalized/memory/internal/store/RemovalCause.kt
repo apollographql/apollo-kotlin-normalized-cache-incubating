@@ -20,6 +20,10 @@
  */
 package com.apollographql.cache.normalized.memory.internal.store
 
+import com.apollographql.cache.normalized.memory.internal.store.RemovalCause.EXPLICIT
+import com.apollographql.cache.normalized.memory.internal.store.RemovalCause.REPLACED
+
+
 /**
  * The reason why a cached entry was removed.
  * @param wasEvicted True if entry removal was automatic due to eviction. That is, the cause of removal is neither [EXPLICIT] or [REPLACED].

@@ -15,7 +15,7 @@ kotlin {
     getByName("commonMain") {
       dependencies {
         api(libs.kotlinx.coroutines.test)
-        api(project(":normalized-cache-incubating"))
+        api(project(":normalized-cache"))
         implementation(libs.kotlin.test)
       }
     }

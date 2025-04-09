@@ -1,6 +1,6 @@
 # Managing pagination manually
 
-Using the [`ApolloStore`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/-apollo-store/index.html)
+Using the [`ApolloStore`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized/-apollo-store/index.html)
 APIs, you can update the cache manually whenever you fetch a new page of data.
 
 Here's a general outline of how you can do this:
@@ -32,4 +32,4 @@ Note that in this simple example, we need to remember the last fetched page, so 
 This can be stored in shared preferences for instance. However in most cases the API can return a "page info" object containing the information needed to fetch the next page, and this can be stored
 in the cache with the rest of the data.
 
-An example of doing this is available [here](https://github.com/apollographql/apollo-kotlin-normalized-cache-incubating/tree/main/samples/pagination/manual).
+An example of doing this is available [here](https://github.com/apollographql/apollo-kotlin-normalized-cache/tree/main/samples/pagination/manual).

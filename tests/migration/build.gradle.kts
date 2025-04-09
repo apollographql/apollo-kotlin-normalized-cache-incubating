@@ -17,7 +17,7 @@ kotlin {
         implementation(libs.apollo.runtime)
         implementation(libs.apollo.cache)
         implementation(libs.apollo.cache.sqlite)
-        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
+        implementation("com.apollographql.cache:normalized-cache-sqlite")
       }
     }
 

@@ -11,7 +11,7 @@ Note: to execute the app, provide a [GitHub access token](https://developer.gith
   1. Gets the current list from the cache
   2. Fetches the next page from the network
   3. Manually merges the next page with the current list
-  4. Updates the cache with the merged list using the [`ApolloStore`](https://apollographql.github.io/apollo-kotlin-normalized-cache-incubating/kdoc/normalized-cache-incubating/com.apollographql.cache.normalized/-apollo-store/index.html?query=interface%20ApolloStore) API
+  4. Updates the cache with the merged list using the [`ApolloStore`](https://apollographql.github.io/apollo-kotlin-normalized-cache/kdoc/normalized-cache/com.apollographql.cache.normalized/-apollo-store/index.html?query=interface%20ApolloStore) API
 - Writing to the cache triggers an emission to the watcher, and the `LazyColumn` is updated with the updated list. 
 
 The gist of it is [here](app/src/main/java/com/example/apollokotlinpaginationsample/repository/Apollo.kt#L43).

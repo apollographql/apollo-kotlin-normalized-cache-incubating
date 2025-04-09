@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <com.apollographql.cache:normalized-cache-incubating>
+// Library unique name: <com.apollographql.cache:normalized-cache>
 final enum class com.apollographql.cache.normalized/FetchPolicy : kotlin/Enum<com.apollographql.cache.normalized/FetchPolicy> { // com.apollographql.cache.normalized/FetchPolicy|null[0]
     enum entry CacheAndNetwork // com.apollographql.cache.normalized/FetchPolicy.CacheAndNetwork|null[0]
     enum entry CacheFirst // com.apollographql.cache.normalized/FetchPolicy.CacheFirst|null[0]
