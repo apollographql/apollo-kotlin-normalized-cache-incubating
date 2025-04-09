@@ -102,20 +102,25 @@ store.writeOperation(operation, data)
 store.writeOperation(operation, data).also { store.publish(it) }
 ```
 
-### CustomScalarAdapters
+### Passing `CustomScalarAdapters` to `ApolloStore` methods
 
-Individual `ApolloStore` methods no longer accept a `CustomScalarAdapters`. Instead it can be passed to the `ApolloStore` constructor,
-or to the `normalizedCache` extension.
+Previously, if you configured custom scalar adapters on your client, you had to pass them to the `ApolloStore` methods.
 
-If you do use a `CustomScalarAdapters`, make sure to pass the same instance you configured on the `ApolloClient`:
+Now, `ApolloClient.apolloStore` returns a `SimpleApolloStore`, a wrapper around `ApolloStore` which passes the client's `CustomScalarAdapters` automatically.
 
 ```kotlin
-val customScalarAdapters = CustomScalarAdapters.Builder()/* ... */.build()
-val client = ApolloClient.Builder()
-    /* ... */
-    .customScalarAdapters(customScalarAdapters)
-    .normalizedCache(cacheFactory, customScalarAdapters = customScalarAdapters)
-    .build()
+// Before
+client.apolloStore.writeOperation(
+    operation = operation,
+    data = data,
+    customScalarAdapters = client.customScalarAdapters
+)
+
+// After
+client.apolloStore.writeOperation(
+    operation = operation,
+    data = data
+)
 ```
 
 ### Other changes
