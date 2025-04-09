@@ -1,0 +1,333 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SimpleApolloStore</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../../index.html">
+                            apollo-kotlin-normalized-cache
+                    </a>            </div>
+            <div class="library-version">
+<dokka-template-command data="{&quot;@class&quot;:&quot;org.jetbrains.dokka.base.templating.ReplaceVersionsCommand&quot;,&quot;location&quot;:&quot;com.apollographql.cache.normalized/-simple-apollo-store/index.html&quot;}">0.0.9-SNAPSHOT</dokka-template-command>            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":normalized-cache/commonMain">common</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="normalized-cache::com.apollographql.cache.normalized/SimpleApolloStore///PointingToDeclaration//-1172623753">
+  <div class="breadcrumbs"><a href="../../index.html">normalized-cache</a><span class="delimiter">/</span><a href="../index.html">com.apollographql.cache.normalized</a><span class="delimiter">/</span><span class="current">SimpleApolloStore</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Simple</span><wbr><span>Apollo</span><wbr><span><span>Store</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SimpleApolloStore</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">apolloStore<span class="token operator">: </span><a href="../-apollo-store/index.html">ApolloStore</a><span class="token punctuation">, </span></span><span class="parameter ">customScalarAdapters<span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/CustomScalarAdapters///PointingToDeclaration/">CustomScalarAdapters</span></span></span><span class="token punctuation">)</span></div><p class="paragraph">A wrapper around <a href="../-apollo-store/index.html">ApolloStore</a> that provides a simplified API for reading and writing data.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="210859039%2FConstructors%2F-1172623753" anchor-label="SimpleApolloStore" id="210859039%2FConstructors%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-simple-apollo-store.html"><span>Simple</span><wbr><span>Apollo</span><wbr><span><span>Store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="210859039%2FConstructors%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">apolloStore<span class="token operator">: </span><a href="../-apollo-store/index.html">ApolloStore</a><span class="token punctuation">, </span></span><span class="parameter ">customScalarAdapters<span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/CustomScalarAdapters///PointingToDeclaration/">CustomScalarAdapters</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-1356807473%2FProperties%2F-1172623753" anchor-label="changedKeys" id="-1356807473%2FProperties%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="changed-keys.html"><span>changed</span><wbr><span><span>Keys</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1356807473%2FProperties%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="changed-keys.html">changedKeys</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/SharedFlow///PointingToDeclaration/">SharedFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="734327056%2FFunctions%2F-1172623753" anchor-label="accessCache" id="734327056%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="access-cache.html"><span>access</span><wbr><span><span>Cache</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="734327056%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="access-cache.html">R</a><span class="token operator">&gt; </span><a href="access-cache.html"><span class="token function">accessCache</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">block<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../com.apollographql.cache.normalized.api/-normalized-cache/index.html">NormalizedCache</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="access-cache.html">R</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="access-cache.html">R</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1377950607%2FFunctions%2F-1172623753" anchor-label="clearAll" id="1377950607%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clear-all.html"><span>clear</span><wbr><span><span>All</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1377950607%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="clear-all.html"><span class="token function">clearAll</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-821803944%2FFunctions%2F-1172623753" anchor-label="dispose" id="-821803944%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dispose.html"><span><span>dispose</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-821803944%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="dispose.html"><span class="token function">dispose</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-650564433%2FFunctions%2F-1172623753" anchor-label="dump" id="-650564433%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dump.html"><span><span>dump</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-650564433%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="dump.html"><span class="token function">dump</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.reflect/-k-class/index.html">KClass</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="../../com.apollographql.cache.normalized.api/-cache-key/index.html">CacheKey</a><span class="token punctuation">, </span><a href="../../com.apollographql.cache.normalized.api/-record/index.html">Record</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1488250299%2FFunctions%2F-1172623753" anchor-label="normalize" id="-1488250299%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="normalize.html"><span><span>normalize</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1488250299%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="normalize.html">D</a><span class="token operator"> : </span><span data-unresolved-link="com.apollographql.apollo.api/Executable.Data///PointingToDeclaration/">Executable.Data</span><span class="token operator">&gt; </span><a href="normalize.html"><span class="token function">normalize</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">executable<span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/Executable///PointingToDeclaration/">Executable</span><span class="token operator">&lt;</span><a href="normalize.html">D</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">dataWithErrors<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-data-with-errors/index.html">DataWithErrors</a><span class="token punctuation">, </span></span><span class="parameter ">rootKey<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-cache-key/index.html">CacheKey</a><span class="token operator"> = </span>CacheKey.QUERY_ROOT</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="../../com.apollographql.cache.normalized.api/-cache-key/index.html">CacheKey</a><span class="token punctuation">, </span><a href="../../com.apollographql.cache.normalized.api/-record/index.html">Record</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1437497636%2FFunctions%2F-1172623753" anchor-label="publish" id="-1437497636%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="publish.html"><span><span>publish</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1437497636%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="publish.html"><span class="token function">publish</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">keys<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-554157964%2FFunctions%2F-1172623753" anchor-label="readFragment" id="-554157964%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read-fragment.html"><span>read</span><wbr><span><span>Fragment</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-554157964%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="read-fragment.html">D</a><span class="token operator"> : </span><span data-unresolved-link="com.apollographql.apollo.api/Fragment.Data///PointingToDeclaration/">Fragment.Data</span><span class="token operator">&gt; </span><a href="read-fragment.html"><span class="token function">readFragment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fragment<span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/Fragment///PointingToDeclaration/">Fragment</span><span class="token operator">&lt;</span><a href="read-fragment.html">D</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">cacheKey<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-cache-key/index.html">CacheKey</a><span class="token punctuation">, </span></span><span class="parameter ">cacheHeaders<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-cache-headers/index.html">CacheHeaders</a><span class="token operator"> = </span>CacheHeaders.NONE</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-apollo-store/-read-result/index.html">ApolloStore.ReadResult</a><span class="token operator">&lt;</span><a href="read-fragment.html">D</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1977768289%2FFunctions%2F-1172623753" anchor-label="readOperation" id="1977768289%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read-operation.html"><span>read</span><wbr><span><span>Operation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1977768289%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="read-operation.html">D</a><span class="token operator"> : </span><span data-unresolved-link="com.apollographql.apollo.api/Operation.Data///PointingToDeclaration/">Operation.Data</span><span class="token operator">&gt; </span><a href="read-operation.html"><span class="token function">readOperation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">operation<span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/Operation///PointingToDeclaration/">Operation</span><span class="token operator">&lt;</span><a href="read-operation.html">D</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">cacheHeaders<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-cache-headers/index.html">CacheHeaders</a><span class="token operator"> = </span>CacheHeaders.NONE</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/ApolloResponse///PointingToDeclaration/">ApolloResponse</span><span class="token operator">&lt;</span><a href="read-operation.html">D</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1545184370%2FFunctions%2F-1172623753" anchor-label="remove" id="-1545184370%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remove.html"><span><span>remove</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1545184370%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="remove.html"><span class="token function">remove</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cacheKey<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-cache-key/index.html">CacheKey</a><span class="token punctuation">, </span></span><span class="parameter ">cascade<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="remove.html"><span class="token function">remove</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cacheKeys<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../com.apollographql.cache.normalized.api/-cache-key/index.html">CacheKey</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">cascade<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1700959495%2FFunctions%2F-1172623753" anchor-label="rollbackOptimisticUpdates" id="-1700959495%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="rollback-optimistic-updates.html"><span>rollback</span><wbr><span>Optimistic</span><wbr><span><span>Updates</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1700959495%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="rollback-optimistic-updates.html"><span class="token function">rollbackOptimisticUpdates</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">mutationId<span class="token operator">: </span><span data-unresolved-link="com.benasher44.uuid/Uuid///PointingToDeclaration/">Uuid</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1867163192%2FFunctions%2F-1172623753" anchor-label="trim" id="1867163192%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="trim.html"><span><span>trim</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1867163192%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="trim.html"><span class="token function">trim</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">maxSizeBytes<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">trimFactor<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">0.1f</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="997699918%2FFunctions%2F-1172623753" anchor-label="writeFragment" id="997699918%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="write-fragment.html"><span>write</span><wbr><span><span>Fragment</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="997699918%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="write-fragment.html">D</a><span class="token operator"> : </span><span data-unresolved-link="com.apollographql.apollo.api/Fragment.Data///PointingToDeclaration/">Fragment.Data</span><span class="token operator">&gt; </span><a href="write-fragment.html"><span class="token function">writeFragment</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fragment<span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/Fragment///PointingToDeclaration/">Fragment</span><span class="token operator">&lt;</span><a href="write-fragment.html">D</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">cacheKey<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-cache-key/index.html">CacheKey</a><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="write-fragment.html">D</a><span class="token punctuation">, </span></span><span class="parameter ">cacheHeaders<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-cache-headers/index.html">CacheHeaders</a><span class="token operator"> = </span>CacheHeaders.NONE</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="489027745%2FFunctions%2F-1172623753" anchor-label="writeOperation" id="489027745%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="write-operation.html"><span>write</span><wbr><span><span>Operation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="489027745%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="write-operation.html">D</a><span class="token operator"> : </span><span data-unresolved-link="com.apollographql.apollo.api/Operation.Data///PointingToDeclaration/">Operation.Data</span><span class="token operator">&gt; </span><a href="write-operation.html"><span class="token function">writeOperation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">operation<span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/Operation///PointingToDeclaration/">Operation</span><span class="token operator">&lt;</span><a href="write-operation.html">D</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">dataWithErrors<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-data-with-errors/index.html">DataWithErrors</a><span class="token punctuation">, </span></span><span class="parameter ">cacheHeaders<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-cache-headers/index.html">CacheHeaders</a><span class="token operator"> = </span>CacheHeaders.NONE</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="write-operation.html">D</a><span class="token operator"> : </span><span data-unresolved-link="com.apollographql.apollo.api/Operation.Data///PointingToDeclaration/">Operation.Data</span><span class="token operator">&gt; </span><a href="write-operation.html"><span class="token function">writeOperation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">operation<span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/Operation///PointingToDeclaration/">Operation</span><span class="token operator">&lt;</span><a href="write-operation.html">D</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="write-operation.html">D</a><span class="token punctuation">, </span></span><span class="parameter ">errors<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="com.apollographql.apollo.api/Error///PointingToDeclaration/">Error</span><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">cacheHeaders<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-cache-headers/index.html">CacheHeaders</a><span class="token operator"> = </span>CacheHeaders.NONE</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="47249697%2FFunctions%2F-1172623753" anchor-label="writeOptimisticUpdates" id="47249697%2FFunctions%2F-1172623753" data-filterable-set=":normalized-cache/commonMain"></a>
+          <div class="table-row" data-filterable-current=":normalized-cache/commonMain" data-filterable-set=":normalized-cache/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="write-optimistic-updates.html"><span>write</span><wbr><span>Optimistic</span><wbr><span><span>Updates</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="47249697%2FFunctions%2F-1172623753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":normalized-cache/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="write-optimistic-updates.html">D</a><span class="token operator"> : </span><span data-unresolved-link="com.apollographql.apollo.api/Operation.Data///PointingToDeclaration/">Operation.Data</span><span class="token operator">&gt; </span><a href="write-optimistic-updates.html"><span class="token function">writeOptimisticUpdates</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">operation<span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/Operation///PointingToDeclaration/">Operation</span><span class="token operator">&lt;</span><a href="write-optimistic-updates.html">D</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="write-optimistic-updates.html">D</a><span class="token punctuation">, </span></span><span class="parameter ">mutationId<span class="token operator">: </span><span data-unresolved-link="com.benasher44.uuid/Uuid///PointingToDeclaration/">Uuid</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="write-optimistic-updates.html">D</a><span class="token operator"> : </span><span data-unresolved-link="com.apollographql.apollo.api/Fragment.Data///PointingToDeclaration/">Fragment.Data</span><span class="token operator">&gt; </span><a href="write-optimistic-updates.html"><span class="token function">writeOptimisticUpdates</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fragment<span class="token operator">: </span><span data-unresolved-link="com.apollographql.apollo.api/Fragment///PointingToDeclaration/">Fragment</span><span class="token operator">&lt;</span><a href="write-optimistic-updates.html">D</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">cacheKey<span class="token operator">: </span><a href="../../com.apollographql.cache.normalized.api/-cache-key/index.html">CacheKey</a><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="write-optimistic-updates.html">D</a><span class="token punctuation">, </span></span><span class="parameter ">mutationId<span class="token operator">: </span><span data-unresolved-link="com.benasher44.uuid/Uuid///PointingToDeclaration/">Uuid</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
