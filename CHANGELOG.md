@@ -12,9 +12,8 @@ _2025-04-09_
 
   The package names are unchanged.
 - Records are now rooted per operation type (QUERY_ROOT, MUTATION_ROOT, SUBSCRIPTION_ROOT) (#109)
-- `ApolloClient.apolloStore` is deprecated in favor of `ApolloClient.store` for consistency.
-- Individual `ApolloStore` methods no longer accept a `CustomScalarAdapters`. Instead it can be passed to the `ApolloStore` constructor.
-- `ApolloClient.apolloStore` now returns a `SimpleApolloStore`, a wrapper around `ApolloStore` that doesn't need a `CustomScalarAdapters` to be passed to read/write methods.
+- `ApolloClient.apolloStore` is deprecated in favor of `ApolloClient.store` for consistency. (#127)
+- `ApolloClient.apolloStore` now returns a `SimpleApolloStore`, a wrapper around `ApolloStore` that doesn't need a `CustomScalarAdapters` to be passed to read/write methods. (#123)
 
 # Version 0.0.8
 _2025-03-28_
