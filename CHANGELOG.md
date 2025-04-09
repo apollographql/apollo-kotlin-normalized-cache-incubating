@@ -1,5 +1,10 @@
 # Next version (unreleased)
 
+PUT_CHANGELOG_HERE
+
+# Version 0.0.9
+_2025-04-09_
+
 - Removing "incubating" from the repository and artifacts name. With a stable API on the horizon, now is a great time to try the library in your projects and give us feedback.
   The artifacts are now:
   - `com.apollographql.cache:normalized-cache` for the memory cache
