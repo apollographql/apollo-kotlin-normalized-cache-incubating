@@ -162,7 +162,7 @@ class SimpleApolloStore(
   fun <D : Executable.Data> normalize(
       executable: Executable<D>,
       dataWithErrors: DataWithErrors,
-      rootKey: CacheKey = CacheKey.rootKey(),
+      rootKey: CacheKey = CacheKey.QUERY_ROOT,
   ): Map<CacheKey, Record> = apolloStore.normalize(
       executable = executable,
       dataWithErrors = dataWithErrors,
