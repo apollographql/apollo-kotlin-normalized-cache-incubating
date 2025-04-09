@@ -32,5 +32,6 @@ kotlin {
 apollo {
   service("base") {
     packageName.set("defer")
+    generateFragmentImplementations.set(true)
   }
 }

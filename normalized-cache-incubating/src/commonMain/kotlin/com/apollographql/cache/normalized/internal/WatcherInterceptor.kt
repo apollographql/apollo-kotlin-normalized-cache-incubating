@@ -10,6 +10,7 @@ import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.ApolloStoreInterceptor
+import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.dependentKeys
 import com.apollographql.cache.normalized.api.withErrors
 import com.apollographql.cache.normalized.watchContext
@@ -39,7 +40,12 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
     var watchedKeys: Set<String>? =
       watchContext.data?.let { data ->
         val dataWithErrors = (data as D).withErrors(request.operation, null, customScalarAdapters)
-        store.normalize(request.operation, dataWithErrors, customScalarAdapters = customScalarAdapters).values.dependentKeys()
+        store.normalize(
+            executable = request.operation,
+            dataWithErrors = dataWithErrors,
+            rootKey = CacheKey.QUERY_ROOT,
+            customScalarAdapters = customScalarAdapters,
+        ).values.dependentKeys()
       }
 
     return (store.changedKeys as SharedFlow<Any>)
@@ -60,7 +66,12 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
                   if (response.data != null) {
                     val dataWithErrors = response.data!!.withErrors(request.operation, response.errors, customScalarAdapters)
                     watchedKeys =
-                      store.normalize(request.operation, dataWithErrors, customScalarAdapters = customScalarAdapters).values.dependentKeys()
+                      store.normalize(
+                          executable = request.operation,
+                          dataWithErrors = dataWithErrors,
+                          rootKey = CacheKey.QUERY_ROOT,
+                          customScalarAdapters = customScalarAdapters,
+                      ).values.dependentKeys()
                   }
                 }
           }

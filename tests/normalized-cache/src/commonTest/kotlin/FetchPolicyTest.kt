@@ -603,7 +603,7 @@ class FetchPolicyTest {
           )
         }
     )
-    store.publish(setOf(CacheKey.rootKey().fieldKey("hero")))
+    store.publish(setOf(CacheKey.QUERY_ROOT.fieldKey("hero")))
 
     /**
      * This time the watcher should do a network request

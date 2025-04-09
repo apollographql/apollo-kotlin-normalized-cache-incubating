@@ -36,6 +36,7 @@ import defer.SimpleDeferQuery
 import defer.WithFragmentSpreadsMutation
 import defer.WithFragmentSpreadsQuery
 import defer.fragment.ComputerFields
+import defer.fragment.ComputerFieldsImpl
 import defer.fragment.ScreenFields
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -496,16 +497,13 @@ class DeferNormalizedCacheTest {
     assertEquals(networkExpected, networkActual)
 
     // Now cache is not empty
-    val cacheActual = apolloClient.query(WithFragmentSpreadsQuery()).fetchPolicy(FetchPolicy.CacheOnly).execute().dataOrThrow()
+    val cacheActual = store.readFragment(ComputerFieldsImpl(), CacheKey.MUTATION_ROOT.append("computers", "0")).data
 
+    println(cacheActual)
     // We get the last/fully formed data
-    val cacheExpected = WithFragmentSpreadsQuery.Data(
-        listOf(WithFragmentSpreadsQuery.Computer("Computer", "Computer1", ComputerFields("386", 1993,
-            ComputerFields.Screen("Screen", "640x480",
-                ScreenFields(false)
-            )
-        )
-        )
+    val cacheExpected = ComputerFields("386", 1993,
+        ComputerFields.Screen("Screen", "640x480",
+            ScreenFields(false)
         )
     )
     assertEquals(cacheExpected, cacheActual)

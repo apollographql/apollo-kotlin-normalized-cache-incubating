@@ -240,14 +240,15 @@ public final class com/apollographql/cache/normalized/api/CacheKey {
 	public final fun getKey ()Ljava/lang/String;
 	public fun hashCode ()I
 	public static fun hashCode-impl (Ljava/lang/String;)I
-	public static final fun rootKey-mqw0cJ0 ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
 	public final synthetic fun unbox-impl ()Ljava/lang/String;
 }
 
 public final class com/apollographql/cache/normalized/api/CacheKey$Companion {
-	public final fun rootKey-mqw0cJ0 ()Ljava/lang/String;
+	public final fun getMUTATION_ROOT-mqw0cJ0 ()Ljava/lang/String;
+	public final fun getQUERY_ROOT-mqw0cJ0 ()Ljava/lang/String;
+	public final fun getSUBSCRIPTION_ROOT-mqw0cJ0 ()Ljava/lang/String;
 }
 
 public abstract interface class com/apollographql/cache/normalized/api/CacheKeyGenerator {
@@ -258,10 +259,6 @@ public final class com/apollographql/cache/normalized/api/CacheKeyGeneratorConte
 	public fun <init> (Lcom/apollographql/apollo/api/CompiledField;Lcom/apollographql/apollo/api/Executable$Variables;)V
 	public final fun getField ()Lcom/apollographql/apollo/api/CompiledField;
 	public final fun getVariables ()Lcom/apollographql/apollo/api/Executable$Variables;
-}
-
-public final class com/apollographql/cache/normalized/api/CacheKeyKt {
-	public static final fun isRootKey-pWl1Des (Ljava/lang/String;)Z
 }
 
 public abstract class com/apollographql/cache/normalized/api/CacheKeyResolver : com/apollographql/cache/normalized/api/CacheResolver {

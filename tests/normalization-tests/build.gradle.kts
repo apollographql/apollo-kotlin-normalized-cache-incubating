@@ -19,11 +19,18 @@ kotlin {
       }
     }
 
+    getByName("concurrentMain") {
+      dependencies {
+        implementation("com.apollographql.cache:normalized-cache-sqlite-incubating")
+      }
+    }
+
     getByName("commonTest") {
       dependencies {
         implementation("com.apollographql.cache:test-utils")
         implementation(libs.apollo.mockserver)
         implementation(libs.kotlin.test)
+        implementation("com.apollographql.cache:test-utils")
       }
     }
 
@@ -47,5 +54,9 @@ apollo {
   service("3") {
     srcDir("src/commonMain/graphql/3")
     packageName.set("com.example.three")
+  }
+  service("4") {
+    srcDir("src/commonMain/graphql/4")
+    packageName.set("com.example.four")
   }
 }

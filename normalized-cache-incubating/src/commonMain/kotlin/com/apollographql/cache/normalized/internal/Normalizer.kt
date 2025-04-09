@@ -31,7 +31,6 @@ import com.apollographql.cache.normalized.api.MetadataGeneratorContext
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
 import com.apollographql.cache.normalized.api.append
-import com.apollographql.cache.normalized.api.isRootKey
 import com.apollographql.cache.normalized.api.toMaxAgeField
 import com.apollographql.cache.normalized.api.withErrors
 import kotlin.time.Duration
@@ -107,8 +106,9 @@ internal class Normalizer(
 
       val fieldKey = fieldKeyGenerator.getFieldKey(FieldKeyContext(parentType.name, mergedField, variables))
 
-      val base = if (key.isRootKey()) {
-        // If we're at the root level, skip `QUERY_ROOT` altogether to save a few bytes
+      val base = if (key == CacheKey.QUERY_ROOT) {
+        // If we're at the query root level, skip `QUERY_ROOT` altogether to save a few bytes.
+        // For mutations and subscriptions, keep it.
         null
       } else {
         key
@@ -194,6 +194,7 @@ internal class Normalizer(
       embeddedFields: List<String>,
   ): Any? {
     val field = fieldPath.last()
+
     /**
      * Remove the NotNull decoration if needed
      */
@@ -281,7 +282,7 @@ internal class Normalizer(
  */
 fun <D : Executable.Data> D.normalized(
     executable: Executable<D>,
-    rootKey: CacheKey = CacheKey.rootKey(),
+    rootKey: CacheKey = CacheKey.QUERY_ROOT,
     customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
     cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
@@ -298,7 +299,7 @@ fun <D : Executable.Data> D.normalized(
  */
 fun <D : Executable.Data> DataWithErrors.normalized(
     executable: Executable<D>,
-    rootKey: CacheKey = CacheKey.rootKey(),
+    rootKey: CacheKey = CacheKey.QUERY_ROOT,
     customScalarAdapters: CustomScalarAdapters = CustomScalarAdapters.Empty,
     cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
