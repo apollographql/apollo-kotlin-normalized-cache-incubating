@@ -106,6 +106,7 @@ store.writeOperation(operation, data).also { store.publish(it) }
 
 - `readFragment()` now returns a `ReadResult<D>` (it previously returned a `<D>`). This allows for surfacing metadata associated to the returned data, e.g. staleness.
 - Records are now rooted per operation type (`QUERY_ROOT`, `MUTATION_ROOT`, `SUBSCRIPTION_ROOT`), when previously these were all at the same level, which could cause conflicts.
+- `ApolloClient.apolloStore` is deprecated in favor of `ApolloClient.store` for consistency.
 
 ## CacheResolver, CacheKeyResolver
 

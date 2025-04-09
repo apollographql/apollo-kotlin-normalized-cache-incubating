@@ -18,7 +18,6 @@ import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
-import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.fetchPolicyInterceptor
@@ -310,7 +309,7 @@ class CachePartialResultTest {
           )
 
           // Remove project lead from the cache
-          apolloClient.apolloStore.remove(CacheKey("User:3"))
+          apolloClient.store.remove(CacheKey("User:3"))
           val cacheResult = apolloClient.query(MeWithBestFriendQuery())
               .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
@@ -354,7 +353,7 @@ class CachePartialResultTest {
           )
 
           // Remove best friend from the cache
-          apolloClient.apolloStore.remove(CacheKey("User:2"))
+          apolloClient.store.remove(CacheKey("User:2"))
           val cacheResult2 = apolloClient.query(MeWithBestFriendQuery())
               .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
@@ -395,7 +394,7 @@ class CachePartialResultTest {
           )
 
           // Remove project user from the cache
-          apolloClient.apolloStore.remove(CacheKey("User:4"))
+          apolloClient.store.remove(CacheKey("User:4"))
           val cacheResult3 = apolloClient.query(MeWithBestFriendQuery())
               .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)
               .execute()
@@ -542,7 +541,7 @@ class CachePartialResultTest {
           )
 
           // Remove the category from the cache
-          apolloClient.apolloStore.accessCache { cache ->
+          apolloClient.store.accessCache { cache ->
             val record = cache.loadRecord(CacheKey("User:1"), CacheHeaders.NONE)!!
             cache.remove(CacheKey("User:1"), false)
             cache.merge(Record(record.key, record.fields - "category"), CacheHeaders.NONE, DefaultRecordMerger)
@@ -646,7 +645,7 @@ class CachePartialResultTest {
           )
 
           // Remove lead from the cache
-          apolloClient.apolloStore.remove(CacheKey("User:2"))
+          apolloClient.store.remove(CacheKey("User:2"))
 
           val cacheMissResult = apolloClient.query(WithFragmentsQuery())
               .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)

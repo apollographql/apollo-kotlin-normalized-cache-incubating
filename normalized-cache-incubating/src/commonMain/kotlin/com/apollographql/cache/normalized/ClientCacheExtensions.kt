@@ -191,12 +191,17 @@ internal fun <D : Query.Data> ApolloCall<D>.watchInternal(data: D?): Flow<Apollo
   return copy().addExecutionContext(WatchContext(data)).toFlow()
 }
 
+@Deprecated("Use store instead", ReplaceWith("store"))
 val ApolloClient.apolloStore: ApolloStore
+  get() = store
+
+val ApolloClient.store: ApolloStore
   get() {
     return interceptors.firstOrNull { it is ApolloCacheInterceptor }?.let {
       (it as ApolloCacheInterceptor).store
     } ?: error("no cache configured")
   }
+
 
 /**
  * Sets the initial [FetchPolicy]
