@@ -62,6 +62,13 @@ class ThreadTests {
       return delegate.remove(cacheKeys, cascade)
     }
 
+    override fun removeByTypes(types: Collection<String>): Int {
+      check(currentThreadId() != mainThreadId) {
+        "Cache access on main thread"
+      }
+      return delegate.removeByTypes(types)
+    }
+
     override fun loadRecord(key: CacheKey, cacheHeaders: CacheHeaders): Record? {
       check(currentThreadId() != mainThreadId) {
         "Cache access on main thread"

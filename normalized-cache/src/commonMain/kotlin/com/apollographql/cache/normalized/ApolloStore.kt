@@ -242,6 +242,16 @@ interface ApolloStore {
   fun remove(cacheKeys: List<CacheKey>, cascade: Boolean = true): Int
 
   /**
+   * Removes records by their types.
+   *
+   * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * @param types the types of the records to remove
+   * @return the number of records that have been removed
+   */
+  fun removeByTypes(types: List<String>): Int
+
+  /**
    * Trims the store if its size exceeds [maxSizeBytes]. The amount of data to remove is determined by [trimFactor].
    * The oldest records are removed according to their updated date.
    *

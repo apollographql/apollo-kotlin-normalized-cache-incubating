@@ -48,6 +48,12 @@ class SqlNormalizedCache internal constructor(
     }
   }
 
+  override fun removeByTypes(types: Collection<String>): Int {
+    return recordDatabase.transaction {
+      internalDeleteRecordsByTypes(types)
+    }
+  }
+
   override fun merge(record: Record, cacheHeaders: CacheHeaders, recordMerger: RecordMerger): Set<String> {
     return merge(records = listOf(record), cacheHeaders = cacheHeaders, recordMerger = recordMerger)
   }
@@ -96,6 +102,16 @@ class SqlNormalizedCache internal constructor(
   }
 
   /**
+   * Assumes an enclosing transaction
+   */
+  private fun internalDeleteRecordsByTypes(types: Collection<String>): Int {
+    return (types).chunked(parametersMax).sumOf { chunkedKeys ->
+      recordDatabase.deleteRecordsByTypes(chunkedKeys)
+      recordDatabase.changes().toInt()
+    }
+  }
+
+  /**
    * Updates records.
    * The [records] are merged using the given [recordMerger], requiring to load the existing records from the db first.
    */
@@ -121,7 +137,7 @@ class SqlNormalizedCache internal constructor(
   }
 
   /**
-   * Loads a list of records, making sure to not query more than 999 at a time
+   * Loads a list of records, making sure to not query more than [parametersMax] at a time
    * to help with the SQLite limitations
    */
   private fun selectRecords(keys: Collection<CacheKey>): List<Record> {

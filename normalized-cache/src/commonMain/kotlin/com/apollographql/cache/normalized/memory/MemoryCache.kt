@@ -76,8 +76,16 @@ class MemoryCache(
 
   override fun remove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
     return lockWrite {
-      val total = internalRemove(cacheKeys, cascade)
-      nextCache?.remove(cacheKeys, cascade)
+      var total = internalRemove(cacheKeys, cascade)
+      total += nextCache?.remove(cacheKeys, cascade) ?: 0
+      total
+    }
+  }
+
+  override fun removeByTypes(types: Collection<String>): Int {
+    return lockWrite {
+      var total = internalRemove(lruCache.asMap().filterValues { it.type in types }.keys, false)
+      total += nextCache?.removeByTypes(types) ?: 0
       total
     }
   }

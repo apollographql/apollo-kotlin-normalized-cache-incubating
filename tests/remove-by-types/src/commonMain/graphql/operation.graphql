@@ -1,0 +1,14 @@
+query MediaListQuery {
+  medias {
+    id
+    ... on Image {
+      width
+    }
+    ... on Video {
+      duration
+    }
+    ... on Audio {
+      sampleRate
+    }
+  }
+}

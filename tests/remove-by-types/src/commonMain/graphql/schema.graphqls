@@ -1,0 +1,36 @@
+type Query {
+  medias: [Media!]!
+}
+
+interface Media {
+  id: ID!
+  name: String!
+  description: String
+  url: String!
+}
+
+type Image implements Media {
+  id: ID!
+  name: String!
+  description: String
+  url: String!
+  width: Int!
+  height: Int!
+}
+
+type Video implements Media {
+  id: ID!
+  name: String!
+  description: String
+  url: String!
+  duration: Int!
+}
+
+type Audio implements Media {
+  id: ID!
+  name: String!
+  description: String
+  url: String!
+  duration: Int!
+  sampleRate: Int!
+}

@@ -18,6 +18,7 @@ public final class com/apollographql/cache/normalized/sql/SqlNormalizedCache : c
 	public fun merge (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/RecordMerger;)Ljava/util/Set;
 	public fun remove (Ljava/util/Collection;Z)I
 	public fun remove-eNSUWrY (Ljava/lang/String;Z)Z
+	public fun removeByTypes (Ljava/util/Collection;)I
 	public fun trim (JF)J
 }
 

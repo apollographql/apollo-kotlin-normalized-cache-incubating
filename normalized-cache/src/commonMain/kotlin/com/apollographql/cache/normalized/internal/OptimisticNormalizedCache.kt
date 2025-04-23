@@ -46,6 +46,10 @@ internal class OptimisticNormalizedCache(private val wrapped: NormalizedCache) :
     return wrapped.remove(cacheKeys, cascade) + internalRemove(cacheKeys, cascade)
   }
 
+  override fun removeByTypes(types: Collection<String>): Int {
+    return wrapped.removeByTypes(types) + internalRemove(recordJournals.filterValues { it.current.type in types }.keys, false)
+  }
+
   override fun trim(maxSizeBytes: Long, trimFactor: Float): Long {
     return wrapped.trim(maxSizeBytes, trimFactor)
   }

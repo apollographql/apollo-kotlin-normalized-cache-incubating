@@ -104,6 +104,10 @@ internal class DefaultApolloStore(
     return cache.remove(cacheKeys, cascade)
   }
 
+  override fun removeByTypes(types: List<String>): Int {
+    return cache.removeByTypes(types)
+  }
+
   override fun <D : Executable.Data> normalize(
       executable: Executable<D>,
       dataWithErrors: DataWithErrors,

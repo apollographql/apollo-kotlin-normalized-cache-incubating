@@ -152,6 +152,11 @@ class SimpleApolloStore(
   fun remove(cacheKeys: List<CacheKey>, cascade: Boolean = true): Int = apolloStore.remove(cacheKeys, cascade)
 
   /**
+   * @see ApolloStore.removeByTypes
+   */
+  fun removeByTypes(types: List<String>): Int = apolloStore.removeByTypes(types)
+
+  /**
    * @see ApolloStore.trim
    */
   fun trim(maxSizeBytes: Long, trimFactor: Float = 0.1f): Long = apolloStore.trim(maxSizeBytes, trimFactor)

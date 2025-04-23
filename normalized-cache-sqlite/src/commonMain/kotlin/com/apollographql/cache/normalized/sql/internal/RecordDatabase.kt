@@ -18,7 +18,7 @@ internal class RecordDatabase(private val driver: SqlDriver) {
   }
 
   /**
-   * @param keys the keys of the records to select, size must be <= 999
+   * @param keys the keys of the records to delete. Size must be under the max size of the SQL IN clause.
    */
   fun selectRecords(keys: Collection<String>): List<Record> {
     return recordQueries.selectRecords(keys).executeAsList().map {
@@ -51,12 +51,15 @@ internal class RecordDatabase(private val driver: SqlDriver) {
 
 
   /**
-   * @param keys the keys of the records to delete, size must be <= 999
+   * @param keys the keys of the records to delete. Size must be under the max size of the SQL IN clause.
    */
   fun deleteRecords(keys: Collection<String>) {
     recordQueries.deleteRecords(keys)
   }
 
+  /**
+   * @param types the types of the records to delete. Size must be under the max size of the SQL IN clause.
+   */
   fun deleteRecordsByTypes(types: Collection<String>) {
     recordQueries.deleteRecordsByTypes(types)
   }

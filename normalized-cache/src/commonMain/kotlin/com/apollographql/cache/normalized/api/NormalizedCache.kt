@@ -19,10 +19,10 @@ import kotlin.reflect.KClass
  */
 interface NormalizedCache : ReadOnlyNormalizedCache {
   /**
-   * @param record       The [Record] to merge.
-   * @param cacheHeaders The [CacheHeaders] associated with the request which generated this record.
-   * @param recordMerger The [RecordMerger] to use when merging the record.
-   * @return A set of record field keys that have changed. This set is returned by [RecordMerger.merge].
+   * @param record the [Record] to merge.
+   * @param cacheHeaders the [CacheHeaders] associated with the request which generated this record.
+   * @param recordMerger the [RecordMerger] to use when merging the record.
+   * @return a set of record field keys that have changed. This set is returned by [RecordMerger.merge].
    */
   fun merge(
       record: Record,
@@ -34,10 +34,10 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
    * Calls through to [NormalizedCache.merge]. Implementations should override this method
    * if the underlying storage technology can offer an optimized manner to store multiple records.
    *
-   * @param records The collection of Records to merge.
-   * @param cacheHeaders The [CacheHeaders] associated with the request which generated this record.
-   * @param recordMerger The [RecordMerger] to use when merging the records.
-   * @return A set of record field keys that have changed. This set is returned by [RecordMerger.merge].
+   * @param records the collection of Records to merge.
+   * @param cacheHeaders the [CacheHeaders] associated with the request which generated this record.
+   * @param recordMerger the [RecordMerger] to use when merging the records.
+   * @return a set of record field keys that have changed. This set is returned by [RecordMerger.merge].
    */
   fun merge(
       records: Collection<Record>,
@@ -52,11 +52,11 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
   fun clearAll()
 
   /**
-   * Remove a record and potentially its referenced records from this cache and all chained caches
+   * Removes a record and potentially its referenced records from this cache and all chained caches.
    *
-   * @param cacheKey of record to be removed
-   * @param cascade remove referenced records if true
-   * @return `true` if at least one record was successfully removed, `false` otherwise
+   * @param cacheKey the key of the record to remove.
+   * @param cascade whether to remove referenced records.
+   * @return `true` if at least one record was successfully removed, `false` otherwise.
    */
   fun remove(cacheKey: CacheKey, cascade: Boolean): Boolean
 
@@ -64,11 +64,20 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
    * Calls through to [NormalizedCache.remove]. Implementations should override this method
    * if the underlying storage technology can offer an optimized manner to remove multiple records.
    *
-   * @param cacheKeys of records to be removed
-   * @param cascade remove referenced records if true
-   * @return the number of records removed
+   * @param cacheKeys the keys of the records to remove.
+   * @param cascade whether to remove referenced records.
+   * @return the number of removed records.
    */
   fun remove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int
+
+  /**
+   * Removes records by types.
+   *
+   * @param types the types of the records to remove.
+   * @param cascade whether to remove referenced records.
+   * @return the number of removed records.
+   */
+  fun removeByTypes(types: Collection<String>): Int
 
   /**
    * Trims the cache if its size exceeds [maxSizeBytes]. The amount of data to remove is determined by [trimFactor].
