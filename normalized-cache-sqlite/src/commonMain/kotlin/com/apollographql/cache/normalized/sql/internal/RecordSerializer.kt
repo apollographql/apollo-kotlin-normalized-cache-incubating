@@ -26,7 +26,7 @@ internal object RecordSerializer {
     return buffer.readByteArray()
   }
 
-  fun deserialize(key: String, bytes: ByteArray): Record {
+  fun deserialize(key: String, type: String, bytes: ByteArray): Record {
     val buffer = Buffer().write(bytes)
     val fields = buffer.readMap()
     val metadataSize = buffer._readInt()
@@ -39,7 +39,7 @@ internal object RecordSerializer {
     }.mapKeys { (k, _) -> knownMetadataKeysInverted[k] ?: k }
     return Record(
         key = CacheKey(key),
-        type = "TODO", // TODO
+        type = type,
         fields = fields,
         mutationId = null,
         metadata = metadata

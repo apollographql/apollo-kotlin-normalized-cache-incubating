@@ -39,15 +39,17 @@ public final class com/apollographql/cache/normalized/sql/VersionKt {
 }
 
 public final class com/apollographql/cache/normalized/sql/internal/record/Record {
-	public fun <init> (Ljava/lang/String;[BJ)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;[BJ)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()[B
-	public final fun component3 ()J
-	public final fun copy (Ljava/lang/String;[BJ)Lcom/apollographql/cache/normalized/sql/internal/record/Record;
-	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/record/Record;Ljava/lang/String;[BJILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/record/Record;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()[B
+	public final fun component4 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;[BJ)Lcom/apollographql/cache/normalized/sql/internal/record/Record;
+	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/record/Record;Ljava/lang/String;Ljava/lang/String;[BJILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/record/Record;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getKey ()Ljava/lang/String;
 	public final fun getRecord ()[B
+	public final fun getType ()Ljava/lang/String;
 	public final fun getUpdated_date ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -59,36 +61,41 @@ public final class com/apollographql/cache/normalized/sql/internal/record/Record
 	public final fun count ()Lapp/cash/sqldelight/Query;
 	public final fun deleteAllRecords ()V
 	public final fun deleteRecords (Ljava/util/Collection;)V
-	public final fun insertOrUpdateRecord (Ljava/lang/String;[BJ)V
+	public final fun deleteRecordsByTypes (Ljava/util/Collection;)V
+	public final fun insertOrUpdateRecord (Ljava/lang/String;Ljava/lang/String;[BJ)V
 	public final fun selectAllRecords ()Lapp/cash/sqldelight/Query;
-	public final fun selectAllRecords (Lkotlin/jvm/functions/Function2;)Lapp/cash/sqldelight/Query;
+	public final fun selectAllRecords (Lkotlin/jvm/functions/Function3;)Lapp/cash/sqldelight/Query;
 	public final fun selectRecords (Ljava/util/Collection;)Lapp/cash/sqldelight/Query;
-	public final fun selectRecords (Ljava/util/Collection;Lkotlin/jvm/functions/Function2;)Lapp/cash/sqldelight/Query;
+	public final fun selectRecords (Ljava/util/Collection;Lkotlin/jvm/functions/Function3;)Lapp/cash/sqldelight/Query;
 	public final fun trimByUpdatedDate (J)V
 }
 
 public final class com/apollographql/cache/normalized/sql/internal/record/SelectAllRecords {
-	public fun <init> (Ljava/lang/String;[B)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;[B)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()[B
-	public final fun copy (Ljava/lang/String;[B)Lcom/apollographql/cache/normalized/sql/internal/record/SelectAllRecords;
-	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/record/SelectAllRecords;Ljava/lang/String;[BILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/record/SelectAllRecords;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()[B
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;[B)Lcom/apollographql/cache/normalized/sql/internal/record/SelectAllRecords;
+	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/record/SelectAllRecords;Ljava/lang/String;Ljava/lang/String;[BILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/record/SelectAllRecords;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getKey ()Ljava/lang/String;
 	public final fun getRecord ()[B
+	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/apollographql/cache/normalized/sql/internal/record/SelectRecords {
-	public fun <init> (Ljava/lang/String;[B)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;[B)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()[B
-	public final fun copy (Ljava/lang/String;[B)Lcom/apollographql/cache/normalized/sql/internal/record/SelectRecords;
-	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/record/SelectRecords;Ljava/lang/String;[BILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/record/SelectRecords;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()[B
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;[B)Lcom/apollographql/cache/normalized/sql/internal/record/SelectRecords;
+	public static synthetic fun copy$default (Lcom/apollographql/cache/normalized/sql/internal/record/SelectRecords;Ljava/lang/String;Ljava/lang/String;[BILjava/lang/Object;)Lcom/apollographql/cache/normalized/sql/internal/record/SelectRecords;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getKey ()Ljava/lang/String;
 	public final fun getRecord ()[B
+	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

@@ -1,0 +1,3 @@
+-- Version 3 is the 'record' schema without the type column - add it
+
+ALTER TABLE record ADD COLUMN type TEXT NOT NULL DEFAULT '';

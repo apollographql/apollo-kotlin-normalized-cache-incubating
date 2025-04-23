@@ -1,5 +1,6 @@
 CREATE TABLE record (
   key TEXT NOT NULL,
+  type TEXT NOT NULL,
   record BLOB NOT NULL,
   updated_date INTEGER NOT NULL,
   PRIMARY KEY (key) ON CONFLICT REPLACE
@@ -7,16 +8,19 @@ CREATE TABLE record (
 WITHOUT ROWID;
 
 selectRecords:
-SELECT key, record FROM record WHERE key IN ?;
+SELECT key, type, record FROM record WHERE key IN ?;
 
 selectAllRecords:
-SELECT key, record FROM record;
+SELECT key, type, record FROM record;
 
 insertOrUpdateRecord:
-INSERT INTO record (key, record, updated_date) VALUES (?, ?, ?);
+INSERT INTO record (key, type, record, updated_date) VALUES (?, ?, ?, ?);
 
 deleteRecords:
 DELETE FROM record WHERE key IN ?;
+
+deleteRecordsByTypes:
+DELETE FROM record WHERE type IN ?;
 
 deleteAllRecords:
 DELETE FROM record;

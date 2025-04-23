@@ -21,15 +21,32 @@ internal class RecordDatabase(private val driver: SqlDriver) {
    * @param keys the keys of the records to select, size must be <= 999
    */
   fun selectRecords(keys: Collection<String>): List<Record> {
-    return recordQueries.selectRecords(keys).executeAsList().map { RecordSerializer.deserialize(it.key, it.record) }
+    return recordQueries.selectRecords(keys).executeAsList().map {
+      RecordSerializer.deserialize(
+          key = it.key,
+          type = it.type,
+          bytes = it.record,
+      )
+    }
   }
 
   fun selectAllRecords(): List<Record> {
-    return recordQueries.selectAllRecords().executeAsList().map { RecordSerializer.deserialize(it.key, it.record) }
+    return recordQueries.selectAllRecords().executeAsList().map {
+      RecordSerializer.deserialize(
+          key = it.key,
+          type = it.type,
+          bytes = it.record,
+      )
+    }
   }
 
   fun insertOrUpdateRecord(record: Record) {
-    recordQueries.insertOrUpdateRecord(key = record.key.key, record = RecordSerializer.serialize(record), updated_date = currentTimeMillis())
+    recordQueries.insertOrUpdateRecord(
+        key = record.key.key,
+        type = record.type,
+        record = RecordSerializer.serialize(record),
+        updated_date = currentTimeMillis(),
+    )
   }
 
 
@@ -38,6 +55,10 @@ internal class RecordDatabase(private val driver: SqlDriver) {
    */
   fun deleteRecords(keys: Collection<String>) {
     recordQueries.deleteRecords(keys)
+  }
+
+  fun deleteRecordsByTypes(types: Collection<String>) {
+    recordQueries.deleteRecordsByTypes(types)
   }
 
   fun deleteAllRecords() {
