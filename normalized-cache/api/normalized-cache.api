@@ -520,8 +520,8 @@ public abstract interface class com/apollographql/cache/normalized/api/ReadOnlyN
 
 public final class com/apollographql/cache/normalized/api/Record : java/util/Map, kotlin/jvm/internal/markers/KMappedMarker {
 	public static final field Companion Lcom/apollographql/cache/normalized/api/Record$Companion;
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;Ljava/util/Map;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/UUID;Ljava/util/Map;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public synthetic fun compute (Ljava/lang/Object;Ljava/util/function/BiFunction;)Ljava/lang/Object;
 	public fun compute (Ljava/lang/String;Ljava/util/function/BiFunction;)Ljava/lang/Object;
@@ -544,6 +544,7 @@ public final class com/apollographql/cache/normalized/api/Record : java/util/Map
 	public final fun getMutationId ()Ljava/util/UUID;
 	public fun getSize ()I
 	public final fun getSizeInBytes ()I
+	public final fun getType ()Ljava/lang/String;
 	public fun getValues ()Ljava/util/Collection;
 	public fun isEmpty ()Z
 	public final fun keySet ()Ljava/util/Set;

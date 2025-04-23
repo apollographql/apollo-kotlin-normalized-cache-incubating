@@ -19,6 +19,7 @@ class TrimTest {
 
     val oldRecord = Record(
         key = CacheKey("old"),
+        type = "Type",
         fields = mapOf("key" to "value"),
         mutationId = null,
         metadata = emptyMap()
@@ -28,6 +29,7 @@ class TrimTest {
     val newRecords = 0.until(2 * 1024).map {
       Record(
           key = CacheKey("new$it"),
+          type = "Type",
           fields = mapOf("key" to largeString),
           mutationId = null,
           metadata = emptyMap()

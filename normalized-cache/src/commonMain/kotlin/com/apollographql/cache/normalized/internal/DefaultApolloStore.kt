@@ -264,6 +264,7 @@ internal class DefaultApolloStore(
     ).values.map { record ->
       Record(
           key = record.key,
+          type = record.type,
           fields = record.fields,
           mutationId = mutationId
       )
@@ -291,6 +292,7 @@ internal class DefaultApolloStore(
     ).values.map { record ->
       Record(
           key = record.key,
+          type = record.type,
           fields = record.fields,
           mutationId = mutationId
       )

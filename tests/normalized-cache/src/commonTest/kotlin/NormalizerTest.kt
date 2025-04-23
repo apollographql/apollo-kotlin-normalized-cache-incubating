@@ -60,12 +60,14 @@ class NormalizerTest {
   fun testMergeNull() {
     val record = Record(
         key = CacheKey("Key"),
+        type = "Type",
         fields = mapOf("field1" to "value1"),
     )
     normalizedCache.merge(listOf(record), CacheHeaders.NONE, DefaultRecordMerger)
 
     val newRecord = Record(
         key = CacheKey("Key"),
+        type = "Type",
         fields = mapOf("field2" to null),
     )
 
@@ -266,6 +268,17 @@ class NormalizerTest {
       records(HeroAndFriendsConnectionQuery(Episode.EMPIRE), "HeroAndFriendsConnectionResponse.json", maxAgeProvider = maxAgeProvider)
     assertTrue(records[CacheKey("hero({\"episode\":\"EMPIRE\"})")]!!["friendsConnection"] == null)
     assertTrue(records[CacheKey("hero({\"episode\":\"EMPIRE\"})").append("friendsConnection")]!!.isEmpty())
+  }
+
+  @Test
+  fun testTypes() {
+    val records = records(HeroParentTypeDependentFieldQuery(Episode.JEDI), "HeroParentTypeDependentFieldHumanResponse.json")
+    assertEquals("Query", records[CacheKey.QUERY_ROOT]?.type)
+    assertTrue(records.values.filter { it["name"] == "Han Solo" }.all { it.type == "Human" })
+    assertTrue(records.values.filter { it["name"] == "Leia Organa" }.all { it.type == "Human" })
+    assertTrue(records.values.filter { it["name"] == "Luke Skywalker" }.all { it.type == "Human" })
+    assertTrue(records.values.filter { it["name"] == "C-3PO" }.all { it.type == "Droid" })
+    assertTrue(records.values.filter { it["name"] == "R2-D2" }.all { it.type == "Droid" })
   }
 
   companion object {

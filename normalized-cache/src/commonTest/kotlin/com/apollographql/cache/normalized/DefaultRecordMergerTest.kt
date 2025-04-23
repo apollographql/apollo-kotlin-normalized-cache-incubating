@@ -13,6 +13,7 @@ class DefaultRecordMergerTest {
   fun mergeMetaData() {
     val existing = Record(
         key = CacheKey("key"),
+        type = "Type",
         fields = mapOf(
             "field1" to "value1",
             "field2" to "value2"
@@ -32,6 +33,7 @@ class DefaultRecordMergerTest {
 
     val incoming = Record(
         key = CacheKey("key"),
+        type = "Type",
         fields = mapOf(
             "field1" to "value1.incoming",
             "field3" to "value3",
@@ -53,6 +55,7 @@ class DefaultRecordMergerTest {
 
     val expected = Record(
         key = CacheKey("key"),
+        type = "Type",
         fields = mapOf(
             "field1" to "value1.incoming",
             "field2" to "value2",

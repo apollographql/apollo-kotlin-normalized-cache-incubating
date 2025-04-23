@@ -39,6 +39,7 @@ internal object RecordSerializer {
     }.mapKeys { (k, _) -> knownMetadataKeysInverted[k] ?: k }
     return Record(
         key = CacheKey(key),
+        type = "TODO", // TODO
         fields = fields,
         mutationId = null,
         metadata = metadata

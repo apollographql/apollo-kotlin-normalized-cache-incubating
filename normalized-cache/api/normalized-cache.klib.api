@@ -305,7 +305,7 @@ final class com.apollographql.cache.normalized.api/MetadataGeneratorContext { //
 }
 
 final class com.apollographql.cache.normalized.api/Record : kotlin.collections/Map<kotlin/String, kotlin/Any?> { // com.apollographql.cache.normalized.api/Record|null[0]
-    constructor <init>(com.apollographql.cache.normalized.api/CacheKey, kotlin.collections/Map<kotlin/String, kotlin/Any?>, com.benasher44.uuid/Uuid? = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?>> = ...) // com.apollographql.cache.normalized.api/Record.<init>|<init>(com.apollographql.cache.normalized.api.CacheKey;kotlin.collections.Map<kotlin.String,kotlin.Any?>;com.benasher44.uuid.Uuid?;kotlin.collections.Map<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.Any?>>){}[0]
+    constructor <init>(com.apollographql.cache.normalized.api/CacheKey, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?>, com.benasher44.uuid/Uuid? = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?>> = ...) // com.apollographql.cache.normalized.api/Record.<init>|<init>(com.apollographql.cache.normalized.api.CacheKey;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>;com.benasher44.uuid.Uuid?;kotlin.collections.Map<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.Any?>>){}[0]
 
     final val entries // com.apollographql.cache.normalized.api/Record.entries|{}entries[0]
         final fun <get-entries>(): kotlin.collections/Set<kotlin.collections/Map.Entry<kotlin/String, kotlin/Any?>> // com.apollographql.cache.normalized.api/Record.entries.<get-entries>|<get-entries>(){}[0]
@@ -323,6 +323,8 @@ final class com.apollographql.cache.normalized.api/Record : kotlin.collections/M
         final fun <get-size>(): kotlin/Int // com.apollographql.cache.normalized.api/Record.size.<get-size>|<get-size>(){}[0]
     final val sizeInBytes // com.apollographql.cache.normalized.api/Record.sizeInBytes|{}sizeInBytes[0]
         final fun <get-sizeInBytes>(): kotlin/Int // com.apollographql.cache.normalized.api/Record.sizeInBytes.<get-sizeInBytes>|<get-sizeInBytes>(){}[0]
+    final val type // com.apollographql.cache.normalized.api/Record.type|{}type[0]
+        final fun <get-type>(): kotlin/String // com.apollographql.cache.normalized.api/Record.type.<get-type>|<get-type>(){}[0]
     final val values // com.apollographql.cache.normalized.api/Record.values|{}values[0]
         final fun <get-values>(): kotlin.collections/Collection<kotlin/Any?> // com.apollographql.cache.normalized.api/Record.values.<get-values>|<get-values>(){}[0]
 

@@ -20,6 +20,7 @@ class RecordWeigherTest {
     val expectedScalarList = listOf("scalarOne", "scalarTwo")
     val record = Record(
         key = CacheKey("root"),
+        type = "Type",
         fields = mapOf(
             "double" to expectedDouble,
             "string" to expectedStringValue,

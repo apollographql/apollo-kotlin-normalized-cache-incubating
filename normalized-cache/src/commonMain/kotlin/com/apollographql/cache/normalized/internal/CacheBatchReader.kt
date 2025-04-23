@@ -124,7 +124,7 @@ internal class CacheBatchReader(
         if (record == null) {
           if (pendingReference.key.isRootKey()) {
             // This happens the very first time we read the cache
-            record = Record(pendingReference.key, emptyMap())
+            record = Record(pendingReference.key, "Query", emptyMap())
           } else {
             if (returnPartialResponses) {
               data[pendingReference.path] =
@@ -324,8 +324,7 @@ internal class CacheBatchReader(
         .build()
   }
 
-  @Suppress("UNCHECKED_CAST")
-  internal fun Any?.hasErrors(): Boolean {
+  private fun Any?.hasErrors(): Boolean {
     val queue = ArrayDeque<Any?>()
     queue.add(this)
     while (queue.isNotEmpty()) {

@@ -156,6 +156,7 @@ internal class Normalizer(
     val metadata = fields.mapValues { it.value.metadata }.filterValues { it.isNotEmpty() }
     val record = Record(
         key = cacheKey,
+        type = obj["__typename"] as? String ?: parentType.name,
         fields = fieldValues,
         mutationId = null,
         metadata = metadata,

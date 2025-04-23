@@ -544,7 +544,7 @@ class CachePartialResultTest {
           apolloClient.store.accessCache { cache ->
             val record = cache.loadRecord(CacheKey("User:1"), CacheHeaders.NONE)!!
             cache.remove(CacheKey("User:1"), false)
-            cache.merge(Record(record.key, record.fields - "category"), CacheHeaders.NONE, DefaultRecordMerger)
+            cache.merge(Record(record.key, "Type", record.fields - "category"), CacheHeaders.NONE, DefaultRecordMerger)
           }
           val cacheMissResult = apolloClient.query(UserByCategoryQuery(Category(2, "Second")))
               .fetchPolicyInterceptor(PartialCacheOnlyInterceptor)

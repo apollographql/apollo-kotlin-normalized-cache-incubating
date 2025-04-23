@@ -4,10 +4,10 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
-import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
+import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
@@ -25,7 +25,7 @@ class SqlNormalizationTest {
         .normalizedCache(SqlNormalizedCacheFactory())
         .build()
 
-    apolloClient.apolloStore.clearAll()
+    apolloClient.store.clearAll()
     mockserver.enqueueString(
         // language=JSON
         """
@@ -55,7 +55,7 @@ class SqlNormalizationTest {
     )
     apolloClient.mutation(CreateUserMutation("John")).fetchPolicy(FetchPolicy.NetworkOnly).execute()
 
-    apolloClient.apolloStore.accessCache { normalizedCache ->
+    apolloClient.store.accessCache { normalizedCache ->
       assertContentEquals(
           listOf(
               CacheKey.MUTATION_ROOT,

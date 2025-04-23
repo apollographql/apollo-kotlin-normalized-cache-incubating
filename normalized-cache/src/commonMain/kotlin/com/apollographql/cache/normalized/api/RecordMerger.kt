@@ -47,6 +47,7 @@ object DefaultRecordMerger : RecordMerger {
 
     return Record(
         key = existing.key,
+        type = incoming.type,
         fields = mergedFields,
         mutationId = incoming.mutationId,
         metadata = existing.metadata.mergedWith(incoming.metadata),
@@ -128,6 +129,7 @@ class FieldRecordMerger(private val fieldMerger: FieldMerger) : RecordMerger {
 
     return Record(
         key = existing.key,
+        type = incoming.type,
         fields = mergedFields,
         mutationId = incoming.mutationId,
         metadata = mergedMetadata,

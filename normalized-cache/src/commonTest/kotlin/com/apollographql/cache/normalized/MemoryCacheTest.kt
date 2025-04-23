@@ -98,6 +98,7 @@ class MemoryCacheTest {
     val updatedRestRecord1 = Record(
         fields = testRecord1.fields.plus("field3" to "value3"),
         key = testRecord1.key,
+        type = "Type",
         mutationId = testRecord1.mutationId
     )
 
@@ -224,6 +225,7 @@ class MemoryCacheTest {
 
     val record1 = Record(
         key = CacheKey("id_1"),
+        type = "Type",
         fields = mapOf(
             "a" to "stringValueA",
             "b" to "stringValueB"
@@ -232,6 +234,7 @@ class MemoryCacheTest {
 
     val record2 = Record(
         key = CacheKey("id_2"),
+        type = "Type",
         fields = mapOf(
             "a" to CacheKey("id_1"),
         )
@@ -250,6 +253,7 @@ class MemoryCacheTest {
 
     val record1 = Record(
         key = CacheKey("id_1"),
+        type = "Type",
         fields = mapOf(
             "a" to "stringValueA",
             "b" to "stringValueB"
@@ -258,6 +262,7 @@ class MemoryCacheTest {
 
     val record2 = Record(
         key = CacheKey("id_2"),
+        type = "Type",
         fields = mapOf(
             "a" to CacheKey("id_1"),
         )
@@ -287,6 +292,7 @@ class MemoryCacheTest {
   private fun createTestRecord(id: String): Record {
     return Record(
         key = CacheKey("key$id"),
+        type = "Type",
         fields = mapOf(
             "field1" to "stringValueA$id",
             "field2" to "stringValueB$id"

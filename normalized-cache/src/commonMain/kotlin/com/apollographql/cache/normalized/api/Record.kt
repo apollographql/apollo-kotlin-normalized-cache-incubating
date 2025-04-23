@@ -11,6 +11,7 @@ import com.benasher44.uuid.Uuid
  */
 class Record(
     val key: CacheKey,
+    val type: String,
     val fields: Map<String, RecordValue>,
     val mutationId: Uuid? = null,
 
@@ -84,6 +85,7 @@ fun Record.withDates(receivedDate: String?, expirationDate: String?): Record {
   return Record(
       key = key,
       fields = fields,
+      type = type,
       mutationId = mutationId,
       metadata = metadata + fields.mapValues { (key, _) ->
         metadata[key].orEmpty() + buildMap {

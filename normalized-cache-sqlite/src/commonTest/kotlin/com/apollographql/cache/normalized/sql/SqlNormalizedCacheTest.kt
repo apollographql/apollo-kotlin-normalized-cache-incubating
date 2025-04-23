@@ -80,6 +80,7 @@ class SqlNormalizedCacheTest {
     cache.merge(
         record = Record(
             key = STANDARD_KEY,
+            type = "Type",
             fields = mapOf(
                 "fieldKey" to "valueUpdated",
                 "newFieldKey" to true,
@@ -100,6 +101,7 @@ class SqlNormalizedCacheTest {
     cache.merge(
         record = Record(
             key = STANDARD_KEY,
+            type = "Type",
             fields = mapOf(
                 "fieldKey" to "valueUpdated",
                 "newFieldKey" to true,
@@ -127,6 +129,7 @@ class SqlNormalizedCacheTest {
     cache.merge(
         record = Record(
             key = STANDARD_KEY,
+            type = "Type",
             fields = emptyMap(),
         ),
         cacheHeaders = CacheHeaders.builder().addHeader(ApolloCacheHeaders.DO_NOT_STORE, "true").build(),
@@ -141,6 +144,7 @@ class SqlNormalizedCacheTest {
     val changedKeys = cache.merge(
         record = Record(
             key = STANDARD_KEY,
+            type = "Type",
             fields = mapOf(
                 "fieldKey" to "valueUpdated",
                 "newFieldKey" to true,
@@ -162,6 +166,7 @@ class SqlNormalizedCacheTest {
     cache.merge(
         record = Record(
             key = STANDARD_KEY,
+            type = "Type",
             fields = mapOf(
                 "fieldKey" to "valueUpdated",
                 "newFieldKey" to true,
@@ -192,6 +197,7 @@ class SqlNormalizedCacheTest {
     badCache.merge(
         record = Record(
             key = STANDARD_KEY,
+            type = "Type",
             fields = mapOf(
                 "fieldKey" to "valueUpdated",
                 "newFieldKey" to true,
@@ -210,6 +216,7 @@ class SqlNormalizedCacheTest {
     cache.merge(
         record = Record(
             key = CacheKey("selfRefKey"),
+            type = "Type",
             fields = mapOf(
                 "field1" to "value1",
                 "selfRef" to CacheKey("selfRefKey"),
@@ -232,6 +239,7 @@ class SqlNormalizedCacheTest {
     cache.merge(
         record = Record(
             key = CacheKey("key1"),
+            type = "Type",
             fields = mapOf(
                 "field1" to "value1",
                 "refToKey2" to CacheKey("key2"),
@@ -244,6 +252,7 @@ class SqlNormalizedCacheTest {
     cache.merge(
         record = Record(
             key = CacheKey("key2"),
+            type = "Type",
             fields = mapOf(
                 "field1" to "value2",
                 "refToKey1" to CacheKey("key1"),
@@ -304,6 +313,7 @@ class SqlNormalizedCacheTest {
     cache.merge(
         record = Record(
             key = key,
+            type = "Type",
             fields = mapOf(
                 "field1" to "value1",
                 "field2" to "value2",

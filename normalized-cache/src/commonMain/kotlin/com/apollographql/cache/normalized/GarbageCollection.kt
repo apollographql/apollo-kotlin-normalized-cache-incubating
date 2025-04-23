@@ -280,6 +280,7 @@ private operator fun Record.minus(key: String): Record {
   return Record(
       key = this.key,
       fields = this.fields - key,
+      type = this.type,
       metadata = this.metadata - key,
   )
 }

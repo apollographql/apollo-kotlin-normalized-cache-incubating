@@ -16,6 +16,7 @@ class MemoryCacheTest {
   fun testDoesNotExpireBeforeMillis() = runTest {
     val record = Record(
         key = CacheKey("key"),
+        type = "Type",
         fields = mapOf(
             "field" to "value"
         )
