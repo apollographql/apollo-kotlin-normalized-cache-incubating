@@ -36,15 +36,21 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlin.reflect.KClass
 
 /**
- * ApolloStore exposes a thread-safe api to access a [com.apollographql.cache.normalized.api.NormalizedCache].
+ * ApolloStore exposes a high-level API to access a [com.apollographql.cache.normalized.api.NormalizedCache].
  *
  * Note that most operations are synchronous and might block if the underlying cache is doing IO - calling them from the main thread
  * should be avoided.
+ *
+ * Note that changes are not automatically published - call [publish] to notify any watchers.
  */
 interface ApolloStore {
   /**
-   * Exposes the keys of records that have changed.
-   * A special key [ALL_KEYS] is used to indicate that all records have changed.
+   * Exposes the record field keys that have changed. This is collected internally to notify watchers.
+   *
+   * A special value [ALL_KEYS] indicates that all records have changed.
+   *
+   * @see publish
+   * @see watch
    */
   val changedKeys: SharedFlow<Set<String>>
 
@@ -102,10 +108,12 @@ interface ApolloStore {
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
+   * Call [publish] with the returned keys to notify any watchers.
+   *
    * @param operation the operation to write
    * @param data the operation data to write
    * @param errors the operation errors to write
-   * @return the changed keys
+   * @return the changed field keys
    *
    * @see publish
    */
@@ -122,9 +130,11 @@ interface ApolloStore {
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
+   * Call [publish] with the returned keys to notify any watchers.
+   *
    * @param operation the operation to write
    * @param dataWithErrors the operation data to write as a [DataWithErrors] object
-   * @return the changed keys
+   * @return the changed field keys
    *
    * @see publish
    */
@@ -140,10 +150,12 @@ interface ApolloStore {
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
+   * Call [publish] with the returned keys to notify any watchers.
+   *
    * @param fragment the fragment to write
    * @param cacheKey the root where to write the fragment data to
    * @param data the fragment data to write
-   * @return the changed keys
+   * @return the changed field keys
    *
    * @see publish
    */
@@ -160,10 +172,12 @@ interface ApolloStore {
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
+   * Call [publish] with the returned keys to notify any watchers.
+   *
    * @param operation the operation to write
    * @param data the operation data to write
    * @param mutationId a unique identifier for this optimistic update
-   * @return the changed keys
+   * @return the changed field keys
    *
    * @see publish
    */
@@ -179,11 +193,13 @@ interface ApolloStore {
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
+   * Call [publish] with the returned keys to notify any watchers.
+   *
    * @param fragment the fragment to write
    * @param cacheKey the root where to write the fragment data to
    * @param data the fragment data to write
    * @param mutationId a unique identifier for this optimistic update
-   * @return the changed keys
+   * @return the changed field keys
    *
    * @see publish
    */
@@ -200,8 +216,10 @@ interface ApolloStore {
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
+   * Call [publish] with the returned keys to notify any watchers.
+   *
    * @param mutationId the unique identifier of the optimistic update to rollback
-   * @return the changed keys
+   * @return the changed field keys
    *
    * @see publish
    */
@@ -214,6 +232,8 @@ interface ApolloStore {
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
+   * Call [publish] with [ALL_KEYS] to notify any watchers.
+   *
    * @return `true` if all records were successfully removed, `false` otherwise
    */
   fun clearAll(): Boolean
@@ -222,6 +242,8 @@ interface ApolloStore {
    * Removes a record by its key.
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * Call [publish] with [ALL_KEYS] to notify any watchers.
    *
    * @param cacheKey the key of the record to remove
    * @param cascade whether referenced records should also be removed
@@ -234,6 +256,8 @@ interface ApolloStore {
    * This is an optimized version of [remove] for caches that can batch operations.
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
+   *
+   * Call [publish] with [ALL_KEYS] to notify any watchers.
    *
    * @param cacheKeys the keys of the records to remove
    * @param cascade whether referenced records should also be removed
@@ -264,13 +288,14 @@ interface ApolloStore {
   ): Map<CacheKey, Record>
 
   /**
-   * Publishes a set of keys that have changed. This will notify subscribers of [changedKeys].
+   * Publishes a set of keys of record fields that have changed. This will notify watchers and any subscribers of [changedKeys].
    *
    * Pass [ALL_KEYS] to indicate that all records have changed, for instance after a [clearAll] operation.
    *
    * @see changedKeys
+   * @see watch
    *
-   * @param keys A set of keys of [Record] which have changed.
+   * @param keys A set of keys of [Record] fields which have changed.
    */
   suspend fun publish(keys: Set<String>)
 
