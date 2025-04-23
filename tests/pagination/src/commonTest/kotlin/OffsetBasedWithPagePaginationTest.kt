@@ -46,7 +46,7 @@ class OffsetBasedWithPagePaginationTest {
         cacheResolver = FieldPolicyCacheResolver,
         recordMerger = FieldRecordMerger(OffsetPaginationFieldMerger())
     )
-    apolloStore.clearAll()
+    apolloStore.removeAll()
 
     // First page
     val query1 = UsersQuery(offset = Optional.Present(42), limit = Optional.Present(2))

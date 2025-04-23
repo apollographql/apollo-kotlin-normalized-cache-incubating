@@ -85,7 +85,7 @@ class ClientSideCacheControlTest {
         )
         .serverUrl("unused")
         .build()
-    client.store.clearAll()
+    client.store.removeAll()
 
     val query = GetUserQuery()
     val data = GetUserQuery.Data(GetUserQuery.User("John", "john@doe.com", true))
@@ -132,7 +132,7 @@ class ClientSideCacheControlTest {
         )
         .serverUrl("unused")
         .build()
-    client.store.clearAll()
+    client.store.removeAll()
 
     // Store records 25 seconds ago, more than default max age: should cache miss
     mergeCompanyQueryResults(client, 25)
@@ -200,7 +200,7 @@ class ClientSideCacheControlTest {
         )
         .serverUrl("unused")
         .build()
-    client.store.clearAll()
+    client.store.removeAll()
 
     // Store records 25 seconds ago, more than default max age: should cache miss
     mergeCompanyQueryResults(client, 25)

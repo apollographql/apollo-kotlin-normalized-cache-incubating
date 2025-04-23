@@ -69,7 +69,7 @@ class ClientAndServerSideCacheControlTest {
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())
         .build()
-    client.store.clearAll()
+    client.store.removeAll()
 
     val data = """
       {
@@ -148,7 +148,7 @@ class ClientAndServerSideCacheControlTest {
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())
         .build()
-    client.store.clearAll()
+    client.store.removeAll()
 
     val data = """
       {
@@ -220,7 +220,7 @@ class ClientAndServerSideCacheControlTest {
         )
         .serverUrl(mockServer.url())
         .build()
-    client.store.clearAll()
+    client.store.removeAll()
 
     val data = """
       {

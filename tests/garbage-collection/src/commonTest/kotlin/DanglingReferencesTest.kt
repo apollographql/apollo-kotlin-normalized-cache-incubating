@@ -36,7 +36,7 @@ class DanglingReferencesTest {
 
   private fun simple(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    val store = apolloStore.also { it.removeAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
@@ -77,7 +77,7 @@ class DanglingReferencesTest {
 
   private fun multiple(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    val store = apolloStore.also { it.removeAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)

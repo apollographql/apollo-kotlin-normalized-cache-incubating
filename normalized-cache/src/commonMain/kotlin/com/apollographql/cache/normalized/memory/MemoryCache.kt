@@ -63,10 +63,10 @@ class MemoryCache(
     recordsByKey.values.filterNotNull() + nextCachedRecords
   }
 
-  override fun clearAll() {
+  override fun removeAll() {
     lockWrite {
       lruCache.clear()
-      nextCache?.clearAll()
+      nextCache?.removeAll()
     }
   }
 

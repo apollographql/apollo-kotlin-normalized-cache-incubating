@@ -116,7 +116,7 @@ class MigrationTest {
           assertEquals(REPOSITORY_LIST_DATA, response.data)
 
           // Clean up
-          store.clearAll()
+          store.removeAll()
         }
   }
 
@@ -137,7 +137,7 @@ class MigrationTest {
         }
 
     // Create a modern store and migrate the legacy data
-    val store = ApolloStore(SqlNormalizedCacheFactory(name = "modern.db")).also { it.clearAll() }
+    val store = ApolloStore(SqlNormalizedCacheFactory(name = "modern.db")).also { it.removeAll() }
     store.migrateFrom(legacyStore)
 
     // Read the data back

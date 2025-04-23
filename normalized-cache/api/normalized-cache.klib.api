@@ -54,11 +54,12 @@ abstract interface com.apollographql.cache.normalized.api/MetadataGenerator { //
 }
 
 abstract interface com.apollographql.cache.normalized.api/NormalizedCache : com.apollographql.cache.normalized.api/ReadOnlyNormalizedCache { // com.apollographql.cache.normalized.api/NormalizedCache|null[0]
-    abstract fun clearAll() // com.apollographql.cache.normalized.api/NormalizedCache.clearAll|clearAll(){}[0]
     abstract fun merge(com.apollographql.cache.normalized.api/Record, com.apollographql.cache.normalized.api/CacheHeaders, com.apollographql.cache.normalized.api/RecordMerger): kotlin.collections/Set<kotlin/String> // com.apollographql.cache.normalized.api/NormalizedCache.merge|merge(com.apollographql.cache.normalized.api.Record;com.apollographql.cache.normalized.api.CacheHeaders;com.apollographql.cache.normalized.api.RecordMerger){}[0]
     abstract fun merge(kotlin.collections/Collection<com.apollographql.cache.normalized.api/Record>, com.apollographql.cache.normalized.api/CacheHeaders, com.apollographql.cache.normalized.api/RecordMerger): kotlin.collections/Set<kotlin/String> // com.apollographql.cache.normalized.api/NormalizedCache.merge|merge(kotlin.collections.Collection<com.apollographql.cache.normalized.api.Record>;com.apollographql.cache.normalized.api.CacheHeaders;com.apollographql.cache.normalized.api.RecordMerger){}[0]
     abstract fun remove(com.apollographql.cache.normalized.api/CacheKey, kotlin/Boolean): kotlin/Boolean // com.apollographql.cache.normalized.api/NormalizedCache.remove|remove(com.apollographql.cache.normalized.api.CacheKey;kotlin.Boolean){}[0]
     abstract fun remove(kotlin.collections/Collection<com.apollographql.cache.normalized.api/CacheKey>, kotlin/Boolean): kotlin/Int // com.apollographql.cache.normalized.api/NormalizedCache.remove|remove(kotlin.collections.Collection<com.apollographql.cache.normalized.api.CacheKey>;kotlin.Boolean){}[0]
+    abstract fun removeAll() // com.apollographql.cache.normalized.api/NormalizedCache.removeAll|removeAll(){}[0]
+    open fun clearAll() // com.apollographql.cache.normalized.api/NormalizedCache.clearAll|clearAll(){}[0]
     open fun trim(kotlin/Long, kotlin/Float = ...): kotlin/Long // com.apollographql.cache.normalized.api/NormalizedCache.trim|trim(kotlin.Long;kotlin.Float){}[0]
 
     final object Companion { // com.apollographql.cache.normalized.api/NormalizedCache.Companion|null[0]
@@ -89,14 +90,15 @@ abstract interface com.apollographql.cache.normalized/ApolloStore { // com.apoll
     abstract fun <#A1: com.apollographql.apollo.api/Operation.Data> writeOperation(com.apollographql.apollo.api/Operation<#A1>, kotlin.collections/Map<kotlin/String, kotlin/Any?>, com.apollographql.apollo.api/CustomScalarAdapters = ..., com.apollographql.cache.normalized.api/CacheHeaders = ...): kotlin.collections/Set<kotlin/String> // com.apollographql.cache.normalized/ApolloStore.writeOperation|writeOperation(com.apollographql.apollo.api.Operation<0:0>;kotlin.collections.Map<kotlin.String,kotlin.Any?>;com.apollographql.apollo.api.CustomScalarAdapters;com.apollographql.cache.normalized.api.CacheHeaders){0§<com.apollographql.apollo.api.Operation.Data>}[0]
     abstract fun <#A1: com.apollographql.apollo.api/Operation.Data> writeOptimisticUpdates(com.apollographql.apollo.api/Operation<#A1>, #A1, com.benasher44.uuid/Uuid, com.apollographql.apollo.api/CustomScalarAdapters = ...): kotlin.collections/Set<kotlin/String> // com.apollographql.cache.normalized/ApolloStore.writeOptimisticUpdates|writeOptimisticUpdates(com.apollographql.apollo.api.Operation<0:0>;0:0;com.benasher44.uuid.Uuid;com.apollographql.apollo.api.CustomScalarAdapters){0§<com.apollographql.apollo.api.Operation.Data>}[0]
     abstract fun <#A1: kotlin/Any?> accessCache(kotlin/Function1<com.apollographql.cache.normalized.api/NormalizedCache, #A1>): #A1 // com.apollographql.cache.normalized/ApolloStore.accessCache|accessCache(kotlin.Function1<com.apollographql.cache.normalized.api.NormalizedCache,0:0>){0§<kotlin.Any?>}[0]
-    abstract fun clearAll(): kotlin/Boolean // com.apollographql.cache.normalized/ApolloStore.clearAll|clearAll(){}[0]
     abstract fun dispose() // com.apollographql.cache.normalized/ApolloStore.dispose|dispose(){}[0]
     abstract fun dump(): kotlin.collections/Map<kotlin.reflect/KClass<*>, kotlin.collections/Map<com.apollographql.cache.normalized.api/CacheKey, com.apollographql.cache.normalized.api/Record>> // com.apollographql.cache.normalized/ApolloStore.dump|dump(){}[0]
     abstract fun remove(com.apollographql.cache.normalized.api/CacheKey, kotlin/Boolean = ...): kotlin/Boolean // com.apollographql.cache.normalized/ApolloStore.remove|remove(com.apollographql.cache.normalized.api.CacheKey;kotlin.Boolean){}[0]
     abstract fun remove(kotlin.collections/List<com.apollographql.cache.normalized.api/CacheKey>, kotlin/Boolean = ...): kotlin/Int // com.apollographql.cache.normalized/ApolloStore.remove|remove(kotlin.collections.List<com.apollographql.cache.normalized.api.CacheKey>;kotlin.Boolean){}[0]
+    abstract fun removeAll(): kotlin/Boolean // com.apollographql.cache.normalized/ApolloStore.removeAll|removeAll(){}[0]
     abstract fun rollbackOptimisticUpdates(com.benasher44.uuid/Uuid): kotlin.collections/Set<kotlin/String> // com.apollographql.cache.normalized/ApolloStore.rollbackOptimisticUpdates|rollbackOptimisticUpdates(com.benasher44.uuid.Uuid){}[0]
     abstract fun trim(kotlin/Long, kotlin/Float = ...): kotlin/Long // com.apollographql.cache.normalized/ApolloStore.trim|trim(kotlin.Long;kotlin.Float){}[0]
     abstract suspend fun publish(kotlin.collections/Set<kotlin/String>) // com.apollographql.cache.normalized/ApolloStore.publish|publish(kotlin.collections.Set<kotlin.String>){}[0]
+    open fun clearAll(): kotlin/Boolean // com.apollographql.cache.normalized/ApolloStore.clearAll|clearAll(){}[0]
 
     final class <#A1: com.apollographql.apollo.api/Executable.Data> ReadResult { // com.apollographql.cache.normalized/ApolloStore.ReadResult|null[0]
         constructor <init>(#A1, com.apollographql.cache.normalized.api/CacheHeaders) // com.apollographql.cache.normalized/ApolloStore.ReadResult.<init>|<init>(1:0;com.apollographql.cache.normalized.api.CacheHeaders){}[0]
@@ -384,7 +386,6 @@ final class com.apollographql.cache.normalized.memory/MemoryCache : com.apollogr
     final val size // com.apollographql.cache.normalized.memory/MemoryCache.size|{}size[0]
         final fun <get-size>(): kotlin/Int // com.apollographql.cache.normalized.memory/MemoryCache.size.<get-size>|<get-size>(){}[0]
 
-    final fun clearAll() // com.apollographql.cache.normalized.memory/MemoryCache.clearAll|clearAll(){}[0]
     final fun dump(): kotlin.collections/Map<kotlin.reflect/KClass<*>, kotlin.collections/Map<com.apollographql.cache.normalized.api/CacheKey, com.apollographql.cache.normalized.api/Record>> // com.apollographql.cache.normalized.memory/MemoryCache.dump|dump(){}[0]
     final fun loadRecord(com.apollographql.cache.normalized.api/CacheKey, com.apollographql.cache.normalized.api/CacheHeaders): com.apollographql.cache.normalized.api/Record? // com.apollographql.cache.normalized.memory/MemoryCache.loadRecord|loadRecord(com.apollographql.cache.normalized.api.CacheKey;com.apollographql.cache.normalized.api.CacheHeaders){}[0]
     final fun loadRecords(kotlin.collections/Collection<com.apollographql.cache.normalized.api/CacheKey>, com.apollographql.cache.normalized.api/CacheHeaders): kotlin.collections/Collection<com.apollographql.cache.normalized.api/Record> // com.apollographql.cache.normalized.memory/MemoryCache.loadRecords|loadRecords(kotlin.collections.Collection<com.apollographql.cache.normalized.api.CacheKey>;com.apollographql.cache.normalized.api.CacheHeaders){}[0]
@@ -392,6 +393,7 @@ final class com.apollographql.cache.normalized.memory/MemoryCache : com.apollogr
     final fun merge(kotlin.collections/Collection<com.apollographql.cache.normalized.api/Record>, com.apollographql.cache.normalized.api/CacheHeaders, com.apollographql.cache.normalized.api/RecordMerger): kotlin.collections/Set<kotlin/String> // com.apollographql.cache.normalized.memory/MemoryCache.merge|merge(kotlin.collections.Collection<com.apollographql.cache.normalized.api.Record>;com.apollographql.cache.normalized.api.CacheHeaders;com.apollographql.cache.normalized.api.RecordMerger){}[0]
     final fun remove(com.apollographql.cache.normalized.api/CacheKey, kotlin/Boolean): kotlin/Boolean // com.apollographql.cache.normalized.memory/MemoryCache.remove|remove(com.apollographql.cache.normalized.api.CacheKey;kotlin.Boolean){}[0]
     final fun remove(kotlin.collections/Collection<com.apollographql.cache.normalized.api/CacheKey>, kotlin/Boolean): kotlin/Int // com.apollographql.cache.normalized.memory/MemoryCache.remove|remove(kotlin.collections.Collection<com.apollographql.cache.normalized.api.CacheKey>;kotlin.Boolean){}[0]
+    final fun removeAll() // com.apollographql.cache.normalized.memory/MemoryCache.removeAll|removeAll(){}[0]
     final fun trim(kotlin/Long, kotlin/Float): kotlin/Long // com.apollographql.cache.normalized.memory/MemoryCache.trim|trim(kotlin.Long;kotlin.Float){}[0]
 }
 
@@ -490,6 +492,7 @@ final class com.apollographql.cache.normalized/SimpleApolloStore { // com.apollo
     final fun dump(): kotlin.collections/Map<kotlin.reflect/KClass<*>, kotlin.collections/Map<com.apollographql.cache.normalized.api/CacheKey, com.apollographql.cache.normalized.api/Record>> // com.apollographql.cache.normalized/SimpleApolloStore.dump|dump(){}[0]
     final fun remove(com.apollographql.cache.normalized.api/CacheKey, kotlin/Boolean = ...): kotlin/Boolean // com.apollographql.cache.normalized/SimpleApolloStore.remove|remove(com.apollographql.cache.normalized.api.CacheKey;kotlin.Boolean){}[0]
     final fun remove(kotlin.collections/List<com.apollographql.cache.normalized.api/CacheKey>, kotlin/Boolean = ...): kotlin/Int // com.apollographql.cache.normalized/SimpleApolloStore.remove|remove(kotlin.collections.List<com.apollographql.cache.normalized.api.CacheKey>;kotlin.Boolean){}[0]
+    final fun removeAll(): kotlin/Boolean // com.apollographql.cache.normalized/SimpleApolloStore.removeAll|removeAll(){}[0]
     final fun rollbackOptimisticUpdates(com.benasher44.uuid/Uuid): kotlin.collections/Set<kotlin/String> // com.apollographql.cache.normalized/SimpleApolloStore.rollbackOptimisticUpdates|rollbackOptimisticUpdates(com.benasher44.uuid.Uuid){}[0]
     final fun trim(kotlin/Long, kotlin/Float = ...): kotlin/Long // com.apollographql.cache.normalized/SimpleApolloStore.trim|trim(kotlin.Long;kotlin.Float){}[0]
     final suspend fun publish(kotlin.collections/Set<kotlin/String>) // com.apollographql.cache.normalized/SimpleApolloStore.publish|publish(kotlin.collections.Set<kotlin.String>){}[0]

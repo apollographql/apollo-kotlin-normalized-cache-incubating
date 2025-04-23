@@ -33,7 +33,7 @@ class ReachableCacheKeysTest {
 
   private fun getReachableCacheKeys(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    val store = apolloStore.also { it.removeAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)

@@ -43,7 +43,7 @@ class StaleFieldsTest {
 
   private fun clientControlledRemoveFields(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    val store = apolloStore.also { it.removeAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
@@ -120,7 +120,7 @@ class StaleFieldsTest {
 
   private fun clientControlledRemoveRecords(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    val store = apolloStore.also { it.removeAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)
@@ -198,7 +198,7 @@ class StaleFieldsTest {
 
   private fun serverControlledRemoveFields(apolloStore: ApolloStore) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    val store = apolloStore.also { it.removeAll() }
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .store(store)

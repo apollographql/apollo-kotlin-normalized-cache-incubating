@@ -33,8 +33,8 @@ internal class OptimisticNormalizedCache(private val wrapped: NormalizedCache) :
     return wrapped.merge(records, cacheHeaders, recordMerger)
   }
 
-  override fun clearAll() {
-    wrapped.clearAll()
+  override fun removeAll() {
+    wrapped.removeAll()
     recordJournals.clear()
   }
 

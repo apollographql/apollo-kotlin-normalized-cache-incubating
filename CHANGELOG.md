@@ -2,6 +2,8 @@
 
 PUT_CHANGELOG_HERE
 
+- Deprecate `ApolloStore`/`NormalizedCache` `clearAll()` in favor of `removeAll()` for consistency with `remove()`
+
 # Version 0.0.9
 _2025-04-09_
 

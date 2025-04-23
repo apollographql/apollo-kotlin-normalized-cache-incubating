@@ -166,7 +166,7 @@ class MemoryCacheTest {
     val records = listOf(testRecord1, testRecord2, testRecord3)
     primaryCache.merge(records, CacheHeaders.NONE, DefaultRecordMerger)
 
-    primaryCache.clearAll()
+    primaryCache.removeAll()
 
     assertEquals(0, primaryCache.size)
     assertEquals(0, secondaryCache.size)

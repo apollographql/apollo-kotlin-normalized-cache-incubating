@@ -99,7 +99,7 @@ class DoNotStoreTest {
         )
         .build()
         .use { apolloClient ->
-          apolloClient.store.clearAll()
+          apolloClient.store.removeAll()
           val networkResponse = apolloClient.query(GetUserQuery())
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .execute()
@@ -195,7 +195,7 @@ class DoNotStoreTest {
         )
         .build()
         .use { apolloClient ->
-          apolloClient.store.clearAll()
+          apolloClient.store.removeAll()
           val networkResponse = apolloClient.mutation(SignInMutation("scott", "tiger"))
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .execute()

@@ -92,7 +92,7 @@ class FetchPolicyTest {
     assertTrue(response.isFromCache)
 
     // Clear the store and offer a malformed response, we should get a composite error
-    store.clearAll()
+    store.removeAll()
     mockServer.enqueueString("malformed")
     apolloClient.query(query).execute().exception.let {
       assertIs<CacheMissException>(it)
@@ -125,7 +125,7 @@ class FetchPolicyTest {
     assertTrue(response.isFromCache)
 
     // Clear the store and offer a malformed response, we should get a composite error
-    store.clearAll()
+    store.removeAll()
     mockServer.enqueueString("malformed")
     try {
       @Suppress("DEPRECATION")
@@ -173,7 +173,7 @@ class FetchPolicyTest {
     }
 
     // Clear the store and offer a malformed response, we should get a composite error
-    store.clearAll()
+    store.removeAll()
     mockServer.enqueueString("malformed")
     @Suppress("DEPRECATION")
     responses = apolloClient.query(query)
@@ -215,7 +215,7 @@ class FetchPolicyTest {
 
     // Network error and no cache -> we should get an error
     mockServer.enqueueString("malformed")
-    store.clearAll()
+    store.removeAll()
 
     call.execute().exception.let {
       assertIs<JsonEncodingException>(it)
@@ -254,7 +254,7 @@ class FetchPolicyTest {
 
     // Network error and no cache -> we should get an error
     mockServer.enqueueString("malformed")
-    store.clearAll()
+    store.removeAll()
     try {
       @Suppress("DEPRECATION")
       call.executeV3()
@@ -308,7 +308,7 @@ class FetchPolicyTest {
 
     // Network error and no cache -> we should get an error
     mockServer.enqueueString("malformed")
-    store.clearAll()
+    store.removeAll()
     @Suppress("DEPRECATION")
     responses = call.toFlowV3()
     responses.test {
@@ -589,7 +589,7 @@ class FetchPolicyTest {
     /**
      * clear the cache and trigger the watcher again
      */
-    store.clearAll()
+    store.removeAll()
 
     mockServer.enqueueString(
         buildJsonString {
@@ -644,7 +644,7 @@ class FetchPolicyTest {
     assertTrue(response.isFromCache)
 
     // CacheOnly / miss
-    store.clearAll()
+    store.removeAll()
     response = apolloClient.query(query)
         .fetchPolicy(FetchPolicy.CacheOnly)
         .execute()
@@ -660,7 +660,7 @@ class FetchPolicyTest {
     assertFalse(response.isFromCache)
 
     // CacheFirst / miss / miss
-    store.clearAll()
+    store.removeAll()
     mockServer.enqueueString("malformed")
     var responses = apolloClient.query(query)
         .fetchPolicy(FetchPolicy.CacheFirst)
@@ -670,7 +670,7 @@ class FetchPolicyTest {
     assertFalse(responses[1].isFromCache)
 
     // NetworkFirst / miss / miss
-    store.clearAll()
+    store.removeAll()
     mockServer.enqueueString("malformed")
     responses = apolloClient.query(query)
         .fetchPolicy(FetchPolicy.NetworkFirst)

@@ -210,13 +210,16 @@ interface ApolloStore {
   ): Set<String>
 
   /**
-   * Clears all records.
+   * Removes all records.
    *
    * This is a synchronous operation that might block if the underlying cache is doing IO.
    *
    * @return `true` if all records were successfully removed, `false` otherwise
    */
-  fun clearAll(): Boolean
+  fun removeAll(): Boolean
+
+  @Deprecated("Use removeAll() instead", ReplaceWith("removeAll()"))
+  fun clearAll() = removeAll()
 
   /**
    * Removes a record by its key.
@@ -266,7 +269,7 @@ interface ApolloStore {
   /**
    * Publishes a set of keys that have changed. This will notify subscribers of [changedKeys].
    *
-   * Pass [ALL_KEYS] to indicate that all records have changed, for instance after a [clearAll] operation.
+   * Pass [ALL_KEYS] to indicate that all records have changed, for instance after a [removeAll] operation.
    *
    * @see changedKeys
    *

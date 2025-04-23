@@ -47,9 +47,12 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
 
 
   /**
-   * Clears all records from the cache.
+   * Removes all records from the cache.
    */
-  fun clearAll()
+  fun removeAll()
+
+  @Deprecated("Use removeAll() instead", ReplaceWith("removeAll()"))
+  fun clearAll() = removeAll()
 
   /**
    * Remove a record and potentially its referenced records from this cache and all chained caches

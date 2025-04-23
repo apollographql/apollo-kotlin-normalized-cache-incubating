@@ -28,7 +28,7 @@ class SqlNormalizedCacheTest {
 
   @BeforeTest
   fun setUp() {
-    cache.clearAll()
+    cache.removeAll()
   }
 
   @Test
@@ -114,10 +114,10 @@ class SqlNormalizedCacheTest {
   }
 
   @Test
-  fun testClearAll() {
+  fun testRemoveAll() {
     createRecord(QUERY_ROOT_KEY)
     createRecord(STANDARD_KEY)
-    cache.clearAll()
+    cache.removeAll()
     assertNull(cache.loadRecord(QUERY_ROOT_KEY, CacheHeaders.NONE))
     assertNull(cache.loadRecord(STANDARD_KEY, CacheHeaders.NONE))
   }

@@ -25,7 +25,7 @@ class SqlNormalizationTest {
         .normalizedCache(SqlNormalizedCacheFactory())
         .build()
 
-    apolloClient.apolloStore.clearAll()
+    apolloClient.apolloStore.removeAll()
     mockserver.enqueueString(
         // language=JSON
         """

@@ -50,7 +50,7 @@ class CursorBasedPaginationTest {
         cacheResolver = FieldPolicyCacheResolver,
         recordMerger = ConnectionRecordMerger
     )
-    apolloStore.clearAll()
+    apolloStore.removeAll()
 
     // First page
     val query1 = UsersQuery(first = Optional.Present(2))

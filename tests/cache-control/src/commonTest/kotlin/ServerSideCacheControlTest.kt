@@ -48,7 +48,7 @@ class ServerSideCacheControlTest {
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())
         .build()
-    client.store.clearAll()
+    client.store.removeAll()
 
     val query = GetUserQuery()
     val data = """

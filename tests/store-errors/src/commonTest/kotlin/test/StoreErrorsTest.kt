@@ -43,9 +43,9 @@ class StoreErrorsTest {
 
   private val memoryStore = ApolloStore(MemoryCacheFactory())
 
-  private val sqlStore = ApolloStore(SqlNormalizedCacheFactory()).also { it.clearAll() }
+  private val sqlStore = ApolloStore(SqlNormalizedCacheFactory()).also { it.removeAll() }
 
-  private val memoryThenSqlStore = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+  private val memoryThenSqlStore = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.removeAll() }
 
   @Test
   fun simpleMemory() = runTest(before = { setUp() }, after = { tearDown() }) {

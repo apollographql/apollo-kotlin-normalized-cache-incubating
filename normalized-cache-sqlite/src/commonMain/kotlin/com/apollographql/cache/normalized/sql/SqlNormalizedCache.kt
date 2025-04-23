@@ -34,7 +34,7 @@ class SqlNormalizedCache internal constructor(
     }
   }
 
-  override fun clearAll() {
+  override fun removeAll() {
     recordDatabase.deleteAllRecords()
   }
 

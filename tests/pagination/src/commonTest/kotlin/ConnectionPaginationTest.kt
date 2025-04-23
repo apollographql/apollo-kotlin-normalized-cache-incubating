@@ -44,7 +44,7 @@ class ConnectionPaginationTest {
         cacheResolver = FieldPolicyCacheResolver,
         recordMerger = ConnectionRecordMerger
     )
-    apolloStore.clearAll()
+    apolloStore.removeAll()
 
     // First page
     val query1 = UsersQuery(first = Optional.Present(2))
@@ -369,7 +369,7 @@ class ConnectionPaginationTest {
         cacheResolver = FieldPolicyCacheResolver,
         recordMerger = ConnectionRecordMerger
     )
-    apolloStore.clearAll()
+    apolloStore.removeAll()
     val query = UsersQuery(first = Optional.Present(2))
     apolloStore.writeOperation(
         operation = query,

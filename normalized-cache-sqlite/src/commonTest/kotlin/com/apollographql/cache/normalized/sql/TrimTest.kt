@@ -13,7 +13,7 @@ import kotlin.test.assertNull
 class TrimTest {
   @Test
   fun trimTest() {
-    val apolloStore = ApolloStore(SqlNormalizedCacheFactory()).also { it.clearAll() }
+    val apolloStore = ApolloStore(SqlNormalizedCacheFactory()).also { it.removeAll() }
 
     val largeString = "".padStart(1024, '?')
 

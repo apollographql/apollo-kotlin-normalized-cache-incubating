@@ -41,11 +41,11 @@ class ThreadTests {
       return delegate.merge(records, cacheHeaders, recordMerger)
     }
 
-    override fun clearAll() {
+    override fun removeAll() {
       check(currentThreadId() != mainThreadId) {
         "Cache access on main thread"
       }
-      return delegate.clearAll()
+      return delegate.removeAll()
     }
 
     override fun remove(cacheKey: CacheKey, cascade: Boolean): Boolean {

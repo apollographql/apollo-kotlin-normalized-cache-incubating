@@ -657,7 +657,7 @@ class WatcherTest {
           assertEquals("R2-D2", awaitItem().data?.hero?.name)
 
           // Clear the cache
-          store.clearAll()
+          store.removeAll()
           store.publish(ApolloStore.ALL_KEYS)
           assertIs<CacheMissException>(awaitItem().exception)
         }

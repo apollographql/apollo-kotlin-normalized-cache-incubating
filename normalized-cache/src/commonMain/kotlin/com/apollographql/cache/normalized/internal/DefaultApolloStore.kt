@@ -85,8 +85,8 @@ internal class DefaultApolloStore(
     changedKeysEvents.emit(keys)
   }
 
-  override fun clearAll(): Boolean {
-    cache.clearAll()
+  override fun removeAll(): Boolean {
+    cache.removeAll()
     return true
   }
 

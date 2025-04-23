@@ -137,9 +137,12 @@ class SimpleApolloStore(
   fun rollbackOptimisticUpdates(mutationId: Uuid): Set<String> = apolloStore.rollbackOptimisticUpdates(mutationId)
 
   /**
-   * @see ApolloStore.clearAll
+   * @see ApolloStore.removeAll
    */
-  fun clearAll(): Boolean = apolloStore.clearAll()
+  fun removeAll(): Boolean = apolloStore.removeAll()
+
+  @Deprecated("Use removeAll() instead", ReplaceWith("removeAll()"))
+  fun clearAll() = removeAll()
 
   /**
    * @see ApolloStore.remove

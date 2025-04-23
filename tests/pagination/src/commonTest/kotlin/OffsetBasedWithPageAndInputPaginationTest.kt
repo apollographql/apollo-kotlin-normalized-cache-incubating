@@ -51,7 +51,7 @@ class OffsetBasedWithPageAndInputPaginationTest {
         recordMerger = FieldRecordMerger(OffsetPaginationFieldMerger()),
         fieldKeyGenerator = UsersFieldKeyGenerator,
     )
-    apolloStore.clearAll()
+    apolloStore.removeAll()
 
     // First page
     val query1 = UsersQuery(offset = Optional.Present(42), limit = Optional.Present(2))

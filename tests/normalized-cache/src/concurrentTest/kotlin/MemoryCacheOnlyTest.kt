@@ -23,7 +23,7 @@ import kotlin.test.assertIs
 class MemoryCacheOnlyTest {
   @Test
   fun memoryCacheOnlyDoesNotStoreInSqlCache() = runTest {
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.removeAll() }
     val apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).store(store).build()
     val query = GetUserQuery()
     apolloClient.enqueueTestResponse(query, GetUserQuery.Data(GetUserQuery.User("John", "a@a.com")))
@@ -35,7 +35,7 @@ class MemoryCacheOnlyTest {
 
   @Test
   fun memoryCacheOnlyDoesNotReadFromSqlCache() = runTest {
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.removeAll() }
     val query = GetUserQuery()
     store.writeOperation(query, GetUserQuery.Data(GetUserQuery.User("John", "a@a.com")))
 
