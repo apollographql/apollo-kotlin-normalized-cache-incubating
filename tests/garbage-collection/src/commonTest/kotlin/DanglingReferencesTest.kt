@@ -52,7 +52,7 @@ class DanglingReferencesTest {
 
           // Remove User 1, now Repository 0.starGazers is a dangling reference
           store.remove(CacheKey("User:1"), cascade = false)
-          val removedFieldsAndRecords = store.removeDanglingReferences()
+          val removedFieldsAndRecords = apolloClient.store.removeDanglingReferences()
           assertEquals(
               setOf(CacheKey("Repository:0").fieldKey("starGazers")),
               removedFieldsAndRecords.removedFields
@@ -96,7 +96,7 @@ class DanglingReferencesTest {
           // thus (QUERY_ROOT).metaProjects is a dangling reference
           // thus QUERY_ROOT is empty and removed
           store.remove(CacheKey("User:0"), cascade = false)
-          val removedFieldsAndRecords = store.removeDanglingReferences()
+          val removedFieldsAndRecords = apolloClient.store.removeDanglingReferences()
           assertEquals(
               setOf(
                   CacheKey("metaProjects").append("0", "0", "type").fieldKey("owners"),

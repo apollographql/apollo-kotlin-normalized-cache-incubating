@@ -60,16 +60,11 @@ private fun NormalizedCache.removeUnreachableRecords(allRecords: Map<CacheKey, R
  * Remove all unreachable records in the store.
  * @see removeUnreachableRecords
  */
-fun ApolloStore.removeUnreachableRecords(): Set<CacheKey> {
+fun SimpleApolloStore.removeUnreachableRecords(): Set<CacheKey> {
   return accessCache { cache ->
     cache.removeUnreachableRecords()
   }
 }
-
-/**
- * @see removeUnreachableRecords
- */
-fun SimpleApolloStore.removeUnreachableRecords() = apolloStore.removeUnreachableRecords()
 
 /**
  * Remove all stale fields in the cache.
@@ -182,23 +177,13 @@ private fun NormalizedCache.removeStaleFields(
  * Remove all stale fields in the store.
  * @see removeStaleFields
  */
-fun ApolloStore.removeStaleFields(
+fun SimpleApolloStore.removeStaleFields(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
 ): RemovedFieldsAndRecords {
   return accessCache { cache ->
     cache.removeStaleFields(maxAgeProvider, maxStale)
   }
-}
-
-/**
- * @see removeStaleFields
- */
-fun SimpleApolloStore.removeStaleFields(
-    maxAgeProvider: MaxAgeProvider,
-    maxStale: Duration = Duration.ZERO,
-): RemovedFieldsAndRecords {
-  return apolloStore.removeStaleFields(maxAgeProvider, maxStale)
 }
 
 /**
@@ -257,17 +242,10 @@ private fun NormalizedCache.removeDanglingReferences(allRecords: MutableMap<Cach
  * Remove all dangling references in the store.
  * @see removeDanglingReferences
  */
-fun ApolloStore.removeDanglingReferences(): RemovedFieldsAndRecords {
+fun SimpleApolloStore.removeDanglingReferences(): RemovedFieldsAndRecords {
   return accessCache { cache ->
     cache.removeDanglingReferences()
   }
-}
-
-/**
- * @see removeDanglingReferences
- */
-fun SimpleApolloStore.removeDanglingReferences(): RemovedFieldsAndRecords {
-  return apolloStore.removeDanglingReferences()
 }
 
 private fun RecordValue.isDanglingReference(allRecords: Map<CacheKey, Record>): Boolean {
@@ -330,23 +308,13 @@ fun NormalizedCache.garbageCollect(
  * Perform garbage collection on the store.
  * @see garbageCollect
  */
-fun ApolloStore.garbageCollect(
+fun SimpleApolloStore.garbageCollect(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
 ): GarbageCollectResult {
   return accessCache { cache ->
     cache.garbageCollect(maxAgeProvider, maxStale)
   }
-}
-
-/**
- * @see garbageCollect
- */
-fun SimpleApolloStore.garbageCollect(
-    maxAgeProvider: MaxAgeProvider,
-    maxStale: Duration = Duration.ZERO,
-): GarbageCollectResult {
-  return apolloStore.garbageCollect(maxAgeProvider, maxStale)
 }
 
 class RemovedFieldsAndRecords(

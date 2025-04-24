@@ -65,7 +65,7 @@ class StaleFieldsTest {
               Cache.maxAges,
               defaultMaxAge = 120.seconds,
           )
-          var removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
+          var removedFieldsAndRecords = apolloClient.store.removeStaleFields(maxAgeProvider)
           // Repository.stars has a max age of 60 seconds, so they should be removed / User has a max age of 90 seconds, so Repository.starGazers should be kept
           assertEquals(
               setOf(
@@ -87,7 +87,7 @@ class StaleFieldsTest {
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .cacheHeaders(receivedDate(currentTimeSeconds() - 90))
               .execute()
-          removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
+          removedFieldsAndRecords = apolloClient.store.removeStaleFields(maxAgeProvider)
           // Repository.stars and Repository.starGazers should be removed
           assertEquals(
               setOf(
@@ -142,7 +142,7 @@ class StaleFieldsTest {
               Cache.maxAges,
               defaultMaxAge = 120.seconds,
           )
-          var removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
+          var removedFieldsAndRecords = apolloClient.store.removeStaleFields(maxAgeProvider)
           // Project.velocity has a max age of 60 seconds, so they should be removed / Project.isUrgent has a max age of 90 seconds, so they should be kept
           assertEquals(
               setOf(
@@ -164,7 +164,7 @@ class StaleFieldsTest {
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .cacheHeaders(receivedDate(currentTimeSeconds() - 90))
               .execute()
-          removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
+          removedFieldsAndRecords = apolloClient.store.removeStaleFields(maxAgeProvider)
           // Project.velocity and Project.isUrgent should be removed, their records being empty they should be removed
           assertEquals(
               setOf(
@@ -216,7 +216,7 @@ class StaleFieldsTest {
           assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
           assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("starGazers"))
 
-          var removedFieldsAndRecords = store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE))
+          var removedFieldsAndRecords = apolloClient.store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE))
           // Everything is stale
           assertEquals(
               setOf(
@@ -259,7 +259,7 @@ class StaleFieldsTest {
               .cacheHeaders(expirationDate(currentTimeSeconds() - 60))
               .execute()
 
-          removedFieldsAndRecords = store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE), maxStale = 70.seconds)
+          removedFieldsAndRecords = apolloClient.store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE), maxStale = 70.seconds)
           // Nothing is stale
           assertEquals(
               emptySet(),

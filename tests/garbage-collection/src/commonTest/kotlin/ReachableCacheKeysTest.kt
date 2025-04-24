@@ -210,7 +210,7 @@ class ReachableCacheKeysTest {
           )
 
           // Remove unreachable records, should remove Repositories 5, 6, and 500
-          val removedKeys = store.removeUnreachableRecords()
+          val removedKeys = apolloClient.store.removeUnreachableRecords()
           assertEquals(
               setOf(
                   CacheKey("QUERY_ROOT"),

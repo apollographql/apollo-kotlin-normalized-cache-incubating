@@ -58,7 +58,7 @@ class GarbageCollectTest {
               Cache.maxAges,
               defaultMaxAge = 120.seconds,
           )
-          val garbageCollectResult = store.garbageCollect(maxAgeProvider)
+          val garbageCollectResult = apolloClient.store.garbageCollect(maxAgeProvider)
           assertEquals(
               setOf(
                   CacheKey("metaProjects").append("0", "0", "type").fieldKey("owners"),
