@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
  */
 class SimpleApolloStore(
     val apolloStore: ApolloStore,
-    private val customScalarAdapters: CustomScalarAdapters,
+    val customScalarAdapters: CustomScalarAdapters,
 ) {
   /**
    * @see ApolloStore.changedKeys

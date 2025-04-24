@@ -198,6 +198,7 @@ public final class com/apollographql/cache/normalized/SimpleApolloStore {
 	public final fun dump ()Ljava/util/Map;
 	public final fun getApolloStore ()Lcom/apollographql/cache/normalized/ApolloStore;
 	public final fun getChangedKeys ()Lkotlinx/coroutines/flow/SharedFlow;
+	public final fun getCustomScalarAdapters ()Lcom/apollographql/apollo/api/CustomScalarAdapters;
 	public final fun normalize-Hljz6HE (Lcom/apollographql/apollo/api/Executable;Ljava/util/Map;Ljava/lang/String;)Ljava/util/Map;
 	public static synthetic fun normalize-Hljz6HE$default (Lcom/apollographql/cache/normalized/SimpleApolloStore;Lcom/apollographql/apollo/api/Executable;Ljava/util/Map;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/Map;
 	public final fun publish (Ljava/util/Set;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
