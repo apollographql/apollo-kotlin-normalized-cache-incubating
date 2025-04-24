@@ -67,6 +67,11 @@ fun ApolloStore.removeUnreachableRecords(): Set<CacheKey> {
 }
 
 /**
+ * @see removeUnreachableRecords
+ */
+fun SimpleApolloStore.removeUnreachableRecords() = apolloStore.removeUnreachableRecords()
+
+/**
  * Remove all stale fields in the cache.
  * A field is stale if its received date is older than its max age (configurable via [maxAgeProvider]) or if its expiration date has
  * passed. A maximum staleness can be passed.
@@ -187,6 +192,16 @@ fun ApolloStore.removeStaleFields(
 }
 
 /**
+ * @see removeStaleFields
+ */
+fun SimpleApolloStore.removeStaleFields(
+    maxAgeProvider: MaxAgeProvider,
+    maxStale: Duration = Duration.ZERO,
+): RemovedFieldsAndRecords {
+  return apolloStore.removeStaleFields(maxAgeProvider, maxStale)
+}
+
+/**
  * Remove all dangling references in the cache.
  * A field is a dangling reference if its value (or, for lists, any of its values) is a reference to a record that does not exist.
  *
@@ -246,6 +261,13 @@ fun ApolloStore.removeDanglingReferences(): RemovedFieldsAndRecords {
   return accessCache { cache ->
     cache.removeDanglingReferences()
   }
+}
+
+/**
+ * @see removeDanglingReferences
+ */
+fun SimpleApolloStore.removeDanglingReferences(): RemovedFieldsAndRecords {
+  return apolloStore.removeDanglingReferences()
 }
 
 private fun RecordValue.isDanglingReference(allRecords: Map<CacheKey, Record>): Boolean {
@@ -315,6 +337,16 @@ fun ApolloStore.garbageCollect(
   return accessCache { cache ->
     cache.garbageCollect(maxAgeProvider, maxStale)
   }
+}
+
+/**
+ * @see garbageCollect
+ */
+fun SimpleApolloStore.garbageCollect(
+    maxAgeProvider: MaxAgeProvider,
+    maxStale: Duration = Duration.ZERO,
+): GarbageCollectResult {
+  return apolloStore.garbageCollect(maxAgeProvider, maxStale)
 }
 
 class RemovedFieldsAndRecords(

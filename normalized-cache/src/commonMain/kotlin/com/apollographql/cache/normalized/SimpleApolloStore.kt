@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
  * A wrapper around [ApolloStore] that provides a simplified API for reading and writing data.
  */
 class SimpleApolloStore(
-    private val apolloStore: ApolloStore,
+    val apolloStore: ApolloStore,
     private val customScalarAdapters: CustomScalarAdapters,
 ) {
   /**
