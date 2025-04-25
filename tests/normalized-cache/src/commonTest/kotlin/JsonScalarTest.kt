@@ -2,11 +2,11 @@ package test
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.AnyAdapter
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
@@ -19,13 +19,13 @@ import kotlin.test.assertFalse
 class JsonScalarTest {
   private lateinit var mockServer: MockServer
   private lateinit var apolloClient: ApolloClient
-  private lateinit var store: ApolloStore
+  private lateinit var cacheManager: CacheManager
 
   private suspend fun setUp() {
-    store = ApolloStore(MemoryCacheFactory())
+    cacheManager = CacheManager(MemoryCacheFactory())
     mockServer = MockServer()
     apolloClient = ApolloClient.Builder().serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .addCustomScalarAdapter(Json.type, AnyAdapter)
         .build()
   }

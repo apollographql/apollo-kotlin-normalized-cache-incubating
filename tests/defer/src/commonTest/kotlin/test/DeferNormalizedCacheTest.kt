@@ -11,10 +11,11 @@ import com.apollographql.apollo.exception.ApolloHttpException
 import com.apollographql.apollo.exception.ApolloNetworkException
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.network.NetworkTransport
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.optimisticUpdates
@@ -54,12 +55,12 @@ import kotlin.test.assertTrue
 class DeferNormalizedCacheTest {
   private lateinit var mockServer: MockServer
   private lateinit var apolloClient: ApolloClient
-  private lateinit var store: ApolloStore
+  private lateinit var cacheManager: CacheManager
 
   private suspend fun setUp() {
-    store = ApolloStore(MemoryCacheFactory())
+    cacheManager = CacheManager(MemoryCacheFactory())
     mockServer = MockServer()
-    apolloClient = ApolloClient.Builder().serverUrl(mockServer.url()).store(store).build()
+    apolloClient = ApolloClient.Builder().serverUrl(mockServer.url()).cacheManager(cacheManager).build()
   }
 
   private fun tearDown() {
@@ -421,7 +422,7 @@ class DeferNormalizedCacheTest {
     )
 
     apolloClient = ApolloClient.Builder()
-        .store(store)
+        .cacheManager(cacheManager)
         .fetchPolicy(FetchPolicy.NetworkFirst)
         .networkTransport(
             object : NetworkTransport {
@@ -496,7 +497,7 @@ class DeferNormalizedCacheTest {
     assertEquals(networkExpected, networkActual)
 
     // Now cache is not empty
-    val cacheActual = store.readFragment(ComputerFieldsImpl(), CacheKey.MUTATION_ROOT.append("computers", "0")).data
+    val cacheActual = cacheManager.readFragment(ComputerFieldsImpl(), CacheKey.MUTATION_ROOT.append("computers", "0")).data
 
     println(cacheActual)
     // We get the last/fully formed data

@@ -3,13 +3,13 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import main.GetUser2Query
 import main.GetUserByIdQuery
@@ -21,12 +21,12 @@ import kotlin.test.assertEquals
 class IdCacheKeyGeneratorTest {
   @Test
   fun defaultValues() = runTest {
-    val store = ApolloStore(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = MemoryCacheFactory(),
         cacheKeyGenerator = IdCacheKeyGenerator(),
         cacheResolver = IdCacheKeyResolver(),
     )
-    val apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).store(store).build()
+    val apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).cacheManager(cacheManager).build()
     val query = GetUser2Query("42")
     apolloClient.enqueueTestResponse(query, GetUser2Query.Data(GetUser2Query.User2(id = "42", name = "John", email = "a@a.com")))
     apolloClient.query(query).fetchPolicy(FetchPolicy.NetworkOnly).execute()
@@ -37,12 +37,12 @@ class IdCacheKeyGeneratorTest {
 
   @Test
   fun customIdField() = runTest {
-    val store = ApolloStore(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = MemoryCacheFactory(),
         cacheKeyGenerator = IdCacheKeyGenerator("userId"),
         cacheResolver = IdCacheKeyResolver(idFields = listOf("userId")),
     )
-    val apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).store(store).build()
+    val apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).cacheManager(cacheManager).build()
     val query = GetUserByIdQuery("42")
     apolloClient.enqueueTestResponse(query, GetUserByIdQuery.Data(GetUserByIdQuery.UserById(userId = "42", name = "John", email = "a@a.com")))
     apolloClient.query(query).fetchPolicy(FetchPolicy.NetworkOnly).execute()
@@ -53,12 +53,12 @@ class IdCacheKeyGeneratorTest {
 
   @Test
   fun lists() = runTest {
-    val store = ApolloStore(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = MemoryCacheFactory(),
         cacheKeyGenerator = IdCacheKeyGenerator("id"),
         cacheResolver = IdCacheKeyResolver(idListFields = listOf("ids", "userIds")),
     )
-    val apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).store(store).build()
+    val apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).cacheManager(cacheManager).build()
     val query1 = GetUsersQuery(listOf("42", "43"))
     apolloClient.enqueueTestResponse(
         query1,

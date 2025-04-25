@@ -7,8 +7,7 @@ import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.JsonNumber
-import com.apollographql.apollo.interceptor.ApolloInterceptor
-import com.apollographql.cache.normalized.ApolloStore.Companion.ALL_KEYS
+import com.apollographql.cache.normalized.CacheManager.Companion.ALL_KEYS
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
@@ -30,20 +29,20 @@ import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordMerger
 import com.apollographql.cache.normalized.api.RecordValue
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
-import com.apollographql.cache.normalized.internal.DefaultApolloStore
+import com.apollographql.cache.normalized.internal.DefaultCacheManager
 import com.benasher44.uuid.Uuid
 import kotlinx.coroutines.flow.SharedFlow
 import kotlin.reflect.KClass
 
 /**
- * ApolloStore exposes a high-level API to access a [com.apollographql.cache.normalized.api.NormalizedCache].
+ * CacheManager exposes a high-level API to access a [com.apollographql.cache.normalized.api.NormalizedCache].
  *
  * Note that most operations are synchronous and might block if the underlying cache is doing IO - calling them from the main thread
  * should be avoided.
  *
  * Note that changes are not automatically published - call [publish] to notify any watchers.
  */
-interface ApolloStore {
+interface CacheManager {
   /**
    * Exposes the record field keys that have changed. This is collected internally to notify watchers.
    *
@@ -326,7 +325,7 @@ interface ApolloStore {
   )
 }
 
-fun ApolloStore(
+fun CacheManager(
     normalizedCacheFactory: NormalizedCacheFactory,
     cacheKeyGenerator: CacheKeyGenerator = TypePolicyCacheKeyGenerator,
     metadataGenerator: MetadataGenerator = EmptyMetadataGenerator,
@@ -335,7 +334,7 @@ fun ApolloStore(
     fieldKeyGenerator: FieldKeyGenerator = DefaultFieldKeyGenerator,
     embeddedFieldsProvider: EmbeddedFieldsProvider = DefaultEmbeddedFieldsProvider,
     maxAgeProvider: MaxAgeProvider = DefaultMaxAgeProvider,
-): ApolloStore = DefaultApolloStore(
+): CacheManager = DefaultCacheManager(
     normalizedCacheFactory = normalizedCacheFactory,
     cacheKeyGenerator = cacheKeyGenerator,
     metadataGenerator = metadataGenerator,
@@ -346,12 +345,7 @@ fun ApolloStore(
     maxAgeProvider = maxAgeProvider,
 )
 
-/**
- * Interface that marks all interceptors added when configuring a `store()` on ApolloClient.Builder.
- */
-internal interface ApolloStoreInterceptor : ApolloInterceptor
-
-internal fun ApolloStore.cacheDumpProvider(): () -> Map<String, Map<String, Pair<Int, Map<String, Any?>>>> {
+internal fun CacheManager.cacheDumpProvider(): () -> Map<String, Map<String, Pair<Int, Map<String, Any?>>>> {
   return {
     dump().map { (cacheClass, cacheRecords) ->
       cacheClass.normalizedCacheName() to cacheRecords

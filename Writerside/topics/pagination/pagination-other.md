@@ -59,7 +59,7 @@ object MyFieldMerger : FieldRecordMerger.FieldMerger {
   }
 }
 
-val apolloStore = ApolloStore(
+val cacheManager = ApolloStore(
   normalizedCacheFactory = cacheFactory,
   recordMerger = FieldRecordMerger(MyFieldMerger), // Configure the store with the custom merger
 )

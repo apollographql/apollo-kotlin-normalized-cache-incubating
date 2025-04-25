@@ -1,11 +1,11 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.cache.normalized.writeToCacheAsynchronously
 import com.apollographql.mockserver.MockServer
@@ -26,16 +26,16 @@ import kotlin.test.assertNull
 class WriteToCacheAsynchronouslyTest {
   private lateinit var mockServer: MockServer
   private lateinit var apolloClient: ApolloClient
-  private lateinit var store: ApolloStore
+  private lateinit var cacheManager: CacheManager
   private var dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
   private suspend fun setUp() {
-    store = ApolloStore(MemoryCacheFactory())
+    cacheManager = CacheManager(MemoryCacheFactory())
     mockServer = MockServer()
     apolloClient = ApolloClient.Builder()
         .serverUrl(mockServer.url())
         .dispatcher(dispatcher)
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
   }
 
@@ -58,7 +58,7 @@ class WriteToCacheAsynchronouslyTest {
           .execute()
 
 
-      val record = store.accessCache { it.loadRecord(QUERY_ROOT_KEY, CacheHeaders.NONE) }
+      val record = cacheManager.accessCache { it.loadRecord(QUERY_ROOT_KEY, CacheHeaders.NONE) }
       assertNull(record)
     }
   }
@@ -76,7 +76,7 @@ class WriteToCacheAsynchronouslyTest {
           .writeToCacheAsynchronously(false)
           .execute()
 
-      val record = store.accessCache { it.loadRecord(QUERY_ROOT_KEY, CacheHeaders.NONE) }
+      val record = cacheManager.accessCache { it.loadRecord(QUERY_ROOT_KEY, CacheHeaders.NONE) }
       assertNotNull(record)
     }
   }

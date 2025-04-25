@@ -74,8 +74,8 @@ fun ApolloClient.Builder.normalizedCache(
     maxAgeProvider: MaxAgeProvider = DefaultMaxAgeProvider,
     writeToCacheAsynchronously: Boolean = false,
 ): ApolloClient.Builder {
-  return store(
-      ApolloStore(
+  return cacheManager(
+      CacheManager(
           normalizedCacheFactory = normalizedCacheFactory,
           cacheKeyGenerator = cacheKeyGenerator,
           metadataGenerator = metadataGenerator,
@@ -123,11 +123,11 @@ private fun ApolloInterceptorChain.asInterceptor(): ApolloInterceptor {
   }
 }
 
-internal class CacheInterceptor(val store: ApolloStore) : ApolloInterceptor {
+internal class CacheInterceptor(val cacheManager: CacheManager) : ApolloInterceptor {
   private val delegates = listOf(
-      WatcherInterceptor(store),
+      WatcherInterceptor(cacheManager),
       FetchPolicyRouterInterceptor,
-      ApolloCacheInterceptor(store),
+      ApolloCacheInterceptor(cacheManager),
       StoreExpirationDateInterceptor,
   )
 
@@ -139,10 +139,10 @@ internal class CacheInterceptor(val store: ApolloStore) : ApolloInterceptor {
   }
 }
 
-fun ApolloClient.Builder.store(store: ApolloStore, writeToCacheAsynchronously: Boolean = false): ApolloClient.Builder {
-  return cacheInterceptor(CacheInterceptor(store))
+fun ApolloClient.Builder.cacheManager(cacheManager: CacheManager, writeToCacheAsynchronously: Boolean = false): ApolloClient.Builder {
+  return cacheInterceptor(CacheInterceptor(cacheManager))
       .writeToCacheAsynchronously(writeToCacheAsynchronously)
-      .addExecutionContext(CacheDumpProviderContext(store.cacheDumpProvider()))
+      .addExecutionContext(CacheDumpProviderContext(cacheManager.cacheDumpProvider()))
 }
 
 /**
@@ -153,7 +153,7 @@ fun ApolloClient.Builder.store(store: ApolloStore, writeToCacheAsynchronously: B
  *
  * [fetchPolicy] controls how the result is first queried, while [refetchPolicy] will control the subsequent fetches.
  *
- * Note: when manually updating the cache through [ApolloStore], [ApolloStore.publish] must be called for watchers to be notified.
+ * Note: when manually updating the cache through [CacheManager], [CacheManager.publish] must be called for watchers to be notified.
  *
  * @see fetchPolicy
  * @see refetchPolicy
@@ -229,7 +229,7 @@ val ApolloClient.apolloStore: SimpleApolloStore
 val ApolloClient.store: SimpleApolloStore
   get() {
     return (cacheInterceptor as? CacheInterceptor)?.let {
-      SimpleApolloStore(it.store, customScalarAdapters)
+      SimpleApolloStore(it.cacheManager, customScalarAdapters)
     } ?: error("No store configured")
   }
 

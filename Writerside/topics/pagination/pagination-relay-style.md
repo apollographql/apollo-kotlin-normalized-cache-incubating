@@ -58,7 +58,7 @@ extend type Query @typePolicy(connectionFields: "usersConnection")
 In Kotlin, configure the `ApolloStore` like this, using the generated `Pagination` object:
 
 ```kotlin
-val apolloStore = ApolloStore(
+val cacheManager = ApolloStore(
   normalizedCacheFactory = cacheFactory,
   metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
   recordMerger = ConnectionRecordMerger

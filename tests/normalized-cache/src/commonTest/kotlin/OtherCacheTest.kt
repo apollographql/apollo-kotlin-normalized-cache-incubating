@@ -3,14 +3,14 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.composeJsonResponse
 import com.apollographql.apollo.exception.CacheMissException
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.keyToString
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
@@ -34,12 +34,12 @@ import kotlin.test.assertTrue
 class OtherCacheTest {
   private lateinit var mockServer: MockServer
   private lateinit var apolloClient: ApolloClient
-  private lateinit var store: ApolloStore
+  private lateinit var cacheManager: CacheManager
 
   private suspend fun setUp() {
-    store = ApolloStore(MemoryCacheFactory(), cacheKeyGenerator = IdCacheKeyGenerator(), cacheResolver = IdCacheKeyResolver())
+    cacheManager = CacheManager(MemoryCacheFactory(), cacheKeyGenerator = IdCacheKeyGenerator(), cacheResolver = IdCacheKeyResolver())
     mockServer = MockServer()
-    apolloClient = ApolloClient.Builder().serverUrl(mockServer.url()).store(store).build()
+    apolloClient = ApolloClient.Builder().serverUrl(mockServer.url()).cacheManager(cacheManager).build()
   }
 
   private suspend fun tearDown() {
@@ -186,7 +186,7 @@ class OtherCacheTest {
     mockServer.enqueueString(mutation.composeJsonResponse(data))
     apolloClient.mutation(mutation).execute()
 
-    val storeData = store.readOperation(mutation).data
+    val storeData = cacheManager.readOperation(mutation).data
     assertEquals(data, storeData)
   }
 }

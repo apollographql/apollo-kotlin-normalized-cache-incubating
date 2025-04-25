@@ -1,6 +1,6 @@
 package test.declarativecache
 
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
@@ -22,7 +22,7 @@ class DeclarativeCacheTest {
 
   @Test
   fun typePolicyIsWorking() = runTest {
-    val store = ApolloStore(MemoryCacheFactory())
+    val store = CacheManager(MemoryCacheFactory())
 
     // Write a book at the "promo" path
     val promoOperation = GetPromoBookQuery()
@@ -42,7 +42,7 @@ class DeclarativeCacheTest {
 
   @Test
   fun fallbackIdIsWorking() = runTest {
-    val store = ApolloStore(MemoryCacheFactory())
+    val store = CacheManager(MemoryCacheFactory())
 
     // Write a library at the "promo" path
     val promoOperation = GetPromoLibraryQuery()
@@ -62,7 +62,7 @@ class DeclarativeCacheTest {
 
   @Test
   fun fieldPolicyIsWorking() = runTest {
-    val store = ApolloStore(MemoryCacheFactory())
+    val store = CacheManager(MemoryCacheFactory())
 
     val bookQuery1 = GetPromoBookQuery()
     val bookData1 = GetPromoBookQuery.Data(GetPromoBookQuery.PromoBook("Promo", "42", "Book"))
@@ -107,7 +107,7 @@ class DeclarativeCacheTest {
         return FieldPolicyCacheResolver.resolveField(context)
       }
     }
-    val store = ApolloStore(MemoryCacheFactory(), cacheResolver = cacheResolver)
+    val store = CacheManager(MemoryCacheFactory(), cacheResolver = cacheResolver)
 
     val promoOperation = GetPromoBookQuery()
     store.writeOperation(promoOperation, GetPromoBookQuery.Data(GetPromoBookQuery.PromoBook("Title1", "1", "Book")))

@@ -6,7 +6,7 @@ import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.Fragment
 import com.apollographql.apollo.api.Operation
-import com.apollographql.cache.normalized.ApolloStore.ReadResult
+import com.apollographql.cache.normalized.CacheManager.ReadResult
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DataWithErrors
@@ -17,38 +17,38 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlin.reflect.KClass
 
 /**
- * A wrapper around [ApolloStore] that provides a simplified API for reading and writing data.
+ * A wrapper around [CacheManager] that provides a simplified API for reading and writing data.
  */
 class SimpleApolloStore(
-    val apolloStore: ApolloStore,
+    val cacheManager: CacheManager,
     val customScalarAdapters: CustomScalarAdapters,
 ) {
   /**
-   * @see ApolloStore.changedKeys
+   * @see CacheManager.changedKeys
    */
   val changedKeys: SharedFlow<Set<String>>
-    get() = apolloStore.changedKeys
+    get() = cacheManager.changedKeys
 
   /**
-   * @see ApolloStore.readOperation
+   * @see CacheManager.readOperation
    */
   fun <D : Operation.Data> readOperation(
       operation: Operation<D>,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
-  ): ApolloResponse<D> = apolloStore.readOperation(
+  ): ApolloResponse<D> = cacheManager.readOperation(
       operation = operation,
       cacheHeaders = cacheHeaders,
       customScalarAdapters = customScalarAdapters,
   )
 
   /**
-   * @see ApolloStore.readFragment
+   * @see CacheManager.readFragment
    */
   fun <D : Fragment.Data> readFragment(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
-  ): ReadResult<D> = apolloStore.readFragment(
+  ): ReadResult<D> = cacheManager.readFragment(
       fragment = fragment,
       cacheKey = cacheKey,
       customScalarAdapters = customScalarAdapters,
@@ -56,14 +56,14 @@ class SimpleApolloStore(
   )
 
   /**
-   * @see ApolloStore.writeOperation
+   * @see CacheManager.writeOperation
    */
   fun <D : Operation.Data> writeOperation(
       operation: Operation<D>,
       data: D,
       errors: List<Error>? = null,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
-  ): Set<String> = apolloStore.writeOperation(
+  ): Set<String> = cacheManager.writeOperation(
       operation = operation,
       data = data,
       errors = errors,
@@ -72,13 +72,13 @@ class SimpleApolloStore(
   )
 
   /**
-   * @see ApolloStore.writeFragment
+   * @see CacheManager.writeFragment
    */
   fun <D : Operation.Data> writeOperation(
       operation: Operation<D>,
       dataWithErrors: DataWithErrors,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
-  ): Set<String> = apolloStore.writeOperation(
+  ): Set<String> = cacheManager.writeOperation(
       operation = operation,
       dataWithErrors = dataWithErrors,
       cacheHeaders = cacheHeaders,
@@ -86,14 +86,14 @@ class SimpleApolloStore(
   )
 
   /**
-   * @see ApolloStore.writeFragment
+   * @see CacheManager.writeFragment
    */
   fun <D : Fragment.Data> writeFragment(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
       data: D,
       cacheHeaders: CacheHeaders = CacheHeaders.NONE,
-  ): Set<String> = apolloStore.writeFragment(
+  ): Set<String> = cacheManager.writeFragment(
       fragment = fragment,
       cacheKey = cacheKey,
       data = data,
@@ -102,13 +102,13 @@ class SimpleApolloStore(
   )
 
   /**
-   * @see ApolloStore.writeOptimisticUpdates
+   * @see CacheManager.writeOptimisticUpdates
    */
   fun <D : Operation.Data> writeOptimisticUpdates(
       operation: Operation<D>,
       data: D,
       mutationId: Uuid,
-  ): Set<String> = apolloStore.writeOptimisticUpdates(
+  ): Set<String> = cacheManager.writeOptimisticUpdates(
       operation = operation,
       data = data,
       mutationId = mutationId,
@@ -116,14 +116,14 @@ class SimpleApolloStore(
   )
 
   /**
-   * @see ApolloStore.writeOptimisticUpdates
+   * @see CacheManager.writeOptimisticUpdates
    */
   fun <D : Fragment.Data> writeOptimisticUpdates(
       fragment: Fragment<D>,
       cacheKey: CacheKey,
       data: D,
       mutationId: Uuid,
-  ): Set<String> = apolloStore.writeOptimisticUpdates(
+  ): Set<String> = cacheManager.writeOptimisticUpdates(
       fragment = fragment,
       cacheKey = cacheKey,
       data = data,
@@ -132,38 +132,38 @@ class SimpleApolloStore(
   )
 
   /**
-   * @see ApolloStore.rollbackOptimisticUpdates
+   * @see CacheManager.rollbackOptimisticUpdates
    */
-  fun rollbackOptimisticUpdates(mutationId: Uuid): Set<String> = apolloStore.rollbackOptimisticUpdates(mutationId)
+  fun rollbackOptimisticUpdates(mutationId: Uuid): Set<String> = cacheManager.rollbackOptimisticUpdates(mutationId)
 
   /**
-   * @see ApolloStore.clearAll
+   * @see CacheManager.clearAll
    */
-  fun clearAll(): Boolean = apolloStore.clearAll()
+  fun clearAll(): Boolean = cacheManager.clearAll()
 
   /**
-   * @see ApolloStore.remove
+   * @see CacheManager.remove
    */
-  fun remove(cacheKey: CacheKey, cascade: Boolean = true): Boolean = apolloStore.remove(cacheKey, cascade)
+  fun remove(cacheKey: CacheKey, cascade: Boolean = true): Boolean = cacheManager.remove(cacheKey, cascade)
 
   /**
-   * @see ApolloStore.remove
+   * @see CacheManager.remove
    */
-  fun remove(cacheKeys: List<CacheKey>, cascade: Boolean = true): Int = apolloStore.remove(cacheKeys, cascade)
+  fun remove(cacheKeys: List<CacheKey>, cascade: Boolean = true): Int = cacheManager.remove(cacheKeys, cascade)
 
   /**
-   * @see ApolloStore.trim
+   * @see CacheManager.trim
    */
-  fun trim(maxSizeBytes: Long, trimFactor: Float = 0.1f): Long = apolloStore.trim(maxSizeBytes, trimFactor)
+  fun trim(maxSizeBytes: Long, trimFactor: Float = 0.1f): Long = cacheManager.trim(maxSizeBytes, trimFactor)
 
   /**
-   * @see ApolloStore.normalize
+   * @see CacheManager.normalize
    */
   fun <D : Executable.Data> normalize(
       executable: Executable<D>,
       dataWithErrors: DataWithErrors,
       rootKey: CacheKey = CacheKey.QUERY_ROOT,
-  ): Map<CacheKey, Record> = apolloStore.normalize(
+  ): Map<CacheKey, Record> = cacheManager.normalize(
       executable = executable,
       dataWithErrors = dataWithErrors,
       rootKey = rootKey,
@@ -171,22 +171,22 @@ class SimpleApolloStore(
   )
 
   /**
-   * @see ApolloStore.publish
+   * @see CacheManager.publish
    */
-  suspend fun publish(keys: Set<String>) = apolloStore.publish(keys)
+  suspend fun publish(keys: Set<String>) = cacheManager.publish(keys)
 
   /**
-   * @see ApolloStore.publish
+   * @see CacheManager.publish
    */
-  fun <R> accessCache(block: (NormalizedCache) -> R): R = apolloStore.accessCache(block)
+  fun <R> accessCache(block: (NormalizedCache) -> R): R = cacheManager.accessCache(block)
 
   /**
-   * @see ApolloStore.dump
+   * @see CacheManager.dump
    */
-  fun dump(): Map<KClass<*>, Map<CacheKey, Record>> = apolloStore.dump()
+  fun dump(): Map<KClass<*>, Map<CacheKey, Record>> = cacheManager.dump()
 
   /**
-   * @see ApolloStore.dispose
+   * @see CacheManager.dispose
    */
-  fun dispose() = apolloStore.dispose()
+  fun dispose() = cacheManager.dispose()
 }

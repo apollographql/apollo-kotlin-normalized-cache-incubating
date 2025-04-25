@@ -9,9 +9,9 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.json.ApolloJsonElement
 import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.variables
-import com.apollographql.cache.normalized.ApolloStore
-import com.apollographql.cache.normalized.ApolloStore.ReadResult
 import com.apollographql.cache.normalized.CacheInfo
+import com.apollographql.cache.normalized.CacheManager
+import com.apollographql.cache.normalized.CacheManager.ReadResult
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlin.reflect.KClass
 
-internal class DefaultApolloStore(
+internal class DefaultCacheManager(
     normalizedCacheFactory: NormalizedCacheFactory,
     private val cacheKeyGenerator: CacheKeyGenerator,
     private val fieldKeyGenerator: FieldKeyGenerator,
@@ -47,7 +47,7 @@ internal class DefaultApolloStore(
     private val recordMerger: RecordMerger,
     private val embeddedFieldsProvider: EmbeddedFieldsProvider,
     private val maxAgeProvider: MaxAgeProvider,
-) : ApolloStore {
+) : CacheManager {
   private val changedKeysEvents = MutableSharedFlow<Set<String>>(
       /**
        * The '64' magic number here is a potential code smell
@@ -78,7 +78,7 @@ internal class DefaultApolloStore(
   }
 
   override suspend fun publish(keys: Set<String>) {
-    if (keys.isEmpty() && keys !== ApolloStore.ALL_KEYS) {
+    if (keys.isEmpty() && keys !== CacheManager.ALL_KEYS) {
       return
     }
 

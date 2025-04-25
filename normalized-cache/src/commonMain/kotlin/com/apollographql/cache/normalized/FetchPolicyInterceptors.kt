@@ -150,7 +150,7 @@ fun <D : Operation.Data> ApolloResponse<D>.errorsAsException(): ApolloResponse<D
   }
 }
 
-internal object FetchPolicyRouterInterceptor : ApolloInterceptor, ApolloStoreInterceptor {
+internal object FetchPolicyRouterInterceptor : ApolloInterceptor {
   override fun <D : Operation.Data> intercept(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
     if (request.operation !is Query) {
       // Subscriptions and Mutations do not support fetchPolicies

@@ -9,14 +9,14 @@ import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestNetworkError
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.refetchPolicy
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.cache.normalized.watch
 import com.apollographql.mockserver.MockResponse
@@ -47,11 +47,11 @@ import kotlin.time.Duration.Companion.minutes
 
 class WatcherTest {
   private lateinit var apolloClient: ApolloClient
-  private lateinit var store: ApolloStore
+  private lateinit var cacheManager: CacheManager
 
   private fun setUp() {
-    store = ApolloStore(MemoryCacheFactory(), cacheKeyGenerator = IdCacheKeyGenerator())
-    apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).store(store).build()
+    cacheManager = CacheManager(MemoryCacheFactory(), cacheKeyGenerator = IdCacheKeyGenerator())
+    apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).cacheManager(cacheManager).build()
   }
 
   private val episodeHeroNameData = EpisodeHeroNameQuery.Data(EpisodeHeroNameQuery.Hero("R2-D2"))
@@ -177,8 +177,8 @@ class WatcherTest {
         )
     )
 
-    store.writeOperation(operation, data).also {
-      store.publish(it)
+    cacheManager.writeOperation(operation, data).also {
+      cacheManager.publish(it)
     }
 
     assertEquals(channel.awaitElement()?.hero?.name, "Artoo")
@@ -657,8 +657,8 @@ class WatcherTest {
           assertEquals("R2-D2", awaitItem().data?.hero?.name)
 
           // Clear the cache
-          store.clearAll()
-          store.publish(ApolloStore.ALL_KEYS)
+          cacheManager.clearAll()
+          cacheManager.publish(CacheManager.ALL_KEYS)
           assertIs<CacheMissException>(awaitItem().exception)
         }
   }

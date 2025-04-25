@@ -14,9 +14,8 @@ import com.apollographql.apollo.exception.apolloExceptionHandler
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
 import com.apollographql.apollo.mpp.currentTimeMillis
-import com.apollographql.cache.normalized.ApolloStore
-import com.apollographql.cache.normalized.ApolloStoreInterceptor
 import com.apollographql.cache.normalized.CacheInfo
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.cacheHeaders
@@ -36,8 +35,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 internal class ApolloCacheInterceptor(
-    val store: ApolloStore,
-) : ApolloInterceptor, ApolloStoreInterceptor {
+    val cacheManager: CacheManager,
+) : ApolloInterceptor {
   private suspend fun <D : Operation.Data> maybeAsync(request: ApolloRequest<D>, block: suspend () -> Unit) {
     if (request.writeToCacheAsynchronously) {
       val scope = request.executionContext[ConcurrencyInfo]!!.coroutineScope
@@ -80,11 +79,11 @@ internal class ApolloCacheInterceptor(
         if (request.errorsReplaceCachedValues) {
           cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.ERRORS_REPLACE_CACHED_VALUES, "true").build()
         }
-        store.writeOperation(request.operation, response.data!!, response.errors, customScalarAdapters, cacheHeaders)
+        cacheManager.writeOperation(request.operation, response.data!!, response.errors, customScalarAdapters, cacheHeaders)
       } else {
         emptySet()
       }
-      store.publish(cacheKeys + extraKeys)
+      cacheManager.publish(cacheKeys + extraKeys)
     }
   }
 
@@ -139,12 +138,12 @@ internal class ApolloCacheInterceptor(
       val optimisticData = request.optimisticData
       if (optimisticData != null) {
         @Suppress("UNCHECKED_CAST")
-        store.writeOptimisticUpdates(
+        cacheManager.writeOptimisticUpdates(
             operation = request.operation,
             data = optimisticData as D,
             mutationId = request.requestUuid,
             customScalarAdapters = customScalarAdapters,
-        ).also { store.publish(it) }
+        ).also { cacheManager.publish(it) }
       }
 
       /**
@@ -165,7 +164,7 @@ internal class ApolloCacheInterceptor(
         }
         previousResponse = response
         if (optimisticKeys == null) optimisticKeys = if (optimisticData != null) {
-          store.rollbackOptimisticUpdates(request.requestUuid)
+          cacheManager.rollbackOptimisticUpdates(request.requestUuid)
         } else {
           emptySet()
         }
@@ -176,12 +175,12 @@ internal class ApolloCacheInterceptor(
 
       if (networkException != null) {
         if (optimisticKeys == null) optimisticKeys = if (optimisticData != null) {
-          store.rollbackOptimisticUpdates(request.requestUuid)
+          cacheManager.rollbackOptimisticUpdates(request.requestUuid)
         } else {
           emptySet()
         }
 
-        store.publish(optimisticKeys)
+        cacheManager.publish(optimisticKeys)
       }
     }
   }
@@ -208,7 +207,7 @@ internal class ApolloCacheInterceptor(
       cacheHeaders += CacheHeaders.Builder().addHeader(ApolloCacheHeaders.MEMORY_CACHE_ONLY, "true").build()
     }
     val startMillis = currentTimeMillis()
-    val response = store.readOperation(
+    val response = cacheManager.readOperation(
         operation = request.operation,
         customScalarAdapters = customScalarAdapters,
         cacheHeaders = cacheHeaders,

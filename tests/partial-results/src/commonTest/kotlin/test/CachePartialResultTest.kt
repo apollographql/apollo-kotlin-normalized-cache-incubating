@@ -8,7 +8,7 @@ import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.api.graphQLErrorOrNull
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheControlCacheResolver
 import com.apollographql.cache.normalized.api.CacheHeaders
@@ -18,6 +18,7 @@ import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.fetchPolicyInterceptor
@@ -170,8 +171,8 @@ class CachePartialResultTest {
     )
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(
-            ApolloStore(
+        .cacheManager(
+            CacheManager(
                 normalizedCacheFactory = MemoryCacheFactory(),
                 cacheKeyGenerator = IdCacheKeyGenerator(),
                 cacheResolver = IdCacheKeyResolver()
@@ -441,8 +442,8 @@ class CachePartialResultTest {
     )
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(
-            ApolloStore(
+        .cacheManager(
+            CacheManager(
                 normalizedCacheFactory = MemoryCacheFactory(),
                 cacheKeyGenerator = IdCacheKeyGenerator(),
                 cacheResolver = IdCacheKeyResolver()
@@ -503,8 +504,8 @@ class CachePartialResultTest {
     )
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(
-            ApolloStore(
+        .cacheManager(
+            CacheManager(
                 normalizedCacheFactory = MemoryCacheFactory(),
                 cacheKeyGenerator = IdCacheKeyGenerator(),
                 cacheResolver = IdCacheKeyResolver()

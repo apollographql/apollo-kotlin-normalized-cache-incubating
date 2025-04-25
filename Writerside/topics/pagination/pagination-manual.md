@@ -23,8 +23,8 @@ suspend fun fetchAndMergePage(nextPage: Int) {
   )
 
   // 4. Update the cache with the merged list
-  val keys = apolloClient.apolloStore.writeOperation(operation = listQuery, operationData = dataWithMergedList)
-  apolloClient.apolloStore.publish(keys)
+  val keys = apolloClient.cacheManager.writeOperation(operation = listQuery, operationData = dataWithMergedList)
+  apolloClient.cacheManager.publish(keys)
 }
 ```
 
