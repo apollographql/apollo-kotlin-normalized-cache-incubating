@@ -222,11 +222,7 @@ internal fun <D : Query.Data> ApolloCall<D>.watchInternal(data: D?): Flow<Apollo
   return copy().addExecutionContext(WatchContext(data)).toFlow()
 }
 
-@Deprecated("Use store instead", ReplaceWith("store"))
 val ApolloClient.apolloStore: ApolloStore
-  get() = store
-
-val ApolloClient.store: ApolloStore
   get() {
     return (cacheInterceptor as? CacheInterceptor)?.let {
       ApolloStore(it.cacheManager, customScalarAdapters)

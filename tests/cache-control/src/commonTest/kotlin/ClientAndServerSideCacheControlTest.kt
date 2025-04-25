@@ -11,6 +11,7 @@ import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.MaxAge
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.cacheInfo
 import com.apollographql.cache.normalized.fetchPolicy
@@ -19,7 +20,6 @@ import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storeExpirationDate
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockResponse
@@ -69,7 +69,7 @@ class ClientAndServerSideCacheControlTest {
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())
         .build()
-    client.store.clearAll()
+    client.apolloStore.clearAll()
 
     val data = """
       {
@@ -148,7 +148,7 @@ class ClientAndServerSideCacheControlTest {
         .storeExpirationDate(true)
         .serverUrl(mockServer.url())
         .build()
-    client.store.clearAll()
+    client.apolloStore.clearAll()
 
     val data = """
       {
@@ -220,7 +220,7 @@ class ClientAndServerSideCacheControlTest {
         )
         .serverUrl(mockServer.url())
         .build()
-    client.store.clearAll()
+    client.apolloStore.clearAll()
 
     val data = """
       {

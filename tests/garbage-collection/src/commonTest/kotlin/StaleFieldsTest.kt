@@ -10,13 +10,13 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.cacheHeaders
 import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeStaleFields
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.fieldKey
 import com.apollographql.cache.normalized.testing.runTest
@@ -66,7 +66,7 @@ class StaleFieldsTest {
               Cache.maxAges,
               defaultMaxAge = 120.seconds,
           )
-          var removedFieldsAndRecords = apolloClient.store.removeStaleFields(maxAgeProvider)
+          var removedFieldsAndRecords = apolloClient.apolloStore.removeStaleFields(maxAgeProvider)
           // Repository.stars has a max age of 60 seconds, so they should be removed / User has a max age of 90 seconds, so Repository.starGazers should be kept
           assertEquals(
               setOf(
@@ -88,7 +88,7 @@ class StaleFieldsTest {
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .cacheHeaders(receivedDate(currentTimeSeconds() - 90))
               .execute()
-          removedFieldsAndRecords = apolloClient.store.removeStaleFields(maxAgeProvider)
+          removedFieldsAndRecords = apolloClient.apolloStore.removeStaleFields(maxAgeProvider)
           // Repository.stars and Repository.starGazers should be removed
           assertEquals(
               setOf(
@@ -143,7 +143,7 @@ class StaleFieldsTest {
               Cache.maxAges,
               defaultMaxAge = 120.seconds,
           )
-          var removedFieldsAndRecords = apolloClient.store.removeStaleFields(maxAgeProvider)
+          var removedFieldsAndRecords = apolloClient.apolloStore.removeStaleFields(maxAgeProvider)
           // Project.velocity has a max age of 60 seconds, so they should be removed / Project.isUrgent has a max age of 90 seconds, so they should be kept
           assertEquals(
               setOf(
@@ -165,7 +165,7 @@ class StaleFieldsTest {
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .cacheHeaders(receivedDate(currentTimeSeconds() - 90))
               .execute()
-          removedFieldsAndRecords = apolloClient.store.removeStaleFields(maxAgeProvider)
+          removedFieldsAndRecords = apolloClient.apolloStore.removeStaleFields(maxAgeProvider)
           // Project.velocity and Project.isUrgent should be removed, their records being empty they should be removed
           assertEquals(
               setOf(
@@ -217,7 +217,7 @@ class StaleFieldsTest {
           assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
           assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("starGazers"))
 
-          var removedFieldsAndRecords = apolloClient.store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE))
+          var removedFieldsAndRecords = apolloClient.apolloStore.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE))
           // Everything is stale
           assertEquals(
               setOf(
@@ -260,7 +260,8 @@ class StaleFieldsTest {
               .cacheHeaders(expirationDate(currentTimeSeconds() - 60))
               .execute()
 
-          removedFieldsAndRecords = apolloClient.store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE), maxStale = 70.seconds)
+          removedFieldsAndRecords =
+            apolloClient.apolloStore.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE), maxStale = 70.seconds)
           // Nothing is stale
           assertEquals(
               emptySet(),

@@ -5,13 +5,13 @@ import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.getReachableCacheKeys
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeUnreachableRecords
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storeReceivedDate
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
@@ -211,7 +211,7 @@ class ReachableCacheKeysTest {
           )
 
           // Remove unreachable records, should remove Repositories 5, 6, and 500
-          val removedKeys = apolloClient.store.removeUnreachableRecords()
+          val removedKeys = apolloClient.apolloStore.removeUnreachableRecords()
           assertEquals(
               setOf(
                   CacheKey("QUERY_ROOT"),

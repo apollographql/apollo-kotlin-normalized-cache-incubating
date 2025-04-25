@@ -4,10 +4,10 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
 import com.apollographql.cache.normalized.api.CacheKeyGeneratorContext
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import embed.GetHeroQuery
 import kotlin.test.Test
@@ -47,8 +47,8 @@ class EmbedTest {
             listOf(GetHeroQuery.Friend("Luke", GetHeroQuery.Pet("Snoopy")), GetHeroQuery.Friend("Leia", GetHeroQuery.Pet("Fluffy")))
         )
     )
-    client.store.writeOperation(query, data)
-    val dataFromStore = client.store.readOperation(query).data
+    client.apolloStore.writeOperation(query, data)
+    val dataFromStore = client.apolloStore.readOperation(query).data
     assertEquals(data, dataFromStore)
   }
 }

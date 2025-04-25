@@ -5,12 +5,12 @@ import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeDanglingReferences
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.fieldKey
 import com.apollographql.cache.normalized.testing.runTest
@@ -53,7 +53,7 @@ class DanglingReferencesTest {
 
           // Remove User 1, now Repository 0.starGazers is a dangling reference
           cacheManager.remove(CacheKey("User:1"), cascade = false)
-          val removedFieldsAndRecords = apolloClient.store.removeDanglingReferences()
+          val removedFieldsAndRecords = apolloClient.apolloStore.removeDanglingReferences()
           assertEquals(
               setOf(CacheKey("Repository:0").fieldKey("starGazers")),
               removedFieldsAndRecords.removedFields
@@ -97,7 +97,7 @@ class DanglingReferencesTest {
           // thus (QUERY_ROOT).metaProjects is a dangling reference
           // thus QUERY_ROOT is empty and removed
           cacheManager.remove(CacheKey("User:0"), cascade = false)
-          val removedFieldsAndRecords = apolloClient.store.removeDanglingReferences()
+          val removedFieldsAndRecords = apolloClient.apolloStore.removeDanglingReferences()
           assertEquals(
               setOf(
                   CacheKey("metaProjects").append("0", "0", "type").fieldKey("owners"),

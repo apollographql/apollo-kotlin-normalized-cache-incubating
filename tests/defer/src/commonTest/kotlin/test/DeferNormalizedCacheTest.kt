@@ -15,11 +15,11 @@ import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.optimisticUpdates
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.Platform
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.keyToString
@@ -543,7 +543,7 @@ class DeferNormalizedCacheTest {
     val multipartBody = mockServer.enqueueMultipart("application/json")
     multipartBody.enqueuePart(jsonList[0].encodeUtf8(), false)
     val recordFields = apolloClient.query(SimpleDeferQuery()).fetchPolicy(FetchPolicy.NetworkOnly).toFlow().map {
-      apolloClient.store.accessCache { it.loadRecord(CacheKey("computers").append("0"), CacheHeaders.NONE)!!.fields }.also {
+      apolloClient.apolloStore.accessCache { it.loadRecord(CacheKey("computers").append("0"), CacheHeaders.NONE)!!.fields }.also {
         multipartBody.enqueuePart(jsonList[1].encodeUtf8(), true)
       }
     }.toList()
