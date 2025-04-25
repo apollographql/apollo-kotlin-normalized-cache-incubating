@@ -153,7 +153,7 @@ fun ApolloClient.Builder.cacheManager(cacheManager: CacheManager, writeToCacheAs
  *
  * [fetchPolicy] controls how the result is first queried, while [refetchPolicy] will control the subsequent fetches.
  *
- * Note: when manually updating the cache through [CacheManager], [CacheManager.publish] must be called for watchers to be notified.
+ * Note: when manually updating the cache through [ApolloStore], [ApolloStore.publish] must be called for watchers to be notified.
  *
  * @see fetchPolicy
  * @see refetchPolicy
