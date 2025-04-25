@@ -41,25 +41,25 @@ class StoreErrorsTest {
     mockServer.close()
   }
 
-  private val memoryStore = CacheManager(MemoryCacheFactory())
+  private val memoryCacheManager = CacheManager(MemoryCacheFactory())
 
-  private val sqlStore = CacheManager(SqlNormalizedCacheFactory()).also { it.clearAll() }
+  private val sqlCacheManager = CacheManager(SqlNormalizedCacheFactory()).also { it.clearAll() }
 
-  private val memoryThenSqlStore = CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+  private val memoryThenSqlCacheManager = CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
 
   @Test
   fun simpleMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    simple(memoryStore)
+    simple(memoryCacheManager)
   }
 
   @Test
   fun simpleSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    simple(sqlStore)
+    simple(sqlCacheManager)
   }
 
   @Test
   fun simpleMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    simple(memoryThenSqlStore)
+    simple(memoryThenSqlCacheManager)
   }
 
   private suspend fun simple(cacheManager: CacheManager) {
@@ -128,17 +128,17 @@ class StoreErrorsTest {
 
   @Test
   fun listsMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    lists(memoryStore)
+    lists(memoryCacheManager)
   }
 
   @Test
   fun listsSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    lists(sqlStore)
+    lists(sqlCacheManager)
   }
 
   @Test
   fun listsMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    lists(memoryThenSqlStore)
+    lists(memoryThenSqlCacheManager)
   }
 
   private suspend fun lists(cacheManager: CacheManager) {
@@ -227,17 +227,17 @@ class StoreErrorsTest {
 
   @Test
   fun compositeMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    composite(memoryStore)
+    composite(memoryCacheManager)
   }
 
   @Test
   fun compositeSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    composite(sqlStore)
+    composite(sqlCacheManager)
   }
 
   @Test
   fun compositeMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    composite(memoryThenSqlStore)
+    composite(memoryThenSqlCacheManager)
   }
 
   private suspend fun composite(cacheManager: CacheManager) {
@@ -342,17 +342,17 @@ class StoreErrorsTest {
 
   @Test
   fun aliasesMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    aliases(memoryStore)
+    aliases(memoryCacheManager)
   }
 
   @Test
   fun aliasesSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    aliases(sqlStore)
+    aliases(sqlCacheManager)
   }
 
   @Test
   fun aliasesMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    aliases(memoryThenSqlStore)
+    aliases(memoryThenSqlCacheManager)
   }
 
   private suspend fun aliases(cacheManager: CacheManager) {
@@ -420,17 +420,17 @@ class StoreErrorsTest {
 
   @Test
   fun fragmentsAndAliasesMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    fragmentsAndAliases(memoryStore)
+    fragmentsAndAliases(memoryCacheManager)
   }
 
   @Test
   fun fragmentsAndAliasesSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    fragmentsAndAliases(sqlStore)
+    fragmentsAndAliases(sqlCacheManager)
   }
 
   @Test
   fun fragmentsAndAliasesMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    fragmentsAndAliases(memoryThenSqlStore)
+    fragmentsAndAliases(memoryThenSqlCacheManager)
   }
 
   private fun fragmentsAndAliases(cacheManager: CacheManager) = runTest(before = { setUp() }, after = { tearDown() }) {
@@ -534,17 +534,17 @@ class StoreErrorsTest {
 
   @Test
   fun errorsReplaceCachedValuesMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    errorsReplaceCachedValues(memoryStore)
+    errorsReplaceCachedValues(memoryCacheManager)
   }
 
   @Test
   fun errorsReplaceCachedValuesSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    errorsReplaceCachedValues(sqlStore)
+    errorsReplaceCachedValues(sqlCacheManager)
   }
 
   @Test
   fun errorsReplaceCachedValuesMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    errorsReplaceCachedValues(memoryThenSqlStore)
+    errorsReplaceCachedValues(memoryThenSqlCacheManager)
   }
 
   private suspend fun errorsReplaceCachedValues(cacheManager: CacheManager) {
@@ -704,7 +704,7 @@ class StoreErrorsTest {
         query,
         listOf(Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName")).build()),
     )
-    val normalized: Map<CacheKey, Record> = memoryStore.normalize(
+    val normalized: Map<CacheKey, Record> = memoryCacheManager.normalize(
         executable = query,
         dataWithErrors = dataWithErrors,
     )
@@ -719,17 +719,17 @@ class StoreErrorsTest {
 
   @Test
   fun writeOperationMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    writeOperation(memoryStore)
+    writeOperation(memoryCacheManager)
   }
 
   @Test
   fun writeOperationSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    writeOperation(sqlStore)
+    writeOperation(sqlCacheManager)
   }
 
   @Test
   fun writeOperationMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    writeOperation(memoryThenSqlStore)
+    writeOperation(memoryThenSqlCacheManager)
   }
 
   private fun writeOperation(cacheManager: CacheManager) {

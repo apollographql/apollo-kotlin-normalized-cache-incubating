@@ -23,21 +23,21 @@ import kotlin.test.assertIs
 class MemoryCacheOnlyTest {
   @Test
   fun memoryCacheOnlyDoesNotStoreInSqlCache() = runTest {
-    val store = CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
-    val apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).cacheManager(store).build()
+    val cacheManager = CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).cacheManager(cacheManager).build()
     val query = GetUserQuery()
     apolloClient.enqueueTestResponse(query, GetUserQuery.Data(GetUserQuery.User("John", "a@a.com")))
     apolloClient.query(query).memoryCacheOnly(true).execute()
-    val dump: Map<KClass<*>, Map<CacheKey, Record>> = store.dump()
+    val dump: Map<KClass<*>, Map<CacheKey, Record>> = cacheManager.dump()
     assertEquals(2, dump[MemoryCache::class]!!.size)
     assertEquals(0, dump[SqlNormalizedCache::class]!!.size)
   }
 
   @Test
   fun memoryCacheOnlyDoesNotReadFromSqlCache() = runTest {
-    val store = CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+    val cacheManager = CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
     val query = GetUserQuery()
-    store.writeOperation(query, GetUserQuery.Data(GetUserQuery.User("John", "a@a.com")))
+    cacheManager.writeOperation(query, GetUserQuery.Data(GetUserQuery.User("John", "a@a.com")))
 
     val store2 = CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory()))
     val apolloClient = ApolloClient.Builder().serverUrl("unused").cacheManager(store2).build()

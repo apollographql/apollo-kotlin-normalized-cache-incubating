@@ -50,7 +50,7 @@ internal object IdBasedCacheKeyResolver : CacheResolver, CacheKeyGenerator {
 class NormalizationTest {
   @Test
   fun issue3672() = runTest {
-    val store = CacheManager(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = MemoryCacheFactory(),
         cacheKeyGenerator = IdBasedCacheKeyResolver,
         cacheResolver = IdBasedCacheKeyResolver
@@ -61,15 +61,15 @@ class NormalizationTest {
     val data1 =
       Buffer().writeUtf8(nestedResponse).jsonReader().toApolloResponse(operation = query, customScalarAdapters = CustomScalarAdapters.Empty)
           .dataOrThrow()
-    store.writeOperation(query, data1)
+    cacheManager.writeOperation(query, data1)
 
-    val data2 = store.readOperation(query).data
+    val data2 = cacheManager.readOperation(query).data
     assertEquals(data2, data1)
   }
 
   @Test
   fun issue3672_2() = runTest {
-    val store = CacheManager(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = MemoryCacheFactory(),
         cacheKeyGenerator = IdBasedCacheKeyResolver,
         cacheResolver = IdBasedCacheKeyResolver
@@ -79,9 +79,9 @@ class NormalizationTest {
 
     val data1 = Buffer().writeUtf8(nestedResponse_list).jsonReader()
         .toApolloResponse(operation = query, customScalarAdapters = CustomScalarAdapters.Empty).dataOrThrow()
-    store.writeOperation(query, data1)
+    cacheManager.writeOperation(query, data1)
 
-    val data2 = store.readOperation(query).data
+    val data2 = cacheManager.readOperation(query).data
     assertEquals(data2, data1)
   }
 
