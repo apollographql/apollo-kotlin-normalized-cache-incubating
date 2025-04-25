@@ -60,7 +60,7 @@ private fun NormalizedCache.removeUnreachableRecords(allRecords: Map<CacheKey, R
  * Remove all unreachable records in the store.
  * @see removeUnreachableRecords
  */
-fun SimpleApolloStore.removeUnreachableRecords(): Set<CacheKey> {
+fun ApolloStore.removeUnreachableRecords(): Set<CacheKey> {
   return accessCache { cache ->
     cache.removeUnreachableRecords()
   }
@@ -177,7 +177,7 @@ private fun NormalizedCache.removeStaleFields(
  * Remove all stale fields in the store.
  * @see removeStaleFields
  */
-fun SimpleApolloStore.removeStaleFields(
+fun ApolloStore.removeStaleFields(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
 ): RemovedFieldsAndRecords {
@@ -242,7 +242,7 @@ private fun NormalizedCache.removeDanglingReferences(allRecords: MutableMap<Cach
  * Remove all dangling references in the store.
  * @see removeDanglingReferences
  */
-fun SimpleApolloStore.removeDanglingReferences(): RemovedFieldsAndRecords {
+fun ApolloStore.removeDanglingReferences(): RemovedFieldsAndRecords {
   return accessCache { cache ->
     cache.removeDanglingReferences()
   }
@@ -308,7 +308,7 @@ fun NormalizedCache.garbageCollect(
  * Perform garbage collection on the store.
  * @see garbageCollect
  */
-fun SimpleApolloStore.garbageCollect(
+fun ApolloStore.garbageCollect(
     maxAgeProvider: MaxAgeProvider,
     maxStale: Duration = Duration.ZERO,
 ): GarbageCollectResult {

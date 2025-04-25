@@ -223,13 +223,13 @@ internal fun <D : Query.Data> ApolloCall<D>.watchInternal(data: D?): Flow<Apollo
 }
 
 @Deprecated("Use store instead", ReplaceWith("store"))
-val ApolloClient.apolloStore: SimpleApolloStore
+val ApolloClient.apolloStore: ApolloStore
   get() = store
 
-val ApolloClient.store: SimpleApolloStore
+val ApolloClient.store: ApolloStore
   get() {
     return (cacheInterceptor as? CacheInterceptor)?.let {
-      SimpleApolloStore(it.cacheManager, customScalarAdapters)
+      ApolloStore(it.cacheManager, customScalarAdapters)
     } ?: error("No store configured")
   }
 

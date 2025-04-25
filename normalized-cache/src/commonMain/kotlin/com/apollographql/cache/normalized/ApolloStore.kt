@@ -19,7 +19,7 @@ import kotlin.reflect.KClass
 /**
  * A wrapper around [CacheManager] that provides a simplified API for reading and writing data.
  */
-class SimpleApolloStore(
+class ApolloStore(
     val cacheManager: CacheManager,
     val customScalarAdapters: CustomScalarAdapters,
 ) {
