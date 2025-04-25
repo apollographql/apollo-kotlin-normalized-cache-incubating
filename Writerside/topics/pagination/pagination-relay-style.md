@@ -55,14 +55,17 @@ that return a connection:
 extend type Query @typePolicy(connectionFields: "usersConnection")
 ```
 
-In Kotlin, configure the `ApolloStore` like this, using the generated `Pagination` object:
+In Kotlin, configure the cache like this, using the generated `Pagination` object:
 
 ```kotlin
-val cacheManager = ApolloStore(
-  normalizedCacheFactory = cacheFactory,
-  metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
-  recordMerger = ConnectionRecordMerger
-)
+val client = ApolloClient.Builder()
+    // ...
+    .normalizedCache(
+        normalizedCacheFactory = cacheFactory,
+        metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
+        recordMerger = ConnectionRecordMerger
+    )
+    .build()
 ```
 
 Query `UsersConnection()` to fetch new pages and update the cache, and watch it to observe the full list.
