@@ -1,7 +1,12 @@
 # Next version (unreleased)
 
-- Rename `ApolloStore` to `CacheManager` and `SimpleApolloStore` to `ApolloStore`.
-- Revert the `ApolloClient.apolloStore` deprecation - keeping the original name makes more sense now after the above rename.
+PUT_CHANGELOG_HERE
+
+# Version 1.0.0-alpha.1
+
+- Rename `ApolloStore` to `CacheManager` and `SimpleApolloStore` to `ApolloStore`. (#134)
+- Revert the `ApolloClient.apolloStore` deprecation - keeping the original name makes more sense now after the above rename. (#134)
+- Add `ApolloStore.removeOperation()` and `ApolloStore.removeFragment()`. (#135)
 
 # Version 0.0.9
 _2025-04-09_
