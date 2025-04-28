@@ -2,7 +2,7 @@ package pagination
 
 import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.api.json.ApolloJsonElement
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.FieldRecordMerger
 import com.apollographql.cache.normalized.api.MetadataGenerator
@@ -36,14 +36,14 @@ class OffsetBasedWithArrayPaginationTest {
   }
 
   private fun test(cacheFactory: NormalizedCacheFactory) = runTest {
-    val apolloStore = ApolloStore(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = cacheFactory,
         cacheKeyGenerator = TypePolicyCacheKeyGenerator,
         metadataGenerator = OffsetPaginationMetadataGenerator("users"),
         cacheResolver = FieldPolicyCacheResolver,
         recordMerger = FieldRecordMerger(OffsetPaginationFieldMerger())
     )
-    apolloStore.clearAll()
+    cacheManager.clearAll()
 
     // First page
     val query1 = UsersQuery(offset = Optional.Present(42), limit = Optional.Present(2))
@@ -53,10 +53,10 @@ class OffsetBasedWithArrayPaginationTest {
           buildUser { id = "43" },
       )
     }
-    apolloStore.writeOperation(query1, data1)
-    var dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query1, data1)
+    var dataFromStore = cacheManager.readOperation(query1).data
     assertEquals(data1, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Page after
     val query2 = UsersQuery(offset = Optional.Present(44), limit = Optional.Present(2))
@@ -66,8 +66,8 @@ class OffsetBasedWithArrayPaginationTest {
           buildUser { id = "45" },
       )
     }
-    apolloStore.writeOperation(query2, data2)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query2, data2)
+    dataFromStore = cacheManager.readOperation(query1).data
     var expectedData = UsersQuery.Data {
       users = listOf(
           buildUser { id = "42" },
@@ -77,7 +77,7 @@ class OffsetBasedWithArrayPaginationTest {
       )
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Page in the middle
     val query3 = UsersQuery(offset = Optional.Present(44), limit = Optional.Present(3))
@@ -88,8 +88,8 @@ class OffsetBasedWithArrayPaginationTest {
           buildUser { id = "46" },
       )
     }
-    apolloStore.writeOperation(query3, data3)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query3, data3)
+    dataFromStore = cacheManager.readOperation(query1).data
     expectedData = UsersQuery.Data {
       users = listOf(
           buildUser { id = "42" },
@@ -100,7 +100,7 @@ class OffsetBasedWithArrayPaginationTest {
       )
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Page before
     val query4 = UsersQuery(offset = Optional.Present(40), limit = Optional.Present(2))
@@ -110,8 +110,8 @@ class OffsetBasedWithArrayPaginationTest {
           buildUser { id = "41" },
       )
     }
-    apolloStore.writeOperation(query4, data4)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query4, data4)
+    dataFromStore = cacheManager.readOperation(query1).data
     expectedData = UsersQuery.Data {
       users = listOf(
           buildUser { id = "40" },
@@ -124,7 +124,7 @@ class OffsetBasedWithArrayPaginationTest {
       )
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Non-contiguous page (should reset)
     val query5 = UsersQuery(offset = Optional.Present(50), limit = Optional.Present(2))
@@ -134,20 +134,20 @@ class OffsetBasedWithArrayPaginationTest {
           buildUser { id = "51" },
       )
     }
-    apolloStore.writeOperation(query5, data5)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query5, data5)
+    dataFromStore = cacheManager.readOperation(query1).data
     assertEquals(data5, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Empty page (should keep previous result)
     val query6 = UsersQuery(offset = Optional.Present(52), limit = Optional.Present(2))
     val data6 = UsersQuery.Data {
       users = emptyList()
     }
-    apolloStore.writeOperation(query6, data6)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query6, data6)
+    dataFromStore = cacheManager.readOperation(query1).data
     assertEquals(data5, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
   }
 
   private class OffsetPaginationMetadataGenerator(private val fieldName: String) : MetadataGenerator {

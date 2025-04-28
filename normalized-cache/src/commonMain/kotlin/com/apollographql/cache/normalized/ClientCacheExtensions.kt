@@ -74,8 +74,8 @@ fun ApolloClient.Builder.normalizedCache(
     maxAgeProvider: MaxAgeProvider = DefaultMaxAgeProvider,
     writeToCacheAsynchronously: Boolean = false,
 ): ApolloClient.Builder {
-  return store(
-      ApolloStore(
+  return cacheManager(
+      CacheManager(
           normalizedCacheFactory = normalizedCacheFactory,
           cacheKeyGenerator = cacheKeyGenerator,
           metadataGenerator = metadataGenerator,
@@ -123,11 +123,11 @@ private fun ApolloInterceptorChain.asInterceptor(): ApolloInterceptor {
   }
 }
 
-internal class CacheInterceptor(val store: ApolloStore) : ApolloInterceptor {
+internal class CacheInterceptor(val cacheManager: CacheManager) : ApolloInterceptor {
   private val delegates = listOf(
-      WatcherInterceptor(store),
+      WatcherInterceptor(cacheManager),
       FetchPolicyRouterInterceptor,
-      ApolloCacheInterceptor(store),
+      ApolloCacheInterceptor(cacheManager),
       StoreExpirationDateInterceptor,
   )
 
@@ -139,10 +139,10 @@ internal class CacheInterceptor(val store: ApolloStore) : ApolloInterceptor {
   }
 }
 
-fun ApolloClient.Builder.store(store: ApolloStore, writeToCacheAsynchronously: Boolean = false): ApolloClient.Builder {
-  return cacheInterceptor(CacheInterceptor(store))
+fun ApolloClient.Builder.cacheManager(cacheManager: CacheManager, writeToCacheAsynchronously: Boolean = false): ApolloClient.Builder {
+  return cacheInterceptor(CacheInterceptor(cacheManager))
       .writeToCacheAsynchronously(writeToCacheAsynchronously)
-      .addExecutionContext(CacheDumpProviderContext(store.cacheDumpProvider()))
+      .addExecutionContext(CacheDumpProviderContext(cacheManager.cacheDumpProvider()))
 }
 
 /**
@@ -222,14 +222,10 @@ internal fun <D : Query.Data> ApolloCall<D>.watchInternal(data: D?): Flow<Apollo
   return copy().addExecutionContext(WatchContext(data)).toFlow()
 }
 
-@Deprecated("Use store instead", ReplaceWith("store"))
-val ApolloClient.apolloStore: SimpleApolloStore
-  get() = store
-
-val ApolloClient.store: SimpleApolloStore
+val ApolloClient.apolloStore: ApolloStore
   get() {
     return (cacheInterceptor as? CacheInterceptor)?.let {
-      SimpleApolloStore(it.store, customScalarAdapters)
+      ApolloStore(it.cacheManager, customScalarAdapters)
     } ?: error("No store configured")
   }
 

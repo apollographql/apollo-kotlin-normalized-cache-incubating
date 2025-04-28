@@ -278,8 +278,8 @@ class MemoryCacheTest {
     return MemoryCache(maxSizeBytes = maxSizeBytes, expireAfterMillis = expireAfterMillis, nextCache = nextCache)
   }
 
-  private fun assertTestRecordPresentAndAccurate(testRecord: Record, store: NormalizedCache) {
-    val cacheRecord = checkNotNull(store.loadRecord(testRecord.key, CacheHeaders.NONE))
+  private fun assertTestRecordPresentAndAccurate(testRecord: Record, cache: NormalizedCache) {
+    val cacheRecord = checkNotNull(cache.loadRecord(testRecord.key, CacheHeaders.NONE))
     assertEquals(testRecord.key, cacheRecord.key)
     assertEquals(testRecord.fields, cacheRecord.fields)
   }

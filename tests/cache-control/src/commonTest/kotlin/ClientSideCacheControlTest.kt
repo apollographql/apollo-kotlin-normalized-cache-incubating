@@ -12,13 +12,13 @@ import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.MaxAge
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.internal.normalized
 import com.apollographql.cache.normalized.maxStale
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import programmatic.GetCompanyQuery
 import programmatic.GetUserAdminQuery
@@ -85,14 +85,14 @@ class ClientSideCacheControlTest {
         )
         .serverUrl("unused")
         .build()
-    client.store.clearAll()
+    client.apolloStore.clearAll()
 
     val query = GetUserQuery()
     val data = GetUserQuery.Data(GetUserQuery.User("John", "john@doe.com", true))
 
     val records = data.normalized(query).values
 
-    client.store.accessCache {
+    client.apolloStore.accessCache {
       // store records in the past
       it.merge(records, receivedDate(currentTimeSeconds() - 15), DefaultRecordMerger)
     }
@@ -106,7 +106,7 @@ class ClientSideCacheControlTest {
         .execute()
     assertTrue(response1.data?.user?.name == "John")
 
-    client.store.accessCache {
+    client.apolloStore.accessCache {
       // update records to be in the present
       it.merge(records, receivedDate(currentTimeSeconds()), DefaultRecordMerger)
     }
@@ -132,7 +132,7 @@ class ClientSideCacheControlTest {
         )
         .serverUrl("unused")
         .build()
-    client.store.clearAll()
+    client.apolloStore.clearAll()
 
     // Store records 25 seconds ago, more than default max age: should cache miss
     mergeCompanyQueryResults(client, 25)
@@ -182,7 +182,7 @@ class ClientSideCacheControlTest {
   private fun mergeCompanyQueryResults(client: ApolloClient, secondsAgo: Int) {
     val data = GetCompanyQuery.Data(GetCompanyQuery.Company("42"))
     val records = data.normalized(GetCompanyQuery()).values
-    client.store.accessCache {
+    client.apolloStore.accessCache {
       it.merge(records, receivedDate(currentTimeSeconds() - secondsAgo), DefaultRecordMerger)
     }
   }
@@ -200,7 +200,7 @@ class ClientSideCacheControlTest {
         )
         .serverUrl("unused")
         .build()
-    client.store.clearAll()
+    client.apolloStore.clearAll()
 
     // Store records 25 seconds ago, more than default max age: should cache miss
     mergeCompanyQueryResults(client, 25)
@@ -260,7 +260,7 @@ class ClientSideCacheControlTest {
   private fun mergeUserQueryResults(client: ApolloClient, secondsAgo: Int) {
     val data = GetUserQuery.Data(GetUserQuery.User("John", "john@doe.com", true))
     val records = data.normalized(GetUserQuery()).values
-    client.store.accessCache {
+    client.apolloStore.accessCache {
       it.merge(records, receivedDate(currentTimeSeconds() - secondsAgo), DefaultRecordMerger)
     }
   }
@@ -268,7 +268,7 @@ class ClientSideCacheControlTest {
   private fun mergeProjectQueryResults(client: ApolloClient, secondsAgo: Int) {
     val data = declarative.GetProjectQuery.Data(declarative.GetProjectQuery.Project("42", "Stardust"))
     val records = data.normalized(declarative.GetProjectQuery()).values
-    client.store.accessCache {
+    client.apolloStore.accessCache {
       it.merge(records, receivedDate(currentTimeSeconds() - secondsAgo), DefaultRecordMerger)
     }
   }

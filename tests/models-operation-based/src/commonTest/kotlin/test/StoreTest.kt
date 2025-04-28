@@ -7,11 +7,11 @@ import codegen.models.fragment.HeroWithFriendsFragmentImpl
 import codegen.models.fragment.HumanWithIdFragment
 import codegen.models.fragment.HumanWithIdFragmentImpl
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
@@ -22,15 +22,15 @@ import kotlin.test.assertEquals
 class StoreTest {
   private lateinit var mockServer: MockServer
   private lateinit var apolloClient: ApolloClient
-  private lateinit var store: ApolloStore
+  private lateinit var cacheManager: CacheManager
 
   private suspend fun setUp() {
-    store = ApolloStore(
+    cacheManager = CacheManager(
         normalizedCacheFactory = MemoryCacheFactory(),
         cacheKeyGenerator = IdCacheKeyGenerator()
     )
     mockServer = MockServer()
-    apolloClient = ApolloClient.Builder().serverUrl(mockServer.url()).store(store).build()
+    apolloClient = ApolloClient.Builder().serverUrl(mockServer.url()).cacheManager(cacheManager).build()
   }
 
   private suspend fun tearDown() {
@@ -42,7 +42,7 @@ class StoreTest {
     mockServer.enqueueString(testFixtureToUtf8("HeroAndFriendsWithTypename.json"))
     apolloClient.query(HeroAndFriendsWithTypenameQuery()).execute()
 
-    val heroWithFriendsFragment = store.readFragment(
+    val heroWithFriendsFragment = cacheManager.readFragment(
         HeroWithFriendsFragmentImpl(),
         CacheKey("Character:2001"),
     ).data
@@ -56,7 +56,7 @@ class StoreTest {
     assertEquals(heroWithFriendsFragment.friends?.get(2)?.humanWithIdFragment?.id, "1003")
     assertEquals(heroWithFriendsFragment.friends?.get(2)?.humanWithIdFragment?.name, "Leia Organa")
 
-    var fragment = store.readFragment(
+    var fragment = cacheManager.readFragment(
         HumanWithIdFragmentImpl(),
         CacheKey("Character:1000"),
     ).data
@@ -64,14 +64,14 @@ class StoreTest {
     assertEquals(fragment.id, "1000")
     assertEquals(fragment.name, "Luke Skywalker")
 
-    fragment = store.readFragment(
+    fragment = cacheManager.readFragment(
         HumanWithIdFragmentImpl(),
         CacheKey("Character:1002"),
     ).data
     assertEquals(fragment.id, "1002")
     assertEquals(fragment.name, "Han Solo")
 
-    fragment = store.readFragment(
+    fragment = cacheManager.readFragment(
         HumanWithIdFragmentImpl(),
         CacheKey("Character:1003"),
     ).data
@@ -98,7 +98,7 @@ class StoreTest {
     assertEquals(response.data?.hero?.heroWithFriendsFragment?.friends?.get(2)?.humanWithIdFragment?.id, "1003")
     assertEquals(response.data?.hero?.heroWithFriendsFragment?.friends?.get(2)?.humanWithIdFragment?.name, "Leia Organa")
 
-    store.writeFragment(
+    cacheManager.writeFragment(
         HeroWithFriendsFragmentImpl(),
         CacheKey("Character:2001"),
         HeroWithFriendsFragment(
@@ -123,7 +123,7 @@ class StoreTest {
         ),
     )
 
-    store.writeFragment(
+    cacheManager.writeFragment(
         HumanWithIdFragmentImpl(),
         CacheKey("Character:1002"),
         HumanWithIdFragment(

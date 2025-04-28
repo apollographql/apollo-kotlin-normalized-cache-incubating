@@ -3,9 +3,9 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.joinAll
@@ -18,13 +18,13 @@ class CacheConcurrencyTest {
 
   @Test
   fun storeConcurrently() = runTest {
-    val store = ApolloStore(MemoryCacheFactory(maxSizeBytes = 1000))
+    val cacheManager = CacheManager(MemoryCacheFactory(maxSizeBytes = 1000))
     val executor = Executors.newFixedThreadPool(10)
     val dispatcher = executor.asCoroutineDispatcher()
 
     val apolloClient = ApolloClient.Builder()
         .networkTransport(QueueTestNetworkTransport())
-        .store(store)
+        .cacheManager(cacheManager)
         .dispatcher(dispatcher)
         .build()
 
@@ -39,6 +39,6 @@ class CacheConcurrencyTest {
     }.joinAll()
 
     executor.shutdown()
-    println(store.dump().values.toList()[1].map { (k, v) -> "$k -> ${v.fields}" }.joinToString("\n"))
+    println(cacheManager.dump().values.toList()[1].map { (k, v) -> "$k -> ${v.fields}" }.joinToString("\n"))
   }
 }

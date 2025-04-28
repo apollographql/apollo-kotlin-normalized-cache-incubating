@@ -15,13 +15,13 @@ import com.apollographql.cache.normalized.api.FieldKeyContext
 import com.apollographql.cache.normalized.api.FieldKeyGenerator
 import com.apollographql.cache.normalized.api.NormalizedCacheFactory
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.fetchPolicyInterceptor
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.assertErrorsEquals
 import com.apollographql.cache.normalized.testing.keyToString
@@ -99,7 +99,7 @@ class DoNotStoreTest {
         )
         .build()
         .use { apolloClient ->
-          apolloClient.store.clearAll()
+          apolloClient.apolloStore.clearAll()
           val networkResponse = apolloClient.query(GetUserQuery())
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .execute()
@@ -195,7 +195,7 @@ class DoNotStoreTest {
         )
         .build()
         .use { apolloClient ->
-          apolloClient.store.clearAll()
+          apolloClient.apolloStore.clearAll()
           val networkResponse = apolloClient.mutation(SignInMutation("scott", "tiger"))
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .execute()
@@ -221,7 +221,7 @@ class DoNotStoreTest {
               networkResponse.data
           )
 
-          apolloClient.store.accessCache { cache ->
+          apolloClient.apolloStore.accessCache { cache ->
             val authRecord = cache.loadRecord(CacheKey.MUTATION_ROOT.append("auth"), CacheHeaders.NONE)!!
             // No password in field key
             assertContentEquals(listOf("signIn"), authRecord.fields.keys)

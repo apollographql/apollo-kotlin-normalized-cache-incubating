@@ -1,16 +1,17 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.apolloStore
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.getReachableCacheKeys
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeUnreachableRecords
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.storeReceivedDate
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
@@ -23,20 +24,20 @@ import kotlin.test.assertEquals
 
 class ReachableCacheKeysTest {
   @Test
-  fun getReachableCacheKeysMemory() = getReachableCacheKeys(ApolloStore(MemoryCacheFactory()))
+  fun getReachableCacheKeysMemory() = getReachableCacheKeys(CacheManager(MemoryCacheFactory()))
 
   @Test
-  fun getReachableCacheKeysSql() = getReachableCacheKeys(ApolloStore(SqlNormalizedCacheFactory()))
+  fun getReachableCacheKeysSql() = getReachableCacheKeys(CacheManager(SqlNormalizedCacheFactory()))
 
   @Test
-  fun getReachableCacheKeysChained() = getReachableCacheKeys(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+  fun getReachableCacheKeysChained() = getReachableCacheKeys(CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
 
-  private fun getReachableCacheKeys(apolloStore: ApolloStore) = runTest {
+  private fun getReachableCacheKeys(cacheManager: CacheManager) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    cacheManager.clearAll()
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .storeReceivedDate(true)
         .build()
         .use { apolloClient ->
@@ -133,7 +134,7 @@ class ReachableCacheKeysTest {
           )
 
           apolloClient.query(query).fetchPolicy(FetchPolicy.NetworkOnly).execute()
-          var reachableCacheKeys = store.accessCache { it.allRecords().getReachableCacheKeys() }
+          var reachableCacheKeys = cacheManager.accessCache { it.allRecords().getReachableCacheKeys() }
           assertEquals(
               setOf(
                   CacheKey("QUERY_ROOT"),
@@ -153,8 +154,8 @@ class ReachableCacheKeysTest {
           )
 
           // Remove User 43, now Repositories 5 and 6 should not be reachable / 7 should still be reachable
-          store.remove(CacheKey("User:43"), cascade = false)
-          reachableCacheKeys = store.accessCache { it.allRecords().getReachableCacheKeys() }
+          cacheManager.remove(CacheKey("User:43"), cascade = false)
+          reachableCacheKeys = cacheManager.accessCache { it.allRecords().getReachableCacheKeys() }
           assertEquals(
               setOf(
                   CacheKey("QUERY_ROOT"),
@@ -171,12 +172,12 @@ class ReachableCacheKeysTest {
           )
 
           // Add a non-reachable Repository, reachableCacheKeys should not change
-          store.writeFragment(
+          cacheManager.writeFragment(
               RepositoryFragmentImpl(),
               CacheKey("Repository:500"),
               RepositoryFragment(id = "500", __typename = "Repository", starGazers = emptyList()),
           )
-          reachableCacheKeys = store.accessCache { it.allRecords().getReachableCacheKeys() }
+          reachableCacheKeys = cacheManager.accessCache { it.allRecords().getReachableCacheKeys() }
           assertEquals(
               setOf(
                   CacheKey("QUERY_ROOT"),
@@ -206,11 +207,11 @@ class ReachableCacheKeysTest {
                   CacheKey("Repository:500"),
                   CacheKey("Repository:7"),
               ),
-              store.accessCache { it.allRecords() }.keys.toSet()
+              cacheManager.accessCache { it.allRecords() }.keys.toSet()
           )
 
           // Remove unreachable records, should remove Repositories 5, 6, and 500
-          val removedKeys = store.removeUnreachableRecords()
+          val removedKeys = apolloClient.apolloStore.removeUnreachableRecords()
           assertEquals(
               setOf(
                   CacheKey("QUERY_ROOT"),
@@ -223,7 +224,7 @@ class ReachableCacheKeysTest {
                   CacheKey("Repository:2"),
                   CacheKey("Repository:1"),
               ),
-              store.accessCache { it.allRecords() }.keys.toSet()
+              cacheManager.accessCache { it.allRecords() }.keys.toSet()
           )
           assertEquals(
               setOf(

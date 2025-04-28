@@ -2,7 +2,7 @@ package pagination
 
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Optional
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
 import com.apollographql.cache.normalized.api.ConnectionRecordMerger
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
@@ -37,14 +37,14 @@ class ConnectionPaginationTest {
   }
 
   private fun test(cacheFactory: NormalizedCacheFactory) = runTest {
-    val apolloStore = ApolloStore(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = cacheFactory,
         cacheKeyGenerator = TypePolicyCacheKeyGenerator,
         metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
         cacheResolver = FieldPolicyCacheResolver,
         recordMerger = ConnectionRecordMerger
     )
-    apolloStore.clearAll()
+    cacheManager.clearAll()
 
     // First page
     val query1 = UsersQuery(first = Optional.Present(2))
@@ -70,10 +70,10 @@ class ConnectionPaginationTest {
         )
       }
     }
-    apolloStore.writeOperation(query1, data1)
-    var dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query1, data1)
+    var dataFromStore = cacheManager.readOperation(query1).data
     assertEquals(data1, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Page after
     val query2 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx43"))
@@ -99,8 +99,8 @@ class ConnectionPaginationTest {
         )
       }
     }
-    apolloStore.writeOperation(query2, data2)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query2, data2)
+    dataFromStore = cacheManager.readOperation(query1).data
     var expectedData = UsersQuery.Data {
       users = buildUserConnection {
         pageInfo = buildPageInfo {
@@ -136,7 +136,7 @@ class ConnectionPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Page after
     val query3 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx45"))
@@ -162,8 +162,8 @@ class ConnectionPaginationTest {
         )
       }
     }
-    apolloStore.writeOperation(query3, data3)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query3, data3)
+    dataFromStore = cacheManager.readOperation(query1).data
     expectedData = UsersQuery.Data {
       users = buildUserConnection {
         pageInfo = buildPageInfo {
@@ -211,7 +211,7 @@ class ConnectionPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Page before
     val query4 = UsersQuery(last = Optional.Present(2), before = Optional.Present("xx42"))
@@ -237,8 +237,8 @@ class ConnectionPaginationTest {
         )
       }
     }
-    apolloStore.writeOperation(query4, data4)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query4, data4)
+    dataFromStore = cacheManager.readOperation(query1).data
     expectedData = UsersQuery.Data {
       users = buildUserConnection {
         pageInfo = buildPageInfo {
@@ -298,7 +298,7 @@ class ConnectionPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Non-contiguous page (should reset)
     val query5 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx50"))
@@ -324,10 +324,10 @@ class ConnectionPaginationTest {
         )
       }
     }
-    apolloStore.writeOperation(query5, data5)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query5, data5)
+    dataFromStore = cacheManager.readOperation(query1).data
     assertEquals(data5, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Empty page (should keep previous result)
     val query6 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx51"))
@@ -340,10 +340,10 @@ class ConnectionPaginationTest {
         edges = emptyList()
       }
     }
-    apolloStore.writeOperation(query6, data6)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query6, data6)
+    dataFromStore = cacheManager.readOperation(query1).data
     assertEquals(data5, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
   }
 
   @Test
@@ -362,21 +362,21 @@ class ConnectionPaginationTest {
   }
 
   private fun errorTest(cacheFactory: NormalizedCacheFactory) = runTest {
-    val apolloStore = ApolloStore(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = cacheFactory,
         cacheKeyGenerator = TypePolicyCacheKeyGenerator,
         metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
         cacheResolver = FieldPolicyCacheResolver,
         recordMerger = ConnectionRecordMerger
     )
-    apolloStore.clearAll()
+    cacheManager.clearAll()
     val query = UsersQuery(first = Optional.Present(2))
-    apolloStore.writeOperation(
+    cacheManager.writeOperation(
         operation = query,
         data = UsersQuery.Data { users = null },
         errors = listOf(Error.Builder("An error occurred.").path(listOf("users")).build())
     )
-    val responseFromStore = apolloStore.readOperation(query)
+    val responseFromStore = cacheManager.readOperation(query)
     assertEquals(UsersQuery.Data { users = null }, responseFromStore.data)
     assertEquals(1, responseFromStore.errors?.size)
     assertEquals("An error occurred.", responseFromStore.errors?.firstOrNull()?.message)

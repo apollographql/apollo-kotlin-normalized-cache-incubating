@@ -1,17 +1,18 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.cacheHeaders
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.garbageCollect
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.fieldKey
 import com.apollographql.cache.normalized.testing.runTest
@@ -25,20 +26,20 @@ import kotlin.time.Duration.Companion.seconds
 
 class GarbageCollectTest {
   @Test
-  fun garbageCollectMemory() = garbageCollect(ApolloStore(MemoryCacheFactory()))
+  fun garbageCollectMemory() = garbageCollect(CacheManager(MemoryCacheFactory()))
 
   @Test
-  fun garbageCollectSql() = garbageCollect(ApolloStore(SqlNormalizedCacheFactory()))
+  fun garbageCollectSql() = garbageCollect(CacheManager(SqlNormalizedCacheFactory()))
 
   @Test
-  fun garbageCollectChained() = garbageCollect(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+  fun garbageCollectChained() = garbageCollect(CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
 
-  private fun garbageCollect(apolloStore: ApolloStore) = runTest {
+  private fun garbageCollect(cacheManager: CacheManager) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    cacheManager.clearAll()
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           mockServer.enqueueString(META_PROJECT_LIST_RESPONSE)
@@ -58,7 +59,7 @@ class GarbageCollectTest {
               Cache.maxAges,
               defaultMaxAge = 120.seconds,
           )
-          val garbageCollectResult = store.garbageCollect(maxAgeProvider)
+          val garbageCollectResult = apolloClient.apolloStore.garbageCollect(maxAgeProvider)
           assertEquals(
               setOf(
                   CacheKey("metaProjects").append("0", "0", "type").fieldKey("owners"),
@@ -104,7 +105,7 @@ class GarbageCollectTest {
               garbageCollectResult.removedUnreachableRecords
           )
 
-          val allRecords = store.accessCache { it.allRecords() }
+          val allRecords = cacheManager.accessCache { it.allRecords() }
           assertEquals(emptyMap(), allRecords)
         }
   }

@@ -7,18 +7,18 @@ import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.api.Operation
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.withErrors
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.errorsReplaceCachedValues
 import com.apollographql.cache.normalized.fetchFromCache
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.fetchPolicyInterceptor
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.assertErrorsEquals
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
@@ -41,28 +41,28 @@ class StoreErrorsTest {
     mockServer.close()
   }
 
-  private val memoryStore = ApolloStore(MemoryCacheFactory())
+  private val memoryCacheManager = CacheManager(MemoryCacheFactory())
 
-  private val sqlStore = ApolloStore(SqlNormalizedCacheFactory()).also { it.clearAll() }
+  private val sqlCacheManager = CacheManager(SqlNormalizedCacheFactory()).also { it.clearAll() }
 
-  private val memoryThenSqlStore = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
+  private val memoryThenSqlCacheManager = CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())).also { it.clearAll() }
 
   @Test
   fun simpleMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    simple(memoryStore)
+    simple(memoryCacheManager)
   }
 
   @Test
   fun simpleSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    simple(sqlStore)
+    simple(sqlCacheManager)
   }
 
   @Test
   fun simpleMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    simple(memoryThenSqlStore)
+    simple(memoryThenSqlCacheManager)
   }
 
-  private suspend fun simple(store: ApolloStore) {
+  private suspend fun simple(cacheManager: CacheManager) {
     mockServer.enqueueString(
         // language=JSON
         """
@@ -87,7 +87,7 @@ class StoreErrorsTest {
     )
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(MeWithNickNameQuery())
@@ -128,20 +128,20 @@ class StoreErrorsTest {
 
   @Test
   fun listsMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    lists(memoryStore)
+    lists(memoryCacheManager)
   }
 
   @Test
   fun listsSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    lists(sqlStore)
+    lists(sqlCacheManager)
   }
 
   @Test
   fun listsMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    lists(memoryThenSqlStore)
+    lists(memoryThenSqlCacheManager)
   }
 
-  private suspend fun lists(store: ApolloStore) {
+  private suspend fun lists(cacheManager: CacheManager) {
     mockServer.enqueueString(
         // language=JSON
         """
@@ -176,7 +176,7 @@ class StoreErrorsTest {
     )
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(UsersQuery(listOf("1", "2", "3")))
@@ -227,20 +227,20 @@ class StoreErrorsTest {
 
   @Test
   fun compositeMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    composite(memoryStore)
+    composite(memoryCacheManager)
   }
 
   @Test
   fun compositeSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    composite(sqlStore)
+    composite(sqlCacheManager)
   }
 
   @Test
   fun compositeMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    composite(memoryThenSqlStore)
+    composite(memoryThenSqlCacheManager)
   }
 
-  private suspend fun composite(store: ApolloStore) {
+  private suspend fun composite(cacheManager: CacheManager) {
     mockServer.enqueueString(
         // language=JSON
         """
@@ -284,7 +284,7 @@ class StoreErrorsTest {
     )
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(MeWithBestFriendQuery())
@@ -342,20 +342,20 @@ class StoreErrorsTest {
 
   @Test
   fun aliasesMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    aliases(memoryStore)
+    aliases(memoryCacheManager)
   }
 
   @Test
   fun aliasesSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    aliases(sqlStore)
+    aliases(sqlCacheManager)
   }
 
   @Test
   fun aliasesMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    aliases(memoryThenSqlStore)
+    aliases(memoryThenSqlCacheManager)
   }
 
-  private suspend fun aliases(store: ApolloStore) {
+  private suspend fun aliases(cacheManager: CacheManager) {
     mockServer.enqueueString(
         // language=JSON
         """
@@ -380,7 +380,7 @@ class StoreErrorsTest {
     )
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(DefaultProjectQuery())
@@ -420,20 +420,20 @@ class StoreErrorsTest {
 
   @Test
   fun fragmentsAndAliasesMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    fragmentsAndAliases(memoryStore)
+    fragmentsAndAliases(memoryCacheManager)
   }
 
   @Test
   fun fragmentsAndAliasesSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    fragmentsAndAliases(sqlStore)
+    fragmentsAndAliases(sqlCacheManager)
   }
 
   @Test
   fun fragmentsAndAliasesMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    fragmentsAndAliases(memoryThenSqlStore)
+    fragmentsAndAliases(memoryThenSqlCacheManager)
   }
 
-  private fun fragmentsAndAliases(store: ApolloStore) = runTest(before = { setUp() }, after = { tearDown() }) {
+  private fun fragmentsAndAliases(cacheManager: CacheManager) = runTest(before = { setUp() }, after = { tearDown() }) {
     mockServer.enqueueString(
         // language=JSON
         """
@@ -472,7 +472,7 @@ class StoreErrorsTest {
     )
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           val networkResult = apolloClient.query(WithFragmentsQuery())
@@ -534,20 +534,20 @@ class StoreErrorsTest {
 
   @Test
   fun errorsReplaceCachedValuesMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    errorsReplaceCachedValues(memoryStore)
+    errorsReplaceCachedValues(memoryCacheManager)
   }
 
   @Test
   fun errorsReplaceCachedValuesSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    errorsReplaceCachedValues(sqlStore)
+    errorsReplaceCachedValues(sqlCacheManager)
   }
 
   @Test
   fun errorsReplaceCachedValuesMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    errorsReplaceCachedValues(memoryThenSqlStore)
+    errorsReplaceCachedValues(memoryThenSqlCacheManager)
   }
 
-  private suspend fun errorsReplaceCachedValues(store: ApolloStore) {
+  private suspend fun errorsReplaceCachedValues(cacheManager: CacheManager) {
     mockServer.enqueueString(
         // language=JSON
         """
@@ -612,7 +612,7 @@ class StoreErrorsTest {
 
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           val noErrorNetworkResult = apolloClient.query(MeWithNickNameQuery())
@@ -704,7 +704,7 @@ class StoreErrorsTest {
         query,
         listOf(Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName")).build()),
     )
-    val normalized: Map<CacheKey, Record> = memoryStore.normalize(
+    val normalized: Map<CacheKey, Record> = memoryCacheManager.normalize(
         executable = query,
         dataWithErrors = dataWithErrors,
     )
@@ -719,21 +719,21 @@ class StoreErrorsTest {
 
   @Test
   fun writeOperationMemory() = runTest(before = { setUp() }, after = { tearDown() }) {
-    writeOperation(memoryStore)
+    writeOperation(memoryCacheManager)
   }
 
   @Test
   fun writeOperationSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    writeOperation(sqlStore)
+    writeOperation(sqlCacheManager)
   }
 
   @Test
   fun writeOperationMemoryThenSql() = runTest(before = { setUp() }, after = { tearDown() }) {
-    writeOperation(memoryThenSqlStore)
+    writeOperation(memoryThenSqlCacheManager)
   }
 
-  private fun writeOperation(store: ApolloStore) {
-    store.writeOperation(
+  private fun writeOperation(cacheManager: CacheManager) {
+    cacheManager.writeOperation(
         operation = MeWithNickNameQuery(),
         data = MeWithNickNameQuery.Data(
             MeWithNickNameQuery.Me(
@@ -748,7 +748,7 @@ class StoreErrorsTest {
             Error.Builder("'nickName' can't be reached").path(listOf("me", "nickName")).build()
         ),
     )
-    val responseFromCache = store.readOperation(MeWithNickNameQuery())
+    val responseFromCache = cacheManager.readOperation(MeWithNickNameQuery())
     assertEquals(
         MeWithNickNameQuery.Data(
             MeWithNickNameQuery.Me(

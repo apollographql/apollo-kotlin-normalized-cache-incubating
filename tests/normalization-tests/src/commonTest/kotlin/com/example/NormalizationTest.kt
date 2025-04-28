@@ -4,7 +4,7 @@ import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.CustomScalarAdapters
 import com.apollographql.apollo.api.json.jsonReader
 import com.apollographql.apollo.api.toApolloResponse
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.CacheKeyGenerator
@@ -14,10 +14,10 @@ import com.apollographql.cache.normalized.api.CacheResolver
 import com.apollographql.cache.normalized.api.FieldPolicyCacheResolver
 import com.apollographql.cache.normalized.api.ResolverContext
 import com.apollographql.cache.normalized.api.TypePolicyCacheKeyGenerator
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
@@ -50,7 +50,7 @@ internal object IdBasedCacheKeyResolver : CacheResolver, CacheKeyGenerator {
 class NormalizationTest {
   @Test
   fun issue3672() = runTest {
-    val store = ApolloStore(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = MemoryCacheFactory(),
         cacheKeyGenerator = IdBasedCacheKeyResolver,
         cacheResolver = IdBasedCacheKeyResolver
@@ -61,15 +61,15 @@ class NormalizationTest {
     val data1 =
       Buffer().writeUtf8(nestedResponse).jsonReader().toApolloResponse(operation = query, customScalarAdapters = CustomScalarAdapters.Empty)
           .dataOrThrow()
-    store.writeOperation(query, data1)
+    cacheManager.writeOperation(query, data1)
 
-    val data2 = store.readOperation(query).data
+    val data2 = cacheManager.readOperation(query).data
     assertEquals(data2, data1)
   }
 
   @Test
   fun issue3672_2() = runTest {
-    val store = ApolloStore(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = MemoryCacheFactory(),
         cacheKeyGenerator = IdBasedCacheKeyResolver,
         cacheResolver = IdBasedCacheKeyResolver
@@ -79,21 +79,21 @@ class NormalizationTest {
 
     val data1 = Buffer().writeUtf8(nestedResponse_list).jsonReader()
         .toApolloResponse(operation = query, customScalarAdapters = CustomScalarAdapters.Empty).dataOrThrow()
-    store.writeOperation(query, data1)
+    cacheManager.writeOperation(query, data1)
 
-    val data2 = store.readOperation(query).data
+    val data2 = cacheManager.readOperation(query).data
     assertEquals(data2, data1)
   }
 
   @Test
   fun issue2818() = runTest {
-    val apolloStore = ApolloStore(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = MemoryCacheFactory(),
         cacheKeyGenerator = IdBasedCacheKeyResolver,
         cacheResolver = IdBasedCacheKeyResolver
     )
 
-    apolloStore.writeOperation(
+    cacheManager.writeOperation(
         Issue2818Query(),
         Issue2818Query.Data(
             Issue2818Query.Home(
@@ -111,7 +111,7 @@ class NormalizationTest {
         ),
     )
 
-    val data = apolloStore.readOperation(Issue2818Query()).data!!
+    val data = cacheManager.readOperation(Issue2818Query()).data!!
     assertEquals("section-name", data.home.sectionA?.name)
     assertEquals("section-id", data.home.sectionFragment.sectionA?.id)
     assertEquals("https://...", data.home.sectionFragment.sectionA?.imageUrl)
@@ -148,8 +148,8 @@ class NormalizationTest {
     val mockserver = MockServer()
     val apolloClient = ApolloClient.Builder()
         .serverUrl(mockserver.url())
-        .store(
-            ApolloStore(
+        .cacheManager(
+            CacheManager(
                 normalizedCacheFactory = MemoryCacheFactory(),
                 cacheKeyGenerator = TypePolicyCacheKeyGenerator,
                 cacheResolver = object : CacheKeyResolver() {
@@ -222,8 +222,8 @@ class NormalizationTest {
     val mockserver = MockServer()
     val apolloClient = ApolloClient.Builder()
         .serverUrl(mockserver.url())
-        .store(
-            ApolloStore(
+        .cacheManager(
+            CacheManager(
                 normalizedCacheFactory = MemoryCacheFactory(),
                 cacheKeyGenerator = TypePolicyCacheKeyGenerator,
                 cacheResolver = object : CacheResolver {
@@ -295,7 +295,7 @@ class NormalizationTest {
 
     // Fetch from network
     apolloClient.query(GetBooksByIdsPaginatedQuery(listOf("book-1", "book-2"))).fetchPolicy(FetchPolicy.NetworkOnly).execute()
-    // println(NormalizedCache.prettifyDump(apolloClient.apolloStore.dump()))
+    // println(NormalizedCache.prettifyDump(apolloClient.cacheManager.dump()))
 
     // Fetch from the cache
     val fromCache1 = apolloClient.query(GetBooksByIdsPaginatedNoCursorsQuery(listOf("book-1"))).fetchPolicy(FetchPolicy.CacheOnly).execute()

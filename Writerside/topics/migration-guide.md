@@ -38,10 +38,9 @@ import com.apollographql.cache.normalized.*
 import com.apollographql.apollo.cache.normalized.api.MemoryCacheFactory
 // With
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
-
-
-
 ```
+
+In most cases, this will be enough to migrate your project, but there were a few renames and API breaking changes. Read on for more details.
 
 ## Database schema
 
@@ -106,7 +105,7 @@ store.writeOperation(operation, data).also { store.publish(it) }
 
 Previously, if you configured custom scalar adapters on your client, you had to pass them to the `ApolloStore` methods.
 
-Now, `ApolloClient.apolloStore` returns a `SimpleApolloStore`, a wrapper around `ApolloStore` which passes the client's `CustomScalarAdapters` automatically.
+Now, `ApolloStore` has a reference to the client's `CustomScalarAdapters` so individual methods no longer need an adapters argument.
 
 ```kotlin
 // Before
@@ -123,11 +122,35 @@ client.apolloStore.writeOperation(
 )
 ```
 
+### Providing your own store
+
+The `ApolloStore` interface has been renamed to `CacheManager`. If you provide your own implementation, change the parent interface to `CacheManager`.
+Correspondingly, the `ApolloClient.Builder.store()` extension has been renamed to `ApolloClient.Builder.cacheManager()`.
+
+```kotlin
+// Before
+val MyStore = object : ApolloStore {
+  // ...
+}
+val apolloClient = ApolloClient.Builder()
+    // ...
+    .store(MyStore)
+    .build()
+
+// After
+val MyStore = object : CacheManager {
+  // ...
+}
+val apolloClient = ApolloClient.Builder()
+    // ...
+    .cacheManager(MyStore)
+    .build()
+```
+
 ### Other changes
 
 - `readFragment()` now returns a `ReadResult<D>` (it previously returned a `<D>`). This allows for surfacing metadata associated to the returned data, e.g. staleness.
 - Records are now rooted per operation type (`QUERY_ROOT`, `MUTATION_ROOT`, `SUBSCRIPTION_ROOT`), when previously these were all at the same level, which could cause conflicts.
-- `ApolloClient.apolloStore` is deprecated in favor of `ApolloClient.store` for consistency.
 
 ## CacheResolver, CacheKeyResolver
 

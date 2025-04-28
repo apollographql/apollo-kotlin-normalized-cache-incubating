@@ -1,7 +1,7 @@
 package pagination
 
 import com.apollographql.apollo.api.Optional
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.api.ConnectionEmbeddedFieldsProvider
 import com.apollographql.cache.normalized.api.ConnectionFieldKeyGenerator
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
@@ -41,7 +41,7 @@ class ConnectionProgrammaticPaginationTest {
   private fun test(cacheFactory: NormalizedCacheFactory) = runTest {
     val connectionTypes = setOf(UserConnection.type.name)
     val connectionFields = mapOf(Query.type.name to listOf("users"))
-    val apolloStore = ApolloStore(
+    val cacheManager = CacheManager(
         normalizedCacheFactory = cacheFactory,
         cacheKeyGenerator = TypePolicyCacheKeyGenerator,
         metadataGenerator = ConnectionMetadataGenerator(connectionTypes),
@@ -53,7 +53,7 @@ class ConnectionProgrammaticPaginationTest {
             connectionFields = connectionFields
         ),
     )
-    apolloStore.clearAll()
+    cacheManager.clearAll()
 
     // First page
     val query1 = UsersQuery(first = Optional.Present(2))
@@ -79,10 +79,10 @@ class ConnectionProgrammaticPaginationTest {
         )
       }
     }
-    apolloStore.writeOperation(query1, data1)
-    var dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query1, data1)
+    var dataFromStore = cacheManager.readOperation(query1).data
     assertEquals(data1, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Page after
     val query2 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx43"))
@@ -108,8 +108,8 @@ class ConnectionProgrammaticPaginationTest {
         )
       }
     }
-    apolloStore.writeOperation(query2, data2)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query2, data2)
+    dataFromStore = cacheManager.readOperation(query1).data
     var expectedData = UsersQuery.Data {
       users = buildUserConnection {
         pageInfo = buildPageInfo {
@@ -145,7 +145,7 @@ class ConnectionProgrammaticPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Page after
     val query3 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx45"))
@@ -171,8 +171,8 @@ class ConnectionProgrammaticPaginationTest {
         )
       }
     }
-    apolloStore.writeOperation(query3, data3)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query3, data3)
+    dataFromStore = cacheManager.readOperation(query1).data
     expectedData = UsersQuery.Data {
       users = buildUserConnection {
         pageInfo = buildPageInfo {
@@ -220,7 +220,7 @@ class ConnectionProgrammaticPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Page before
     val query4 = UsersQuery(last = Optional.Present(2), before = Optional.Present("xx42"))
@@ -246,8 +246,8 @@ class ConnectionProgrammaticPaginationTest {
         )
       }
     }
-    apolloStore.writeOperation(query4, data4)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query4, data4)
+    dataFromStore = cacheManager.readOperation(query1).data
     expectedData = UsersQuery.Data {
       users = buildUserConnection {
         pageInfo = buildPageInfo {
@@ -307,7 +307,7 @@ class ConnectionProgrammaticPaginationTest {
       }
     }
     assertEquals(expectedData, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Non-contiguous page (should reset)
     val query5 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx50"))
@@ -333,10 +333,10 @@ class ConnectionProgrammaticPaginationTest {
         )
       }
     }
-    apolloStore.writeOperation(query5, data5)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query5, data5)
+    dataFromStore = cacheManager.readOperation(query1).data
     assertEquals(data5, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
 
     // Empty page (should keep previous result)
     val query6 = UsersQuery(first = Optional.Present(2), after = Optional.Present("xx51"))
@@ -349,10 +349,10 @@ class ConnectionProgrammaticPaginationTest {
         edges = emptyList()
       }
     }
-    apolloStore.writeOperation(query6, data6)
-    dataFromStore = apolloStore.readOperation(query1).data
+    cacheManager.writeOperation(query6, data6)
+    dataFromStore = cacheManager.readOperation(query1).data
     assertEquals(data5, dataFromStore)
-    assertChainedCachesAreEqual(apolloStore)
+    assertChainedCachesAreEqual(cacheManager)
   }
 }
 

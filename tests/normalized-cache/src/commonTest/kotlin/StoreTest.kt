@@ -6,16 +6,16 @@ import com.apollographql.apollo.api.StringAdapter
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.isFromCache
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import normalizer.CharacterNameByIdQuery
 import normalizer.ColorQuery
@@ -33,11 +33,11 @@ import kotlin.test.assertIs
  */
 class StoreTest {
   private lateinit var apolloClient: ApolloClient
-  private lateinit var store: ApolloStore
+  private lateinit var cacheManager: CacheManager
 
   private fun setUp() {
-    store = ApolloStore(MemoryCacheFactory(), cacheKeyGenerator = IdCacheKeyGenerator(), cacheResolver = IdCacheKeyResolver())
-    apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).store(store).build()
+    cacheManager = CacheManager(MemoryCacheFactory(), cacheKeyGenerator = IdCacheKeyGenerator(), cacheResolver = IdCacheKeyResolver())
+    apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).cacheManager(cacheManager).build()
   }
 
   @Test
@@ -46,7 +46,7 @@ class StoreTest {
     assertFriendIsCached("1002", "Han Solo")
 
     // remove the root query object
-    var removed = store.remove(CacheKey("Character:2001"))
+    var removed = cacheManager.remove(CacheKey("Character:2001"))
     assertEquals(true, removed)
 
     // Trying to get the full response should fail
@@ -57,7 +57,7 @@ class StoreTest {
     assertFriendIsCached("1002", "Han Solo")
 
     // remove a single object from the list
-    removed = store.remove(CacheKey("Character:1002"))
+    removed = cacheManager.remove(CacheKey("Character:1002"))
     assertEquals(true, removed)
 
     // Trying to get the full response should fail
@@ -79,7 +79,7 @@ class StoreTest {
     assertFriendIsCached("1003", "Leia Organa")
 
     // Now remove multiple keys
-    val removed = store.remove(listOf(CacheKey("Character:1002"), CacheKey("Character:1000")))
+    val removed = cacheManager.remove(listOf(CacheKey("Character:1002"), CacheKey("Character:1000")))
 
     assertEquals(2, removed)
 
@@ -100,7 +100,7 @@ class StoreTest {
     assertFriendIsCached("1003", "Leia Organa")
 
     // test remove root query object
-    val removed = store.remove(CacheKey("Character:2001"), true)
+    val removed = cacheManager.remove(CacheKey("Character:2001"), true)
     assertEquals(true, removed)
 
     // Nothing should be cached anymore
@@ -116,7 +116,7 @@ class StoreTest {
     // put everything in the cache
     storeAllFriends()
 
-    store.accessCache {
+    cacheManager.accessCache {
       it.remove(CacheKey("Character:1000"), false)
     }
     assertFriendIsNotCached("1000")
@@ -127,8 +127,8 @@ class StoreTest {
     storeAllFriends()
     assertFriendIsCached("1000", "Luke Skywalker")
 
-    val newStore = ApolloStore(MemoryCacheFactory())
-    val newClient = apolloClient.newBuilder().store(newStore).build()
+    val newCacheManager = CacheManager(MemoryCacheFactory())
+    val newClient = apolloClient.newBuilder().cacheManager(newCacheManager).build()
 
     assertFriendIsNotCached("1000", newClient)
   }

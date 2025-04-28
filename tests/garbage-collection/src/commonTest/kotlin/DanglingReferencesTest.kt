@@ -1,15 +1,16 @@
 package test
 
 import com.apollographql.apollo.ApolloClient
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.CacheKey
+import com.apollographql.cache.normalized.apolloStore
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeDanglingReferences
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.fieldKey
 import com.apollographql.cache.normalized.testing.runTest
@@ -24,22 +25,22 @@ import kotlin.test.assertTrue
 
 class DanglingReferencesTest {
   @Test
-  fun simpleMemory() = simple(ApolloStore(MemoryCacheFactory()))
+  fun simpleMemory() = simple(CacheManager(MemoryCacheFactory()))
 
   @Test
-  fun simpleSql() = simple(ApolloStore(SqlNormalizedCacheFactory()))
+  fun simpleSql() = simple(CacheManager(SqlNormalizedCacheFactory()))
 
   @Test
   fun simpleChained(): TestResult {
-    return simple(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+    return simple(CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
   }
 
-  private fun simple(apolloStore: ApolloStore) = runTest {
+  private fun simple(cacheManager: CacheManager) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    cacheManager.clearAll()
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           mockServer.enqueueString(REPOSITORY_LIST_RESPONSE)
@@ -47,12 +48,12 @@ class DanglingReferencesTest {
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .execute()
 
-          var allRecords = store.accessCache { it.allRecords() }
+          var allRecords = cacheManager.accessCache { it.allRecords() }
           assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
 
           // Remove User 1, now Repository 0.starGazers is a dangling reference
-          store.remove(CacheKey("User:1"), cascade = false)
-          val removedFieldsAndRecords = store.removeDanglingReferences()
+          cacheManager.remove(CacheKey("User:1"), cascade = false)
+          val removedFieldsAndRecords = apolloClient.apolloStore.removeDanglingReferences()
           assertEquals(
               setOf(CacheKey("Repository:0").fieldKey("starGazers")),
               removedFieldsAndRecords.removedFields
@@ -61,26 +62,26 @@ class DanglingReferencesTest {
               emptySet(),
               removedFieldsAndRecords.removedRecords
           )
-          allRecords = store.accessCache { it.allRecords() }
+          allRecords = cacheManager.accessCache { it.allRecords() }
           assertFalse(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
         }
   }
 
   @Test
-  fun multipleMemory() = multiple(ApolloStore(MemoryCacheFactory()))
+  fun multipleMemory() = multiple(CacheManager(MemoryCacheFactory()))
 
   @Test
-  fun multipleSql() = multiple(ApolloStore(SqlNormalizedCacheFactory()))
+  fun multipleSql() = multiple(CacheManager(SqlNormalizedCacheFactory()))
 
   @Test
-  fun multipleChained() = multiple(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+  fun multipleChained() = multiple(CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
 
-  private fun multiple(apolloStore: ApolloStore) = runTest {
+  private fun multiple(cacheManager: CacheManager) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    cacheManager.clearAll()
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           mockServer.enqueueString(META_PROJECT_LIST_RESPONSE)
@@ -95,8 +96,8 @@ class DanglingReferencesTest {
           // thus (metaProjects.0.0) is empty and removed
           // thus (QUERY_ROOT).metaProjects is a dangling reference
           // thus QUERY_ROOT is empty and removed
-          store.remove(CacheKey("User:0"), cascade = false)
-          val removedFieldsAndRecords = store.removeDanglingReferences()
+          cacheManager.remove(CacheKey("User:0"), cascade = false)
+          val removedFieldsAndRecords = apolloClient.apolloStore.removeDanglingReferences()
           assertEquals(
               setOf(
                   CacheKey("metaProjects").append("0", "0", "type").fieldKey("owners"),
@@ -113,7 +114,7 @@ class DanglingReferencesTest {
               ),
               removedFieldsAndRecords.removedRecords
           )
-          val allRecords = store.accessCache { it.allRecords() }
+          val allRecords = cacheManager.accessCache { it.allRecords() }
           assertFalse(allRecords.containsKey(CacheKey("QUERY_ROOT")))
           assertFalse(allRecords.containsKey(CacheKey("metaProjects").append("0", "0")))
           assertFalse(allRecords.containsKey(CacheKey("metaProjects").append("0", "0", "type")))

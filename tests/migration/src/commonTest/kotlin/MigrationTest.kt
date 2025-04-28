@@ -3,17 +3,17 @@ package test
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.mpp.currentTimeMillis
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.Record
 import com.apollographql.cache.normalized.api.RecordValue
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import com.apollographql.mockserver.MockServer
 import com.apollographql.mockserver.enqueueString
@@ -91,10 +91,10 @@ class MigrationTest {
         }
 
     // Open the legacy store which empties it. Add/read some data to make sure it works.
-    val store = ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory(name = name)))
+    val cacheManager = CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory(name = name)))
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           // Expected cache miss: the db has been cleared
@@ -116,7 +116,7 @@ class MigrationTest {
           assertEquals(REPOSITORY_LIST_DATA, response.data)
 
           // Clean up
-          store.clearAll()
+          cacheManager.clearAll()
         }
   }
 
@@ -137,13 +137,13 @@ class MigrationTest {
         }
 
     // Create a modern store and migrate the legacy data
-    val store = ApolloStore(SqlNormalizedCacheFactory(name = "modern.db")).also { it.clearAll() }
-    store.migrateFrom(legacyStore)
+    val cacheManager = CacheManager(SqlNormalizedCacheFactory(name = "modern.db")).also { it.clearAll() }
+    cacheManager.migrateFrom(legacyStore)
 
     // Read the data back
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           val response = apolloClient.query(RepositoryListQuery())
@@ -154,7 +154,7 @@ class MigrationTest {
   }
 }
 
-private fun ApolloStore.migrateFrom(legacyStore: LegacyApolloStore) {
+private fun CacheManager.migrateFrom(legacyStore: LegacyApolloStore) {
   accessCache { cache ->
     cache.merge(
         records = legacyStore.accessCache { it.allRecords() }.map { it.toRecord() },

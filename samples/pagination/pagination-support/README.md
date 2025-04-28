@@ -17,8 +17,8 @@ Note: to execute the app, provide a [GitHub access token](https://developer.gith
   ```
   and the cache declaration in `Apollo.kt`:
   ```kotlin
-  .store(
-    ApolloStore(
+  .cacheManager(
+    CacheManager(
         normalizedCacheFactory = memoryThenSqlCache,
         cacheKeyGenerator = TypePolicyCacheKeyGenerator,
         metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes), // Use the generated Pagination class

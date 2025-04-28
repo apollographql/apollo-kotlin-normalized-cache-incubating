@@ -9,15 +9,15 @@ import com.apollographql.apollo.exception.CacheMissException
 import com.apollographql.apollo.network.NetworkTransport
 import com.apollographql.apollo.testing.QueueTestNetworkTransport
 import com.apollographql.apollo.testing.enqueueTestResponse
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.cacheHeaders
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.doNotStore
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.runTest
 import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.flow.Flow
@@ -29,11 +29,11 @@ import kotlin.test.assertNotNull
 
 class CacheFlagsTest {
   private lateinit var apolloClient: ApolloClient
-  private lateinit var store: ApolloStore
+  private lateinit var cacheManager: CacheManager
 
   private fun setUp() {
-    store = ApolloStore(MemoryCacheFactory())
-    apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).store(store).build()
+    cacheManager = CacheManager(MemoryCacheFactory())
+    apolloClient = ApolloClient.Builder().networkTransport(QueueTestNetworkTransport()).cacheManager(cacheManager).build()
   }
 
   @Test
@@ -75,10 +75,10 @@ class CacheFlagsTest {
     val query = HeroNameQuery()
     val data = HeroNameQuery.Data(HeroNameQuery.Hero("R2-D2"))
 
-    store = ApolloStore(MemoryCacheFactory())
+    cacheManager = CacheManager(MemoryCacheFactory())
     val queueTestNetworkTransport = QueueTestNetworkTransport()
     apolloClient = ApolloClient.Builder()
-        .store(store)
+        .cacheManager(cacheManager)
         .networkTransport(object : NetworkTransport {
           val delegate = queueTestNetworkTransport
           override fun <D : Operation.Data> execute(request: ApolloRequest<D>): Flow<ApolloResponse<D>> {

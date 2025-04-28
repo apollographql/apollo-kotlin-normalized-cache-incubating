@@ -8,8 +8,7 @@ import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.exception.DefaultApolloException
 import com.apollographql.apollo.interceptor.ApolloInterceptor
 import com.apollographql.apollo.interceptor.ApolloInterceptorChain
-import com.apollographql.cache.normalized.ApolloStore
-import com.apollographql.cache.normalized.ApolloStoreInterceptor
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.dependentKeys
 import com.apollographql.cache.normalized.api.withErrors
@@ -26,7 +25,7 @@ import kotlinx.coroutines.flow.onSubscription
 
 internal val WatcherSentinel = DefaultApolloException("The watcher has started")
 
-internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, ApolloStoreInterceptor {
+internal class WatcherInterceptor(val cacheManager: CacheManager) : ApolloInterceptor {
   override fun <D : Operation.Data> intercept(request: ApolloRequest<D>, chain: ApolloInterceptorChain): Flow<ApolloResponse<D>> {
     val watchContext = request.watchContext ?: return chain.proceed(request)
 
@@ -44,7 +43,7 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
             errors = null,
             customScalarAdapters = customScalarAdapters,
         )
-        store.normalize(
+        cacheManager.normalize(
             executable = request.operation,
             dataWithErrors = dataWithErrors,
             rootKey = CacheKey.QUERY_ROOT,
@@ -52,13 +51,13 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
         ).values.dependentKeys()
       }
 
-    return (store.changedKeys as SharedFlow<Any>)
+    return (cacheManager.changedKeys as SharedFlow<Any>)
         .onSubscription {
           emit(Unit)
         }
         .filter { changedKeys ->
           changedKeys !is Set<*> ||
-              changedKeys === ApolloStore.ALL_KEYS ||
+              changedKeys === CacheManager.ALL_KEYS ||
               watchedKeys == null ||
               changedKeys.intersect(watchedKeys!!).isNotEmpty()
         }.map {
@@ -73,7 +72,7 @@ internal class WatcherInterceptor(val store: ApolloStore) : ApolloInterceptor, A
                         errors = response.errors,
                         customScalarAdapters = customScalarAdapters,
                     )
-                    watchedKeys = store.normalize(
+                    watchedKeys = cacheManager.normalize(
                         executable = request.operation,
                         dataWithErrors = dataWithErrors,
                         rootKey = CacheKey.QUERY_ROOT,

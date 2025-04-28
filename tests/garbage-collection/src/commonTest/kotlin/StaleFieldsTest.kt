@@ -2,7 +2,7 @@ package test
 
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.mpp.currentTimeMillis
-import com.apollographql.cache.normalized.ApolloStore
+import com.apollographql.cache.normalized.CacheManager
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.allRecords
 import com.apollographql.cache.normalized.api.ApolloCacheHeaders
@@ -10,12 +10,13 @@ import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.GlobalMaxAgeProvider
 import com.apollographql.cache.normalized.api.SchemaCoordinatesMaxAgeProvider
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.cacheHeaders
+import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.removeStaleFields
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.testing.append
 import com.apollographql.cache.normalized.testing.fieldKey
 import com.apollographql.cache.normalized.testing.runTest
@@ -32,21 +33,21 @@ import kotlin.time.Duration.Companion.seconds
 
 class StaleFieldsTest {
   @Test
-  fun clientControlledRemoveFieldsMemory() = clientControlledRemoveFields(ApolloStore(MemoryCacheFactory()))
+  fun clientControlledRemoveFieldsMemory() = clientControlledRemoveFields(CacheManager(MemoryCacheFactory()))
 
   @Test
-  fun clientControlledRemoveFieldsSql() = clientControlledRemoveFields(ApolloStore(SqlNormalizedCacheFactory()))
+  fun clientControlledRemoveFieldsSql() = clientControlledRemoveFields(CacheManager(SqlNormalizedCacheFactory()))
 
   @Test
   fun clientControlledRemoveFieldsChained() =
-    clientControlledRemoveFields(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+    clientControlledRemoveFields(CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
 
-  private fun clientControlledRemoveFields(apolloStore: ApolloStore) = runTest {
+  private fun clientControlledRemoveFields(cacheManager: CacheManager) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    cacheManager.clearAll()
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           mockServer.enqueueString(REPOSITORY_LIST_RESPONSE)
@@ -55,7 +56,7 @@ class StaleFieldsTest {
               .cacheHeaders(receivedDate(currentTimeSeconds() - 60))
               .execute()
 
-          var allRecords = store.accessCache { it.allRecords() }
+          var allRecords = cacheManager.accessCache { it.allRecords() }
           assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("stars"))
           assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
           assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
@@ -65,7 +66,7 @@ class StaleFieldsTest {
               Cache.maxAges,
               defaultMaxAge = 120.seconds,
           )
-          var removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
+          var removedFieldsAndRecords = apolloClient.apolloStore.removeStaleFields(maxAgeProvider)
           // Repository.stars has a max age of 60 seconds, so they should be removed / User has a max age of 90 seconds, so Repository.starGazers should be kept
           assertEquals(
               setOf(
@@ -76,7 +77,7 @@ class StaleFieldsTest {
           assertEquals(
               emptySet(), removedFieldsAndRecords.removedRecords
           )
-          allRecords = store.accessCache { it.allRecords() }
+          allRecords = cacheManager.accessCache { it.allRecords() }
           assertFalse(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("stars"))
           assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
           assertFalse(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
@@ -87,7 +88,7 @@ class StaleFieldsTest {
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .cacheHeaders(receivedDate(currentTimeSeconds() - 90))
               .execute()
-          removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
+          removedFieldsAndRecords = apolloClient.apolloStore.removeStaleFields(maxAgeProvider)
           // Repository.stars and Repository.starGazers should be removed
           assertEquals(
               setOf(
@@ -100,7 +101,7 @@ class StaleFieldsTest {
           assertEquals(
               emptySet(), removedFieldsAndRecords.removedRecords
           )
-          allRecords = store.accessCache { it.allRecords() }
+          allRecords = cacheManager.accessCache { it.allRecords() }
           assertFalse(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("stars"))
           assertFalse(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
           assertFalse(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
@@ -109,21 +110,21 @@ class StaleFieldsTest {
   }
 
   @Test
-  fun clientControlledRemoveRecordsMemory() = clientControlledRemoveRecords(ApolloStore(MemoryCacheFactory()))
+  fun clientControlledRemoveRecordsMemory() = clientControlledRemoveRecords(CacheManager(MemoryCacheFactory()))
 
   @Test
-  fun clientControlledRemoveRecordsSql() = clientControlledRemoveRecords(ApolloStore(SqlNormalizedCacheFactory()))
+  fun clientControlledRemoveRecordsSql() = clientControlledRemoveRecords(CacheManager(SqlNormalizedCacheFactory()))
 
   @Test
   fun clientControlledRemoveRecordsChained() =
-    clientControlledRemoveRecords(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+    clientControlledRemoveRecords(CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
 
-  private fun clientControlledRemoveRecords(apolloStore: ApolloStore) = runTest {
+  private fun clientControlledRemoveRecords(cacheManager: CacheManager) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    cacheManager.clearAll()
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           mockServer.enqueueString(PROJECT_LIST_RESPONSE)
@@ -132,7 +133,7 @@ class StaleFieldsTest {
               .cacheHeaders(receivedDate(currentTimeSeconds() - 60))
               .execute()
 
-          var allRecords = store.accessCache { it.allRecords() }
+          var allRecords = cacheManager.accessCache { it.allRecords() }
           assertTrue(allRecords[CacheKey("projects").append("0")]!!.fields.containsKey("velocity"))
           assertTrue(allRecords[CacheKey("projects").append("0")]!!.fields.containsKey("isUrgent"))
           assertTrue(allRecords[CacheKey("projects").append("1")]!!.fields.containsKey("velocity"))
@@ -142,7 +143,7 @@ class StaleFieldsTest {
               Cache.maxAges,
               defaultMaxAge = 120.seconds,
           )
-          var removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
+          var removedFieldsAndRecords = apolloClient.apolloStore.removeStaleFields(maxAgeProvider)
           // Project.velocity has a max age of 60 seconds, so they should be removed / Project.isUrgent has a max age of 90 seconds, so they should be kept
           assertEquals(
               setOf(
@@ -153,7 +154,7 @@ class StaleFieldsTest {
           assertEquals(
               emptySet(), removedFieldsAndRecords.removedRecords
           )
-          allRecords = store.accessCache { it.allRecords() }
+          allRecords = cacheManager.accessCache { it.allRecords() }
           assertFalse(allRecords[CacheKey("projects").append("0")]!!.fields.containsKey("velocity"))
           assertTrue(allRecords[CacheKey("projects").append("0")]!!.fields.containsKey("isUrgent"))
           assertFalse(allRecords[CacheKey("projects").append("1")]!!.fields.containsKey("velocity"))
@@ -164,7 +165,7 @@ class StaleFieldsTest {
               .fetchPolicy(FetchPolicy.NetworkOnly)
               .cacheHeaders(receivedDate(currentTimeSeconds() - 90))
               .execute()
-          removedFieldsAndRecords = store.removeStaleFields(maxAgeProvider)
+          removedFieldsAndRecords = apolloClient.apolloStore.removeStaleFields(maxAgeProvider)
           // Project.velocity and Project.isUrgent should be removed, their records being empty they should be removed
           assertEquals(
               setOf(
@@ -180,28 +181,28 @@ class StaleFieldsTest {
                   CacheKey("projects").append("1"),
               ), removedFieldsAndRecords.removedRecords
           )
-          allRecords = store.accessCache { it.allRecords() }
+          allRecords = cacheManager.accessCache { it.allRecords() }
           assertFalse(allRecords.containsKey(CacheKey("projects").append("0")))
           assertFalse(allRecords.containsKey(CacheKey("projects").append("1")))
         }
   }
 
   @Test
-  fun serverControlledRemoveFieldsMemory() = serverControlledRemoveFields(ApolloStore(MemoryCacheFactory()))
+  fun serverControlledRemoveFieldsMemory() = serverControlledRemoveFields(CacheManager(MemoryCacheFactory()))
 
   @Test
-  fun serverControlledRemoveFieldsSql() = serverControlledRemoveFields(ApolloStore(SqlNormalizedCacheFactory()))
+  fun serverControlledRemoveFieldsSql() = serverControlledRemoveFields(CacheManager(SqlNormalizedCacheFactory()))
 
   @Test
   fun serverControlledRemoveFieldsChained() =
-    serverControlledRemoveFields(ApolloStore(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
+    serverControlledRemoveFields(CacheManager(MemoryCacheFactory().chain(SqlNormalizedCacheFactory())))
 
-  private fun serverControlledRemoveFields(apolloStore: ApolloStore) = runTest {
+  private fun serverControlledRemoveFields(cacheManager: CacheManager) = runTest {
     val mockServer = MockServer()
-    val store = apolloStore.also { it.clearAll() }
+    cacheManager.clearAll()
     ApolloClient.Builder()
         .serverUrl(mockServer.url())
-        .store(store)
+        .cacheManager(cacheManager)
         .build()
         .use { apolloClient ->
           mockServer.enqueueString(REPOSITORY_LIST_RESPONSE)
@@ -210,13 +211,13 @@ class StaleFieldsTest {
               .cacheHeaders(expirationDate(currentTimeSeconds() - 60))
               .execute()
 
-          var allRecords = store.accessCache { it.allRecords() }
+          var allRecords = cacheManager.accessCache { it.allRecords() }
           assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("stars"))
           assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
           assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
           assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("starGazers"))
 
-          var removedFieldsAndRecords = store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE))
+          var removedFieldsAndRecords = apolloClient.apolloStore.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE))
           // Everything is stale
           assertEquals(
               setOf(
@@ -250,7 +251,7 @@ class StaleFieldsTest {
                   CacheKey("QUERY_ROOT"),
               ), removedFieldsAndRecords.removedRecords
           )
-          allRecords = store.accessCache { it.allRecords() }
+          allRecords = cacheManager.accessCache { it.allRecords() }
           assertTrue(allRecords.isEmpty())
 
           mockServer.enqueueString(REPOSITORY_LIST_RESPONSE)
@@ -259,7 +260,8 @@ class StaleFieldsTest {
               .cacheHeaders(expirationDate(currentTimeSeconds() - 60))
               .execute()
 
-          removedFieldsAndRecords = store.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE), maxStale = 70.seconds)
+          removedFieldsAndRecords =
+            apolloClient.apolloStore.removeStaleFields(GlobalMaxAgeProvider(Duration.INFINITE), maxStale = 70.seconds)
           // Nothing is stale
           assertEquals(
               emptySet(),
@@ -269,7 +271,7 @@ class StaleFieldsTest {
               emptySet(),
               removedFieldsAndRecords.removedRecords
           )
-          allRecords = store.accessCache { it.allRecords() }
+          allRecords = cacheManager.accessCache { it.allRecords() }
           assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("stars"))
           assertTrue(allRecords[CacheKey("Repository:0")]!!.fields.containsKey("starGazers"))
           assertTrue(allRecords[CacheKey("Repository:1")]!!.fields.containsKey("stars"))
