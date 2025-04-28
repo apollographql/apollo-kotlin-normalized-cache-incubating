@@ -10,14 +10,13 @@ import androidx.paging.RemoteMediator
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Optional
 import com.apollographql.apollo.exception.ApolloGraphQLException
-import com.apollographql.cache.normalized.ApolloStore
 import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.ConnectionMetadataGenerator
 import com.apollographql.cache.normalized.api.ConnectionRecordMerger
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
+import com.apollographql.cache.normalized.normalizedCache
 import com.apollographql.cache.normalized.sql.SqlNormalizedCacheFactory
-import com.apollographql.cache.normalized.store
 import com.apollographql.cache.normalized.watch
 import com.example.apollokotlinpaginationsample.Application
 import com.example.apollokotlinpaginationsample.BuildConfig
@@ -47,12 +46,10 @@ val apolloClient: ApolloClient by lazy {
         )
 
         // Normalized cache
-        .store(
-            ApolloStore(
-                normalizedCacheFactory = memoryThenSqlCache,
-                metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
-                recordMerger = ConnectionRecordMerger
-            )
+        .normalizedCache(
+            normalizedCacheFactory = memoryThenSqlCache,
+            metadataGenerator = ConnectionMetadataGenerator(Pagination.connectionTypes),
+            recordMerger = ConnectionRecordMerger
         )
 
         .build()
