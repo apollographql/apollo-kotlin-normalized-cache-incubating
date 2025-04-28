@@ -11,15 +11,22 @@ import com.apollographql.cache.normalized.FetchPolicy
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.IdCacheKeyGenerator
 import com.apollographql.cache.normalized.api.IdCacheKeyResolver
+import com.apollographql.cache.normalized.apolloStore
 import com.apollographql.cache.normalized.cacheManager
 import com.apollographql.cache.normalized.fetchPolicy
 import com.apollographql.cache.normalized.isFromCache
 import com.apollographql.cache.normalized.memory.MemoryCacheFactory
 import com.apollographql.cache.normalized.normalizedCache
+import com.apollographql.cache.normalized.removeFragment
+import com.apollographql.cache.normalized.removeOperation
 import com.apollographql.cache.normalized.testing.runTest
 import normalizer.CharacterNameByIdQuery
 import normalizer.ColorQuery
 import normalizer.HeroAndFriendsNamesWithIDsQuery
+import normalizer.HeroAndFriendsWithFragmentsQuery
+import normalizer.fragment.HeroWithFriendsFragment
+import normalizer.fragment.HeroWithFriendsFragmentImpl
+import normalizer.fragment.HumanWithIdFragment
 import normalizer.type.Color
 import normalizer.type.Episode
 import kotlin.test.Test
@@ -87,6 +94,77 @@ class StoreTest {
     assertFriendIsNotCached("1000")
     assertFriendIsNotCached("1002")
     assertFriendIsCached("1003", "Leia Organa")
+  }
+
+  @Test
+  fun removeQueryFromStore() = runTest(before = { setUp() }) {
+    // Setup the cache with ColorQuery and HeroAndFriendsNamesWithIDsQuery
+    val colorQuery = ColorQuery()
+    apolloClient.enqueueTestResponse(colorQuery, ColorQuery.Data(color = "red"))
+    apolloClient.query(colorQuery).fetchPolicy(FetchPolicy.NetworkOnly).execute()
+    storeAllFriends()
+
+    // Remove fields from HeroAndFriendsNamesWithIDsQuery
+    val operation = HeroAndFriendsNamesWithIDsQuery(Episode.NEWHOPE)
+    val operationData = apolloClient.apolloStore.readOperation(operation).data!!
+    apolloClient.apolloStore.removeOperation(operation, operationData)
+
+    // Fields from HeroAndFriendsNamesWithIDsQuery should be removed
+    assertFriendIsNotCached("1000")
+    assertFriendIsNotCached("1002")
+    assertFriendIsNotCached("1003")
+
+    // But fields from ColorQuery should still be there
+    val cacheResponse = apolloClient.query(colorQuery).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    assertEquals(cacheResponse.data?.color, "red")
+  }
+
+  @Test
+  fun removeFragmentFromStore() = runTest(before = { setUp() }) {
+    // Setup the cache with ColorQuery and HeroAndFriendsWithFragments
+    val colorQuery = ColorQuery()
+    apolloClient.enqueueTestResponse(colorQuery, ColorQuery.Data(color = "red"))
+    apolloClient.query(colorQuery).fetchPolicy(FetchPolicy.NetworkOnly).execute()
+    val heroAndFriendsWithFragmentsQuery = HeroAndFriendsWithFragmentsQuery()
+    apolloClient.enqueueTestResponse(
+        heroAndFriendsWithFragmentsQuery,
+        HeroAndFriendsWithFragmentsQuery.Data(
+            HeroAndFriendsWithFragmentsQuery.Hero(
+                __typename = "Droid",
+                heroWithFriendsFragment = HeroWithFriendsFragment(
+                    id = "2001",
+                    name = "R2-D2",
+                    friends = listOf(
+                        HeroWithFriendsFragment.Friend(
+                            __typename = "Human",
+                            humanWithIdFragment = HumanWithIdFragment(
+                                id = "1000",
+                                name = "Luke Skywalker"
+                            )
+                        ),
+                    )
+                )
+            )
+        )
+    )
+    apolloClient.query(heroAndFriendsWithFragmentsQuery).fetchPolicy(FetchPolicy.NetworkOnly).execute()
+
+    // Remove fields from HeroWithFriendsFragment
+    val fragment = HeroWithFriendsFragmentImpl()
+    val cacheKey = CacheKey("Character:2001")
+    val fragmentData = apolloClient.apolloStore.readFragment(
+        fragment = fragment,
+        cacheKey = cacheKey,
+    ).data
+    apolloClient.apolloStore.removeFragment(fragment, cacheKey, fragmentData)
+
+    // Fields from HeroAndFriendsNamesWithIDsQuery should be removed
+    assertFriendIsNotCached("2001")
+    assertFriendIsNotCached("1000")
+
+    // But fields from ColorQuery should still be there
+    val cacheResponse = apolloClient.query(colorQuery).fetchPolicy(FetchPolicy.CacheOnly).execute()
+    assertEquals(cacheResponse.data?.color, "red")
   }
 
   @Test

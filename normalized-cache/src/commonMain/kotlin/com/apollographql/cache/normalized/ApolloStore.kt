@@ -10,8 +10,11 @@ import com.apollographql.cache.normalized.CacheManager.ReadResult
 import com.apollographql.cache.normalized.api.CacheHeaders
 import com.apollographql.cache.normalized.api.CacheKey
 import com.apollographql.cache.normalized.api.DataWithErrors
+import com.apollographql.cache.normalized.api.DefaultRecordMerger
 import com.apollographql.cache.normalized.api.NormalizedCache
 import com.apollographql.cache.normalized.api.Record
+import com.apollographql.cache.normalized.api.rootKey
+import com.apollographql.cache.normalized.api.withErrors
 import com.benasher44.uuid.Uuid
 import kotlinx.coroutines.flow.SharedFlow
 import kotlin.reflect.KClass
@@ -189,4 +192,76 @@ class ApolloStore(
    * @see CacheManager.dispose
    */
   fun dispose() = cacheManager.dispose()
+}
+
+/**
+ * Removes an operation from the store.
+ *
+ * This is a synchronous operation that might block if the underlying cache is doing IO.
+ *
+ * Call [publish] with the returned keys to notify any watchers.
+ *
+ * @param operation the operation of the data to remove.
+ * @param data the data to remove.
+ * @return the set of field keys that have been removed.
+ */
+fun <D : Operation.Data> ApolloStore.removeOperation(
+    operation: Operation<D>,
+    data: D,
+    cacheHeaders: CacheHeaders = CacheHeaders.NONE,
+): Set<String> {
+  return removeData(operation, operation.rootKey(), data, cacheHeaders)
+}
+
+/**
+ * Removes a fragment from the store.
+ *
+ * This is a synchronous operation that might block if the underlying cache is doing IO.
+ *
+ * Call [publish] with the returned keys to notify any watchers.
+ *
+ * @param fragment the fragment of the data to remove.
+ * @param data the data to remove.
+ * @param cacheKey the root where to remove the fragment data from.
+ * @return the set of field keys that have been removed.
+ */
+fun <D : Fragment.Data> ApolloStore.removeFragment(
+    fragment: Fragment<D>,
+    cacheKey: CacheKey,
+    data: D,
+    cacheHeaders: CacheHeaders = CacheHeaders.NONE,
+): Set<String> {
+  return removeData(fragment, cacheKey, data, cacheHeaders)
+}
+
+private fun <D : Executable.Data> ApolloStore.removeData(
+    executable: Executable<D>,
+    cacheKey: CacheKey,
+    data: D,
+    cacheHeaders: CacheHeaders,
+): Set<String> {
+  val dataWithErrors = data.withErrors(executable, null)
+  val normalizationRecords = normalize(
+      executable = executable,
+      dataWithErrors = dataWithErrors,
+      rootKey = cacheKey,
+  )
+  val fullRecords = accessCache { cache -> cache.loadRecords(normalizationRecords.map { it.key }, cacheHeaders = cacheHeaders) }
+  val trimmedRecords = fullRecords.map { fullRecord ->
+    val fieldNamesToTrim = normalizationRecords[fullRecord.key]?.fields?.keys.orEmpty()
+    Record(
+        key = fullRecord.key,
+        fields = fullRecord.fields - fieldNamesToTrim,
+        metadata = fullRecord.metadata - fieldNamesToTrim,
+    )
+  }.filterNot { it.fields.isEmpty() }
+  accessCache { cache ->
+    cache.remove(normalizationRecords.keys, cascade = false)
+    cache.merge(
+        records = trimmedRecords,
+        cacheHeaders = cacheHeaders,
+        recordMerger = DefaultRecordMerger
+    )
+  }
+  return normalizationRecords.values.flatMap { it.fieldKeys() }.toSet()
 }

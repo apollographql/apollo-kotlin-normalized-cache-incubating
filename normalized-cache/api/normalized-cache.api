@@ -31,6 +31,13 @@ public final class com/apollographql/cache/normalized/ApolloStore {
 	public final fun writeOptimisticUpdates-dEpVOtE (Lcom/apollographql/apollo/api/Fragment;Ljava/lang/String;Lcom/apollographql/apollo/api/Fragment$Data;Ljava/util/UUID;)Ljava/util/Set;
 }
 
+public final class com/apollographql/cache/normalized/ApolloStoreKt {
+	public static final fun removeFragment-JWiRkbA (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Fragment;Ljava/lang/String;Lcom/apollographql/apollo/api/Fragment$Data;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Set;
+	public static synthetic fun removeFragment-JWiRkbA$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Fragment;Ljava/lang/String;Lcom/apollographql/apollo/api/Fragment$Data;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Ljava/util/Set;
+	public static final fun removeOperation (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Lcom/apollographql/cache/normalized/api/CacheHeaders;)Ljava/util/Set;
+	public static synthetic fun removeOperation$default (Lcom/apollographql/cache/normalized/ApolloStore;Lcom/apollographql/apollo/api/Operation;Lcom/apollographql/apollo/api/Operation$Data;Lcom/apollographql/cache/normalized/api/CacheHeaders;ILjava/lang/Object;)Ljava/util/Set;
+}
+
 public final class com/apollographql/cache/normalized/CacheInfo : com/apollographql/apollo/api/ExecutionContext$Element {
 	public static final field Key Lcom/apollographql/cache/normalized/CacheInfo$Key;
 	public synthetic fun <init> (JJJJZZLcom/apollographql/apollo/exception/CacheMissException;Lcom/apollographql/apollo/exception/ApolloException;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
