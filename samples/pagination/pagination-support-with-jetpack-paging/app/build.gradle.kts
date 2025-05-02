@@ -77,7 +77,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
 
     implementation("com.apollographql.apollo:apollo-runtime")
-    implementation("com.apollographql.cache:normalized-cache-sqlite:1.0.0-alpha.1")
+    implementation("com.apollographql.cache:normalized-cache-sqlite:1.0.0-alpha.2-SNAPSHOT")
 
     implementation("androidx.paging:paging-runtime-ktx:3.3.6")
     implementation("androidx.paging:paging-compose:3.3.6")
