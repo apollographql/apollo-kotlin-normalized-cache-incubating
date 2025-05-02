@@ -500,14 +500,15 @@ public abstract interface class com/apollographql/cache/normalized/api/Normalize
 	public abstract fun clearAll ()V
 	public abstract fun merge (Lcom/apollographql/cache/normalized/api/Record;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/RecordMerger;)Ljava/util/Set;
 	public abstract fun merge (Ljava/util/Collection;Lcom/apollographql/cache/normalized/api/CacheHeaders;Lcom/apollographql/cache/normalized/api/RecordMerger;)Ljava/util/Set;
-	public static fun prettifyDump (Ljava/util/Map;)Ljava/lang/String;
+	public static fun prettifyDump (Ljava/util/Map;Z)Ljava/lang/String;
 	public abstract fun remove (Ljava/util/Collection;Z)I
 	public abstract fun remove-eNSUWrY (Ljava/lang/String;Z)Z
 	public abstract fun trim (JF)J
 }
 
 public final class com/apollographql/cache/normalized/api/NormalizedCache$Companion {
-	public final fun prettifyDump (Ljava/util/Map;)Ljava/lang/String;
+	public final fun prettifyDump (Ljava/util/Map;Z)Ljava/lang/String;
+	public static synthetic fun prettifyDump$default (Lcom/apollographql/cache/normalized/api/NormalizedCache$Companion;Ljava/util/Map;ZILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class com/apollographql/cache/normalized/api/NormalizedCache$DefaultImpls {

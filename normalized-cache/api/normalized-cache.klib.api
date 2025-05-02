@@ -62,7 +62,7 @@ abstract interface com.apollographql.cache.normalized.api/NormalizedCache : com.
     open fun trim(kotlin/Long, kotlin/Float = ...): kotlin/Long // com.apollographql.cache.normalized.api/NormalizedCache.trim|trim(kotlin.Long;kotlin.Float){}[0]
 
     final object Companion { // com.apollographql.cache.normalized.api/NormalizedCache.Companion|null[0]
-        final fun prettifyDump(kotlin.collections/Map<kotlin.reflect/KClass<*>, kotlin.collections/Map<com.apollographql.cache.normalized.api/CacheKey, com.apollographql.cache.normalized.api/Record>>): kotlin/String // com.apollographql.cache.normalized.api/NormalizedCache.Companion.prettifyDump|prettifyDump(kotlin.collections.Map<kotlin.reflect.KClass<*>,kotlin.collections.Map<com.apollographql.cache.normalized.api.CacheKey,com.apollographql.cache.normalized.api.Record>>){}[0]
+        final fun prettifyDump(kotlin.collections/Map<kotlin.reflect/KClass<*>, kotlin.collections/Map<com.apollographql.cache.normalized.api/CacheKey, com.apollographql.cache.normalized.api/Record>>, kotlin/Boolean = ...): kotlin/String // com.apollographql.cache.normalized.api/NormalizedCache.Companion.prettifyDump|prettifyDump(kotlin.collections.Map<kotlin.reflect.KClass<*>,kotlin.collections.Map<com.apollographql.cache.normalized.api.CacheKey,com.apollographql.cache.normalized.api.Record>>;kotlin.Boolean){}[0]
     }
 }
 
