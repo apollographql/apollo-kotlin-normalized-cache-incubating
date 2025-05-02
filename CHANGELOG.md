@@ -1,6 +1,6 @@
 # Next version (unreleased)
 
-PUT_CHANGELOG_HERE
+- The computation of cache keys when multiple key fields are used has changed to avoid potential collisions. Note: this can lead to cache misses after upgrading to this version. (#80)
 
 # Version 1.0.0-alpha.1
 

@@ -25,9 +25,7 @@ value class CacheKey(
       buildString {
         append(typename)
         append(":")
-        values.forEach {
-          append(it)
-        }
+        append(values.joinToString("+") { it.replace("\\", "\\\\").replace("+", "\\+") })
       }
   )
 
