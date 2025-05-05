@@ -86,23 +86,28 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
 
   companion object {
     @JvmStatic
-    fun prettifyDump(dump: Map<@JvmSuppressWildcards KClass<*>, Map<CacheKey, Record>>): String = dump.prettifyDump()
+    fun prettifyDump(dump: Map<@JvmSuppressWildcards KClass<*>, Map<CacheKey, Record>>, showMetadata: Boolean = false): String =
+      dump.prettifyDump(showMetadata = showMetadata)
 
-    private fun Any?.prettifyDump(level: Int = 0): String {
+    private fun Any?.prettifyDump(level: Int = 0, showMetadata: Boolean): String {
       return buildString {
         when (this@prettifyDump) {
           is Record -> {
-            append("{\n")
-            indent(level + 1)
-            append("fields: ")
-            append(fields.prettifyDump(level + 1))
-            append("\n")
-            indent(level + 1)
-            append("metadata: ")
-            append(metadata.prettifyDump(level + 1))
-            append("\n")
-            indent(level)
-            append("}")
+            if (showMetadata) {
+              append("{\n")
+              indent(level + 1)
+              append("fields: ")
+              append(fields.prettifyDump(level + 1, showMetadata))
+              append("\n")
+              indent(level + 1)
+              append("metadata: ")
+              append(metadata.prettifyDump(level + 1, showMetadata))
+              append("\n")
+              indent(level)
+              append("}")
+            } else {
+              append(fields.prettifyDump(level, showMetadata))
+            }
           }
 
           is List<*> -> {
@@ -111,7 +116,7 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
               append("\n")
               for (value in this@prettifyDump) {
                 indent(level + 1)
-                append(value.prettifyDump(level + 1))
+                append(value.prettifyDump(level + 1, showMetadata))
                 append("\n")
               }
               indent(level)
@@ -132,7 +137,7 @@ interface NormalizedCache : ReadOnlyNormalizedCache {
                 }
                 )
                 append(": ")
-                append(value.prettifyDump(level + 1))
+                append(value.prettifyDump(level + 1, showMetadata))
                 append("\n")
               }
               indent(level)

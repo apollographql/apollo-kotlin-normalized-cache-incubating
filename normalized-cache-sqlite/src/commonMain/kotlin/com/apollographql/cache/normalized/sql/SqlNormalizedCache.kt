@@ -35,7 +35,12 @@ class SqlNormalizedCache internal constructor(
   }
 
   override fun clearAll() {
-    recordDatabase.deleteAllRecords()
+    try {
+      recordDatabase.deleteAllRecords()
+    } catch (e: Exception) {
+      // Unable to clear the records from the database, it is possibly corrupted
+      apolloExceptionHandler(Exception("Unable to clear records from the database", e))
+    }
   }
 
   override fun remove(cacheKey: CacheKey, cascade: Boolean): Boolean {
@@ -43,8 +48,14 @@ class SqlNormalizedCache internal constructor(
   }
 
   override fun remove(cacheKeys: Collection<CacheKey>, cascade: Boolean): Int {
-    return recordDatabase.transaction {
-      internalDeleteRecords(cacheKeys.map { it.key }, cascade)
+    return try {
+      recordDatabase.transaction {
+        internalDeleteRecords(cacheKeys.map { it.key }, cascade)
+      }
+    } catch (e: Exception) {
+      // Unable to delete the records from the database, it is possibly corrupted
+      apolloExceptionHandler(Exception("Unable to delete records from the database", e))
+      0
     }
   }
 
@@ -133,14 +144,20 @@ class SqlNormalizedCache internal constructor(
   }
 
   override fun trim(maxSizeBytes: Long, trimFactor: Float): Long {
-    val size = recordDatabase.databaseSize()
-    return if (size >= maxSizeBytes) {
-      val count = recordDatabase.count().executeAsOne()
-      recordDatabase.trimByUpdatedDate((count * trimFactor).toLong())
-      recordDatabase.vacuum()
-      recordDatabase.databaseSize()
-    } else {
-      size
+    try {
+      val size = recordDatabase.databaseSize()
+      return if (size >= maxSizeBytes) {
+        val count = recordDatabase.count().executeAsOne()
+        recordDatabase.trimByUpdatedDate((count * trimFactor).toLong())
+        recordDatabase.vacuum()
+        recordDatabase.databaseSize()
+      } else {
+        size
+      }
+    } catch (e: Exception) {
+      // Unable to trim the records from the database, it is possibly corrupted
+      apolloExceptionHandler(Exception("Unable to trim records from the database", e))
+      return -1
     }
   }
 }
