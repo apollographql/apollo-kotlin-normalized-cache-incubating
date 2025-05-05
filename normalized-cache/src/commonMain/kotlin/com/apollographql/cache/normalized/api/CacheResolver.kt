@@ -1,6 +1,8 @@
 package com.apollographql.cache.normalized.api
 
 import com.apollographql.apollo.api.CompiledField
+import com.apollographql.apollo.api.CompiledListType
+import com.apollographql.apollo.api.CompiledNotNullType
 import com.apollographql.apollo.api.Executable
 import com.apollographql.apollo.api.MutableExecutionOptions
 import com.apollographql.apollo.exception.CacheMissException
@@ -230,12 +232,28 @@ class CacheControlCacheResolver(
  */
 object FieldPolicyCacheResolver : CacheResolver {
   override fun resolveField(context: ResolverContext): Any? {
-    val keyArgsValues = context.field.argumentValues(context.variables) { it.definition.isKey }.values.map { it.toString() }
-
-    if (keyArgsValues.isNotEmpty()) {
-      return CacheKey(context.field.type.rawType().name, keyArgsValues)
+    val keyArgsValues = context.field.argumentValues(context.variables) { it.definition.isKey }.values
+    if (keyArgsValues.isEmpty()) {
+      return DefaultCacheResolver.resolveField(context)
     }
-
-    return DefaultCacheResolver.resolveField(context)
+    var type = context.field.type
+    if (type is CompiledNotNullType) {
+      type = type.ofType
+    }
+    if (type is CompiledListType) {
+      // Only support flat lists
+      if (type.ofType !is CompiledListType && !(type.ofType is CompiledNotNullType && (type.ofType as CompiledNotNullType).ofType is CompiledListType)) {
+        // Only support single key argument which is a flat list
+        if (keyArgsValues.size == 1) {
+          val keyArgsValue = keyArgsValues.first() as? List<*>
+          if (keyArgsValue != null && keyArgsValue.firstOrNull() !is List<*>) {
+            return keyArgsValue.map {
+              CacheKey(type.rawType().name, it.toString())
+            }
+          }
+        }
+      }
+    }
+    return CacheKey(type.rawType().name, keyArgsValues.map { it.toString() })
   }
 }
