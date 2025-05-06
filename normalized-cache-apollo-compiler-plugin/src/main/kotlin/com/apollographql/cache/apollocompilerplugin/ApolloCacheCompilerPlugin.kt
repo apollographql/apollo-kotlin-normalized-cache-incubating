@@ -10,7 +10,10 @@ import com.apollographql.apollo.compiler.ApolloCompilerPluginEnvironment
 import com.apollographql.apollo.compiler.ApolloCompilerPluginLogger
 import com.apollographql.apollo.compiler.ApolloCompilerPluginProvider
 import com.apollographql.apollo.compiler.SchemaListener
+import com.apollographql.apollo.compiler.Transform
+import com.apollographql.apollo.compiler.ir.IrOperations
 import com.apollographql.cache.apollocompilerplugin.internal.Codegen
+import com.apollographql.cache.apollocompilerplugin.internal.Linter
 import com.apollographql.cache.apollocompilerplugin.internal.cacheControlGQLDefinitions
 import com.apollographql.cache.apollocompilerplugin.internal.getMaxAges
 import java.io.File
@@ -20,15 +23,27 @@ class ApolloCacheCompilerPluginProvider : ApolloCompilerPluginProvider {
     return ApolloCacheCompilerPlugin(
         packageName = environment.arguments["packageName"] as? String
             ?: throw IllegalArgumentException("packageName argument is required and must be a String"),
+        checkMissingTypePolicy = CheckLevel.from(environment.arguments["checkMissingTypePolicy"] ?: "disabled")
+            ?: throw IllegalArgumentException("checkMissingTypePolicy argument must be 'disabled', 'warning' or 'error'"),
+        suppressMissingTypePolicyForTypesMatching = environment.arguments["suppressMissingTypePolicyForTypesMatching"]?.let {
+          when (it) {
+            is String -> Regex(it)
+            else -> throw IllegalArgumentException("suppressMissingTypePolicyForTypesMatching argument must be a String")
+          }
+        },
         logger = environment.logger,
     )
   }
 }
 
 class ApolloCacheCompilerPlugin(
-    private val packageName: String,
     private val logger: ApolloCompilerPluginLogger,
+    private val packageName: String,
+    private val checkMissingTypePolicy: CheckLevel,
+    private val suppressMissingTypePolicyForTypesMatching: Regex?,
 ) : ApolloCompilerPlugin {
+  private var irOperations: IrOperations? = null
+
   override fun foreignSchemas(): List<ForeignSchema> {
     return listOf(
         ForeignSchema("cache", "v0.1", cacheControlGQLDefinitions)
@@ -39,9 +54,33 @@ class ApolloCacheCompilerPlugin(
   override fun schemaListener(): SchemaListener {
     return object : SchemaListener {
       override fun onSchema(schema: Schema, outputDirectory: File) {
+        if (checkMissingTypePolicy != CheckLevel.DISABLED && irOperations != null) {
+          Linter(
+              logger = logger,
+              schema = schema,
+              irOperations = irOperations!!,
+              checkMissingTypePolicy = checkMissingTypePolicy,
+              suppressMissingTypePolicyForTypesMatching = suppressMissingTypePolicyForTypesMatching,
+          ).checkMissingTypePolicy()
+        }
+
         val maxAges = schema.getMaxAges(logger)
         Codegen("$packageName.cache", outputDirectory, maxAges).generate()
       }
+    }
+  }
+
+  @ApolloExperimental
+  override fun irOperationsTransform(): Transform<IrOperations>? {
+    return if (checkMissingTypePolicy != CheckLevel.DISABLED) {
+      object : Transform<IrOperations> {
+        override fun transform(input: IrOperations): IrOperations {
+          irOperations = input
+          return input
+        }
+      }
+    } else {
+      null
     }
   }
 }

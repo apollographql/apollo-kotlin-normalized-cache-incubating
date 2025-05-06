@@ -57,6 +57,8 @@ apollo {
 
     plugin("com.apollographql.cache:normalized-cache-apollo-compiler-plugin") {
       argument("packageName", packageName.get())
+      argument("checkMissingTypePolicy", "error")
+      argument("suppressMissingTypePolicyForTypesMatching", "SensitiveObject")
     }
   }
 }
