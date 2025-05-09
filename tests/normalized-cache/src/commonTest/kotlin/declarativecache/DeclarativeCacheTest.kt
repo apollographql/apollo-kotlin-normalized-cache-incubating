@@ -92,6 +92,20 @@ class DeclarativeCacheTest {
   }
 
   @Test
+  fun fieldPolicyWithLists() = runTest {
+    val cacheManager = CacheManager(MemoryCacheFactory())
+    cacheManager.writeOperation(GetPromoBookQuery(), GetPromoBookQuery.Data(GetPromoBookQuery.PromoBook(title = "Promo", isbn = "42", __typename = "Book")))
+    cacheManager.writeOperation(GetOtherBookQuery(), GetOtherBookQuery.Data(GetOtherBookQuery.OtherBook(isbn = "43", title = "Other Book", __typename = "Book")))
+
+    val booksQuery = GetBooksQuery(listOf("42", "43"))
+    val booksCacheResponse = cacheManager.readOperation(booksQuery)
+    val booksData = booksCacheResponse.data!!
+    assertEquals(2, booksData.books.size)
+    assertEquals(GetBooksQuery.Book("Promo", "42", "Book"), booksData.books[0])
+    assertEquals(GetBooksQuery.Book("Other Book", "43", "Book"), booksData.books[1])
+  }
+
+  @Test
   fun canResolveListProgrammatically() = runTest {
     val cacheResolver = object : CacheResolver {
       override fun resolveField(context: ResolverContext): Any? {
