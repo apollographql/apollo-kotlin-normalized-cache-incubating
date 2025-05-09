@@ -248,6 +248,40 @@ class WatcherTest {
     job.cancel()
   }
 
+  @Test
+  fun differentQueryTriggersWatcherAfterCleared() = runTest(before = { setUp() }) {
+    val channel = Channel<EpisodeHeroNameWithIdQuery.Data?>()
+
+    // The first query should get a "R2-D2" name
+    val episodeHeroNameWithIdQuery = EpisodeHeroNameWithIdQuery(Episode.EMPIRE)
+    apolloClient.enqueueTestResponse(episodeHeroNameWithIdQuery, episodeHeroNameWithIdData)
+    val job = launch {
+      apolloClient.query(episodeHeroNameWithIdQuery).watch().collect {
+        channel.send(it.data)
+      }
+    }
+
+    // Cache miss is emitted first (null data)
+    assertNull(channel.awaitElement())
+    assertEquals(channel.awaitElement()?.hero?.name, "R2-D2")
+
+    // Clear the cache
+    cacheManager.clearAll().also { cacheManager.publish(CacheManager.ALL_KEYS) }
+    // Cache miss due to the cache being cleared
+    assertNull(channel.awaitElement())
+
+    // Another newer call gets updated information with "Artoo"
+    val heroAndFriendsNamesWithIDsQuery = HeroAndFriendsNamesWithIDsQuery(Episode.NEWHOPE)
+    apolloClient.enqueueTestResponse(heroAndFriendsNamesWithIDsQuery, heroAndFriendsNamesWithIDsNameChangedData)
+    apolloClient.query(heroAndFriendsNamesWithIDsQuery)
+        .fetchPolicy(FetchPolicy.NetworkOnly)
+        .execute()
+    // Cache miss due to the cache being cleared
+    assertNull(channel.awaitElement())
+
+    job.cancel()
+  }
+
   /**
    * Same as noChangeSameQuery with different queries
    */
